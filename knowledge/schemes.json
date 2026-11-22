@@ -1,0 +1,1485 @@
+{
+ "_about": "Central and state schemes and the stress, opportunity and archetype signals they respond to. A scheme is suggested for an MWS when (a) it addresses at least one triggered stress or opportunity, or the MWS has one of the listed archetypes with share >= 0.15 and a listed stress, (b) its 'state' is null or matches, and (c) its optional 'condition' holds (expression over indicators, ctx.<dimension>, share_<archetype>, district, state). 'caution' text is shown when present. Scheme names, coverage and periods change; every entry should be checked against current guidelines before use. Status reflects knowledge to mid-2026.",
+ "version": "0.1",
+ "match_rules": {
+  "archetype_min_share": 0.15
+ },
+ "schemes": [
+  {
+   "id": "mgnrega_nrm",
+   "name": "Mahatma Gandhi NREGS - natural resource management works",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Rural Development",
+   "purpose": "Wage employment through public and individual works; at least 60% of expenditure on agriculture and allied NRM works.",
+   "relevant_components": [
+    "farm ponds",
+    "check dams and gully plugs",
+    "percolation tanks",
+    "desilting of tanks",
+    "contour and field bunds",
+    "plantation and horticulture on private land",
+    "community fodder plots",
+    "land development of SC/ST land"
+   ],
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.recharge_opportunity",
+    "drought.kharif_drought",
+    "waterbody_shrinkage",
+    "soil.erosion",
+    "productivity.farmland_abandonment",
+    "fodder.grazing_pressure",
+    "forest.tree_cover_loss",
+    "agroforestry_opportunity",
+    "multidimensional_vulnerability",
+    "productivity.declining_intensity",
+    "fodder.commons_degradation",
+    "irrigation.rabi_water_shortfall",
+    "fishery_potential"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": "Default convergence vehicle; works planned through the gram panchayat labour budget.",
+   "url": "https://nrega.nic.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmksy_wdc",
+   "name": "PMKSY - Watershed Development Component (WDC 2.0)",
+   "level": "central",
+   "state": null,
+   "department": "Department of Land Resources",
+   "purpose": "Ridge-to-valley treatment of rainfed and degraded watersheds.",
+   "relevant_components": [
+    "area treatment on ridges",
+    "drainage-line treatment",
+    "water harvesting structures",
+    "livelihood support for landless"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "soil.erosion",
+    "productivity.farmland_abandonment",
+    "groundwater.recharge_opportunity"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "pastoral"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": "Project areas are sanctioned by the state; check whether the MWS lies in a WDC 2.0 project.",
+   "url": "https://dolr.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmksy_pdmc",
+   "name": "PMKSY - Per Drop More Crop (micro-irrigation)",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture & Farmers Welfare",
+   "purpose": "Subsidy for drip and sprinkler irrigation and small water-harvesting structures.",
+   "relevant_components": [
+    "drip and sprinkler subsidy",
+    "secondary storage",
+    "farm ponds (other interventions)"
+   ],
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "groundwater.water_balance_deficit"
+   ],
+   "archetypes": [
+    "groundwater_irrigated",
+    "tree_crops",
+    "canal_irrigated"
+   ],
+   "condition": null,
+   "caution": "Micro-irrigation saves water per hectare but often expands irrigated area; pair with area or volume caps where the aquifer is over-exploited.",
+   "notes": null,
+   "url": "https://pmksy.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmksy_cadwm",
+   "name": "PMKSY - Har Khet Ko Pani / Command Area Development and Water Management",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Jal Shakti",
+   "purpose": "Close the gap between irrigation potential created and used; field channels, drainage, water users' associations.",
+   "relevant_components": [
+    "field channels",
+    "surface and sub-surface drainage",
+    "micro-irrigation in commands",
+    "PIM / WUA strengthening"
+   ],
+   "addresses": [
+    "irrigation.waterlogging",
+    "groundwater.water_balance_deficit"
+   ],
+   "archetypes": [
+    "canal_irrigated"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://pmksy-mowr.nic.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "atal_bhujal",
+   "name": "Atal Bhujal Yojana (Atal Jal)",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Jal Shakti",
+   "purpose": "Community-led demand-side groundwater management in water-stressed gram panchayats.",
+   "relevant_components": [
+    "water security plans",
+    "crop diversification",
+    "micro-irrigation convergence",
+    "recharge structures",
+    "piezometer monitoring"
+   ],
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "groundwater.recharge_opportunity"
+   ],
+   "archetypes": [
+    "groundwater_irrigated",
+    "tree_crops"
+   ],
+   "condition": "state in ['Maharashtra', 'Rajasthan', 'Uttar Pradesh']",
+   "caution": null,
+   "notes": "Covers selected over-exploited/critical blocks in Gujarat, Haryana, Karnataka, MP, Maharashtra, Rajasthan and UP. Check whether the block is covered (Maharashtra: 13 districts incl. Amravati and Pune; Rajasthan and UP: verify Udaipur and Ballia). Scheme period was extended beyond 2025 - verify.",
+   "url": "https://ataljal.mowr.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "jsa_catch_the_rain",
+   "name": "Jal Shakti Abhiyan: Catch the Rain",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Jal Shakti",
+   "purpose": "Annual campaign for rainwater harvesting, renovation of water bodies and recharge, implemented through convergence.",
+   "relevant_components": [
+    "rooftop and recharge structures",
+    "renovation of traditional water bodies",
+    "borewell recharge",
+    "afforestation"
+   ],
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.recharge_opportunity",
+    "waterbody_shrinkage",
+    "drinking_water.scarcity"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://jsactr.mowr.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "amrit_sarovar",
+   "name": "Mission Amrit Sarovar",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Rural Development (multi-ministry)",
+   "purpose": "Develop or rejuvenate at least 75 water bodies of about 1 acre per district.",
+   "relevant_components": [
+    "new ponds",
+    "rejuvenation of ponds and tanks"
+   ],
+   "addresses": [
+    "waterbody_shrinkage",
+    "groundwater.recharge_opportunity",
+    "drought.kharif_drought",
+    "livestock_water_scarcity",
+    "fishery_potential"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": "Implemented through MGNREGS and other schemes; phase 2 continues - verify targets.",
+   "url": "https://amritsarovar.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "rrr_waterbodies",
+   "name": "Repair, Renovation and Restoration (RRR) of water bodies",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Jal Shakti",
+   "purpose": "Restore storage and command of tanks and traditional water bodies.",
+   "relevant_components": [
+    "desilting",
+    "bund and waste-weir repair",
+    "supply-channel restoration",
+    "catchment treatment"
+   ],
+   "addresses": [
+    "waterbody_shrinkage",
+    "irrigation.rabi_water_shortfall"
+   ],
+   "archetypes": [
+    "tank_irrigated"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://jalshakti-dowr.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pm_kusum",
+   "name": "PM-KUSUM (solar pumps and solarised feeders)",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of New and Renewable Energy",
+   "purpose": "Solar pumps for farmers and solarisation of agricultural feeders.",
+   "relevant_components": [
+    "standalone solar pumps (Component B)",
+    "feeder-level solarisation (Component C)"
+   ],
+   "addresses": [
+    "drought.kharif_drought"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "groundwater_irrigated"
+   ],
+   "condition": null,
+   "caution": "Near-zero marginal cost of pumping can accelerate depletion. Avoid new pumps in over-exploited and critical blocks unless paired with metering and caps; Component C with grid buy-back is preferable.",
+   "notes": "Several states require a no-objection from the groundwater authority in over-exploited blocks.",
+   "url": "https://pmkusum.mnre.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmfby",
+   "name": "Pradhan Mantri Fasal Bima Yojana",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture & Farmers Welfare",
+   "purpose": "Crop insurance against yield loss, prevented sowing and post-harvest loss.",
+   "relevant_components": [
+    "kharif and rabi crop insurance",
+    "prevented-sowing claims"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "flood_exposure",
+    "productivity.declining_intensity"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": "Some states run their own schemes instead (check state notification for the season).",
+   "url": "https://pmfby.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "nmsa_rad",
+   "name": "NMSA - Rainfed Area Development",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture & Farmers Welfare",
+   "purpose": "Integrated farming systems for rainfed areas: crop-livestock-tree combinations, water harvesting.",
+   "relevant_components": [
+    "integrated farming system clusters",
+    "on-farm water harvesting",
+    "fodder and livestock components"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "fodder.grazing_pressure"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "pastoral"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": "Implemented under RKVY in recent years - verify current component.",
+   "url": "https://nmsa.dac.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "nfsm_trfa",
+   "name": "NFSM / RKVY - Targeting Rice Fallow Areas",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture & Farmers Welfare",
+   "purpose": "Pulses and oilseeds on rice fallows in eastern states.",
+   "relevant_components": [
+    "seed minikits",
+    "zero-till drills",
+    "relay sowing demonstrations"
+   ],
+   "addresses": [
+    "productivity.rice_fallow_opportunity"
+   ],
+   "archetypes": [
+    "rainfed_rice_subhumid"
+   ],
+   "condition": "state in ['Jharkhand', 'Odisha', 'Andhra Pradesh', 'Uttar Pradesh']",
+   "caution": null,
+   "notes": "Rice-fallow programme focus states: Assam, Bihar, Chhattisgarh, Jharkhand, Odisha, West Bengal (verify AP and UP inclusion).",
+   "url": "https://nfsm.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "nmeo",
+   "name": "National Mission on Edible Oils (oilseeds)",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture & Farmers Welfare",
+   "purpose": "Expand oilseed area including on rice fallows and intercropping.",
+   "relevant_components": [
+    "seed hubs",
+    "cluster demonstrations"
+   ],
+   "addresses": [
+    "productivity.rice_fallow_opportunity"
+   ],
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "rainfed_dryland"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://nmeo.dac.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "natural_farming",
+   "name": "National Mission on Natural Farming",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture & Farmers Welfare",
+   "purpose": "Chemical-free farming clusters with bio-input resource centres.",
+   "relevant_components": [
+    "cluster formation",
+    "bio-input resource centres",
+    "training"
+   ],
+   "addresses": [
+    "productivity.farmland_abandonment",
+    "drought.kharif_drought",
+    "soil.nutrient_deficiency"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://naturalfarming.dac.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "midh",
+   "name": "Mission for Integrated Development of Horticulture",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture & Farmers Welfare",
+   "purpose": "Orchards, protected cultivation, post-harvest infrastructure.",
+   "relevant_components": [
+    "area expansion",
+    "rejuvenation of old orchards",
+    "water-harvesting for horticulture"
+   ],
+   "addresses": [
+    "agroforestry_opportunity"
+   ],
+   "archetypes": [
+    "tree_crops",
+    "groundwater_irrigated"
+   ],
+   "condition": null,
+   "caution": "New irrigated orchards raise water demand in over-exploited blocks.",
+   "notes": null,
+   "url": "https://midh.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "smaf",
+   "name": "Agroforestry (Har Medh Par Ped / Sub-Mission on Agroforestry)",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture & Farmers Welfare",
+   "purpose": "Trees on farm boundaries and in mosaic landscapes.",
+   "relevant_components": [
+    "quality planting material",
+    "boundary plantation"
+   ],
+   "addresses": [
+    "agroforestry_opportunity",
+    "soil.erosion",
+    "productivity.farmland_abandonment",
+    "drought.kharif_drought"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "groundwater_irrigated",
+    "tree_crops"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://agriwelfare.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "nlm",
+   "name": "National Livestock Mission (fodder and feed sub-mission)",
+   "level": "central",
+   "state": null,
+   "department": "Department of Animal Husbandry & Dairying",
+   "purpose": "Fodder production, small-ruminant and poultry entrepreneurship, grassland development.",
+   "relevant_components": [
+    "fodder seed production",
+    "silage units",
+    "development of grazing land and fodder banks"
+   ],
+   "addresses": [
+    "fodder.grazing_pressure",
+    "fodder.commons_degradation",
+    "livestock_water_scarcity"
+   ],
+   "archetypes": [
+    "pastoral"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://dahd.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "green_india",
+   "name": "Green India Mission",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Environment, Forest and Climate Change",
+   "purpose": "Increase forest and tree cover and restore degraded ecosystems.",
+   "relevant_components": [
+    "assisted natural regeneration",
+    "grassland and scrub restoration",
+    "fuel-wood substitution"
+   ],
+   "addresses": [
+    "forest.tree_cover_loss",
+    "agroforestry_opportunity",
+    "fodder.grazing_pressure",
+    "forest.fringe_degradation",
+    "forest.fire"
+   ],
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://moef.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "campa",
+   "name": "Compensatory afforestation (CAMPA)",
+   "level": "central",
+   "state": null,
+   "department": "MoEFCC / State Forest Departments",
+   "purpose": "Afforestation and forest restoration from compensatory funds.",
+   "relevant_components": [
+    "afforestation",
+    "soil and moisture conservation in forests"
+   ],
+   "addresses": [
+    "forest.tree_cover_loss",
+    "agroforestry_opportunity"
+   ],
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://moef.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "green_credit",
+   "name": "Green Credit Programme (tree plantation on degraded land)",
+   "level": "central",
+   "state": null,
+   "department": "MoEFCC / ICFRE",
+   "purpose": "Tradeable green credits for planting on notified degraded land parcels.",
+   "relevant_components": [
+    "tree plantation on degraded land banks"
+   ],
+   "addresses": [
+    "agroforestry_opportunity",
+    "forest.tree_cover_loss"
+   ],
+   "archetypes": [
+    "forest_fringe",
+    "pastoral"
+   ],
+   "condition": "rest_wide_frac >= 0.2",
+   "caution": null,
+   "notes": "CoRE Stack lists Green Credit projects per MWS (none means no project). Credits accrue to private/PSU entities; check that community rights are respected.",
+   "url": "https://moef.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "fra_cfr",
+   "name": "Forest Rights Act - individual and community forest resource rights",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Tribal Affairs",
+   "purpose": "Recognise individual and community forest rights; CFR management plans can draw on MGNREGS and CAMPA.",
+   "relevant_components": [
+    "IFR/CFR claims",
+    "CFR management plans"
+   ],
+   "addresses": [
+    "forest.tree_cover_loss",
+    "multidimensional_vulnerability",
+    "forest.fringe_degradation"
+   ],
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "condition": "nz(st_share) >= 0.1 or share_forest_fringe >= 0.15",
+   "caution": null,
+   "notes": null,
+   "url": "https://tribal.nic.in",
+   "status": "Statute"
+  },
+  {
+   "id": "dajgua",
+   "name": "Dharti Aaba Janjatiya Gram Utkarsh Abhiyan",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Tribal Affairs (17 ministries)",
+   "purpose": "Saturation of infrastructure and livelihoods in tribal-majority villages and aspirational-district tribal villages.",
+   "relevant_components": [
+    "convergent infrastructure",
+    "FRA patta holder support (agriculture, fisheries, livestock)"
+   ],
+   "addresses": [
+    "multidimensional_vulnerability",
+    "forest.tree_cover_loss"
+   ],
+   "archetypes": [
+    "forest_fringe",
+    "rainfed_rice_subhumid"
+   ],
+   "condition": "nz(st_share) >= 0.5",
+   "caution": null,
+   "notes": "Villages with >= 50% ST population and >= 500 ST persons (verify list).",
+   "url": "https://tribal.nic.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pm_janman",
+   "name": "PM-JANMAN (Particularly Vulnerable Tribal Groups)",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Tribal Affairs",
+   "purpose": "Housing, roads, water, livelihoods for PVTG habitations.",
+   "relevant_components": [
+    "habitation saturation",
+    "Van Dhan centres"
+   ],
+   "addresses": [
+    "multidimensional_vulnerability"
+   ],
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "condition": "district in ['Godda', 'Koraput', 'Srikakulam', 'Amaravati', 'Pune', 'Udaipur']",
+   "caution": null,
+   "notes": "PVTGs present: Paharia (Godda), Bonda/Didayi/Langia Saora etc. (Koraput), Savara (Srikakulam), Kolam (Amaravati), Katkari (Pune), Sahariya (not Udaipur) - verify habitation lists.",
+   "url": "https://tribal.nic.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmvdy",
+   "name": "Pradhan Mantri Van Dhan Yojana (NTFP value addition)",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Tribal Affairs / TRIFED",
+   "purpose": "Collective processing and marketing of minor forest produce.",
+   "relevant_components": [
+    "Van Dhan Vikas Kendras",
+    "MSP for MFP"
+   ],
+   "addresses": [
+    "forest.tree_cover_loss",
+    "multidimensional_vulnerability"
+   ],
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://trifed.tribal.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "fmbap",
+   "name": "Flood Management and Border Areas Programme",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Jal Shakti",
+   "purpose": "Central assistance to states for flood control and anti-erosion works.",
+   "relevant_components": [
+    "embankments",
+    "anti-erosion works",
+    "drainage improvement"
+   ],
+   "addresses": [
+    "flood_exposure"
+   ],
+   "archetypes": [],
+   "condition": "ctx.aquifer == 'alluvium'",
+   "caution": null,
+   "notes": null,
+   "url": "https://jalshakti-dowr.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "jjm",
+   "name": "Jal Jeevan Mission (drinking water, source sustainability)",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Jal Shakti",
+   "purpose": "Functional household tap connections with source sustainability and water-quality monitoring.",
+   "relevant_components": [
+    "source strengthening and recharge",
+    "greywater management",
+    "arsenic/fluoride/salinity treatment"
+   ],
+   "addresses": [
+    "groundwater.over_extraction",
+    "drinking_water.salinity",
+    "drinking_water.scarcity",
+    "drinking_water.mining"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": "Ballia: arsenic in shallow aquifers; Amaravati Purna tract: salinity.",
+   "url": "https://jaljeevanmission.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "mh_pocra",
+   "name": "Nanaji Deshmukh Krishi Sanjivani Prakalp (PoCRA)",
+   "level": "state",
+   "state": "Maharashtra",
+   "department": "Agriculture Department, Maharashtra",
+   "purpose": "Climate-resilient agriculture in drought-prone Vidarbha and Marathwada villages (phase 2 from 2024).",
+   "relevant_components": [
+    "farm ponds",
+    "micro-irrigation",
+    "protected cultivation",
+    "soil health",
+    "farmer producer companies"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "groundwater.over_extraction"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "groundwater_irrigated"
+   ],
+   "condition": "district in ['Amaravati']",
+   "caution": null,
+   "notes": "Amravati is a PoCRA district; check village list for phase 2.",
+   "url": "https://mahapocra.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "mh_jalyukt",
+   "name": "Jalyukt Shivar Abhiyan 2.0",
+   "level": "state",
+   "state": "Maharashtra",
+   "department": "Soil and Water Conservation Department, Maharashtra",
+   "purpose": "Village-level water budgeting and water conservation works.",
+   "relevant_components": [
+    "cement nala bunds",
+    "desilting",
+    "CCT and earthen structures",
+    "recharge"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "groundwater.recharge_opportunity",
+    "groundwater.over_extraction",
+    "waterbody_shrinkage"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "mh_gaalmukt",
+   "name": "Gaal-mukt Dharan, Gaal-yukt Shivar",
+   "level": "state",
+   "state": "Maharashtra",
+   "department": "Soil and Water Conservation Department, Maharashtra",
+   "purpose": "Desilt reservoirs and tanks and spread the silt on farms.",
+   "relevant_components": [
+    "desilting of dams and tanks",
+    "silt application on fields"
+   ],
+   "addresses": [
+    "waterbody_shrinkage",
+    "productivity.farmland_abandonment"
+   ],
+   "archetypes": [
+    "tank_irrigated"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "mh_magel_shettale",
+   "name": "Magel Tyala Shettale (farm ponds on demand)",
+   "level": "state",
+   "state": "Maharashtra",
+   "department": "Agriculture Department, Maharashtra",
+   "purpose": "Individual farm ponds for protective irrigation.",
+   "relevant_components": [
+    "farm ponds",
+    "pond lining"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing"
+   ],
+   "archetypes": [
+    "rainfed_dryland"
+   ],
+   "condition": null,
+   "caution": "Lined ponds filled from borewells increase evaporation losses and groundwater draft.",
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "mh_birsa_munda",
+   "name": "Birsa Munda Krishi Kranti Yojana",
+   "level": "state",
+   "state": "Maharashtra",
+   "department": "Tribal Development / Agriculture Department",
+   "purpose": "Wells, pumps, farm ponds and inputs for Scheduled Tribe farmers.",
+   "relevant_components": [
+    "new wells",
+    "pump sets",
+    "micro-irrigation"
+   ],
+   "addresses": [
+    "multidimensional_vulnerability",
+    "drought.kharif_drought"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "forest_fringe"
+   ],
+   "condition": "nz(st_share) >= 0.2",
+   "caution": "New wells in over-exploited blocks need groundwater authority clearance.",
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "mh_fundkar",
+   "name": "Bhausaheb Fundkar Phalbag Lagvad Yojana",
+   "level": "state",
+   "state": "Maharashtra",
+   "department": "Agriculture Department, Maharashtra",
+   "purpose": "Orchard plantation on farmers' land.",
+   "relevant_components": [
+    "fruit orchards"
+   ],
+   "addresses": [
+    "agroforestry_opportunity"
+   ],
+   "archetypes": [
+    "tree_crops",
+    "rainfed_dryland"
+   ],
+   "condition": null,
+   "caution": "Avoid water-intensive orchards (mandarin, banana) in over-exploited blocks.",
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "ap_apcnf",
+   "name": "Andhra Pradesh Community-managed Natural Farming (APCNF)",
+   "level": "state",
+   "state": "Andhra Pradesh",
+   "department": "Rythu Sadhikara Samstha",
+   "purpose": "Natural farming with pre-monsoon dry sowing and year-round cover.",
+   "relevant_components": [
+    "pre-monsoon dry sowing",
+    "multi-crop models",
+    "bio-inputs"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "productivity.farmland_abandonment",
+    "productivity.rice_fallow_opportunity"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://apcnf.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "ap_apdmp",
+   "name": "Andhra Pradesh Drought Mitigation Project",
+   "level": "state",
+   "state": "Andhra Pradesh",
+   "department": "Rural Development / IFAD",
+   "purpose": "Drought resilience in Ananthapur and other Rayalaseema districts: water, livestock, crop diversification.",
+   "relevant_components": [
+    "community water use plans",
+    "small ruminant and fodder support",
+    "farm ponds"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "fodder.grazing_pressure",
+    "groundwater.over_extraction"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "pastoral"
+   ],
+   "condition": "district in ['Ananthapur']",
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Project period may have ended - verify"
+  },
+  {
+   "id": "ap_sheep",
+   "name": "AP sheep and goat development (insurance, deworming, fodder)",
+   "level": "state",
+   "state": "Andhra Pradesh",
+   "department": "Animal Husbandry Department, AP",
+   "purpose": "Support for small-ruminant herders.",
+   "relevant_components": [
+    "fodder and feed",
+    "insurance",
+    "health camps"
+   ],
+   "addresses": [
+    "fodder.grazing_pressure"
+   ],
+   "archetypes": [
+    "pastoral"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Verify current scheme name"
+  },
+  {
+   "id": "ap_itda",
+   "name": "ITDA tribal sub-plan programmes (Seethampeta ITDA)",
+   "level": "state",
+   "state": "Andhra Pradesh",
+   "department": "Tribal Welfare Department, AP",
+   "purpose": "Horticulture (cashew, mango), podu land development and livelihoods in tribal mandals.",
+   "relevant_components": [
+    "podu land development",
+    "cashew and mango plantations",
+    "coffee/pepper (where suited)"
+   ],
+   "addresses": [
+    "forest.tree_cover_loss",
+    "soil.erosion",
+    "multidimensional_vulnerability"
+   ],
+   "archetypes": [
+    "forest_fringe",
+    "tree_crops"
+   ],
+   "condition": "district in ['Srikakulam'] and nz(st_share) >= 0.2",
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "jh_birsa_harit",
+   "name": "Birsa Harit Gram Yojana",
+   "level": "state",
+   "state": "Jharkhand",
+   "department": "Rural Development Department, Jharkhand",
+   "purpose": "Fruit-tree plantations on fallow and upland through MGNREGS.",
+   "relevant_components": [
+    "mango and mixed fruit orchards on uplands",
+    "intercropping"
+   ],
+   "addresses": [
+    "agroforestry_opportunity",
+    "productivity.farmland_abandonment",
+    "soil.erosion"
+   ],
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "forest_fringe"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "jh_nilambar",
+   "name": "Neelambar-Pitambar Jal Samriddhi Yojana",
+   "level": "state",
+   "state": "Jharkhand",
+   "department": "Rural Development Department, Jharkhand",
+   "purpose": "Water conservation through MGNREGS (TCB, farm ponds, field bunds).",
+   "relevant_components": [
+    "trench-cum-bunds",
+    "farm ponds",
+    "loose boulder check dams"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "soil.erosion",
+    "productivity.rice_fallow_opportunity"
+   ],
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "rainfed_dryland"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "jh_didi_bari",
+   "name": "Didi Bari Yojana",
+   "level": "state",
+   "state": "Jharkhand",
+   "department": "Rural Development Department, Jharkhand",
+   "purpose": "Nutrition kitchen gardens for women in MGNREGS households.",
+   "relevant_components": [
+    "kitchen gardens"
+   ],
+   "addresses": [
+    "multidimensional_vulnerability"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "jh_irrigation",
+   "name": "Jharkhand micro-irrigation and tank renovation (Jal Nidhi / Mukhyamantri Jal Samriddhi)",
+   "level": "state",
+   "state": "Jharkhand",
+   "department": "Agriculture / Water Resources Department, Jharkhand",
+   "purpose": "Ponds, tank renovation and micro-lift irrigation.",
+   "relevant_components": [
+    "pond renovation",
+    "solar micro-lift"
+   ],
+   "addresses": [
+    "waterbody_shrinkage",
+    "productivity.rice_fallow_opportunity"
+   ],
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "tank_irrigated"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Verify current scheme names"
+  },
+  {
+   "id": "od_millets",
+   "name": "Odisha Millets Mission (Shree Anna Abhiyan)",
+   "level": "state",
+   "state": "Odisha",
+   "department": "Agriculture & Farmers' Empowerment Department, Odisha",
+   "purpose": "Revive millets in tribal districts with procurement and processing.",
+   "relevant_components": [
+    "improved agronomy (SMI, line transplanting)",
+    "procurement at MSP",
+    "processing units"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "soil.erosion",
+    "multidimensional_vulnerability"
+   ],
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "forest_fringe",
+    "rainfed_dryland"
+   ],
+   "condition": "district in ['Koraput']",
+   "caution": null,
+   "notes": null,
+   "url": "https://milletsodisha.com",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "od_oiipcra",
+   "name": "Odisha Integrated Irrigation Project for Climate Resilient Agriculture",
+   "level": "state",
+   "state": "Odisha",
+   "department": "Department of Water Resources, Odisha / World Bank",
+   "purpose": "Tank renovation and crop diversification in tank commands.",
+   "relevant_components": [
+    "minor irrigation tank renovation",
+    "crop diversification",
+    "WUA strengthening"
+   ],
+   "addresses": [
+    "waterbody_shrinkage",
+    "productivity.rice_fallow_opportunity"
+   ],
+   "archetypes": [
+    "tank_irrigated",
+    "rainfed_rice_subhumid"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Project period may have ended - verify"
+  },
+  {
+   "id": "od_jalanidhi",
+   "name": "Jalanidhi / Deep Borewell Secha Karyakram",
+   "level": "state",
+   "state": "Odisha",
+   "department": "Agriculture & Farmers' Empowerment Department, Odisha",
+   "purpose": "Subsidy for shallow tube wells, dug wells and borewells.",
+   "relevant_components": [
+    "shallow tube wells",
+    "dug wells",
+    "borewells"
+   ],
+   "addresses": [
+    "productivity.rice_fallow_opportunity",
+    "drought.kharif_drought"
+   ],
+   "archetypes": [
+    "rainfed_rice_subhumid"
+   ],
+   "condition": "nz(soge_stage, 0) < 70",
+   "caution": "Only where groundwater extraction is low (Koraput blocks are Safe).",
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "od_cm_kisan",
+   "name": "CM-KISAN (income support)",
+   "level": "state",
+   "state": "Odisha",
+   "department": "Agriculture & Farmers' Empowerment Department, Odisha",
+   "purpose": "Income support to small and landless households (successor to KALIA).",
+   "relevant_components": [
+    "cash transfer"
+   ],
+   "addresses": [
+    "multidimensional_vulnerability",
+    "drought.kharif_drought"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Verify"
+  },
+  {
+   "id": "rj_mjsa",
+   "name": "Mukhyamantri Jal Swavlamban Abhiyan 2.0",
+   "level": "state",
+   "state": "Rajasthan",
+   "department": "Watershed Development and Soil Conservation Department, Rajasthan",
+   "purpose": "Village water self-reliance through ridge-to-valley water harvesting.",
+   "relevant_components": [
+    "anicuts",
+    "mini percolation tanks",
+    "farm ponds",
+    "tanka",
+    "desilting"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "groundwater.recharge_opportunity",
+    "groundwater.over_extraction",
+    "waterbody_shrinkage"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://mjsa.water.rajasthan.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "rj_khet_talai",
+   "name": "Rajasthan farm pond (khet talai) and diggi subsidy",
+   "level": "state",
+   "state": "Rajasthan",
+   "department": "Agriculture Department, Rajasthan (Rajasthan Krishi Vikas Yojana)",
+   "purpose": "Farm ponds and storage tanks for protective irrigation.",
+   "relevant_components": [
+    "farm ponds",
+    "diggi",
+    "pipelines",
+    "sprinklers"
+   ],
+   "addresses": [
+    "drought.kharif_drought"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "groundwater_irrigated"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "rj_forestry",
+   "name": "Rajasthan Forestry and Biodiversity Development Project",
+   "level": "state",
+   "state": "Rajasthan",
+   "department": "Forest Department, Rajasthan",
+   "purpose": "Forest and pasture restoration with joint forest management committees.",
+   "relevant_components": [
+    "pasture development",
+    "assisted regeneration",
+    "soil and moisture conservation"
+   ],
+   "addresses": [
+    "forest.tree_cover_loss",
+    "fodder.grazing_pressure",
+    "agroforestry_opportunity"
+   ],
+   "archetypes": [
+    "forest_fringe",
+    "pastoral"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Verify current phase"
+  },
+  {
+   "id": "rj_pasture",
+   "name": "Gochar / charagah (pasture) development under MGNREGS and state funds",
+   "level": "state",
+   "state": "Rajasthan",
+   "department": "Panchayati Raj / Animal Husbandry, Rajasthan",
+   "purpose": "Fencing, fodder sowing and water points on village pastures.",
+   "relevant_components": [
+    "pasture fencing",
+    "fodder sowing",
+    "water troughs"
+   ],
+   "addresses": [
+    "fodder.grazing_pressure",
+    "productivity.farmland_abandonment",
+    "fodder.commons_degradation"
+   ],
+   "archetypes": [
+    "pastoral"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "up_khet_talab",
+   "name": "Khet Talab Yojana",
+   "level": "state",
+   "state": "Uttar Pradesh",
+   "department": "Agriculture Department, UP",
+   "purpose": "Farm ponds with subsidy for protective irrigation and recharge.",
+   "relevant_components": [
+    "farm ponds"
+   ],
+   "addresses": [
+    "drought.kharif_drought",
+    "groundwater.over_extraction"
+   ],
+   "archetypes": [
+    "rainfed_dryland",
+    "groundwater_irrigated"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": "https://upagripardarshi.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "up_flood",
+   "name": "UP flood management and anti-erosion works (state plan)",
+   "level": "state",
+   "state": "Uttar Pradesh",
+   "department": "Irrigation & Water Resources Department, UP",
+   "purpose": "Embankments, spurs and drainage for Ganga-Ghaghra floods.",
+   "relevant_components": [
+    "embankment strengthening",
+    "drainage"
+   ],
+   "addresses": [
+    "flood_exposure"
+   ],
+   "archetypes": [],
+   "condition": "ctx.aquifer == 'alluvium'",
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "up_groundwater_act",
+   "name": "UP Ground Water (Management and Regulation) Act 2019 - registration and recharge",
+   "level": "state",
+   "state": "Uttar Pradesh",
+   "department": "Ground Water Department, UP",
+   "purpose": "Registration of borewells, recharge obligations, protection in over-exploited blocks.",
+   "relevant_components": [
+    "registration",
+    "rooftop recharge",
+    "Bhujal Saptah campaigns"
+   ],
+   "addresses": [
+    "groundwater.over_extraction"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": null,
+   "url": null,
+   "status": "Statute"
+  },
+  {
+   "id": "soil_health_card",
+   "name": "Soil Health Card scheme (with Soil Health and Fertility component of RKVY)",
+   "level": "central",
+   "state": null,
+   "department": "Department of Agriculture and Farmers Welfare",
+   "purpose": "Soil testing every two years and nutrient recommendations for each farm.",
+   "relevant_components": [
+    "soil sample testing",
+    "crop-wise fertiliser recommendations",
+    "village-level soil testing labs"
+   ],
+   "addresses": [
+    "soil.nutrient_deficiency",
+    "productivity.declining_intensity"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": "Pair with organic-matter building (natural farming, compost) where organic carbon is low.",
+   "url": "https://soilhealth.dac.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "day_nrlm",
+   "name": "Deendayal Antyodaya Yojana - National Rural Livelihoods Mission",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Rural Development",
+   "purpose": "Self-help groups, federations, bank linkage and livelihood support for poor rural households.",
+   "relevant_components": [
+    "SHG formation and revolving fund",
+    "bank linkage",
+    "community investment fund",
+    "farm and non-farm livelihoods",
+    "Lakhpati Didi"
+   ],
+   "addresses": [
+    "multidimensional_vulnerability",
+    "fishery_potential"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": "Low SHG coverage in Mission Antyodaya data is the entry point.",
+   "url": "https://aajeevika.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmmsy",
+   "name": "Pradhan Mantri Matsya Sampada Yojana",
+   "level": "central",
+   "state": null,
+   "department": "Department of Fisheries",
+   "purpose": "Inland fisheries development, including pond fish culture, seed and inputs.",
+   "relevant_components": [
+    "pond construction and renovation for fish",
+    "fish seed",
+    "inputs for community ponds",
+    "cold chain"
+   ],
+   "addresses": [
+    "fishery_potential"
+   ],
+   "archetypes": [
+    "tank_irrigated"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": "Rights over village tanks (panchayat lease, fishermen societies) decide who can benefit.",
+   "url": "https://pmmsy.dof.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "ffpm",
+   "name": "Forest Fire Prevention and Management Scheme",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Environment, Forest and Climate Change",
+   "purpose": "Fire lines, fire watchers, community participation and fire alerts in fire-prone forests.",
+   "relevant_components": [
+    "fire lines",
+    "fire watchers",
+    "Joint Forest Management Committee incentives",
+    "FSI fire alerts"
+   ],
+   "addresses": [
+    "forest.fire"
+   ],
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "condition": null,
+   "caution": null,
+   "notes": "FSI fire alerts are sent to registered users; check whether the forest division uses them.",
+   "url": "https://moef.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmay_g",
+   "name": "Pradhan Mantri Awaas Yojana - Gramin",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Rural Development",
+   "purpose": "Pucca houses for households in kuccha or dilapidated houses.",
+   "relevant_components": [
+    "house construction assistance",
+    "convergence with NREGA wages and SBM toilets"
+   ],
+   "addresses": [
+    "multidimensional_vulnerability"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": "A high kuccha-house share in Mission Antyodaya data indicates unmet need.",
+   "url": "https://pmayg.nic.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmjdy_bc",
+   "name": "PM Jan Dhan Yojana and bank mitra (business correspondent) outlets",
+   "level": "central",
+   "state": null,
+   "department": "Department of Financial Services",
+   "purpose": "Basic bank accounts and banking within reach of every village through business correspondents.",
+   "relevant_components": [
+    "zero-balance accounts",
+    "RuPay card and overdraft",
+    "bank mitra outlets within 5 km"
+   ],
+   "addresses": [
+    "multidimensional_vulnerability"
+   ],
+   "archetypes": [],
+   "condition": null,
+   "caution": null,
+   "notes": "RBI targets a banking outlet within 5 km of every village.",
+   "url": "https://pmjdy.gov.in",
+   "status": "Active (verify current guidelines)"
+  },
+  {
+   "id": "pmkkky_dmf",
+   "name": "Pradhan Mantri Khanij Kshetra Kalyan Yojana (District Mineral Foundation)",
+   "level": "central",
+   "state": null,
+   "department": "Ministry of Mines",
+   "purpose": "Spends mining royalties collected by each District Mineral Foundation on areas and people affected by mining.",
+   "relevant_components": [
+    "drinking water supply",
+    "environment preservation and pollution control",
+    "health care"
+   ],
+   "addresses": [
+    "drinking_water.mining"
+   ],
+   "archetypes": [],
+   "condition": "nz(mining_projects) >= 1",
+   "caution": "Applies only in districts with a District Mineral Foundation and mining-affected areas listed by it.",
+   "notes": "Drinking water and pollution control are among the high-priority sectors in the guidelines.",
+   "url": "https://mines.gov.in",
+   "status": "Active (verify current guidelines)"
+  }
+ ]
+}

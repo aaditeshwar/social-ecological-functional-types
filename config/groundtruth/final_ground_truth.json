@@ -1,0 +1,670 @@
+{
+  "agriculture": {
+    "groundwater": {
+      "positive": [
+        {
+          "block_name": "jawhar",
+          "uid": "25_19554"
+        }
+      ],
+      "negative": [
+        {
+          "block_name": "ghatanji",
+          "uid": "4_102533"
+        },
+        {
+          "block_name": "kalamnuri",
+          "uid": "4_110551"
+        },
+        {
+          "block_name": "ashti",
+          "uid": "18_70995"
+        },
+        {
+          "block_name": "parner",
+          "uid": "18_109626"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_130250"
+        },
+        {
+          "block_name": "vilattikulam",
+          "uid": "2_15086"
+        },
+        {
+          "block_name": "mau",
+          "uid": "12_151409"
+        },
+        {
+          "block_name": "aruppukkottai",
+          "uid": "2_14342"
+        },
+        {
+          "block_name": "bero",
+          "uid": "7_5618"
+        },
+        {
+          "block_name": "girwa",
+          "uid": "23_17585"
+        },
+        {
+          "block_name": "maddur",
+          "uid": "1_34623"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_35924"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_135895"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_44884"
+        },
+        {
+          "block_name": "sihora",
+          "uid": "15_33653"
+        },
+        {
+          "block_name": "kurupam",
+          "uid": "22_26173"
+        },
+        {
+          "block_name": "kadana",
+          "uid": "23_6019"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_108167"
+        },
+        {
+          "block_name": "bijawar",
+          "uid": "12_168639"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_107354"
+        },
+        {
+          "block_name": "bankura",
+          "uid": "12_374565"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_32886"
+        }
+      ]
+    },
+    "drought": {
+      "positive": [
+        {
+          "block_name": "ghatanji",
+          "uid": "4_102533"
+        },
+        {
+          "block_name": "kalamnuri",
+          "uid": "4_110551"
+        },
+        {
+          "block_name": "ashti",
+          "uid": "18_70995"
+        },
+        {
+          "block_name": "parner",
+          "uid": "18_109626"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_130250"
+        },
+        {
+          "block_name": "vilattikulam",
+          "uid": "2_15086"
+        }
+      ],
+      "negative": [
+        {
+          "block_name": "jawhar",
+          "uid": "25_19554"
+        },
+        {
+          "block_name": "mau",
+          "uid": "12_151409"
+        },
+        {
+          "block_name": "aruppukkottai",
+          "uid": "2_14342"
+        },
+        {
+          "block_name": "bero",
+          "uid": "7_5618"
+        },
+        {
+          "block_name": "girwa",
+          "uid": "23_17585"
+        },
+        {
+          "block_name": "maddur",
+          "uid": "1_34623"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_35924"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_135895"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_44884"
+        },
+        {
+          "block_name": "sihora",
+          "uid": "15_33653"
+        },
+        {
+          "block_name": "kurupam",
+          "uid": "22_26173"
+        },
+        {
+          "block_name": "kadana",
+          "uid": "23_6019"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_108167"
+        },
+        {
+          "block_name": "bijawar",
+          "uid": "12_168639"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_107354"
+        },
+        {
+          "block_name": "bankura",
+          "uid": "12_374565"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_32886"
+        }
+      ]
+    },
+    "irrigation": {
+      "positive": [
+        {
+          "block_name": "maddur",
+          "uid": "1_34623"
+        },
+        {
+          "block_name": "mau",
+          "uid": "12_151409"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_35924"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_135895"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_44884"
+        },
+        {
+          "block_name": "sihora",
+          "uid": "15_33653"
+        }
+      ],
+      "negative": [
+        {
+          "block_name": "jawhar",
+          "uid": "25_19554"
+        },
+        {
+          "block_name": "ghatanji",
+          "uid": "4_102533"
+        },
+        {
+          "block_name": "kalamnuri",
+          "uid": "4_110551"
+        },
+        {
+          "block_name": "ashti",
+          "uid": "18_70995"
+        },
+        {
+          "block_name": "parner",
+          "uid": "18_109626"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_130250"
+        },
+        {
+          "block_name": "vilattikulam",
+          "uid": "2_15086"
+        },
+        {
+          "block_name": "aruppukkottai",
+          "uid": "2_14342"
+        },
+        {
+          "block_name": "bero",
+          "uid": "7_5618"
+        },
+        {
+          "block_name": "girwa",
+          "uid": "23_17585"
+        },
+        {
+          "block_name": "kurupam",
+          "uid": "22_26173"
+        },
+        {
+          "block_name": "kadana",
+          "uid": "23_6019"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_108167"
+        },
+        {
+          "block_name": "bijawar",
+          "uid": "12_168639"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_107354"
+        },
+        {
+          "block_name": "bankura",
+          "uid": "12_374565"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_32886"
+        }
+      ]
+    },
+    "low_yield": {
+      "positive": [
+        {
+          "block_name": "kurupam",
+          "uid": "22_26173"
+        },
+        {
+          "block_name": "kadana",
+          "uid": "23_6019"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_108167"
+        },
+        {
+          "block_name": "bijawar",
+          "uid": "12_168639"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_107354"
+        },
+        {
+          "block_name": "bankura",
+          "uid": "12_374565"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_32886"
+        }
+      ],
+      "negative": [
+        {
+          "block_name": "jawhar",
+          "uid": "25_19554"
+        },
+        {
+          "block_name": "ghatanji",
+          "uid": "4_102533"
+        },
+        {
+          "block_name": "kalamnuri",
+          "uid": "4_110551"
+        },
+        {
+          "block_name": "ashti",
+          "uid": "18_70995"
+        },
+        {
+          "block_name": "parner",
+          "uid": "18_109626"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_130250"
+        },
+        {
+          "block_name": "vilattikulam",
+          "uid": "2_15086"
+        },
+        {
+          "block_name": "mau",
+          "uid": "12_151409"
+        },
+        {
+          "block_name": "aruppukkottai",
+          "uid": "2_14342"
+        },
+        {
+          "block_name": "bero",
+          "uid": "7_5618"
+        },
+        {
+          "block_name": "girwa",
+          "uid": "23_17585"
+        },
+        {
+          "block_name": "maddur",
+          "uid": "1_34623"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_35924"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_135895"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_44884"
+        },
+        {
+          "block_name": "sihora",
+          "uid": "15_33653"
+        }
+      ]
+    },
+    "soil_degradation": {
+      "positive": [
+        {
+          "block_name": "kurupam",
+          "uid": "22_26173"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_135895"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_108167"
+        },
+        {
+          "block_name": "kadana",
+          "uid": "23_6019"
+        },
+        {
+          "block_name": "bero",
+          "uid": "7_5618"
+        }
+      ],
+      "negative": [
+        {
+          "block_name": "jawhar",
+          "uid": "25_19554"
+        },
+        {
+          "block_name": "ghatanji",
+          "uid": "4_102533"
+        },
+        {
+          "block_name": "kalamnuri",
+          "uid": "4_110551"
+        },
+        {
+          "block_name": "ashti",
+          "uid": "18_70995"
+        },
+        {
+          "block_name": "parner",
+          "uid": "18_109626"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_130250"
+        },
+        {
+          "block_name": "vilattikulam",
+          "uid": "2_15086"
+        },
+        {
+          "block_name": "mau",
+          "uid": "12_151409"
+        },
+        {
+          "block_name": "aruppukkottai",
+          "uid": "2_14342"
+        },
+        {
+          "block_name": "girwa",
+          "uid": "23_17585"
+        },
+        {
+          "block_name": "maddur",
+          "uid": "1_34623"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_35924"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_44884"
+        },
+        {
+          "block_name": "sihora",
+          "uid": "15_33653"
+        },
+        {
+          "block_name": "bijawar",
+          "uid": "12_168639"
+        },
+        {
+          "block_name": "sapotra",
+          "uid": "12_107354"
+        },
+        {
+          "block_name": "bankura",
+          "uid": "12_374565"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_32886"
+        }
+      ]
+    }
+  },
+  "ntfp": {
+    "forest_degradation": {
+      "positive": [
+        {
+          "block_name": "kadana",
+          "uid": "23_15108"
+        },
+        {
+          "block_name": "niwas",
+          "uid": "15_32041"
+        },
+        {
+          "block_name": "nandapur",
+          "uid": "4_71265"
+        },
+        {
+          "block_name": "pikmal",
+          "uid": "5_60634"
+        },
+        {
+          "block_name": "gogunda",
+          "uid": "9_68"
+        },
+        {
+          "block_name": "chainpur",
+          "uid": "7_1281"
+        },
+        {
+          "block_name": "keonjhar",
+          "uid": "7_25388"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_44884"
+        }
+      ],
+      "negative": [
+        {
+          "block_name": "kasdol",
+          "uid": "5_46804"
+        },
+        {
+          "block_name": "mulbagal",
+          "uid": "2_31875"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_30595"
+        },
+        {
+          "block_name": "bichhiya",
+          "uid": "15_31603"
+        }
+      ]
+    }
+  },
+  "waterbodies":{
+    "siltation":{
+        "negative":  [
+          ],
+        "positive":  [
+          {
+            "block_name": "jatara",
+            "uid": "12_130250"
+          },
+          {
+            "block_name": "karauli",
+            "uid": "12_83677"
+          },
+          {
+            "block_name": "sapotra",
+            "uid": "12_108167"
+          }
+          ]
+    }
+  },
+  "livelihood":{
+    "agroforestry":{
+        "negative":  [
+          ],
+        "positive":  [
+          ]
+    },
+    "fishery":{
+        "negative":  [
+          ],
+        "positive":  [
+          ]
+    },
+    "livestock_water":{
+        "positive":  [
+            {
+              "block_name": "maddur",
+              "uid": "1_34623"
+            }
+          ],
+        "negative":  [
+            {
+              "block_name": "bankura",
+              "uid": "12_374565"
+            },
+            {
+              "block_name": "karera",
+              "uid": "12_61845"
+            },
+            {
+              "block_name": "begun",
+              "uid": "12_104029"
+            },
+            {
+              "block_name": "mudgal",
+              "uid": "18_24160"
+            },
+            {
+              "block_name": "asnawar",
+              "uid": "12_31793"
+            }
+          ]
+    },
+    "livestock_decline":{
+        "negative":  [
+            {
+              "block_name": "maddur",
+              "uid": "1_34623"
+            }
+          ],
+        "positive":  [
+            {
+              "block_name": "bankura",
+              "uid": "12_374565"
+            },
+            {
+              "block_name": "karera",
+              "uid": "12_61845"
+            },
+            {
+              "block_name": "begun",
+              "uid": "12_104029"
+            },
+            {
+              "block_name": "mudgal",
+              "uid": "18_24160"
+            },
+            {
+              "block_name": "asnawar",
+              "uid": "12_31793"
+            }
+          ]
+    }
+  },
+  "socio-economic":{
+    "health":{
+        "negative":  [
+          ],
+        "positive":  [
+          ]
+    },
+    "caste":{
+      "negative":  [
+        ],
+      "positive":  [
+        {
+          "block_name": "pikmal",
+          "uid": "5_60634"
+        },
+        {
+          "block_name": "jatara",
+          "uid": "12_135895"
+        },
+        {
+          "block_name": "bijawar",
+          "uid": "12_168639"
+        }
+        ]
+    }
+  }
+}

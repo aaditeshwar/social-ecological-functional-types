@@ -1,0 +1,204 @@
+{
+ "_about": "Context classes. Each class has a membership 'expr' over indicators (see variables.json). Thresholds in causal_graph.json are conditioned on these ids. A MWS can belong to one class per dimension. Edit 'expr' to move the boundaries.",
+ "dimensions": [
+  {
+   "id": "rainfall",
+   "label": "Rainfall regime (rain_norm: CoRE precipitation rescaled to the district normal)",
+   "sources": [
+    "mandal2016",
+    "expert_judgement"
+   ],
+   "note": "Boundaries follow the broad Indian agro-ecological moisture regimes (semi-arid up to roughly 900-1000 mm, sub-humid roughly 1000-1600 mm; Mandal et al. 2016), applied to rain_norm.",
+   "classes": [
+    {
+     "id": "semi_arid",
+     "label": "Semi-arid (< 900 mm)",
+     "expr": "rain_norm < 900"
+    },
+    {
+     "id": "dry_subhumid",
+     "label": "Dry sub-humid (900-1300 mm)",
+     "expr": "rain_norm >= 900 and rain_norm < 1300"
+    },
+    {
+     "id": "humid",
+     "label": "Moist sub-humid / humid (>= 1300 mm)",
+     "expr": "rain_norm >= 1300"
+    }
+   ]
+  },
+  {
+   "id": "aquifer",
+   "label": "Aquifer",
+   "sources": [
+    "cgwb_gec2015",
+    "cgwb_amravati"
+   ],
+   "note": "Hard-rock aquifers (basalt, granite-gneiss, khondalite...) have specific yield of about 1-3%, so a given storage loss gives a 3-10x larger fall in water level than in alluvium (specific yield ~8-16%). Saline means the block is assessed as saline by CGWB.",
+   "classes": [
+    {
+     "id": "saline",
+     "label": "Saline groundwater",
+     "expr": "(soge_class == 'Saline' or soge_class == 'Salinity')"
+    },
+    {
+     "id": "alluvium",
+     "label": "Alluvium",
+     "expr": "aquifer_class == 'Alluvium'"
+    },
+    {
+     "id": "hard_rock",
+     "label": "Hard rock",
+     "expr": "aquifer_class == 'Hard Rock'"
+    }
+   ]
+  },
+  {
+   "id": "terrain",
+   "label": "Terrain",
+   "sources": [
+    "core_stack",
+    "wischmeier_slope"
+   ],
+   "classes": [
+    {
+     "id": "hilly",
+     "label": "Hilly (hill slope + ridge >= 25%)",
+     "expr": "f_hill >= 0.25"
+    },
+    {
+     "id": "undulating",
+     "label": "Undulating (plain < 60%)",
+     "expr": "f_hill < 0.25 and f_plain < 0.6"
+    },
+    {
+     "id": "plain",
+     "label": "Plain (plain >= 60%)",
+     "expr": "f_plain >= 0.6 and f_hill < 0.25"
+    }
+   ]
+  },
+  {
+   "id": "gw_category",
+   "label": "Groundwater assessment category (block, CGWB)",
+   "sources": [
+    "cgwb_gec2015",
+    "cgwb_dgwr2023"
+   ],
+   "classes": [
+    {
+     "id": "over_exploited",
+     "label": "Over-exploited (> 100%)",
+     "expr": "(soge_class == 'Over Exploited' or soge_class == 'Over-Exploited')"
+    },
+    {
+     "id": "critical",
+     "label": "Critical (90-100%)",
+     "expr": "soge_class == 'Critical'"
+    },
+    {
+     "id": "semi_critical",
+     "label": "Semi-critical (70-90%)",
+     "expr": "(soge_class == 'Semi-Critical' or soge_class == 'Semi Critical')"
+    },
+    {
+     "id": "safe",
+     "label": "Safe (<= 70%)",
+     "expr": "soge_class == 'Safe'"
+    },
+    {
+     "id": "saline_gw",
+     "label": "Saline",
+     "expr": "(soge_class == 'Saline' or soge_class == 'Salinity')"
+    }
+   ]
+  },
+  {
+   "id": "canal",
+   "label": "Canal access",
+   "sources": [
+    "core_stack"
+   ],
+   "classes": [
+    {
+     "id": "canal_present",
+     "label": "Canal crosses MWS",
+     "expr": "n_canals >= 1"
+    },
+    {
+     "id": "no_canal",
+     "label": "No canal",
+     "expr": "n_canals == 0"
+    }
+   ]
+  },
+  {
+   "id": "cropping",
+   "label": "Cropping regime (cropping intensity and kharif sowing)",
+   "sources": [
+    "expert_judgement"
+   ],
+   "note": "Added 21–22 Nov 2026 after the ground-truth check, as a broad setting alongside rainfall, aquifer, terrain, groundwater category and canal access. 'intensive' uses the same cut-off as ctx_high_ci (CI >= 1.5). 'under_sown' is cropland where a large part of the kharif area is left unsown (mean kharif sown share below 85%); 'single_season' is cropland sown fully in kharif but with little second cropping (CI < 1.2).",
+   "classes": [
+    {
+     "id": "intensive",
+     "label": "Intensive (CI >= 1.5)",
+     "expr": "ci_mean >= 1.5"
+    },
+    {
+     "id": "under_sown",
+     "label": "Under-sown kharif (CI < 1.5, kharif sown < 85%)",
+     "expr": "ci_mean < 1.5 and kharif_sown_mean < 85"
+    },
+    {
+     "id": "single_season",
+     "label": "Single-season (CI < 1.2, kharif fully sown)",
+     "expr": "ci_mean < 1.2 and kharif_sown_mean >= 85"
+    },
+    {
+     "id": "moderate",
+     "label": "Moderate (CI 1.2–1.5, kharif fully sown)",
+     "expr": "ci_mean >= 1.2 and ci_mean < 1.5 and kharif_sown_mean >= 85"
+    }
+   ]
+  }
+ ],
+ "rainfall_normals": {
+  "_about": "Long-term annual normal rainfall (mm) by district. CoRE Stack precipitation for 2017-24 is spatially smooth and biased against district normals (Srikakulam 1742 vs 1162 mm; Godda 1008 vs ~1530 mm). The pipeline rescales each MWS: rain_norm = precip_mean x (district normal / district median precip_mean), which keeps the within-district pattern but anchors the level. null = no correction.",
+  "Pune": {
+   "mm": null,
+   "source": null,
+   "note": "District mean hides a 450 mm (Indapur, Daund) to > 2000 mm (Mulshi, Mawal) gradient that CoRE precipitation under-represents (627-874 mm). Left uncorrected; add tehsil normals here if available."
+  },
+  "Amaravati": {
+   "mm": 850,
+   "source": "expert_judgement",
+   "note": "Approximate district normal; verify with IMD."
+  },
+  "Ananthapur": {
+   "mm": 552,
+   "source": "crida_anantapur"
+  },
+  "Srikakulam": {
+   "mm": 1162,
+   "source": "crida_srikakulam"
+  },
+  "Godda": {
+   "mm": 1530,
+   "source": "crida_godda"
+  },
+  "Koraput": {
+   "mm": 1567,
+   "source": "crida_koraput"
+  },
+  "Udaipur": {
+   "mm": 601,
+   "source": "crida_udaipur"
+  },
+  "Ballia": {
+   "mm": 983,
+   "source": "expert_judgement",
+   "note": "Approximate district normal; verify with IMD."
+  }
+ }
+}

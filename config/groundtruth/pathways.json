@@ -1,0 +1,112 @@
+{
+ "_about": "Maps each ground-truth pathway (section.pathway in final_ground_truth.json) to atlas rules (causal_graph.json ids; present if any is triggered) and a Signal_Verification pattern (sheet_rules.json id). Opportunities are left out of stress pathways. Edit this file to change the mapping.",
+ "pathways": {
+  "agriculture.groundwater": {
+   "label": "Groundwater",
+   "atlas_rules": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "groundwater.water_balance_deficit"
+   ],
+   "sheet": "groundwater_stress",
+   "note": "groundwater.recharge_opportunity is an opportunity and is left out"
+  },
+  "agriculture.drought": {
+   "label": "Drought",
+   "atlas_rules": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing"
+   ],
+   "sheet": "high_drought_risk"
+  },
+  "agriculture.irrigation": {
+   "label": "Irrigation",
+   "atlas_rules": [
+    "irrigation.rabi_water_shortfall",
+    "irrigation.waterlogging"
+   ],
+   "sheet": "high_irrigation_difficulties"
+  },
+  "agriculture.low_yield": {
+   "label": "Low yield",
+   "atlas_rules": [
+    "productivity.farmland_abandonment",
+    "productivity.declining_intensity"
+   ],
+   "sheet": "decreasing_productivity",
+   "note": "productivity.rice_fallow_opportunity is an opportunity and is left out"
+  },
+  "agriculture.soil_degradation": {
+   "label": "Soil degradation",
+   "atlas_rules": [
+    "soil.nutrient_deficiency",
+    "soil.erosion"
+   ],
+   "sheet": "soil_health"
+  },
+  "ntfp.forest_degradation": {
+   "label": "Forest degradation",
+   "atlas_rules": [
+    "forest.tree_cover_loss",
+    "forest.fringe_degradation",
+    "forest.fire"
+   ],
+   "sheet": "forest_degradation"
+  },
+  "waterbodies.siltation": {
+   "label": "Siltation",
+   "atlas_rules": [
+    "waterbody_shrinkage"
+   ],
+   "sheet": "siltation"
+  },
+  "livelihood.livestock_water": {
+   "label": "Livestock water",
+   "atlas_rules": [
+    "livestock_water_scarcity"
+   ],
+   "sheet": "water_scarcity"
+  },
+  "livelihood.livestock_decline": {
+   "label": "Livestock decline (fodder shortage)",
+   "atlas_rules": [
+    "fodder.grazing_pressure",
+    "fodder.commons_degradation"
+   ],
+   "sheet": "fodder_risk",
+   "note": "ground-truth 'livestock_decline' is read as fodder shortage"
+  },
+  "livelihood.agroforestry": {
+   "label": "Agroforestry",
+   "atlas_rules": [
+    "agroforestry_opportunity"
+   ],
+   "sheet": "transition_from_crops_to_agroforestry"
+  },
+  "livelihood.fishery": {
+   "label": "Fishery",
+   "atlas_rules": [
+    "fishery_potential"
+   ],
+   "sheet": "good_water_potential"
+  },
+  "socio-economic.caste": {
+   "label": "Multi-sector vulnerability (caste)",
+   "atlas_rules": [
+    "multidimensional_vulnerability"
+   ],
+   "sheet": "multi_sector_vulnerability",
+   "note": "ground-truth 'caste' is read as multi-sector vulnerability (sheet) and multidimensional_vulnerability (atlas)"
+  },
+  "socio-economic.health": {
+   "label": "Health",
+   "atlas_rules": [
+    "drinking_water.scarcity",
+    "drinking_water.salinity",
+    "drinking_water.mining"
+   ],
+   "sheet": "water_security_safety_domestic_use",
+   "note": "assumed to be the sheet's Socio-economic / Health pattern"
+  }
+ }
+}

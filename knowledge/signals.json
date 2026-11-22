@@ -1,0 +1,1940 @@
+{
+ "_about": "Signal library. A signal turns one indicator (variables.json) or one condition into a yes/no answer and a grade between 0 and 1. kind: system (does a production system hold enough of the MWS; uses share_<archetype>), context (amplifier or setting: aquifer, terrain, rivers, institutions), stress (evidence of the stress itself). A numeric signal compares its var with the first threshold whose 'when' holds (or, when use_absolute is false or nothing matches, with pooled percentiles over the run). Grade: 0 before the threshold, 0.5 at the threshold, rising linearly to 1 at the severe threshold. The signal is 'on' when its grade is at least 0.5. A boolean signal (expr) has grade 0 or 1. Rules in causal_graph.json refer to signals by id; the same signal can play different roles in different rules.",
+ "version": "0.1",
+ "grading": {
+  "at_threshold": 0.5,
+  "at_severe": 1.0,
+  "rule": "grade = 0 if the threshold is not crossed; otherwise 0.5 + 0.5 × ramp(value, threshold, severe threshold)"
+ },
+ "signals": [
+  {
+   "id": "sys_gw_users",
+   "kind": "system",
+   "label": "Groundwater-using systems hold ≥ 10%",
+   "expr": "share_groundwater_irrigated + share_tree_crops + 0.5 * share_canal_irrigated >= 0.10",
+   "note": "Canal land counts half because canal commands also pump groundwater."
+  },
+  {
+   "id": "sys_gw_irrigated",
+   "kind": "system",
+   "label": "Groundwater-irrigated farming holds ≥ 10%",
+   "expr": "share_groundwater_irrigated >= 0.10"
+  },
+  {
+   "id": "sys_irrigated",
+   "kind": "system",
+   "label": "Irrigated farming or orchards hold ≥ 10%",
+   "expr": "share_groundwater_irrigated + share_canal_irrigated + share_tree_crops >= 0.10"
+  },
+  {
+   "id": "sys_rainfed_or_tank",
+   "kind": "system",
+   "label": "Rainfed or tank-fed farming holds ≥ 15%",
+   "expr": "share_rainfed_dryland + share_rainfed_rice_subhumid + share_tank_irrigated >= 0.15"
+  },
+  {
+   "id": "sys_rainfed",
+   "kind": "system",
+   "label": "Rainfed farming holds ≥ 15%",
+   "expr": "share_rainfed_dryland + share_rainfed_rice_subhumid >= 0.15"
+  },
+  {
+   "id": "sys_rice_rainfed",
+   "kind": "system",
+   "label": "Rainfed sub-humid (rice-based) farming holds ≥ 15%",
+   "expr": "share_rainfed_rice_subhumid >= 0.15"
+  },
+  {
+   "id": "sys_surface_irrigated",
+   "kind": "system",
+   "label": "Tank- or canal-irrigated farming holds ≥ 10%",
+   "expr": "share_tank_irrigated + share_canal_irrigated >= 0.10"
+  },
+  {
+   "id": "sys_canal",
+   "kind": "system",
+   "label": "Canal-irrigated farming holds ≥ 10%",
+   "expr": "share_canal_irrigated >= 0.10"
+  },
+  {
+   "id": "sys_cropland",
+   "kind": "system",
+   "label": "Farming systems hold ≥ 10%",
+   "expr": "share_rainfed_dryland + share_rainfed_rice_subhumid + share_groundwater_irrigated + share_canal_irrigated + share_tank_irrigated >= 0.10",
+   "note": "Checks the cropland total (all cropland archetypes summed), not whether any one archetype is present. Archetype presence (15%, tank 10%) says which archetypes describe the MWS; this gate says whether there is enough cropland for a cropland stress to matter. Cropland is often split across archetypes, so a per-archetype gate would skip MWS with 15–20% cropland in total (decision of 22 Nov 2026)."
+  },
+  {
+   "id": "sys_cropland_20",
+   "kind": "system",
+   "label": "Farming systems hold ≥ 20%",
+   "expr": "share_rainfed_dryland + share_rainfed_rice_subhumid + share_groundwater_irrigated + share_canal_irrigated + share_tank_irrigated >= 0.20"
+  },
+  {
+   "id": "sys_peri_urban",
+   "kind": "system",
+   "label": "Peri-urban settlement holds ≥ 3%",
+   "expr": "share_peri_urban >= 0.03"
+  },
+  {
+   "id": "sys_trees",
+   "kind": "system",
+   "label": "Forest or tree crops hold ≥ 15%",
+   "expr": "share_forest_fringe + share_tree_crops >= 0.15"
+  },
+  {
+   "id": "sys_forest",
+   "kind": "system",
+   "label": "Forest-fringe system holds ≥ 10%",
+   "expr": "share_forest_fringe >= 0.10"
+  },
+  {
+   "id": "sys_pastoral",
+   "kind": "system",
+   "label": "Pastoral system holds ≥ 5%",
+   "expr": "share_pastoral >= 0.05"
+  },
+  {
+   "id": "sys_waterbodies",
+   "kind": "system",
+   "label": "Water bodies cover ≥ 0.5% of the MWS",
+   "expr": "swb_frac >= 0.005",
+   "note": "Water bodies are a supporting system for tanks, fisheries and livestock."
+  },
+  {
+   "id": "sys_socio",
+   "kind": "system",
+   "label": "Socio-economic system (every MWS)",
+   "expr": "True",
+   "note": "Cross-cutting: people live in every MWS, whatever its land use."
+  },
+  {
+   "id": "sys_any",
+   "kind": "system",
+   "label": "Any MWS",
+   "expr": "True"
+  },
+  {
+   "id": "ps_agriculture",
+   "kind": "system",
+   "label": "Agriculture present (cropland and tree crops ≥ 10%)",
+   "expr": "share_rainfed_dryland + share_rainfed_rice_subhumid + share_groundwater_irrigated + share_canal_irrigated + share_tank_irrigated + share_tree_crops >= 0.10",
+   "note": "Production-system presence: decides whether agriculture's observed stresses are shown."
+  },
+  {
+   "id": "ps_livestock",
+   "kind": "system",
+   "label": "Livestock and commons present (pastoral ≥ 5%)",
+   "expr": "share_pastoral >= 0.05",
+   "note": "Production-system presence."
+  },
+  {
+   "id": "ps_forest",
+   "kind": "system",
+   "label": "Forest present (forest fringe ≥ 10%)",
+   "expr": "share_forest_fringe >= 0.10",
+   "note": "Production-system presence."
+  },
+  {
+   "id": "ps_peri_urban",
+   "kind": "system",
+   "label": "Peri-urban present (settlement ≥ 3%)",
+   "expr": "share_peri_urban >= 0.03",
+   "note": "Production-system presence."
+  },
+  {
+   "id": "ps_socio",
+   "kind": "system",
+   "label": "Households (every MWS)",
+   "expr": "True",
+   "note": "Production-system presence: the socio-economic system is cross-cutting."
+  },
+  {
+   "id": "ctx_hard_rock",
+   "kind": "context",
+   "label": "Hard-rock aquifer",
+   "expr": "ctx.aquifer == 'hard_rock'",
+   "note": "Low specific yield: storage is small, so levels fall fast when pumping exceeds recharge.",
+   "sources": [
+    "cgwb_gec2015"
+   ]
+  },
+  {
+   "id": "ctx_no_canal",
+   "kind": "context",
+   "label": "No canal crosses the MWS",
+   "expr": "n_canals == 0"
+  },
+  {
+   "id": "ctx_flat",
+   "kind": "context",
+   "label": "Mostly flat land",
+   "expr": "ctx.terrain == 'plain'"
+  },
+  {
+   "id": "ctx_alluvial_plain",
+   "kind": "context",
+   "label": "Alluvial plain",
+   "expr": "ctx.aquifer == 'alluvium' and ctx.terrain == 'plain'"
+  },
+  {
+   "id": "ctx_semi_arid",
+   "kind": "context",
+   "label": "Semi-arid rainfall regime",
+   "expr": "ctx.rainfall == 'semi_arid'"
+  },
+  {
+   "id": "ctx_headwater",
+   "kind": "context",
+   "label": "Headwater MWS (no upstream inflow)",
+   "expr": "n_upstream == 0",
+   "note": "Receives no surface or sub-surface inflow from other MWS (mws_connectivity).",
+   "sources": [
+    "core_stack"
+   ]
+  },
+  {
+   "id": "ctx_river",
+   "kind": "context",
+   "label": "A river flows through the MWS",
+   "expr": "river_present >= 1",
+   "sources": [
+    "core_stack"
+   ]
+  },
+  {
+   "id": "ctx_no_river",
+   "kind": "context",
+   "label": "No river flows through the MWS",
+   "expr": "river_present == 0",
+   "sources": [
+    "core_stack"
+   ]
+  },
+  {
+   "id": "ctx_sloping",
+   "kind": "context",
+   "label": "Sloping land",
+   "var": "f_sloping",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.3,
+     "severe": 0.6,
+     "sources": [
+      "wischmeier_slope",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 70,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "ctx_high_ci",
+   "kind": "context",
+   "label": "High cropping intensity",
+   "var": "ci_mean",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 1.5,
+     "severe": 1.8,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "1.5 means half the cropland carries a second crop; that demand usually rests on wells where there is no canal."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "ctx_mfp_dependent",
+   "kind": "context",
+   "label": "Households depend on minor forest produce",
+   "var": "mfp_dependence",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.1,
+     "severe": 0.3,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   },
+   "sources": [
+    "mission_antyodaya"
+   ]
+  },
+  {
+   "id": "ctx_shg_strong",
+   "kind": "context",
+   "label": "Strong self-help group coverage",
+   "var": "shg_coverage",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.5,
+     "severe": 0.75,
+     "sources": [
+      "nrlm_framework",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   },
+   "sources": [
+    "nrlm_framework"
+   ]
+  },
+  {
+   "id": "s_soge_stage",
+   "kind": "stress",
+   "label": "Block stage of groundwater extraction",
+   "var": "soge_stage",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 70,
+     "severe": 100,
+     "sources": [
+      "cgwb_gec2015"
+     ],
+     "note": "Semi-critical above 70%, over-exploited above 100%."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_wl_fall",
+   "kind": "stress",
+   "label": "Falling water level (modelled)",
+   "var": "wl_trend",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -0.2,
+     "severe": -0.4,
+     "sources": [
+      "cgwb_wlf"
+     ],
+     "note": "Equivalent to > 2 m (> 4 m) fall per decade."
+    }
+   ],
+   "use_absolute": false,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   },
+   "note": "CoRE water-level change is biased negative (CS-67); pooled percentiles are used until it is checked against observation wells."
+  },
+  {
+   "id": "s_dg_neg_years",
+   "kind": "stress",
+   "label": "Most years with groundwater storage loss",
+   "var": "dg_neg_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.625,
+     "severe": 0.875,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "5 (7) of 8 years."
+    }
+   ],
+   "use_absolute": false,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   },
+   "note": "Same bias as s_wl_fall."
+  },
+  {
+   "id": "s_dg_recent_loss",
+   "kind": "stress",
+   "label": "Groundwater storage falling in the last 3 years",
+   "var": "dg_late_mean",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0,
+     "severe": -50,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": false,
+   "percentile_fallback": {
+    "pct": 33,
+    "severe_pct": 15
+   },
+   "note": "Same bias as s_wl_fall."
+  },
+  {
+   "id": "s_wl_rise",
+   "kind": "stress",
+   "label": "Rising water level (modelled)",
+   "var": "wl_trend",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.2,
+     "severe": 0.4,
+     "sources": [
+      "mowr_waterlogging"
+     ]
+    }
+   ],
+   "use_absolute": false,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_et_excess",
+   "kind": "stress",
+   "label": "Evapotranspiration exceeds rainfall",
+   "var": "et_p_ratio",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "ctx.canal == 'canal_present'",
+     "value": 1.15,
+     "severe": 1.3,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "Canal imports legitimately raise ET."
+    },
+    {
+     "when": "True",
+     "value": 1.0,
+     "severe": 1.15,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 85,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_runoff_available",
+   "kind": "stress",
+   "label": "Runoff available for recharge",
+   "var": "runoff_ratio",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.2,
+     "severe": 0.3,
+     "sources": [
+      "cgwb_recharge2020",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 50,
+    "severe_pct": 80
+   }
+  },
+  {
+   "id": "s_saline",
+   "kind": "stress",
+   "label": "Block assessed as saline",
+   "expr": "ctx.aquifer == 'saline'",
+   "sources": [
+    "cgwb_dgwr2023"
+   ]
+  },
+  {
+   "id": "s_summer_water_low",
+   "kind": "stress",
+   "label": "Little surface water left in summer",
+   "var": "swb_zaid_persist0",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.2,
+     "severe": 0.05,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "Share of the monsoon water spread still present in summer (zaid)."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   }
+  },
+  {
+   "id": "s_low_piped_water",
+   "kind": "stress",
+   "label": "Few households with piped water",
+   "var": "piped_water_coverage",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.5,
+     "severe": 0.2,
+     "sources": [
+      "jjm_guidelines"
+     ],
+     "note": "Jal Jeevan Mission aims at a functional tap connection for every rural household."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   }
+  },
+  {
+   "id": "s_swb_shrinking",
+   "kind": "stress",
+   "label": "Water-body area shrinking",
+   "var": "swb_slope_pct",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -3,
+     "severe": -8,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 20,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_swb_rabi_trend",
+   "kind": "stress",
+   "label": "Rabi water-body area shrinking",
+   "var": "swb_rabi_slope_pct",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -5,
+     "severe": -10,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "5% (10%) loss a year relative to the mean."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 20,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_swb_rabi_persist_low",
+   "kind": "stress",
+   "label": "Water bodies dry before rabi",
+   "var": "swb_rabi_persist",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.5,
+     "severe": 0.3,
+     "sources": [
+      "palanisami_tanks",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 15,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_swb_rabi_persist_high",
+   "kind": "stress",
+   "label": "Water bodies hold water into rabi",
+   "var": "swb_rabi_persist",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.85,
+     "severe": 0.95,
+     "sources": [
+      "pmmsy_guidelines",
+      "expert_judgement"
+     ],
+     "note": "Most water bodies keep much of their monsoon spread into rabi (pooled median 0.81), so only the top quarter counts as long-holding. Used for fish culture only when summer persistence is not available."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 60,
+    "severe_pct": 85
+   }
+  },
+  {
+   "id": "s_swb_zaid_persist_high",
+   "kind": "stress",
+   "label": "Water bodies hold water into summer",
+   "var": "swb_zaid_persist0",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.6,
+     "severe": 0.8,
+     "sources": [
+      "pmmsy_guidelines",
+      "expert_judgement"
+     ],
+     "note": "Most of the water spread still present in summer (zaid). With 0.3 (the first value) most water bodies qualified, since the median across districts is 0.27–0.62."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   },
+   "note": "Positive signal (an opportunity), named in the stress kind because it is evidence for a rule."
+  },
+  {
+   "id": "s_waterbody_extent",
+   "kind": "stress",
+   "label": "Water bodies cover a meaningful area",
+   "var": "swb_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.02,
+     "severe": 0.05,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 70,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_kharif_water",
+   "kind": "stress",
+   "label": "Water spread seen only in the monsoon",
+   "var": "f_water_kharif_only",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.01,
+     "severe": 0.03,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 95,
+    "severe_pct": 99
+   }
+  },
+  {
+   "id": "s_water_any",
+   "kind": "stress",
+   "label": "Large share of land under water",
+   "var": "f_water_any",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.1,
+     "severe": 0.25,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 90,
+    "severe_pct": 97
+   }
+  },
+  {
+   "id": "s_drought_weeks",
+   "kind": "stress",
+   "label": "Moderate+severe kharif drought weeks",
+   "var": "dr_modsev_mean",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "ctx.rainfall == 'semi_arid'",
+     "value": 3,
+     "severe": 6,
+     "sources": [
+      "drought_manual",
+      "expert_judgement"
+     ]
+    },
+    {
+     "when": "True",
+     "value": 2,
+     "severe": 4,
+     "sources": [
+      "drought_manual",
+      "expert_judgement"
+     ],
+     "note": "Lower in sub-humid areas, where rice-based systems are less adapted to dry spells."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_drought_years",
+   "kind": "stress",
+   "label": "Seasons with ≥ 4 drought weeks",
+   "var": "dr_years_modsev4",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 3,
+     "severe": 5,
+     "sources": [
+      "drought_manual",
+      "expert_judgement"
+     ],
+     "note": "3 (5) of 8 kharif seasons."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_dry_spells",
+   "kind": "stress",
+   "label": "Seasons with ≥ 3 dry-spell weeks",
+   "var": "dry_spell_years3",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 4,
+     "severe": 6,
+     "sources": [
+      "drought_manual"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_kharif_min",
+   "kind": "stress",
+   "label": "Worst-year kharif area far below best",
+   "var": "kharif_min_ratio",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.6,
+     "severe": 0.4,
+     "sources": [
+      "drought_manual",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 20,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_kharif_cv",
+   "kind": "stress",
+   "label": "Kharif area varies a lot",
+   "var": "kharif_cv",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.2,
+     "severe": 0.35,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_dbl_rising",
+   "kind": "stress",
+   "label": "Double cropping rising",
+   "var": "double_slope_pp",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.5,
+     "severe": 1.5,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "+0.5 pp of MWS area a year = +4 pp over 8 years."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_dbl_falling",
+   "kind": "stress",
+   "label": "Double cropping falling",
+   "var": "double_slope_pp",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -0.5,
+     "severe": -1.5,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   }
+  },
+  {
+   "id": "s_ci_decline",
+   "kind": "stress",
+   "label": "Cropping intensity declining",
+   "var": "ci_slope",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -0.02,
+     "severe": -0.05,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "−0.02 a year is −0.16 over 8 years."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 20,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_crop_area_decline",
+   "kind": "stress",
+   "label": "Net cropped area declining",
+   "var": "crop_slope_pp",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -0.5,
+     "severe": -1.5,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 20,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_low_ci",
+   "kind": "stress",
+   "label": "Low cropping intensity",
+   "var": "ci_mean",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "ctx.rainfall != 'semi_arid'",
+     "value": 1.3,
+     "severe": 1.1,
+     "sources": [
+      "gumma2016",
+      "crida_koraput",
+      "crida_godda"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   }
+  },
+  {
+   "id": "s_kharif_only",
+   "kind": "stress",
+   "label": "Much cropland is kharif-only",
+   "var": "rainfed_share",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.4,
+     "severe": 0.6,
+     "sources": [
+      "gumma2016"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_cultivated",
+   "kind": "stress",
+   "label": "Substantial cultivation",
+   "var": "f_crop",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.3,
+     "severe": 0.5,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 50,
+    "severe_pct": 75
+   }
+  },
+  {
+   "id": "s_runoff_high",
+   "kind": "stress",
+   "label": "High runoff",
+   "var": "runoff_ratio",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.25,
+     "severe": 0.3,
+     "sources": [
+      "wischmeier_slope",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 70,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_farm_to_scrub",
+   "kind": "stress",
+   "label": "Farmland turned to scrub or barren",
+   "var": "farm_to_barren_scrub_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.03,
+     "severe": 0.06,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 85,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_farm_to_built",
+   "kind": "stress",
+   "label": "Farm or tree land turned to built-up",
+   "var": "farm_to_built_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.03,
+     "severe": 0.06,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 85,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_built_trend",
+   "kind": "stress",
+   "label": "Built-up share rising",
+   "var": "built_slope_pp",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.4,
+     "severe": 0.8,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 85,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_rest_wide",
+   "kind": "stress",
+   "label": "Wide-scale restoration area",
+   "var": "rest_wide_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.2,
+     "severe": 0.5,
+     "sources": [
+      "wri_restoration"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_rest_mosaic",
+   "kind": "stress",
+   "label": "Mosaic restoration area",
+   "var": "rest_mosaic_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.4,
+     "severe": 0.7,
+     "sources": [
+      "wri_restoration"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 70,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_n_low",
+   "kind": "stress",
+   "label": "Low nitrogen over much of the MWS",
+   "var": "soil_n_low_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.5,
+     "severe": 0.8,
+     "sources": [
+      "shc_ratings"
+     ],
+     "note": "More than half (80%) of the cropped area below the Soil Health Card 'low' limit."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_p_low",
+   "kind": "stress",
+   "label": "Low phosphorus over much of the MWS",
+   "var": "soil_p_low_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.5,
+     "severe": 0.8,
+     "sources": [
+      "shc_ratings"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_k_low",
+   "kind": "stress",
+   "label": "Low potassium over much of the MWS",
+   "var": "soil_k_low_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.5,
+     "severe": 0.8,
+     "sources": [
+      "shc_ratings"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_oc_low",
+   "kind": "stress",
+   "label": "Low organic carbon over much of the MWS",
+   "var": "soil_oc_low_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.8,
+     "severe": 0.95,
+     "sources": [
+      "shc_ratings"
+     ],
+     "note": "80% (95%) of the cropped area below 0.5% organic carbon, as for N, P and K (was 50% / 80% until 22 Nov 2026)."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_grazing_density",
+   "kind": "stress",
+   "label": "Livestock per ha of open commons",
+   "var": "tlu_per_ha_grazing",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 5,
+     "severe": 10,
+     "sources": [
+      "igfri_vision",
+      "fao_tlu",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_livestock_dense",
+   "kind": "stress",
+   "label": "High livestock density",
+   "var": "tlu_per_ha",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 1.0,
+     "severe": 2.0,
+     "sources": [
+      "igfri_vision",
+      "fao_tlu",
+      "expert_judgement"
+     ],
+     "note": "Tropical livestock units per ha of village land."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_commons_shrinking",
+   "kind": "stress",
+   "label": "Open commons shrinking",
+   "var": "shrub_slope_pp",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -0.3,
+     "severe": -0.8,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 20,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_grass_tree_loss",
+   "kind": "stress",
+   "label": "Trees lost in shrub-tree commons",
+   "var": "grass_tree_loss_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.1,
+     "severe": 0.15,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "At least a tenth of the mixed shrub-tree cover lost over 2017–24. The 5% first used is close to the median (5–10% across districts), so it flagged most MWS."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 85,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_shrub_ndvi_decline",
+   "kind": "stress",
+   "label": "Shrubland greenness declining",
+   "note": "On when the ndvi dataset classes the shrubland NDVI trend as 'Decreasing' (4% of sample MWS). The numeric slope is rounded to zero in 96% of MWS (CS-87), so it cannot be thresholded.",
+   "expr": "shrub_ndvi_decreasing >= 1"
+  },
+  {
+   "id": "s_net_tree_loss",
+   "kind": "stress",
+   "label": "Net loss of tree cover",
+   "var": "net_tree_frac",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -0.02,
+     "severe": -0.05,
+     "sources": [
+      "isfr2023",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 15,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_forest_to_farm",
+   "kind": "stress",
+   "label": "Forest converted to farmland",
+   "var": "forest_to_farm_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.05,
+     "severe": 0.1,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_net_tree_neg",
+   "kind": "stress",
+   "label": "Net tree change at least −1%",
+   "expr": "net_tree_frac <= -0.01"
+  },
+  {
+   "id": "s_fringe_loss",
+   "kind": "stress",
+   "label": "Forest edge deforested or degraded",
+   "var": "fringe_loss_frac",
+   "direction": "high",
+   "thresholds": [],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   },
+   "note": "Pooled percentiles only. The fringe change layer's period is undocumented (CS-81), and the median MWS has 27% of its fringe deforested or degraded, so a fixed share (formerly 5%, severe 15%) fired almost everywhere."
+  },
+  {
+   "id": "s_fire_frequent",
+   "kind": "stress",
+   "label": "Frequent fires",
+   "var": "fire_per_100km2",
+   "direction": "high",
+   "thresholds": [],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 85,
+    "severe_pct": 95
+   },
+   "note": "Pooled percentiles only; FSI ranks fire-prone forest by relative fire frequency.",
+   "sources": [
+    "fsi_fire"
+   ]
+  },
+  {
+   "id": "s_st_share",
+   "kind": "stress",
+   "label": "High Scheduled Tribe share",
+   "var": "st_share",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.5,
+     "severe": 0.8,
+     "sources": [
+      "fra2006",
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_sc_share",
+   "kind": "stress",
+   "label": "High Scheduled Caste share",
+   "var": "sc_share",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.25,
+     "severe": 0.4,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 85,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_low_literacy",
+   "kind": "stress",
+   "label": "Low literacy",
+   "var": "literacy",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 40,
+     "severe": 30,
+     "sources": [
+      "census2011",
+      "expert_judgement"
+     ],
+     "note": "CoRE literacy includes children 0–6 in the denominator; 40% is about 47% on the Census basis."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 20,
+    "severe_pct": 5
+   }
+  },
+  {
+   "id": "s_low_nrega",
+   "kind": "stress",
+   "label": "Few NREGA works",
+   "var": "nrega_works_per_1000ha",
+   "direction": "low",
+   "thresholds": [],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   },
+   "note": "Pooled percentiles only: no norm for works per area."
+  },
+  {
+   "id": "s_bank_far",
+   "kind": "stress",
+   "label": "Bank branch far away",
+   "var": "bank_distance_km",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 5,
+     "severe": 10,
+     "sources": [
+      "rbi_5km"
+     ],
+     "note": "Policy aim of a banking outlet within 5 km of every village."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_low_shg",
+   "kind": "stress",
+   "label": "Few households in self-help groups",
+   "var": "shg_coverage",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.3,
+     "severe": 0.15,
+     "sources": [
+      "nrlm_framework",
+      "expert_judgement"
+     ],
+     "note": "DAY-NRLM aims to bring at least one woman from every poor household into an SHG."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   }
+  },
+  {
+   "id": "s_kuccha",
+   "kind": "stress",
+   "label": "Many kuccha houses",
+   "var": "kuccha_share",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.3,
+     "severe": 0.5,
+     "sources": [
+      "expert_judgement"
+     ]
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "ctx_low_nrega_water",
+   "kind": "context",
+   "label": "Few NREGA water works",
+   "var": "nrega_water_per_1000ha",
+   "direction": "low",
+   "thresholds": [],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   },
+   "note": "Pooled percentiles only: no norm for works per area. Marks low public investment in irrigation and soil-water conservation."
+  },
+  {
+   "id": "ctx_swc_works",
+   "kind": "context",
+   "label": "Active NREGA soil and water conservation",
+   "var": "nrega_swc_per_1000ha",
+   "direction": "high",
+   "thresholds": [],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 50,
+    "severe_pct": 75
+   },
+   "note": "Pooled percentiles only. An enabler: a panchayat that already runs conservation works can build and maintain ponds."
+  },
+  {
+   "id": "ctx_plantation_works",
+   "kind": "context",
+   "label": "Active NREGA plantation works",
+   "var": "nrega_plantation_per_1000ha",
+   "direction": "high",
+   "thresholds": [],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 50,
+    "severe_pct": 75
+   },
+   "note": "Pooled percentiles only. An enabler for tree planting on farms and commons."
+  },
+  {
+   "id": "ctx_fpo_access",
+   "kind": "context",
+   "label": "Farmer producer organisation present",
+   "var": "fpo_access",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.3,
+     "severe": 0.6,
+     "sources": [
+      "mission_antyodaya",
+      "expert_judgement"
+     ],
+     "note": "An FPO is listed in villages covering 30% (60%) of the MWS. FPOs are listed in about one village in eight."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   },
+   "sources": [
+    "mission_antyodaya"
+   ]
+  },
+  {
+   "id": "s_mining",
+   "kind": "stress",
+   "label": "Mining in the micro-watershed",
+   "var": "mining_projects",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 1,
+     "severe": 3,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "One mining site or project (three or more)."
+    }
+   ],
+   "use_absolute": true,
+   "sources": [
+    "moefcc_parivesh"
+   ]
+  },
+  {
+   "id": "ctx_low_kharif_rain",
+   "kind": "context",
+   "label": "Rainfall-limited: low rain or little of it in kharif",
+   "expr": "rain_norm < 600 or kharif_rain_share < 0.66",
+   "sources": [
+    "expert_judgement"
+   ],
+   "note": "Structure from the Signal_Verification sheet (drought sig_03): annual rain below 600 mm, or under two-thirds of it in kharif."
+  },
+  {
+   "id": "ctx_runoff_loss",
+   "kind": "context",
+   "label": "Much of the rain runs off",
+   "expr": "runoff_ratio > 0.2",
+   "sources": [
+    "expert_judgement"
+   ],
+   "note": "Context version of runoff; the erosion stress signal s_runoff_high uses 0.25."
+  },
+  {
+   "id": "ctx_dry_year",
+   "kind": "context",
+   "label": "At least one very dry year (< 400 mm)",
+   "expr": "precip_min < 400",
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "id": "ctx_under_sown",
+   "kind": "context",
+   "label": "Under-sown kharif cropping regime",
+   "expr": "ctx.cropping == 'under_sown'"
+  },
+  {
+   "id": "ctx_single_season",
+   "kind": "context",
+   "label": "Single-season cropping regime",
+   "expr": "ctx.cropping == 'single_season'"
+  },
+  {
+   "id": "sys_irrigated_cropland",
+   "kind": "system",
+   "label": "Double or triple cropping on half or more of cropland",
+   "expr": "double_share >= 0.5",
+   "note": "A gate on the irrigated slice of cropland before it is split by water source (groundwater, canal, tank archetypes); not a new archetype."
+  },
+  {
+   "id": "s_rabi_water_drop",
+   "kind": "stress",
+   "label": "Surface water shrinks from kharif to rabi",
+   "var": "rabi_kharif_water",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.995,
+     "severe": 0.5,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "Any loss (below 0.995, as in the Signal_Verification sheet); severe when half the kharif water area is gone by rabi."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   }
+  },
+  {
+   "id": "s_p_medium",
+   "kind": "stress",
+   "label": "Phosphorus low or medium over most cropland",
+   "var": "soil_p_below_high_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.8,
+     "severe": 0.95,
+     "sources": [
+      "soil_health_card",
+      "expert_judgement"
+     ],
+     "note": "80% (95%) of the cropped area below the Soil Health Card medium/high boundary."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_k_medium",
+   "kind": "stress",
+   "label": "Potassium low or medium over most cropland",
+   "var": "soil_k_below_high_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.8,
+     "severe": 0.95,
+     "sources": [
+      "soil_health_card",
+      "expert_judgement"
+     ],
+     "note": "80% (95%) of the cropped area below the Soil Health Card medium/high boundary."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_n_very_low",
+   "kind": "stress",
+   "label": "Very low nitrogen over most cropland",
+   "var": "soil_n_very_low_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.8,
+     "severe": 0.95,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "80% (95%) of the cropped area."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_gain_below_loss",
+   "kind": "stress",
+   "label": "Tree-cover gain well below loss",
+   "var": "tree_gain_loss_ratio",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.7,
+     "severe": 0.3,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "Gain below 0.7 (0.3) of loss; 0.7 follows the Signal_Verification sheet (forest sig_02)."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 25,
+    "severe_pct": 10
+   }
+  },
+  {
+   "id": "s_drought_worst",
+   "kind": "stress",
+   "label": "A severe drought season",
+   "var": "dr_modsev_max",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 6,
+     "severe": 10,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "6 (10) or more moderate+severe drought weeks in the worst season; the Signal_Verification sheet uses > 6 (drought sig_01)."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_ci_fell",
+   "kind": "stress",
+   "label": "Cropping intensity lower than at the start",
+   "var": "ci_endpoint_change",
+   "direction": "low",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": -0.001,
+     "severe": -0.2,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "Any fall between the first two and last two years (severe: a fall of 0.2); the sheet's decreasing_productivity sig_02."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_farm_degradation",
+   "kind": "stress",
+   "label": "Farmland degrading in a forested MWS",
+   "var": "degr_frac",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.04,
+     "severe": 0.08,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "Farmland turned to barren, scrub or built-up land over 4% (8%) of the MWS; the sheet's forest sig_01."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 75,
+    "severe_pct": 90
+   }
+  },
+  {
+   "id": "s_shrub_tree_loss_ha",
+   "kind": "stress",
+   "label": "Trees lost in shrub-tree commons (area)",
+   "var": "grass_tree_loss_ha",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 2,
+     "severe": 10,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "More than 2 ha (severe 10 ha) of trees lost in shrub-tree commons over 2017–24; the Signal_Verification sheet's fodder sig_01. An absolute area, so larger MWS reach it more easily."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "s_forest_to_farm_rel",
+   "kind": "stress",
+   "label": "Forest converted to farm, relative to the forest",
+   "var": "forest_to_farm_rel",
+   "direction": "high",
+   "thresholds": [
+    {
+     "when": "True",
+     "value": 0.06,
+     "severe": 0.12,
+     "sources": [
+      "expert_judgement"
+     ],
+     "note": "6% (12%) of the forest area converted to farmland; the Signal_Verification sheet's forest sig_03."
+    }
+   ],
+   "use_absolute": true,
+   "percentile_fallback": {
+    "pct": 80,
+    "severe_pct": 95
+   }
+  },
+  {
+   "id": "ctx_large_forest",
+   "kind": "context",
+   "label": "Forest area of 600 ha or more",
+   "expr": "forest_area_ha >= 600",
+   "sources": [
+    "expert_judgement"
+   ],
+   "note": "From the Signal_Verification sheet's forest sig_03 (mean forest area > 600 ha). An absolute area: forest-to-farm conversion relative to the forest counts only in MWS with at least 600 ha of forest (27% of the sample)."
+  }
+ ]
+}

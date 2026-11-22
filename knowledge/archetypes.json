@@ -1,0 +1,428 @@
+{
+ "_about": "System archetypes (the basis set) and the rules that decompose each MWS into a mixture of them. Shares are fractions of MWS area. 'helpers' are evaluated first (in order) and can be used by the share expressions. Each archetype's raw share is computed from its 'share' expression; raw shares are then divided by their sum so that the mixture adds to 1. An archetype is 'present' in an MWS when its share is at least 'present_at'. Edit thresholds here; the justification and sources explain each choice. 'cross_cutting' systems (socio-economic) are present in every MWS and sit outside the mixture.",
+ "version": "0.3",
+ "method": [
+  "Split the MWS by land cover (mean of 2017–24 annual shares): cropland, tree cover, open commons (shrub + barren), built-up (last year) and water.",
+  "Split cropland by season. The kharif-only share is cropland with no crop outside kharif; the non-kharif share is cropland that also carries a crop in rabi or summer. The two add up to 1.",
+  "Attribute non-kharif cropping to a water source in a fixed order. Canal first (if a canal crosses the MWS), then tanks (water bodies that still hold water in rabi), then groundwater (scaled by the block stage of extraction). The rest is residual moisture or long-duration crops, which counts as rainfed. The four weights add up to 1.",
+  "Split rainfed cropland into dryland and sub-humid by rainfall rescaled to the district normal.",
+  "Split tree cover into natural forest and tree crops by slope, tribal share and extent of tree cover.",
+  "Split commons into grazing land and other wasteland by the sheep-and-goat share of livestock.",
+  "Split built-up land into peri-urban and village settlement by population density.",
+  "Add up the raw shares and close them to 100% (see normalisation). Apply any community answers."
+ ],
+ "helpers": [
+  {
+   "id": "canal_w",
+   "expr": "0.7 if n_canals >= 2 else (0.5 if n_canals == 1 else 0.0)",
+   "note": "Share of non-kharif cropping attributed to canal water when canals cross the MWS. A crossing canal does not mean the whole MWS is commanded (tail-end deprivation, distributary coverage), hence < 1.",
+   "sources": [
+    "crida_srikakulam",
+    "crida_koraput",
+    "expert_judgement"
+   ],
+   "label": "Canal weight"
+  },
+  {
+   "id": "tank_irrigable",
+   "expr": "5 * nz(swb_frac) * nz(swb_rabi_persist)",
+   "note": "Irrigable area from water bodies that still hold water in rabi, assuming a command area of about 5 times the water spread (South Indian tanks commonly 2-8x).",
+   "sources": [
+    "palanisami_tanks",
+    "expert_judgement"
+   ],
+   "label": "Tank-irrigable area (share of MWS)"
+  },
+  {
+   "id": "tank_w",
+   "expr": "min(div(tank_irrigable, max(f_crop * irr_share, 0.02)), 0.6) * (1 - canal_w) * (1.0 if aquifer_class == 'Hard Rock' else 0.3)",
+   "note": "Share of non-kharif cropping attributed to tanks and ponds, capped at 0.6. Down-weighted on alluvium, where shallow tube wells are cheap and large water bodies are mostly rivers, oxbows and floodplain lakes (Ballia) rather than irrigation tanks.",
+   "label": "Tank weight"
+  },
+  {
+   "id": "gw_plaus",
+   "expr": "ramp(nz(soge_stage, 50), 20, 70)",
+   "note": "Plausibility that non-kharif cropping is groundwater-irrigated, from the block stage of extraction (0 at <= 20%, 1 at >= 70%). Blocks with low extraction (Godda, Koraput, Srikakulam ~20%) cannot be supporting large groundwater-irrigated areas, so greenness outside kharif there is mostly residual moisture, canals or tanks.",
+   "sources": [
+    "cgwb_gec2015",
+    "crida_godda",
+    "crida_koraput"
+   ],
+   "label": "Groundwater plausibility"
+  },
+  {
+   "id": "gw_w",
+   "expr": "gw_plaus * (1 - canal_w - tank_w)",
+   "note": "Share of non-kharif cropping attributed to wells and borewells.",
+   "label": "Groundwater weight"
+  },
+  {
+   "id": "resid_w",
+   "expr": "max(1 - canal_w - tank_w - gw_w, 0)",
+   "note": "Remainder: rainfed second crops on residual moisture (e.g. rice-fallow pulses), long-duration kharif crops that extend past October, or unexplained.",
+   "label": "Residual-moisture weight"
+  },
+  {
+   "id": "humid_w",
+   "expr": "ramp(rain_norm, 900, 1300)",
+   "note": "Weight of the sub-humid rice-based system within rainfed cropland, from rainfall rescaled to the district normal (contexts.json).",
+   "sources": [
+    "mandal2016",
+    "crida_godda",
+    "crida_koraput"
+   ],
+   "label": "Sub-humid weight"
+  },
+  {
+   "id": "rainfed_crop",
+   "expr": "f_crop * (rainfed_share + irr_share * resid_w)",
+   "note": "Rainfed cropland as share of MWS.",
+   "label": "Rainfed cropland (share of MWS)"
+  },
+  {
+   "id": "natural_w",
+   "expr": "max(ramp(f_hill + f_slopy, 0.15, 0.45), ramp(nz(st_share), 0.15, 0.5), ramp(f_forest, 0.3, 0.6))",
+   "note": "Weight of natural forest within tree cover: high on slopes, in tribal villages and where tree cover is extensive; low for scattered trees on plains (orchards, plantations, farm trees).",
+   "sources": [
+    "isfr2023",
+    "dte_srikakulam",
+    "cgwb_naquim_warud",
+    "expert_judgement"
+   ],
+   "label": "Natural-forest weight"
+  },
+  {
+   "id": "pastoral_w",
+   "expr": "0.4 + 0.6 * ramp(nz(small_rum_share, 0.15), 0.15, 0.5)",
+   "note": "Weight of pastoral use within open commons; rises with the sheep-and-goat share of livestock (TLU).",
+   "sources": [
+    "fao_tlu",
+    "crida_anantapur"
+   ],
+   "label": "Grazing weight"
+  },
+  {
+   "id": "urban_w",
+   "expr": "0.5 + 0.5 * ramp(nz(pop_density, 200), 400, 2000)",
+   "note": "Built-up land counts fully only where population density is town-like (400 persons/km2 is the census-town density criterion).",
+   "sources": [
+    "census2011"
+   ],
+   "label": "Peri-urban weight"
+  }
+ ],
+ "archetypes": [
+  {
+   "id": "rainfed_dryland",
+   "label": "Rainfed dryland farming",
+   "color": "#d9a441",
+   "share": "rainfed_crop * (1 - humid_w)",
+   "present_at": 0.15,
+   "description": "Single kharif crop (groundnut, cotton, soybean, maize, millets, pulses) on semi-arid hard-rock uplands, dependent on monsoon timing; long-duration crops and intercrops (pigeonpea) extend into rabi.",
+   "signatures": [
+    "kharif-only cropping",
+    "< 1200 mm rainfall",
+    "high drought weeks",
+    "low groundwater extraction or no well access"
+   ],
+   "where": "Ananthapur (groundnut), Udaipur (maize), dryland Amaravati (cotton-soybean), eastern Pune (Daund, Baramati uplands).",
+   "key_stresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "soil.erosion",
+    "productivity.farmland_abandonment",
+    "soil.nutrient_deficiency",
+    "productivity.declining_intensity",
+    "flood_exposure"
+   ],
+   "sources": [
+    "crida_anantapur",
+    "crida_udaipur",
+    "drought_manual"
+   ],
+   "confidence": "medium",
+   "share_explained": "Rainfed cropland = cropland × (kharif-only share + non-kharif share × residual weight). The kharif-only share is measured directly from the seasonal cropping layer. The residual weight is what is left after canal, tank and groundwater have claimed the non-kharif cropping (see helpers). Rainfed cropland is then split between this archetype and the sub-humid one by rainfall: below 900 mm (rescaled to the district normal) all of it is dryland; above 1300 mm none of it is.",
+   "confidence_reason": "The kharif-only area is measured directly, but the residual part and the 900–1300 mm rainfall split are inferred."
+  },
+  {
+   "id": "rainfed_rice_subhumid",
+   "label": "Rainfed sub-humid farming (rice-based)",
+   "color": "#8fbf4d",
+   "share": "rainfed_crop * humid_w",
+   "present_at": 0.15,
+   "description": "Rainfed lowland and upland paddy with finger millet / niger on uplands; rabi largely fallow or under residual-moisture pulses (rice fallows).",
+   "signatures": [
+    "sub-humid rainfall",
+    "low groundwater extraction",
+    "non-kharif greenness without canal, tank or well water"
+   ],
+   "where": "Godda, Koraput, upland Srikakulam.",
+   "key_stresses": [
+    "productivity.rice_fallow_opportunity",
+    "drought.kharif_drought",
+    "soil.erosion",
+    "soil.nutrient_deficiency",
+    "flood_exposure"
+   ],
+   "sources": [
+    "crida_godda",
+    "crida_koraput",
+    "gumma2016"
+   ],
+   "confidence": "medium",
+   "share_explained": "Same rainfed cropland as the dryland archetype, multiplied by the humid weight ramp(rain_norm, 900, 1300). In sub-humid districts much of the 'non-kharif' greenness the satellite sees on paddy land is residual moisture, weeds or relay pulses rather than irrigation, so low block groundwater extraction sends it to this archetype through the residual weight.",
+   "confidence_reason": "Depends on the rainfall rescaling and on the residual weight, which is driven by block groundwater extraction."
+  },
+  {
+   "id": "groundwater_irrigated",
+   "label": "Groundwater-irrigated farming (wells and borewells)",
+   "color": "#3b7dd8",
+   "share": "f_crop * irr_share * gw_w",
+   "present_at": 0.15,
+   "description": "Double cropping, rabi wheat / gram / onion, sugarcane or vegetables irrigated from dug wells and borewells; dominant irrigation in hard-rock Deccan and in alluvial tube-well belts.",
+   "signatures": [
+    "non-kharif cropping",
+    "no canal",
+    "block stage of extraction >= 70%"
+   ],
+   "where": "Warud-Morshi oranges (Amaravati), Kadiri borewell belt (Ananthapur), Udaipur open-well belt, Pune, Ballia tube wells.",
+   "key_stresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "groundwater.water_balance_deficit",
+    "drinking_water.salinity",
+    "drinking_water.scarcity",
+    "productivity.declining_intensity"
+   ],
+   "sources": [
+    "cgwb_amravati",
+    "crida_anantapur",
+    "crida_udaipur",
+    "shah2009",
+    "jain2021"
+   ],
+   "confidence": "medium",
+   "share_explained": "Cropland × non-kharif share × groundwater weight. The groundwater weight = gw_plaus × (1 − canal weight − tank weight), and gw_plaus ramps from 0 at a block stage of extraction of 20% to 1 at 70%. Non-kharif cropping in a block where groundwater draft is low cannot be mostly well-irrigated.",
+   "confidence_reason": "Non-kharif cropping is measured; its attribution to wells uses block-level extraction, which is coarser than the MWS."
+  },
+  {
+   "id": "canal_irrigated",
+   "label": "Canal-irrigated farming",
+   "color": "#1c4e9a",
+   "share": "f_crop * irr_share * canal_w",
+   "present_at": 0.15,
+   "description": "Paddy, sugarcane or wheat in the command of a major or medium project (Nira, Bhima/Ujani, Ghod; Vamsadhara, Nagavali; Upper Kolab; Tungabhadra HLC; Saryu).",
+   "signatures": [
+    "canal crosses MWS",
+    "high non-kharif cropping",
+    "ET can exceed rainfall"
+   ],
+   "where": "Baramati, Indapur, Daund (Pune); Srikakulam plains; Jaypur (Koraput).",
+   "key_stresses": [
+    "irrigation.waterlogging",
+    "groundwater.water_balance_deficit",
+    "flood_exposure"
+   ],
+   "sources": [
+    "cgwb_pune",
+    "crida_srikakulam",
+    "crida_koraput"
+   ],
+   "confidence": "low",
+   "share_explained": "Cropland × non-kharif share × canal weight. The canal weight is 0.5 when one canal crosses the MWS and 0.7 when two or more do, and 0 otherwise.",
+   "confidence_reason": "A canal line crossing an MWS does not tell us which fields it commands, and tail-end fields often get no water. Missing canal data (Ballia) gives zero."
+  },
+  {
+   "id": "tank_irrigated",
+   "label": "Tank- and pond-irrigated farming",
+   "color": "#4fb3c8",
+   "share": "f_crop * irr_share * tank_w",
+   "present_at": 0.1,
+   "description": "Paddy or rabi crops irrigated from village tanks, anicuts and ponds that hold water past the monsoon.",
+   "signatures": [
+    "water bodies persisting into rabi",
+    "no canal"
+   ],
+   "where": "Srikakulam (tanks ~35% of irrigation), Udaipur, Godda (tanks largest source).",
+   "key_stresses": [
+    "waterbody_shrinkage",
+    "drought.kharif_drought",
+    "irrigation.rabi_water_shortfall",
+    "fishery_potential"
+   ],
+   "sources": [
+    "crida_srikakulam",
+    "crida_godda",
+    "palanisami_tanks"
+   ],
+   "confidence": "low",
+   "share_explained": "Cropland × non-kharif share × tank weight. Irrigable area is taken as 5 × (water-body share × fraction of water spread still present in rabi), and the tank weight is that area divided by the non-kharif cropped area, capped at 0.6, reduced by the canal weight, and cut to 30% on alluvium.",
+   "confidence_reason": "The command ratio of 5 is a rule of thumb (South Indian tanks range from about 2 to 8)."
+  },
+  {
+   "id": "forest_fringe",
+   "label": "Forest and forest-fringe livelihoods",
+   "color": "#2e7d32",
+   "share": "f_forest * natural_w",
+   "present_at": 0.15,
+   "description": "Natural forest on hills and slopes used for NTFP, fuel, grazing and shifting (podu) cultivation, mostly by Scheduled Tribe communities.",
+   "signatures": [
+    "tree cover on hill slopes",
+    "high Scheduled Tribe share",
+    "low built-up"
+   ],
+   "where": "Melghat (Dharni, Chikhaldara), Western Ghats tehsils of Pune, Koraput, Sundarpahari (Godda), tribal mandals of Srikakulam, Udaipur hills.",
+   "key_stresses": [
+    "forest.tree_cover_loss",
+    "soil.erosion",
+    "forest.fringe_degradation",
+    "forest.fire"
+   ],
+   "sources": [
+    "isfr2023",
+    "fra2006",
+    "cgwb_amravati",
+    "crida_koraput"
+   ],
+   "confidence": "medium",
+   "share_explained": "Tree cover × natural weight. The natural weight is the largest of three ramps: slope (hill + gentle slope share 15%→45%), Scheduled Tribe share (15%→50%) and extent of tree cover (30%→60%).",
+   "confidence_reason": "Tree cover is measured, but the land-cover class does not separate forest from orchards and plantations, so the split uses terrain and social proxies."
+  },
+  {
+   "id": "tree_crops",
+   "label": "Orchards, plantations and farm trees",
+   "color": "#9ccc65",
+   "share": "f_forest * (1 - natural_w)",
+   "present_at": 0.15,
+   "description": "Tree cover on plains outside forests: mandarin orchards, mango, sweet orange, cashew and coconut plantations, farm bunds and village groves. Often well-irrigated.",
+   "signatures": [
+    "tree cover on plains",
+    "not tribal",
+    "often with high groundwater extraction"
+   ],
+   "where": "Warud-Morshi (oranges), Kadiri (mango, sweet orange), Srikakulam (cashew, coconut).",
+   "key_stresses": [
+    "groundwater.over_extraction",
+    "agroforestry_opportunity"
+   ],
+   "sources": [
+    "cgwb_naquim_warud",
+    "dte_srikakulam",
+    "crida_anantapur"
+   ],
+   "confidence": "low",
+   "share_explained": "Tree cover × (1 − natural weight): scattered tree cover on flat land in non-tribal villages.",
+   "confidence_reason": "Residual of the forest split; orchards on slopes or in tribal villages are counted as forest."
+  },
+  {
+   "id": "pastoral",
+   "label": "Pastoral and commons-based livestock",
+   "color": "#b07aa1",
+   "share": "f_commons * pastoral_w",
+   "present_at": 0.05,
+   "description": "Open scrub and barren commons grazed by sheep and goats (and cattle), often with migratory or semi-migratory herding.",
+   "signatures": [
+    "shrub/barren commons",
+    "high sheep-and-goat share of livestock"
+   ],
+   "where": "Ananthapur (3.9 M sheep), Udaipur (1.2 M goats).",
+   "key_stresses": [
+    "fodder.grazing_pressure",
+    "productivity.farmland_abandonment",
+    "livestock_water_scarcity",
+    "fodder.commons_degradation",
+    "flood_exposure"
+   ],
+   "sources": [
+    "crida_anantapur",
+    "crida_udaipur",
+    "igfri_vision",
+    "fao_tlu"
+   ],
+   "confidence": "medium",
+   "share_explained": "Open commons (shrub + barren) × pastoral weight. The weight is 0.4 + 0.6 × ramp(sheep-and-goat share of livestock units, 15%→50%), so commons always count partly as grazing land and fully where small ruminants dominate.",
+   "confidence_reason": "Commons are measured; their use for grazing is inferred from the village livestock census, apportioned to the MWS by area.",
+   "present_note": "Listed as present at 5% of the MWS (was 10% until 22 Nov 2026), the same share at which the livestock rules are checked (sys_pastoral)."
+  },
+  {
+   "id": "peri_urban",
+   "label": "Peri-urban and settlement",
+   "color": "#e15759",
+   "share": "f_built_last * urban_w",
+   "present_at": 0.03,
+   "description": "Built-up land and expanding settlements where farmland and commons are converted to built use.",
+   "signatures": [
+    "built-up share",
+    "rising built-up",
+    "town-like population density"
+   ],
+   "where": "Haveli (Pune), Ballia and Godda towns, Amaravati city fringe.",
+   "key_stresses": [
+    "urban_encroachment",
+    "flood_exposure"
+   ],
+   "sources": [
+    "census2011"
+   ],
+   "confidence": "high",
+   "share_explained": "Built-up share in the last year × urban weight. The weight is 0.5 + 0.5 × ramp(population density, 400→2000 persons/km²); 400/km² is the Census-town density criterion. The rest of the built-up area (village settlements) goes to 'other'.",
+   "confidence_reason": "Built-up land is a direct land-cover class and density comes from the census.",
+   "present_note": "Listed as present at 3% of the MWS (was 8% until 22 Nov 2026), the same share at which the peri-urban production system is shown (ps_peri_urban)."
+  },
+  {
+   "id": "other",
+   "label": "Water bodies, unclassified and other land",
+   "color": "#bab0ac",
+   "share": "f_water_any + f_commons * (1 - pastoral_w) + f_built_last * (1 - urban_w)",
+   "present_at": 1.1,
+   "description": "Water bodies, river beds and wasteland not attributed to a production system.",
+   "signatures": [],
+   "where": "",
+   "key_stresses": [],
+   "sources": [],
+   "confidence": "high",
+   "share_explained": "Water bodies + commons not attributed to grazing + built-up not attributed to towns + any land the land-cover layer left unclassified.",
+   "confidence_reason": "Residual class; not a production system."
+  }
+ ],
+ "normalisation": {
+  "fill": "other",
+  "rule": "Raw shares are fractions of MWS area. If they add up to less than 1, the remainder is land the land-cover layer left unclassified, and it is added to 'other'. If they add up to more than 1 (cropland is measured from the cropping-intensity layer and built-up from the last year, so the components can overlap slightly), every share is divided by the total. Community answers then move share between archetypes without changing the total.",
+  "observed": "Across the 4,598 pilot MWS the raw total has a median of 1.00 (middle 50% between 0.99 and 1.00). 18% of MWS fall below 0.90, concentrated in hilly, cloudy tehsils (Jaypur, Koraput, Narayanpatana, Girwa, Mawal, Khed, Sundarpahari, Poreyahat, Boarijor), where the CoRE land-cover classes cover only 80–90% of the MWS (API issue CS-73). That remainder is shown as unclassified land inside 'other' rather than spread over the other systems. 48% exceed 1 (at most 1.33) and are scaled down."
+ },
+ "confidence_rubric": {
+  "about": "Confidence is a property of each archetype rule, not of a single MWS. It says how directly the CoRE Stack data measure that system. It does not scale the share: a 30% share with low confidence is still the best estimate of 30%, but it is more likely to be wrong and is a priority for the community questions.",
+  "high": "The system's area is a satellite land-cover class, split at most by a census variable that is itself measured.",
+  "medium": "The area comes from a measured land-cover or seasonal cropping class, but is split by one inferred weight built from a reliable secondary variable (block groundwater extraction, terrain, rainfall).",
+  "low": "The split depends on a rough assumption or a weak proxy (a canal line crossing the MWS, the command ratio of tanks, plantations told apart from forest by slope)."
+ },
+ "presence_rule": "An archetype is listed as present when its share reaches 'present_at' (15% for most systems, 10% for tank-irrigated and pastoral, 8% for peri-urban). Every archetype with a share of at least 1% is still shown in the MWS mix, whatever its confidence. Scheme matching treats an archetype as relevant at 15%.",
+ "cross_cutting": [
+  {
+   "id": "socio_economic",
+   "label": "Socio-economic system",
+   "color": "#8a6d3b",
+   "description": "The people of the micro-watershed: their households, assets, institutions and access to work, credit and services. Present in every MWS whatever its land use, so it is not an area share and does not enter the mixture that adds up to 100%.",
+   "signatures": [
+    "Scheduled Tribe and Caste share, literacy (Census 2011)",
+    "NREGA works (nrega_annual)",
+    "self-help group membership, piped water and kuccha houses (Mission Antyodaya)",
+    "distance to a bank branch (facilities proximity)"
+   ],
+   "signal": "ps_socio",
+   "key_stresses": [
+    "multidimensional_vulnerability",
+    "drinking_water.scarcity",
+    "drinking_water.salinity",
+    "drinking_water.mining"
+   ],
+   "sources": [
+    "census2011",
+    "mission_antyodaya",
+    "nrlm_framework"
+   ],
+   "confidence": "medium",
+   "confidence_reason": "Village surveys are apportioned to the MWS by area of intersection, which assumes people are spread evenly."
+  }
+ ]
+}

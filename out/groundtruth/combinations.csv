@@ -1,0 +1,53 @@
+pathway,label,rules,n,TP,FP,FN,TN,unknown,no data,accuracy,balanced_accuracy,f1,precision,recall,specificity
+agriculture.groundwater,Groundwater,atlas OR sheet,23,1,10,0,12,0,0,0.565,0.772,0.167,0.091,1.0,0.545
+agriculture.groundwater,Groundwater,atlas AND sheet,23,0,5,1,17,0,0,0.739,0.387,0.0,0.0,0.0,0.773
+agriculture.groundwater,Groundwater,sheet AND groundwater.over_extraction,23,0,5,1,17,0,0,0.739,0.387,0.0,0.0,0.0,0.773
+agriculture.groundwater,Groundwater,sheet OR groundwater.over_extraction,23,1,10,0,12,0,0,0.565,0.772,0.167,0.091,1.0,0.545
+agriculture.groundwater,Groundwater,sheet AND groundwater.irrigation_expansion,23,0,0,1,22,0,0,0.957,0.5,0.0,,0.0,1.0
+agriculture.groundwater,Groundwater,sheet OR groundwater.irrigation_expansion,23,1,8,0,14,0,0,0.652,0.818,0.2,0.111,1.0,0.636
+agriculture.groundwater,Groundwater,sheet AND groundwater.water_balance_deficit,23,0,1,1,21,0,0,0.913,0.477,0.0,0.0,0.0,0.955
+agriculture.groundwater,Groundwater,sheet OR groundwater.water_balance_deficit,23,1,8,0,14,0,0,0.652,0.818,0.2,0.111,1.0,0.636
+agriculture.drought,Drought,atlas OR sheet,23,5,1,1,16,0,0,0.913,0.887,0.833,0.833,0.833,0.941
+agriculture.drought,Drought,atlas AND sheet,23,5,0,1,17,0,0,0.957,0.916,0.909,1.0,0.833,1.0
+agriculture.drought,Drought,sheet AND drought.kharif_drought,23,5,0,1,17,0,0,0.957,0.916,0.909,1.0,0.833,1.0
+agriculture.drought,Drought,sheet OR drought.kharif_drought,23,5,1,1,16,0,0,0.913,0.887,0.833,0.833,0.833,0.941
+agriculture.drought,Drought,sheet AND drought.unstable_sowing,23,1,0,5,17,0,0,0.783,0.584,0.286,1.0,0.167,1.0
+agriculture.drought,Drought,sheet OR drought.unstable_sowing,23,5,1,1,16,0,0,0.913,0.887,0.833,0.833,0.833,0.941
+agriculture.irrigation,Irrigation,atlas OR sheet,23,6,4,0,13,0,0,0.826,0.883,0.75,0.6,1.0,0.765
+agriculture.irrigation,Irrigation,atlas AND sheet,23,6,1,0,16,0,0,0.957,0.97,0.923,0.857,1.0,0.941
+agriculture.irrigation,Irrigation,sheet AND irrigation.rabi_water_shortfall,23,6,1,0,16,0,0,0.957,0.97,0.923,0.857,1.0,0.941
+agriculture.irrigation,Irrigation,sheet OR irrigation.rabi_water_shortfall,23,6,4,0,13,0,0,0.826,0.883,0.75,0.6,1.0,0.765
+agriculture.irrigation,Irrigation,sheet AND irrigation.waterlogging,23,0,0,6,17,0,0,0.739,0.5,0.0,,0.0,1.0
+agriculture.irrigation,Irrigation,sheet OR irrigation.waterlogging,23,6,3,0,14,0,0,0.87,0.912,0.8,0.667,1.0,0.824
+agriculture.low_yield,Low yield,atlas OR sheet,23,7,3,0,13,0,0,0.87,0.906,0.824,0.7,1.0,0.812
+agriculture.low_yield,Low yield,atlas AND sheet,23,5,1,2,15,0,0,0.87,0.826,0.769,0.833,0.714,0.938
+agriculture.low_yield,Low yield,sheet AND productivity.farmland_abandonment,23,2,0,5,16,0,0,0.783,0.643,0.445,1.0,0.286,1.0
+agriculture.low_yield,Low yield,sheet OR productivity.farmland_abandonment,23,7,2,0,14,0,0,0.913,0.938,0.875,0.778,1.0,0.875
+agriculture.low_yield,Low yield,sheet AND productivity.declining_intensity,23,3,1,4,15,0,0,0.783,0.683,0.546,0.75,0.429,0.938
+agriculture.low_yield,Low yield,sheet OR productivity.declining_intensity,23,7,2,0,14,0,0,0.913,0.938,0.875,0.778,1.0,0.875
+agriculture.soil_degradation,Soil degradation,atlas OR sheet,23,4,4,1,14,0,0,0.783,0.789,0.615,0.5,0.8,0.778
+agriculture.soil_degradation,Soil degradation,atlas AND sheet,23,4,1,1,17,0,0,0.913,0.872,0.8,0.8,0.8,0.944
+agriculture.soil_degradation,Soil degradation,sheet AND soil.nutrient_deficiency,23,4,1,1,17,0,0,0.913,0.872,0.8,0.8,0.8,0.944
+agriculture.soil_degradation,Soil degradation,sheet OR soil.nutrient_deficiency,23,4,4,1,14,0,0,0.783,0.789,0.615,0.5,0.8,0.778
+agriculture.soil_degradation,Soil degradation,sheet AND soil.erosion,23,0,0,5,18,0,0,0.783,0.5,0.0,,0.0,1.0
+agriculture.soil_degradation,Soil degradation,sheet OR soil.erosion,23,4,2,1,16,0,0,0.87,0.845,0.727,0.667,0.8,0.889
+ntfp.forest_degradation,Forest degradation,atlas OR sheet,12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+ntfp.forest_degradation,Forest degradation,atlas AND sheet,12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+ntfp.forest_degradation,Forest degradation,sheet AND forest.tree_cover_loss,12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+ntfp.forest_degradation,Forest degradation,sheet OR forest.tree_cover_loss,12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+ntfp.forest_degradation,Forest degradation,sheet AND forest.fringe_degradation,12,2,0,6,4,0,0,0.5,0.625,0.4,1.0,0.25,1.0
+ntfp.forest_degradation,Forest degradation,sheet OR forest.fringe_degradation,12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+ntfp.forest_degradation,Forest degradation,sheet AND forest.fire,12,0,0,8,4,0,0,0.333,0.5,0.0,,0.0,1.0
+ntfp.forest_degradation,Forest degradation,sheet OR forest.fire,12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+waterbodies.siltation,Siltation,atlas OR sheet,3,3,0,0,0,0,0,1.0,,1.0,1.0,1.0,
+waterbodies.siltation,Siltation,atlas AND sheet,3,0,0,3,0,0,0,0.0,,0.0,,0.0,
+livelihood.livestock_water,Livestock water,atlas OR sheet,6,1,0,0,5,0,0,1.0,1.0,1.0,1.0,1.0,1.0
+livelihood.livestock_water,Livestock water,atlas AND sheet,6,0,0,1,5,0,0,0.833,0.5,0.0,,0.0,1.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),atlas OR sheet,6,5,0,0,1,0,0,1.0,1.0,1.0,1.0,1.0,1.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),atlas AND sheet,6,3,0,2,1,0,0,0.667,0.8,0.75,1.0,0.6,1.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),sheet AND fodder.grazing_pressure,6,0,0,5,1,0,0,0.167,0.5,0.0,,0.0,1.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),sheet OR fodder.grazing_pressure,6,5,0,0,1,0,0,1.0,1.0,1.0,1.0,1.0,1.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),sheet AND fodder.commons_degradation,6,3,0,2,1,0,0,0.667,0.8,0.75,1.0,0.6,1.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),sheet OR fodder.commons_degradation,6,5,0,0,1,0,0,1.0,1.0,1.0,1.0,1.0,1.0
+socio-economic.caste,Multi-sector vulnerability (caste),atlas OR sheet,3,3,0,0,0,0,0,1.0,,1.0,1.0,1.0,
+socio-economic.caste,Multi-sector vulnerability (caste),atlas AND sheet,3,1,0,2,0,0,0,0.333,,0.5,1.0,0.333,

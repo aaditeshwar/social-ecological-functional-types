@@ -1,0 +1,269 @@
+{
+ "_about": "Bibliography. Every 'sources' field in the other knowledge files refers to these ids. 'note' records what the source is used for. Entries marked [Verify] should be checked by an expert before citation.",
+ "sources": [
+  {
+   "id": "vallejos2020",
+   "citation": "Vallejos M, Aguiar S, Baldi G, et al. (2020) Social-ecological functional types: connecting people and ecosystems in the Argentine Chaco. Ecosystems 23:471-484.",
+   "url": "https://doi.org/10.1007/s10021-019-00415-6",
+   "used_for": "Framework: classify territorial units into social-ecological functional types from ecosystem-function and social variables."
+  },
+  {
+   "id": "core_stack",
+   "citation": "CoRE Stack (Commoning for Resilience and Equality) - layers and API documentation.",
+   "url": "https://core-stack.org",
+   "used_for": "Data source for every indicator."
+  },
+  {
+   "id": "cgwb_gec2015",
+   "citation": "Central Ground Water Board (2017) Report of the Ground Water Resource Estimation Committee (GEC-2015). Ministry of Water Resources, RD&GR.",
+   "url": "https://cgwb.gov.in",
+   "used_for": "Stage-of-extraction categories: Safe <=70%, Semi-critical 70-90%, Critical 90-100%, Over-exploited >100%; specific-yield ranges for hard-rock and alluvial aquifers."
+  },
+  {
+   "id": "cgwb_dgwr2023",
+   "citation": "Central Ground Water Board (2023) Dynamic Ground Water Resources of India, 2023.",
+   "url": "https://cgwb.gov.in",
+   "used_for": "Block categories used by the CoRE Stack soge_vector layer."
+  },
+  {
+   "id": "cgwb_wlf",
+   "citation": "Central Ground Water Board, Ground Water Year Book / decadal water-level fluctuation maps (classes 0-2 m, 2-4 m, >4 m fall).",
+   "url": "https://cgwb.gov.in",
+   "used_for": "Convention for classifying long-term water-level decline."
+  },
+  {
+   "id": "cgwb_recharge2020",
+   "citation": "Central Ground Water Board (2020) Master Plan for Artificial Recharge to Groundwater in India.",
+   "url": "https://cgwb.gov.in",
+   "used_for": "Recharge structures prioritised in hard-rock areas with declining water levels and available surplus runoff."
+  },
+  {
+   "id": "pmksy_wdc",
+   "citation": "Department of Land Resources: PMKSY Watershed Development Component (WDC 2.0) guidelines, 2021-26.",
+   "url": "https://dolr.gov.in",
+   "used_for": "Ridge-to-valley treatment for rainfed and degraded land."
+  },
+  {
+   "id": "drought_manual",
+   "citation": "Department of Agriculture & Farmers Welfare (2016, updated 2020) Manual for Drought Management. Government of India.",
+   "url": "https://agriwelfare.gov.in",
+   "used_for": "Drought declaration: rainfall deficit, SPI <= -1 with a 3-4 week dry spell, then impact indicators (sown area, NDVI/NDWI, soil moisture, hydrology) and ground truthing (crop loss >= 33% / >= 50%)."
+  },
+  {
+   "id": "crida_anantapur",
+   "citation": "ICAR-CRIDA District Agriculture Contingency Plan: Ananthapuramu, Andhra Pradesh.",
+   "url": "https://icar-crida.res.in/CP/AndhraPradesh/Ananthapuram.pdf",
+   "used_for": "552 mm normal rainfall; net irrigated 136.5 of 793 thousand ha net sown (~17%); tube wells ~70% of irrigation, canals 6%; cropping intensity 106%; groundnut 423 thousand ha; 3.88 million sheep, 0.79 million goats."
+  },
+  {
+   "id": "crida_srikakulam",
+   "citation": "ICAR-CRIDA District Agriculture Contingency Plan: Srikakulam, Andhra Pradesh (2011).",
+   "url": "https://icar-crida.res.in/CP/AndhraPradesh/AP13-Srikakulam%2031.1.2011.pdf",
+   "used_for": "1162 mm rainfall; 196.7 of 322 thousand ha irrigated; canals 53%, tanks 35%, bore wells 10.5%; cropping intensity 140%; paddy 193 thousand ha."
+  },
+  {
+   "id": "crida_udaipur",
+   "citation": "ICAR-CRIDA District Agriculture Contingency Plan: Udaipur, Rajasthan (RAJ22).",
+   "url": "https://icar-crida.res.in",
+   "used_for": "~601 mm rainfall; net irrigated ~41% of net sown; open wells 69%, canals 17%, tanks 8%, bore wells 6%; maize (kharif), wheat (rabi); 1.16 M goats, 1.04 M cattle; forest ~29%."
+  },
+  {
+   "id": "crida_godda",
+   "citation": "ICAR-CRIDA District Agriculture Contingency Plan: Godda, Jharkhand (JKD6).",
+   "url": "https://icar-crida.res.in",
+   "used_for": "~1530 mm rainfall; ~15% irrigated (tanks largest source); rice dominant; cropping intensity ~108%."
+  },
+  {
+   "id": "crida_koraput",
+   "citation": "ICAR District Agriculture Contingency Plan: Koraput, Odisha.",
+   "url": "https://kvk.icar.gov.in/Contigencyplan/Koraputb8cce470-c2c6-4132-bed8-237213973ed9.pdf",
+   "used_for": "1567 mm rainfall; net irrigated 97 of 287 thousand ha; canals ~60% of irrigation (Upper Kolab), bore wells 12%; cropping intensity ~135%; paddy, finger millet, niger; forest ~21%."
+  },
+  {
+   "id": "cgwb_amravati",
+   "citation": "CGWB Ground Water Information Booklet / District Report: Amravati, Maharashtra.",
+   "url": "https://cgwb.gov.in/sites/default/files/2022-10/amravati.pdf",
+   "used_for": "Groundwater ~92% of net irrigated area; saline Purna alluvial tract (Daryapur, parts of Anjangaon, Achalpur, Bhatkuli, Amravati); Warud, Morshi, Chandur Bazar over-exploited; Melghat forest (Dharni, Chikhaldara)."
+  },
+  {
+   "id": "cgwb_pune",
+   "citation": "CGWB Ground Water Information Booklet: Pune district, Maharashtra.",
+   "url": "https://cgwb.gov.in/sites/default/files/2022-10/pune.pdf",
+   "used_for": "Deccan basalt; canal commands of Nira, Bhima (Ujani) and Ghod; high-rainfall Western Ghats tehsils."
+  },
+  {
+   "id": "cgwb_naquim_warud",
+   "citation": "CGWB NAQUIM report: Warud-Morshi area, Amravati (aquifer mapping, orange orchards, over-extraction).",
+   "url": "https://cgwb.gov.in",
+   "used_for": "Over-extraction for Nagpur-mandarin orchards; stage of extraction ~146% in Warud."
+  },
+  {
+   "id": "nih_ballia",
+   "citation": "National Institute of Hydrology, Roorkee: Arsenic study, Ballia district (Ganga-Ghaghra alluvium).",
+   "url": "https://nihroorkee.gov.in",
+   "used_for": "Shallow alluvial aquifers with arsenic; tube-well irrigation; flood-prone doab."
+  },
+  {
+   "id": "iwp_udaipur",
+   "citation": "India Water Portal: Assessing Udaipur's groundwater reserves.",
+   "url": "https://www.indiawaterportal.org",
+   "used_for": "Hard-rock aquifers, open-well irrigation, over-exploited blocks."
+  },
+  {
+   "id": "dte_srikakulam",
+   "citation": "Down To Earth: Green and golden Srikakulam (cashew plantations under ITDA in tribal mandals).",
+   "url": "https://www.downtoearth.org.in",
+   "used_for": "Tree crops (cashew) replacing podu in tribal uplands."
+  },
+  {
+   "id": "icrisat_anantapur",
+   "citation": "ICRISAT IDC: Water conservation and watershed work in Anantapur.",
+   "url": "https://www.icrisat.org",
+   "used_for": "Rainfed groundnut; watershed and recharge interventions."
+  },
+  {
+   "id": "mandal2016",
+   "citation": "Mandal C, Mandal DK, Bhattacharyya T, et al. (2016) Revisiting agro-ecological sub-regions of India - a case study of two major food production zones. Current Science 110(9).",
+   "url": "https://www.currentscience.ac.in",
+   "used_for": "Moisture regimes used to group rainfall contexts (arid, semi-arid, sub-humid, humid)."
+  },
+  {
+   "id": "gumma2016",
+   "citation": "Gumma MK, Thenkabail PS, Teluguntla P, et al. (2016) Mapping rice-fallow cropland areas for short-season grain legumes intensification in South Asia using MODIS 250 m time-series data. International Journal of Digital Earth 9(10):981-1003.",
+   "url": "https://doi.org/10.1080/17538947.2016.1168489",
+   "used_for": "~11-12 M ha rice fallows in South Asia, concentrated in eastern India (Odisha, Jharkhand, Chhattisgarh, West Bengal, coastal AP)."
+  },
+  {
+   "id": "jain2021",
+   "citation": "Jain M, Fishman R, Mondal P, et al. (2021) Groundwater depletion will reduce cropping intensity in India. Science Advances 7(9): eabd2849.",
+   "url": "https://doi.org/10.1126/sciadv.abd2849",
+   "used_for": "Winter cropping depends on groundwater; depletion could cut winter cropped area by up to 20% (68% in depleted regions)."
+  },
+  {
+   "id": "shah2009",
+   "citation": "Shah T (2009) Taming the Anarchy: Groundwater Governance in South Asia. RFF Press / IWMI.",
+   "url": "https://www.iwmi.cgiar.org",
+   "used_for": "Atomistic borewell irrigation and depletion in hard-rock India; electricity-groundwater nexus."
+  },
+  {
+   "id": "fao_tlu",
+   "citation": "FAO (2011) Guidelines for the preparation of livestock sector reviews. Animal Production and Health Guidelines No. 5. Rome.",
+   "url": "https://www.fao.org/4/i2294e/i2294e00.pdf",
+   "used_for": "Tropical livestock unit coefficients by region (South Asia: cattle 0.5, buffalo 0.5, sheep 0.1, goat 0.1, pig 0.2)."
+  },
+  {
+   "id": "igfri_vision",
+   "citation": "ICAR-Indian Grassland and Fodder Research Institute (2015) Vision 2050.",
+   "url": "https://igfri.icar.gov.in",
+   "used_for": "Degraded grazing lands; carrying capacity of common grazing lands typically well below 1 adult cattle unit per ha; fodder deficit."
+  },
+  {
+   "id": "census2011",
+   "citation": "Census of India 2011: definitions of urban areas (census towns: population >= 5000, density >= 400 per km2, >= 75% male main workers outside agriculture).",
+   "url": "https://censusindia.gov.in",
+   "used_for": "Population-density threshold used for the peri-urban archetype."
+  },
+  {
+   "id": "isfr2023",
+   "citation": "Forest Survey of India (2023) India State of Forest Report 2023.",
+   "url": "https://fsi.nic.in",
+   "used_for": "Tree and forest cover change classes; forest-fringe villages."
+  },
+  {
+   "id": "wri_restoration",
+   "citation": "WRI India (2023) Atlas of forest and landscape restoration opportunities in India.",
+   "url": "https://wri-india.org",
+   "used_for": "Wide-scale, mosaic and protection restoration classes used by the CoRE Stack restoration layer."
+  },
+  {
+   "id": "mowr_waterlogging",
+   "citation": "Ministry of Water Resources (1991) Report of the Working Group on Problem Identification in Irrigated Areas with Suggested Remedial Measures (waterlogging, salinity and alkalinity in canal commands). [Verify edition]",
+   "url": "https://jalshakti-dowr.gov.in",
+   "used_for": "Waterlogging where water table is within 2 m; rising water tables in canal commands."
+  },
+  {
+   "id": "palanisami_tanks",
+   "citation": "Palanisami K, Easter KW (2000) Tank Irrigation in the 21st Century: What Next? Discovery Publishing, New Delhi.",
+   "url": "https://www.worldcat.org",
+   "used_for": "Tank systems of South India; command-to-water-spread ratios; decline from siltation and encroachment."
+  },
+  {
+   "id": "fra2006",
+   "citation": "The Scheduled Tribes and Other Traditional Forest Dwellers (Recognition of Forest Rights) Act, 2006.",
+   "url": "https://tribal.nic.in",
+   "used_for": "Forest-dependent households; community forest resource rights."
+  },
+  {
+   "id": "wischmeier_slope",
+   "citation": "General soil-conservation practice (e.g. ICAR-IISWC guidelines): erosion rises steeply with slope and with loss of vegetative cover; conservation measures prioritised on cultivated slopes > 3-5%.",
+   "url": "https://www.iiswc.org.in",
+   "used_for": "Erosion-risk logic for sloping cultivated land."
+  },
+  {
+   "id": "expert_judgement",
+   "citation": "Expert judgement of the authors, calibrated against the 2017-2024 CoRE Stack distributions for the eight pilot districts. Flagged for review.",
+   "url": null,
+   "used_for": "Used where no published threshold exists."
+  },
+  {
+   "id": "shc_ratings",
+   "citation": "Department of Agriculture and Farmers Welfare. Soil Health Card scheme: soil fertility ratings (available N < 280, P < 10, K < 110 kg/ha, organic carbon < 0.5% rated low).",
+   "url": "https://soilhealth.dac.gov.in",
+   "used_for": "Thresholds for the low-nutrient signals."
+  },
+  {
+   "id": "soil_health_card",
+   "citation": "Department of Agriculture and Farmers Welfare. Soil Health Card scheme guidelines.",
+   "url": "https://soilhealth.dac.gov.in",
+   "used_for": "Link between nutrient deficiency and yield; scheme match."
+  },
+  {
+   "id": "jjm_guidelines",
+   "citation": "Ministry of Jal Shakti (2019). Jal Jeevan Mission operational guidelines: functional household tap connections, 55 lpcd.",
+   "url": "https://jaljeevanmission.gov.in",
+   "used_for": "Piped water coverage signal and drinking-water rule."
+  },
+  {
+   "id": "pmmsy_guidelines",
+   "citation": "Department of Fisheries (2020). Pradhan Mantri Matsya Sampada Yojana operational guidelines.",
+   "url": "https://pmmsy.dof.gov.in",
+   "used_for": "Fish culture needs perennial or long-seasonal water bodies."
+  },
+  {
+   "id": "fsi_fire",
+   "citation": "Forest Survey of India. Forest fire activities and fire-prone forest mapping (India State of Forest Report).",
+   "url": "https://fsiforestfire.gov.in",
+   "used_for": "Fire frequency signal, compared across MWS."
+  },
+  {
+   "id": "rbi_5km",
+   "citation": "Reserve Bank of India. Financial inclusion: banking outlet within 5 km of every village (National Strategy for Financial Inclusion 2019–24).",
+   "url": "https://rbi.org.in",
+   "used_for": "Bank distance thresholds (5 km, 10 km severe)."
+  },
+  {
+   "id": "nrlm_framework",
+   "citation": "Ministry of Rural Development. DAY-NRLM framework for implementation: universal social mobilisation of at least one woman per poor household into SHGs.",
+   "url": "https://aajeevika.gov.in",
+   "used_for": "SHG coverage thresholds."
+  },
+  {
+   "id": "mission_antyodaya",
+   "citation": "Ministry of Rural Development (2019–20). Mission Antyodaya village survey.",
+   "url": "https://missionantyodaya.nic.in",
+   "used_for": "Village-level SHG, housing, piped water and livelihood data."
+  },
+  {
+   "id": "moefcc_parivesh",
+   "citation": "Ministry of Environment, Forest and Climate Change. PARIVESH: environmental clearance proposals (mining sector), as compiled in the CoRE Stack mining layer.",
+   "url": "https://parivesh.nic.in",
+   "used_for": "Mining sites and projects per MWS (s_mining)."
+  },
+  {
+   "id": "pmkkky_2024",
+   "citation": "Ministry of Mines (2024). Pradhan Mantri Khanij Kshetra Kalyan Yojana (PMKKKY) guidelines, implemented through District Mineral Foundations.",
+   "url": "https://mines.gov.in",
+   "used_for": "Scheme for mining-affected areas; drinking water and pollution control are high-priority sectors."
+  }
+ ]
+}

@@ -1,0 +1,2253 @@
+{
+ "_about": "Causal knowledge graph linking CoRE Stack indicators to stresses. 'nodes' are drivers, pressures, states and outcomes, each tied to indicators in variables.json. 'edges' carry a sign (+ / - / ?), a mechanism, a confidence and sources. 'stresses' are the rules (causal pathways). Related rules share a group and have ids '<group>.<rule>' (groundwater.over_extraction); stand-alone rules have a plain id. taxonomy.json places them under observed stresses within production systems. 'sheet_pathway' records the matching pattern of the Signal_Verification sheet (null for rules added in the atlas: urban encroachment, flood exposure). Each rule is written over signals from signals.json in three roles: system signals ('systems': where the rule is checked), stress signals (the evidence) and context or amplifier signals (settings that a trigger may require, or that raise intensity). 'trigger' combines signal booleans; '<signal>_g' is a signal's grade (0, or 0.5 to 1). 'intensity' is an expression over grades scaled to 0-100; a triggered rule is severe at 'severe_at' or more. 'public_note' explains the rule in plain words for communities and field teams.",
+ "version": "0.3",
+ "nodes": [
+  {
+   "id": "D_rain_var",
+   "type": "driver",
+   "label": "Monsoon variability and dry spells",
+   "description": "Late onset, mid-season dry spells and erratic distribution of kharif rainfall.",
+   "indicators": [
+    "precip_cv",
+    "dry_spell_mean",
+    "dr_modsev_mean"
+   ]
+  },
+  {
+   "id": "D_rain_amount",
+   "type": "driver",
+   "label": "Rainfall amount",
+   "description": "Long-term rainfall regime; sets recharge potential and whether a second crop can grow on residual moisture.",
+   "indicators": [
+    "rain_norm",
+    "precip_mean"
+   ]
+  },
+  {
+   "id": "D_aquifer",
+   "type": "driver",
+   "label": "Aquifer type and quality",
+   "description": "Hard rock (low storage, specific yield 1-3%) vs alluvium (8-16%); naturally saline tracts.",
+   "indicators": [
+    "aquifer_class",
+    "soge_class"
+   ]
+  },
+  {
+   "id": "D_terrain",
+   "type": "driver",
+   "label": "Slope and terrain",
+   "description": "Share of hill slopes, ridges and gentle slopes.",
+   "indicators": [
+    "f_hill",
+    "f_slopy",
+    "f_plain"
+   ]
+  },
+  {
+   "id": "D_canal",
+   "type": "driver",
+   "label": "Canal water import",
+   "description": "Water brought in from reservoirs through canal networks.",
+   "indicators": [
+    "n_canals"
+   ]
+  },
+  {
+   "id": "D_flood",
+   "type": "driver",
+   "label": "River floods",
+   "description": "Monsoon over-bank flooding and channel migration in alluvial floodplains.",
+   "indicators": [
+    "f_water_kharif_only",
+    "f_water_any"
+   ]
+  },
+  {
+   "id": "D_market",
+   "type": "driver",
+   "label": "Market and policy pull",
+   "description": "Demand for water-intensive crops (sugarcane, orchards), flat or free farm power, plantation programmes.",
+   "indicators": []
+  },
+  {
+   "id": "D_pop",
+   "type": "driver",
+   "label": "Population and settlement growth",
+   "description": "Rising population density and urban expansion.",
+   "indicators": [
+    "pop_density",
+    "built_slope_pp"
+   ]
+  },
+  {
+   "id": "D_livestock",
+   "type": "driver",
+   "label": "Livestock numbers",
+   "description": "Herd size and composition (sheep and goats vs cattle and buffalo).",
+   "indicators": [
+    "tlu_per_ha",
+    "small_rum_share"
+   ]
+  },
+  {
+   "id": "P_wells",
+   "type": "pressure",
+   "label": "Well and borewell pumping",
+   "description": "Groundwater draft for irrigation.",
+   "indicators": [
+    "soge_stage",
+    "irr_share"
+   ]
+  },
+  {
+   "id": "P_dbl",
+   "type": "pressure",
+   "label": "Expansion of second-season cropping",
+   "description": "Growth of double-cropped area.",
+   "indicators": [
+    "double_slope_pp",
+    "ci_slope"
+   ]
+  },
+  {
+   "id": "P_canal",
+   "type": "pressure",
+   "label": "Canal irrigation and seepage",
+   "description": "Applied canal water and seepage losses.",
+   "indicators": [
+    "n_canals",
+    "et_p_ratio"
+   ]
+  },
+  {
+   "id": "P_forest_conv",
+   "type": "pressure",
+   "label": "Clearing of tree cover",
+   "description": "Conversion of forest to farmland, plantations or settlements, including shifting cultivation.",
+   "indicators": [
+    "forest_to_farm_frac",
+    "tcd_frac"
+   ]
+  },
+  {
+   "id": "P_grazing",
+   "type": "pressure",
+   "label": "Grazing on commons",
+   "description": "Livestock density on open scrub and barren commons.",
+   "indicators": [
+    "tlu_per_ha_grazing"
+   ]
+  },
+  {
+   "id": "P_urban",
+   "type": "pressure",
+   "label": "Conversion to built-up",
+   "description": "Farmland, trees and water bodies converted to built-up land.",
+   "indicators": [
+    "farm_to_built_frac",
+    "urb_frac"
+   ]
+  },
+  {
+   "id": "P_tank_neglect",
+   "type": "pressure",
+   "label": "Tank siltation and encroachment",
+   "description": "Loss of tank capacity through siltation, breached bunds and encroachment of foreshore and supply channels.",
+   "indicators": []
+  },
+  {
+   "id": "S_gw",
+   "type": "state",
+   "label": "Groundwater storage and levels",
+   "description": "Annual storage change and water-level trend.",
+   "indicators": [
+    "dg_mean",
+    "dg_late_mean",
+    "wl_trend",
+    "dg_neg_frac"
+   ]
+  },
+  {
+   "id": "S_swb",
+   "type": "state",
+   "label": "Surface water storage",
+   "description": "Area and seasonal persistence of tanks, ponds and reservoirs.",
+   "indicators": [
+    "swb_frac",
+    "swb_rabi_persist",
+    "swb_rabi_slope_pct"
+   ]
+  },
+  {
+   "id": "S_soilm",
+   "type": "state",
+   "label": "Kharif soil moisture",
+   "description": "Root-zone moisture during the kharif season.",
+   "indicators": [
+    "dr_modsev_mean",
+    "kharif_min_ratio"
+   ]
+  },
+  {
+   "id": "S_et",
+   "type": "state",
+   "label": "Landscape water consumption",
+   "description": "Evapotranspiration relative to rainfall.",
+   "indicators": [
+    "et_p_ratio",
+    "et_slope"
+   ]
+  },
+  {
+   "id": "S_tree",
+   "type": "state",
+   "label": "Tree and forest cover",
+   "description": "Extent and net change of tree cover.",
+   "indicators": [
+    "f_forest",
+    "net_tree_frac",
+    "tree_slope_pp"
+   ]
+  },
+  {
+   "id": "S_commons",
+   "type": "state",
+   "label": "Condition of commons",
+   "description": "Extent of open commons and conversion of farmland to scrub or barren land.",
+   "indicators": [
+    "f_commons",
+    "shrub_slope_pp"
+   ]
+  },
+  {
+   "id": "S_soil",
+   "type": "state",
+   "label": "Soil and land condition",
+   "description": "Topsoil loss and degradation of farmland.",
+   "indicators": [
+    "degr_frac",
+    "farm_to_barren_scrub_frac"
+   ]
+  },
+  {
+   "id": "S_wt_rise",
+   "type": "state",
+   "label": "Shallow or rising water table",
+   "description": "Water table rising toward the root zone.",
+   "indicators": [
+    "wl_trend"
+   ]
+  },
+  {
+   "id": "O_yield",
+   "type": "outcome",
+   "label": "Crop failure and income loss",
+   "description": "",
+   "indicators": []
+  },
+  {
+   "id": "O_rabi",
+   "type": "outcome",
+   "label": "Reduced rabi and summer cropping",
+   "description": "",
+   "indicators": [
+    "ci_mean"
+   ]
+  },
+  {
+   "id": "O_wells",
+   "type": "outcome",
+   "label": "Well failure, deeper drilling and debt",
+   "description": "",
+   "indicators": []
+  },
+  {
+   "id": "O_drinking",
+   "type": "outcome",
+   "label": "Drinking-water scarcity and quality risk",
+   "description": "",
+   "indicators": []
+  },
+  {
+   "id": "O_forest_liv",
+   "type": "outcome",
+   "label": "Loss of forest-based livelihoods",
+   "description": "NTFP, fuel, fodder.",
+   "indicators": []
+  },
+  {
+   "id": "O_migration",
+   "type": "outcome",
+   "label": "Distress migration",
+   "description": "",
+   "indicators": []
+  },
+  {
+   "id": "M_social",
+   "type": "state",
+   "label": "Socio-economic deprivation",
+   "description": "Overlapping disadvantage in the socio-economic system: marginalisation, low literacy, weak access to work, credit and collectives, poor housing.",
+   "indicators": [
+    "st_share",
+    "sc_share",
+    "literacy",
+    "nrega_works_per_1000ha",
+    "bank_distance_km",
+    "shg_coverage",
+    "kuccha_share"
+   ]
+  },
+  {
+   "id": "P_fire",
+   "type": "pressure",
+   "label": "Forest fires",
+   "description": "Fires set for clearing, NTFP collection or grazing, and accidental fires.",
+   "indicators": [
+    "fire_per_100km2"
+   ]
+  },
+  {
+   "id": "S_nutrients",
+   "type": "state",
+   "label": "Soil nutrient status",
+   "description": "Available N, P, K and organic carbon in the soil.",
+   "indicators": [
+    "soil_n_low_frac",
+    "soil_p_low_frac",
+    "soil_k_low_frac",
+    "soil_oc_low_frac"
+   ]
+  },
+  {
+   "id": "O_livestock",
+   "type": "outcome",
+   "label": "Livestock water and fodder",
+   "description": "Drinking water and feed for animals through the dry season.",
+   "indicators": [
+    "tlu_per_ha"
+   ]
+  },
+  {
+   "id": "O_fishery",
+   "type": "outcome",
+   "label": "Fishery livelihoods",
+   "description": "Income from fish culture in tanks and ponds.",
+   "indicators": [
+    "swb_rabi_persist"
+   ]
+  },
+  {
+   "id": "D_mining",
+   "type": "driver",
+   "label": "Mining",
+   "description": "Mining sites and environmental-clearance mining projects in the micro-watershed.",
+   "indicators": [
+    "mining_projects"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "from": "D_rain_var",
+   "to": "S_soilm",
+   "sign": "-",
+   "mechanism": "Dry spells and late onset deplete root-zone moisture during crop establishment and flowering.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "drought_manual"
+   ]
+  },
+  {
+   "from": "D_rain_amount",
+   "to": "S_gw",
+   "sign": "+",
+   "mechanism": "Monsoon rainfall is the main source of recharge.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "cgwb_gec2015"
+   ]
+  },
+  {
+   "from": "D_rain_var",
+   "to": "S_gw",
+   "sign": "-",
+   "mechanism": "Below-normal years give little recharge; in hard rock, storage cannot carry over between years.",
+   "confidence": "high",
+   "condition": "ctx.aquifer == 'hard_rock'",
+   "sources": [
+    "cgwb_gec2015"
+   ]
+  },
+  {
+   "from": "D_aquifer",
+   "to": "S_gw",
+   "sign": "+",
+   "mechanism": "Low specific yield of hard rock (1-3%) magnifies each mm of storage loss into large water-level falls.",
+   "confidence": "high",
+   "condition": "ctx.aquifer == 'hard_rock'",
+   "sources": [
+    "cgwb_gec2015"
+   ]
+  },
+  {
+   "from": "D_rain_var",
+   "to": "S_swb",
+   "sign": "-",
+   "mechanism": "Weak or patchy monsoons leave tanks partly filled.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "palanisami_tanks"
+   ]
+  },
+  {
+   "from": "D_market",
+   "to": "P_wells",
+   "sign": "+",
+   "mechanism": "Remunerative water-intensive crops and flat-rate power encourage pumping.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "shah2009",
+    "cgwb_naquim_warud"
+   ]
+  },
+  {
+   "from": "P_dbl",
+   "to": "P_wells",
+   "sign": "+",
+   "mechanism": "Where no canal exists, a second crop is irrigated from wells and borewells.",
+   "confidence": "medium",
+   "condition": "ctx.canal == 'no_canal'",
+   "sources": [
+    "jain2021"
+   ]
+  },
+  {
+   "from": "P_wells",
+   "to": "S_gw",
+   "sign": "-",
+   "mechanism": "Draft in excess of recharge lowers storage.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "cgwb_gec2015",
+    "shah2009"
+   ]
+  },
+  {
+   "from": "P_wells",
+   "to": "S_et",
+   "sign": "+",
+   "mechanism": "Irrigation raises evapotranspiration above what rainfall alone supports.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "S_et",
+   "to": "S_gw",
+   "sign": "-",
+   "mechanism": "Sustained ET above rainfall without canal import must come from stored water.",
+   "confidence": "medium",
+   "condition": "ctx.canal == 'no_canal'",
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "S_gw",
+   "to": "O_wells",
+   "sign": "-",
+   "mechanism": "Falling water levels dry out dug wells and push drilling deeper.",
+   "confidence": "high",
+   "condition": "ctx.aquifer == 'hard_rock'",
+   "sources": [
+    "shah2009"
+   ]
+  },
+  {
+   "from": "S_gw",
+   "to": "O_rabi",
+   "sign": "+",
+   "mechanism": "Rabi and summer cropping depend on groundwater; depletion cuts winter cropped area.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "jain2021"
+   ]
+  },
+  {
+   "from": "S_gw",
+   "to": "O_drinking",
+   "sign": "+",
+   "mechanism": "Rural drinking water is mostly groundwater.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "cgwb_dgwr2023"
+   ]
+  },
+  {
+   "from": "S_gw",
+   "to": "S_swb",
+   "sign": "+",
+   "mechanism": "Falling groundwater reduces baseflow and raises seepage losses from tanks and streams.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "D_canal",
+   "to": "P_canal",
+   "sign": "+",
+   "mechanism": "Canal water applied in the command.",
+   "confidence": "high",
+   "condition": "ctx.canal == 'canal_present'",
+   "sources": [
+    "cgwb_pune"
+   ]
+  },
+  {
+   "from": "P_canal",
+   "to": "S_gw",
+   "sign": "+",
+   "mechanism": "Seepage from canals and fields recharges groundwater.",
+   "confidence": "medium",
+   "condition": "ctx.canal == 'canal_present'",
+   "sources": [
+    "cgwb_gec2015"
+   ]
+  },
+  {
+   "from": "P_canal",
+   "to": "S_wt_rise",
+   "sign": "+",
+   "mechanism": "Over-irrigation and seepage on flat, poorly drained land raise the water table.",
+   "confidence": "medium",
+   "condition": "ctx.terrain == 'plain'",
+   "sources": [
+    "mowr_waterlogging"
+   ]
+  },
+  {
+   "from": "P_canal",
+   "to": "S_et",
+   "sign": "+",
+   "mechanism": "Imported water lets ET exceed local rainfall.",
+   "confidence": "high",
+   "condition": "ctx.canal == 'canal_present'",
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "D_aquifer",
+   "to": "drinking_water.salinity",
+   "sign": "+",
+   "mechanism": "Naturally saline alluvium (Purna valley) limits well irrigation and drinking use.",
+   "confidence": "high",
+   "condition": "ctx.aquifer == 'saline'",
+   "sources": [
+    "cgwb_amravati"
+   ]
+  },
+  {
+   "from": "D_terrain",
+   "to": "soil.erosion",
+   "sign": "+",
+   "mechanism": "Erosion rises steeply with slope.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "wischmeier_slope"
+   ]
+  },
+  {
+   "from": "S_tree",
+   "to": "soil.erosion",
+   "sign": "-",
+   "mechanism": "Vegetative cover protects soil from rain splash and runoff.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "wischmeier_slope"
+   ]
+  },
+  {
+   "from": "soil.erosion",
+   "to": "S_soil",
+   "sign": "-",
+   "mechanism": "Topsoil loss lowers fertility and water-holding capacity.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "wischmeier_slope"
+   ]
+  },
+  {
+   "from": "S_soil",
+   "to": "O_yield",
+   "sign": "-",
+   "mechanism": "Degraded land yields less and is abandoned.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "D_pop",
+   "to": "P_forest_conv",
+   "sign": "+",
+   "mechanism": "Land demand pushes cultivation into forest.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "isfr2023"
+   ]
+  },
+  {
+   "from": "D_market",
+   "to": "P_forest_conv",
+   "sign": "+",
+   "mechanism": "Cash plantations (cashew, eucalyptus) replace forest and podu fallows.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "dte_srikakulam"
+   ]
+  },
+  {
+   "from": "P_forest_conv",
+   "to": "S_tree",
+   "sign": "-",
+   "mechanism": "Direct loss of tree cover.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "isfr2023"
+   ]
+  },
+  {
+   "from": "S_tree",
+   "to": "O_forest_liv",
+   "sign": "+",
+   "mechanism": "Forest supports NTFP, fuel and fodder, especially for Scheduled Tribe households.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "fra2006"
+   ]
+  },
+  {
+   "from": "S_tree",
+   "to": "S_gw",
+   "sign": "?",
+   "mechanism": "Tree cover improves infiltration but plantations also transpire more; the net effect on recharge is contested.",
+   "confidence": "low",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "D_livestock",
+   "to": "P_grazing",
+   "sign": "+",
+   "mechanism": "More animals per hectare of commons.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "fao_tlu"
+   ]
+  },
+  {
+   "from": "P_grazing",
+   "to": "S_commons",
+   "sign": "-",
+   "mechanism": "Grazing beyond carrying capacity removes cover and compacts soil.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "S_commons",
+   "to": "productivity.farmland_abandonment",
+   "sign": "-",
+   "mechanism": "Degraded commons and abandoned fields turn to scrub and barren land.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "D_pop",
+   "to": "P_urban",
+   "sign": "+",
+   "mechanism": "Settlement growth converts farmland.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "census2011"
+   ]
+  },
+  {
+   "from": "P_urban",
+   "to": "S_swb",
+   "sign": "-",
+   "mechanism": "Encroachment and drainage changes shrink water bodies.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "palanisami_tanks"
+   ]
+  },
+  {
+   "from": "P_tank_neglect",
+   "to": "S_swb",
+   "sign": "-",
+   "mechanism": "Siltation and encroachment reduce tank storage.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "palanisami_tanks"
+   ]
+  },
+  {
+   "from": "S_swb",
+   "to": "O_rabi",
+   "sign": "+",
+   "mechanism": "Tank water supports rabi crops in tank commands.",
+   "confidence": "medium",
+   "condition": "ctx.aquifer == 'hard_rock'",
+   "sources": [
+    "crida_srikakulam",
+    "palanisami_tanks"
+   ]
+  },
+  {
+   "from": "S_soilm",
+   "to": "O_yield",
+   "sign": "+",
+   "mechanism": "Moisture stress at critical stages reduces kharif yields.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "drought_manual"
+   ]
+  },
+  {
+   "from": "D_rain_amount",
+   "to": "productivity.rice_fallow_opportunity",
+   "sign": "+",
+   "mechanism": "High rainfall leaves residual moisture after the kharif paddy harvest, which short-duration pulses and oilseeds can use.",
+   "confidence": "medium",
+   "condition": "ctx.rainfall != 'semi_arid'",
+   "sources": [
+    "gumma2016"
+   ]
+  },
+  {
+   "from": "D_flood",
+   "to": "flood_exposure",
+   "sign": "+",
+   "mechanism": "Over-bank floods damage kharif crops and settlements in the Ganga-Ghaghra doab.",
+   "confidence": "medium",
+   "condition": "ctx.aquifer == 'alluvium'",
+   "sources": [
+    "nih_ballia"
+   ]
+  },
+  {
+   "from": "flood_exposure",
+   "to": "O_yield",
+   "sign": "+",
+   "mechanism": "Crop loss in flood years.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "nih_ballia"
+   ]
+  },
+  {
+   "from": "O_yield",
+   "to": "O_migration",
+   "sign": "+",
+   "mechanism": "Repeated crop failure drives seasonal migration.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "M_social",
+   "to": "O_migration",
+   "sign": "+",
+   "mechanism": "Households with fewer assets and less schooling have fewer coping options.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "M_social",
+   "to": "O_forest_liv",
+   "sign": "+",
+   "mechanism": "Scheduled Tribe households depend most on forests.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "fra2006"
+   ]
+  },
+  {
+   "from": "S_gw",
+   "to": "groundwater.over_extraction",
+   "sign": "-",
+   "mechanism": "Defines the stress.",
+   "confidence": "high",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "P_dbl",
+   "to": "groundwater.irrigation_expansion",
+   "sign": "+",
+   "mechanism": "Defines the stress (with S_gw).",
+   "confidence": "medium",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_gw",
+   "to": "groundwater.irrigation_expansion",
+   "sign": "-",
+   "mechanism": "Defines the stress (with P_dbl).",
+   "confidence": "medium",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_et",
+   "to": "groundwater.water_balance_deficit",
+   "sign": "+",
+   "mechanism": "Defines the stress.",
+   "confidence": "low",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_soilm",
+   "to": "drought.kharif_drought",
+   "sign": "-",
+   "mechanism": "Defines the stress.",
+   "confidence": "high",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_soilm",
+   "to": "drought.unstable_sowing",
+   "sign": "-",
+   "mechanism": "Defines the stress.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_swb",
+   "to": "waterbody_shrinkage",
+   "sign": "-",
+   "mechanism": "Defines the stress.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_tree",
+   "to": "forest.tree_cover_loss",
+   "sign": "-",
+   "mechanism": "Defines the stress.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_soil",
+   "to": "productivity.farmland_abandonment",
+   "sign": "-",
+   "mechanism": "Defines the stress.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_commons",
+   "to": "fodder.grazing_pressure",
+   "sign": "-",
+   "mechanism": "Defines the stress.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "P_urban",
+   "to": "urban_encroachment",
+   "sign": "+",
+   "mechanism": "Defines the stress.",
+   "confidence": "high",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_wt_rise",
+   "to": "irrigation.waterlogging",
+   "sign": "+",
+   "mechanism": "Defines the stress.",
+   "confidence": "low",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "groundwater.over_extraction",
+   "to": "O_wells",
+   "sign": "+",
+   "mechanism": "",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "shah2009"
+   ]
+  },
+  {
+   "from": "groundwater.over_extraction",
+   "to": "O_rabi",
+   "sign": "+",
+   "mechanism": "",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "jain2021"
+   ]
+  },
+  {
+   "from": "drought.kharif_drought",
+   "to": "O_yield",
+   "sign": "+",
+   "mechanism": "",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "drought_manual"
+   ]
+  },
+  {
+   "from": "forest.tree_cover_loss",
+   "to": "O_forest_liv",
+   "sign": "+",
+   "mechanism": "",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "fra2006"
+   ]
+  },
+  {
+   "from": "irrigation.waterlogging",
+   "to": "O_yield",
+   "sign": "+",
+   "mechanism": "",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "mowr_waterlogging"
+   ]
+  },
+  {
+   "from": "drinking_water.salinity",
+   "to": "O_drinking",
+   "sign": "+",
+   "mechanism": "",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "cgwb_amravati"
+   ]
+  },
+  {
+   "from": "urban_encroachment",
+   "to": "O_yield",
+   "sign": "+",
+   "mechanism": "Loss of farmland.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": []
+  },
+  {
+   "from": "S_swb",
+   "to": "irrigation.rabi_water_shortfall",
+   "sign": "-",
+   "mechanism": "Less water stored past the monsoon leaves tank and canal commands short in rabi.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "palanisami_tanks"
+   ]
+  },
+  {
+   "from": "irrigation.rabi_water_shortfall",
+   "to": "O_rabi",
+   "sign": "+",
+   "mechanism": "A rabi water shortfall reduces second-season area and yields.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "palanisami_tanks"
+   ]
+  },
+  {
+   "from": "S_nutrients",
+   "to": "soil.nutrient_deficiency",
+   "sign": "-",
+   "mechanism": "Low available nutrients and organic carbon limit crop growth.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "shc_ratings"
+   ]
+  },
+  {
+   "from": "soil.nutrient_deficiency",
+   "to": "O_yield",
+   "sign": "+",
+   "mechanism": "Nutrient deficiency lowers yields unless made up with fertiliser and manure.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "soil_health_card"
+   ]
+  },
+  {
+   "from": "S_gw",
+   "to": "productivity.declining_intensity",
+   "sign": "-",
+   "mechanism": "Falling groundwater forces farmers to drop second crops.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "shah2009"
+   ]
+  },
+  {
+   "from": "S_soil",
+   "to": "productivity.declining_intensity",
+   "sign": "-",
+   "mechanism": "Degraded soils are cropped less often.",
+   "confidence": "low",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "productivity.declining_intensity",
+   "to": "O_yield",
+   "sign": "+",
+   "mechanism": "Fewer crops a year lower farm output.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "from": "S_swb",
+   "to": "livestock_water_scarcity",
+   "sign": "-",
+   "mechanism": "Ponds drying in summer remove the main drinking source for animals.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "D_livestock",
+   "to": "livestock_water_scarcity",
+   "sign": "+",
+   "mechanism": "More animals need more water.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "livestock_water_scarcity",
+   "to": "O_livestock",
+   "sign": "+",
+   "mechanism": "Water shortage forces long treks, distress sales or migration with herds.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "P_grazing",
+   "to": "fodder.commons_degradation",
+   "sign": "+",
+   "mechanism": "Overgrazing removes cover and prevents regeneration on the commons.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "S_commons",
+   "to": "fodder.commons_degradation",
+   "sign": "-",
+   "mechanism": "Shrinking and less green commons supply less fodder.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "fodder.commons_degradation",
+   "to": "O_livestock",
+   "sign": "+",
+   "mechanism": "Commons degradation reduces fodder for animals.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "fodder.grazing_pressure",
+   "to": "O_livestock",
+   "sign": "+",
+   "mechanism": "Too many animals per hectare of commons cause fodder deficits.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "igfri_vision"
+   ]
+  },
+  {
+   "from": "S_swb",
+   "to": "fishery_potential",
+   "sign": "+",
+   "mechanism": "Water bodies that hold water for six months or more can carry a fish crop.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "pmmsy_guidelines"
+   ]
+  },
+  {
+   "from": "fishery_potential",
+   "to": "O_fishery",
+   "sign": "+",
+   "mechanism": "Fish culture adds income from existing water bodies.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "pmmsy_guidelines"
+   ]
+  },
+  {
+   "from": "P_grazing",
+   "to": "forest.fringe_degradation",
+   "sign": "+",
+   "mechanism": "Grazing and fuelwood collection act first along forest edges.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "isfr2023"
+   ]
+  },
+  {
+   "from": "forest.fringe_degradation",
+   "to": "O_forest_liv",
+   "sign": "+",
+   "mechanism": "Degraded edges yield less NTFP, fuel and fodder.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "isfr2023"
+   ]
+  },
+  {
+   "from": "P_fire",
+   "to": "forest.fire",
+   "sign": "+",
+   "mechanism": "Repeated fires kill regeneration and degrade the forest floor.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "fsi_fire"
+   ]
+  },
+  {
+   "from": "forest.fire",
+   "to": "O_forest_liv",
+   "sign": "+",
+   "mechanism": "Fire reduces forest produce.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "fsi_fire"
+   ]
+  },
+  {
+   "from": "S_gw",
+   "to": "drinking_water.scarcity",
+   "sign": "-",
+   "mechanism": "Rural drinking water mostly comes from wells and hand pumps.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "jjm_guidelines"
+   ]
+  },
+  {
+   "from": "S_swb",
+   "to": "drinking_water.scarcity",
+   "sign": "-",
+   "mechanism": "Without ponds or piped supply there is no fallback when wells fail.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "jjm_guidelines"
+   ]
+  },
+  {
+   "from": "drinking_water.scarcity",
+   "to": "O_drinking",
+   "sign": "+",
+   "mechanism": "Wells fail in summer and households depend on tankers or distant sources.",
+   "confidence": "high",
+   "condition": null,
+   "sources": [
+    "jjm_guidelines"
+   ]
+  },
+  {
+   "from": "M_social",
+   "to": "multidimensional_vulnerability",
+   "sign": "+",
+   "mechanism": "Overlapping disadvantage is the stress itself.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "census2011",
+    "mission_antyodaya"
+   ]
+  },
+  {
+   "from": "multidimensional_vulnerability",
+   "to": "O_migration",
+   "sign": "+",
+   "mechanism": "Deprived households have less to fall back on when other stresses hit, and migrate.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "census2011"
+   ]
+  },
+  {
+   "from": "D_mining",
+   "to": "drinking_water.mining",
+   "sign": "+",
+   "mechanism": "Mine runoff and drainage carry sediment, metals and acid into streams, ponds and shallow wells.",
+   "confidence": "medium",
+   "condition": null,
+   "sources": [
+    "expert_judgement"
+   ]
+  }
+ ],
+ "stresses": [
+  {
+   "id": "groundwater.over_extraction",
+   "group": "groundwater",
+   "sheet_pathway": "groundwater_stress",
+   "type": "stress",
+   "label": "Groundwater over-extraction",
+   "node": "S_gw",
+   "signals": {
+    "system": [
+     "sys_gw_users"
+    ],
+    "stress": [
+     "s_soge_stage",
+     "s_wl_fall",
+     "s_dg_neg_years"
+    ],
+    "context": [
+     "ctx_hard_rock",
+     "ctx_no_canal",
+     "ctx_no_river",
+     "ctx_high_ci",
+     "ctx_headwater"
+    ]
+   },
+   "systems": "sys_gw_users",
+   "trigger": "(s_soge_stage and (ctx_hard_rock or ctx_high_ci or ctx_headwater or (ctx_no_canal and ctx_no_river) or s_wl_fall or s_dg_neg_years)) or (s_wl_fall and s_dg_neg_years)",
+   "intensity": "100 * max(s_soge_stage, min(s_wl_fall, s_dg_neg_years)) * (0.75 + 0.25 * max(ctx_hard_rock, ctx_high_ci, ctx_headwater))",
+   "severe_at": 70,
+   "confidence": "high",
+   "sources": [
+    "cgwb_gec2015",
+    "shah2009",
+    "jain2021"
+   ],
+   "interpretation": "Extraction exceeds or approaches recharge. Expect well failure, deeper borewells and reduced rabi area; in hard rock the fall is fast.",
+   "rationale": "Two lines of evidence. The block stage of extraction (s_soge_stage) is the official CGWB measure of draft against recharge, with published category limits. It is assessed for the whole block, so every MWS in the block shares it; it counts here only with at least one local sign that this MWS depends on or stresses groundwater: hard rock (ctx_hard_rock), high cropping intensity (ctx_high_ci), headwater position (ctx_headwater), no canal and no river (ctx_no_canal, ctx_no_river), or MWS-level groundwater evidence (s_wl_fall, s_dg_neg_years). The second line is the MWS-level evidence on its own: the modelled water-level trend together with how often storage fell (s_wl_fall, s_dg_neg_years); both must agree because one bad rainfall year can make either look alarming, and both use pooled percentiles because the modelled series is biased (CS-67). Hard rock, high cropping intensity and headwater position raise intensity: little storage, high demand, no inflow. The local-support requirement follows the Signal_Verification sheet's structure (pattern and context), without its thresholds.",
+   "public_note": "Groundwater is being pumped faster than it is recharged when the block's stage of extraction is above 70% (s_soge_stage) and this micro-watershed shows a local reason to depend on groundwater: a hard-rock aquifer (ctx_hard_rock), high cropping intensity (ctx_high_ci), a headwater position with no inflow (ctx_headwater), no canal or river (ctx_no_canal, ctx_no_river), or its own signs of falling groundwater. It is also flagged when the micro-watershed shows a falling water level (s_wl_fall) together with storage losses in most years (s_dg_neg_years), whatever the block figure. The rule is checked only where farms irrigated from wells, orchards or canal commands cover at least a tenth of the area (sys_gw_users). The stress is more intense in hard-rock aquifers that store little water, where cropping intensity is high, and in headwater micro-watersheds. Further validation should be done through community interactions and documented on Commons Connect, checking whether wells have been deepened, how dense borewells are, and whether dug wells now dry up in summer.",
+   "replaces": "groundwater_overextraction"
+  },
+  {
+   "id": "groundwater.irrigation_expansion",
+   "group": "groundwater",
+   "sheet_pathway": "groundwater_stress",
+   "type": "stress",
+   "label": "Irrigation expanding on a depleting aquifer",
+   "node": "P_dbl",
+   "signals": {
+    "system": [
+     "sys_gw_irrigated"
+    ],
+    "stress": [
+     "s_dbl_rising",
+     "s_dg_recent_loss"
+    ],
+    "context": [
+     "ctx_no_canal",
+     "ctx_hard_rock"
+    ]
+   },
+   "systems": "sys_gw_irrigated",
+   "trigger": "s_dbl_rising and s_dg_recent_loss and ctx_no_canal",
+   "intensity": "100 * min(s_dbl_rising, s_dg_recent_loss) * (0.8 + 0.2 * ctx_hard_rock)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "jain2021",
+    "shah2009"
+   ],
+   "interpretation": "Second-season cropping is growing while groundwater is drawn down, with no imported water. Gains are likely temporary.",
+   "rationale": "A co-incident change: double cropping rising by at least 0.5 percentage points of the MWS a year (s_dbl_rising) while the last three years show storage loss in the worst third (s_dg_recent_loss), with no canal (ctx_no_canal, required). It flags places where gains are paid for with stored groundwater, before the block category catches up.",
+   "public_note": "Double-cropped area has been growing (s_dbl_rising) while groundwater storage fell in the last three years (s_dg_recent_loss), and no canal brings water from outside (ctx_no_canal). Together these suggest that new rabi and summer crops are being irrigated by drawing down the aquifer, which is unlikely to last. The rule is checked where well-irrigated farming covers at least a tenth of the area (sys_gw_irrigated), and is more intense in hard-rock aquifers (ctx_hard_rock). Further validation should be done through community interactions and documented on Commons Connect, asking whether the extra cropping uses new or deeper borewells and whether wells now fail earlier in the season.",
+   "replaces": "irrigation_expansion_on_depleting_aquifer"
+  },
+  {
+   "id": "groundwater.water_balance_deficit",
+   "group": "groundwater",
+   "sheet_pathway": "groundwater_stress",
+   "type": "stress",
+   "label": "Water use exceeds rainfall",
+   "node": "S_et",
+   "signals": {
+    "system": [
+     "sys_irrigated"
+    ],
+    "stress": [
+     "s_et_excess"
+    ],
+    "context": [
+     "ctx_no_canal"
+    ]
+   },
+   "systems": "sys_irrigated",
+   "trigger": "s_et_excess",
+   "intensity": "100 * s_et_excess * (0.8 + 0.2 * ctx_no_canal)",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "expert_judgement",
+    "core_stack"
+   ],
+   "interpretation": "The landscape evaporates more water than it receives as rain. Without canal water this means mining storage.",
+   "rationale": "Evapotranspiration summed over 2017–24 above rainfall over the same years (s_et_excess) means the landscape uses stored or imported water. The threshold is higher where a canal crosses the MWS, because imported water legitimately raises ET. Low confidence because ET is modelled.",
+   "public_note": "Over 2017–24 the crops and vegetation in this micro-watershed used more water than fell as rain (s_et_excess). Where no canal brings water in (ctx_no_canal), the difference must come from groundwater or other stored water, so the pattern points to depletion. The rule is checked where irrigated farming or orchards cover at least a tenth of the area (sys_irrigated). Further validation should be done through community interactions and documented on Commons Connect, checking where irrigation water comes from and whether its availability has been falling.",
+   "replaces": "water_balance_deficit"
+  },
+  {
+   "id": "groundwater.recharge_opportunity",
+   "group": "groundwater",
+   "sheet_pathway": "groundwater_stress",
+   "type": "opportunity",
+   "label": "Groundwater recharge opportunity",
+   "node": "S_gw",
+   "signals": {
+    "system": [
+     "sys_gw_users"
+    ],
+    "stress": [
+     "s_runoff_available",
+     "s_soge_stage"
+    ],
+    "context": [
+     "ctx_hard_rock",
+     "ctx_headwater"
+    ]
+   },
+   "systems": "sys_gw_users",
+   "trigger": "ctx_hard_rock and s_runoff_available and s_soge_stage",
+   "intensity": "100 * min(s_runoff_available, s_soge_stage) * (0.8 + 0.2 * ctx_headwater)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "cgwb_recharge2020"
+   ],
+   "interpretation": "Runoff leaves the watershed while aquifers are stressed: check dams, percolation tanks and recharge shafts can help, together with demand management.",
+   "rationale": "Recharge structures work where there is runoff to capture (s_runoff_available) and an aquifer under pressure (s_soge_stage), on hard rock where storage is small and responds quickly (ctx_hard_rock, required). Headwater MWS score higher because recharge there also benefits downstream MWS.",
+   "public_note": "A sizeable share of rainfall runs off (s_runoff_available) while groundwater is under pressure (s_soge_stage) in a hard-rock aquifer (ctx_hard_rock). Capturing that runoff in check dams, percolation tanks or recharge shafts could restore some storage, especially in headwater micro-watersheds whose recharge also feeds areas downstream (ctx_headwater). The opportunity is checked where groundwater-using farms or orchards cover at least a tenth of the area (sys_gw_users). Further validation should be done through community interactions and documented on Commons Connect, identifying untreated drainage lines and existing structures that need repair.",
+   "replaces": "recharge_opportunity"
+  },
+  {
+   "id": "drought.kharif_drought",
+   "group": "drought",
+   "sheet_pathway": "high_drought_risk",
+   "type": "stress",
+   "label": "Recurrent kharif drought",
+   "node": "S_soilm",
+   "signals": {
+    "system": [
+     "sys_cropland"
+    ],
+    "stress": [
+     "s_drought_weeks",
+     "s_drought_years",
+     "s_drought_worst",
+     "s_dry_spells"
+    ],
+    "context": [
+     "ctx_semi_arid",
+     "ctx_low_kharif_rain",
+     "ctx_runoff_loss",
+     "ctx_dry_year",
+     "ctx_headwater"
+    ]
+   },
+   "systems": "sys_cropland",
+   "trigger": "(s_drought_weeks or s_drought_years or s_drought_worst or (s_dry_spells and ctx_semi_arid)) and ntrue(ctx_low_kharif_rain, ctx_runoff_loss, ctx_dry_year) >= 2",
+   "intensity": "100 * max(s_drought_weeks, s_drought_years, s_drought_worst, min(s_dry_spells, ctx_semi_arid)) * (0.8 + 0.2 * max(s_dry_spells, ctx_headwater))",
+   "severe_at": 70,
+   "confidence": "high",
+   "sources": [
+    "drought_manual",
+    "crida_anantapur"
+   ],
+   "interpretation": "Kharif crops repeatedly face moisture stress. Expect yield loss, re-sowing and reliance on crop insurance and relief.",
+   "rationale": "Mean moderate+severe drought weeks per season (s_drought_weeks) or the number of seasons with at least 4 such weeks (s_drought_years), or a single season with 6 or more such weeks (s_drought_worst, since 22 Nov 2026), or frequent dry spells in a semi-arid area (s_dry_spells with ctx_semi_arid), is the drought pattern. Since 22 Nov 2026 the pattern counts only in a rainfall-limited setting: at least two of low or kharif-poor rainfall (ctx_low_kharif_rain), high runoff (ctx_runoff_loss) and a very dry year (ctx_dry_year). This follows the structure of the Signal_Verification sheet, where drought evidence is read against the rainfall setting; on the ground truth it removed most false alarms in wetter areas. Since 22 Nov 2026 it is checked wherever cropland covers 10% of the MWS (sys_cropland), replacing rainfed or tank farming >= 15%, because drought hits the kharif crop on all cropland, including farms the atlas classes as irrigated by their rabi crop; the rainfall-limited setting now does the filtering. Sub-humid systems get lower drought-week thresholds because rice-based systems are less adapted to dry spells.",
+   "public_note": "Kharif crops in this micro-watershed have repeatedly faced moderate or severe drought, measured as drought weeks per season (s_drought_weeks) or as the number of seasons with four or more such weeks (s_drought_years), or as at least one very severe season (s_drought_worst), or, in a semi-arid area (ctx_semi_arid), as frequent long dry spells within the monsoon (s_dry_spells). It is flagged where the rainfall setting is limiting on at least two counts: little rain or little of it in kharif (ctx_low_kharif_rain), much of the rain running off (ctx_runoff_loss), or at least one very dry year (ctx_dry_year). Frequent dry spells and a headwater position with no inflow (ctx_headwater) raise the intensity. The rule is checked where farming covers at least a tenth of the area (sys_cropland). Further validation should be done through community interactions and documented on Commons Connect, asking how often crops failed or had to be re-sown in recent years.",
+   "replaces": "kharif_drought"
+  },
+  {
+   "id": "drought.unstable_sowing",
+   "group": "drought",
+   "sheet_pathway": "high_drought_risk",
+   "type": "stress",
+   "label": "Unstable kharif sowing",
+   "node": "S_soilm",
+   "signals": {
+    "system": [
+     "sys_rainfed"
+    ],
+    "stress": [
+     "s_kharif_min",
+     "s_kharif_cv"
+    ],
+    "context": [
+     "ctx_semi_arid",
+     "ctx_low_kharif_rain",
+     "ctx_runoff_loss",
+     "ctx_dry_year"
+    ]
+   },
+   "systems": "sys_rainfed",
+   "trigger": "(s_kharif_min or s_kharif_cv) and ntrue(ctx_low_kharif_rain, ctx_runoff_loss, ctx_dry_year) >= 2",
+   "intensity": "100 * max(s_kharif_min, s_kharif_cv)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "drought_manual"
+   ],
+   "interpretation": "Farmers leave land unsown in bad years, a sign of high risk and thin buffers.",
+   "rationale": "The Drought Manual uses a fall in sown area as an impact indicator. The worst year's kharif area at 60% or less of the best (s_kharif_min), or a high year-to-year variation (s_kharif_cv), means farmers leave land unsown in bad years. Since 22 Nov 2026 it counts only in a rainfall-limited setting (at least two of ctx_low_kharif_rain, ctx_runoff_loss, ctx_dry_year), as for kharif drought; on the ground truth its false alarms were in wetter settings.",
+   "public_note": "The area sown in kharif swings widely from year to year: in the worst year it fell well below the best year (s_kharif_min), or it varies strongly across years (s_kharif_cv). Land left unsown in bad years is a sign of high climate risk and thin buffers against it. It is flagged where the rainfall setting is limiting on at least two counts: little rain or little of it in kharif (ctx_low_kharif_rain), much of the rain running off (ctx_runoff_loss), or a very dry year (ctx_dry_year). The rule is checked where rainfed farming covers at least 15% of the area (sys_rainfed). Further validation should be done through community interactions and documented on Commons Connect, asking how much land is left fallow or re-sown in a poor monsoon and why.",
+   "replaces": "kharif_area_instability"
+  },
+  {
+   "id": "irrigation.rabi_water_shortfall",
+   "group": "irrigation",
+   "sheet_pathway": "high_irrigation_difficulties",
+   "type": "stress",
+   "label": "Rabi irrigation water falling short",
+   "node": "S_swb",
+   "signals": {
+    "system": [
+     "sys_irrigated_cropland"
+    ],
+    "stress": [
+     "s_rabi_water_drop",
+     "s_swb_shrinking",
+     "s_swb_rabi_trend"
+    ],
+    "context": [
+     "s_soge_stage",
+     "s_wl_fall",
+     "ctx_no_canal",
+     "ctx_no_river",
+     "ctx_low_nrega_water"
+    ]
+   },
+   "systems": "sys_irrigated_cropland",
+   "trigger": "s_rabi_water_drop and ntrue(s_swb_shrinking or s_swb_rabi_trend, s_soge_stage or s_wl_fall, ctx_no_canal and ctx_no_river, ctx_low_nrega_water) >= 1",
+   "intensity": "100 * s_rabi_water_drop * (0.6 + 0.4 * max(s_swb_shrinking, s_swb_rabi_trend, s_soge_stage, s_wl_fall, min(ctx_no_canal, ctx_no_river), ctx_low_nrega_water))",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "palanisami_tanks",
+    "expert_judgement"
+   ],
+   "interpretation": "Irrigated second-season cropping is exposed: surface water shrinks by rabi and there is no reliable fallback.",
+   "rationale": "Where double or triple cropping covers half or more of the cropland (sys_irrigated_cropland: the irrigated slice of cropland before it is split into the groundwater, canal and tank archetypes), surface water shrinking between kharif and rabi (s_rabi_water_drop) is the core evidence. It counts when at least one condition shows that farmers cannot make up the shortfall: water bodies shrinking over the years (s_swb_shrinking, s_swb_rabi_trend), groundwater already stressed (s_soge_stage, s_wl_fall), no canal and no river (ctx_no_canal, ctx_no_river), or few NREGA irrigation and conservation works (ctx_low_nrega_water). These raise intensity too. Changed 22 Nov 2026 after the ground-truth check: the gate was tank + canal ≥ 10% and the trigger needed water bodies drying before rabi, which missed the groundwater- and canal-irrigated positives. The structure follows the Signal_Verification sheet's irrigation pattern.",
+   "public_note": "Double or triple cropping covers much of the cropland here (sys_irrigated_cropland), but the water held in tanks, ponds and streams shrinks between kharif and rabi (s_rabi_water_drop), and at least one thing makes the shortfall hard to bridge: water bodies shrinking over the years (s_swb_shrinking, s_swb_rabi_trend), groundwater already heavily used or falling (s_soge_stage, s_wl_fall), no canal or river (ctx_no_canal, ctx_no_river), or few NREGA irrigation or soil and water conservation works (ctx_low_nrega_water). Further validation should be done through community interactions and documented on Commons Connect, asking whether water lasts through rabi, how often the second crop fails for lack of water, and when tanks were last desilted."
+  },
+  {
+   "id": "irrigation.waterlogging",
+   "group": "irrigation",
+   "sheet_pathway": "high_irrigation_difficulties",
+   "type": "stress",
+   "label": "Waterlogging and salinity risk in canal commands",
+   "node": "S_wt_rise",
+   "signals": {
+    "system": [
+     "sys_canal"
+    ],
+    "stress": [
+     "s_wl_rise"
+    ],
+    "context": [
+     "ctx_flat"
+    ]
+   },
+   "systems": "sys_canal",
+   "trigger": "s_wl_rise and ctx_flat",
+   "intensity": "100 * s_wl_rise",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "mowr_waterlogging"
+   ],
+   "interpretation": "Canal water plus poor drainage can lift the water table into the root zone; check field reports before acting.",
+   "rationale": "Rising modelled water level (best quarter of the pooled distribution, because the series is biased) on flat land in a canal command. Low confidence; meant to prompt a field check.",
+   "public_note": "The modelled water table is rising (s_wl_rise) on flat land (ctx_flat) in a canal command, where seepage and over-irrigation with poor drainage can lift groundwater into the root zone and bring salts to the surface. The rule is checked where canal-irrigated farming covers at least a tenth of the area (sys_canal). Further validation should be done through community interactions and documented on Commons Connect, asking whether fields stay waterlogged after the monsoon or show white salt crusts.",
+   "replaces": "waterlogging_salinity"
+  },
+  {
+   "id": "waterbody_shrinkage",
+   "group": null,
+   "sheet_pathway": "siltation",
+   "type": "stress",
+   "label": "Tanks and ponds shrinking or drying early",
+   "node": "S_swb",
+   "signals": {
+    "system": [
+     "sys_waterbodies"
+    ],
+    "stress": [
+     "s_swb_rabi_trend",
+     "s_swb_rabi_persist_low"
+    ],
+    "context": [
+     "ctx_sloping"
+    ]
+   },
+   "systems": "sys_waterbodies",
+   "trigger": "(s_swb_rabi_trend and s_swb_rabi_persist_low) or s_swb_rabi_trend_g >= 1 or s_swb_rabi_persist_low_g >= 1",
+   "intensity": "100 * avg(s_swb_rabi_trend, s_swb_rabi_persist_low) * (0.8 + 0.2 * ctx_sloping)",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "palanisami_tanks"
+   ],
+   "interpretation": "Water bodies hold less water, or dry before rabi: siltation, encroachment, broken supply channels or falling groundwater.",
+   "rationale": "Rabi water-body area falling (s_swb_rabi_trend) together with little water spread surviving into rabi (s_swb_rabi_persist_low), or either one at its severe level. Requiring both for a moderate result guards against rainfall-driven variation in an 8-year series. Sloping catchments (ctx_sloping) send more silt. Siltation and encroachment are best confirmed on the ground.",
+   "public_note": "Water bodies in this micro-watershed are holding less water after the monsoon: the area still under water in rabi is shrinking over the years (s_swb_rabi_trend), and little of the monsoon water spread survives into rabi (s_swb_rabi_persist_low). This is a typical sign of silted or encroached tanks and ponds, broken supply channels, or falling groundwater that drains them faster. Sloping catchments send more silt (ctx_sloping). The rule is checked where water bodies cover at least 0.5% of the area (sys_waterbodies). Further validation should be done through community interactions and documented on Commons Connect, asking whether tanks are shallower than before, dry earlier, or have encroached beds and channels.",
+   "replaces": "surface_water_decline"
+  },
+  {
+   "id": "soil.nutrient_deficiency",
+   "group": "soil",
+   "sheet_pathway": "soil_health",
+   "type": "stress",
+   "label": "Low soil nutrients",
+   "node": "S_nutrients",
+   "signals": {
+    "system": [
+     "sys_cropland"
+    ],
+    "stress": [
+     "s_n_very_low",
+     "s_p_medium",
+     "s_k_medium",
+     "s_oc_low"
+    ],
+    "context": []
+   },
+   "systems": "sys_cropland",
+   "trigger": "ntrue(s_n_very_low, s_p_medium, s_k_medium, s_oc_low) >= 2",
+   "intensity": "100 * avg(s_n_very_low, s_p_medium, s_k_medium, s_oc_low)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "shc_ratings",
+    "soil_health_card"
+   ],
+   "interpretation": "Two or more major nutrients are low over most of the cropland; yields depend on fertiliser and organic matter.",
+   "rationale": "Each nutrient signal asks whether most of the cropped area is deficient, from the CoRE soil_health percentiles, which describe the cropped area. Since 22 Nov 2026: phosphorus and potassium count when 80% or more of the cropland is below the Soil Health Card high class (P < 25, K < 280 kg/ha), so medium values can trigger. Nitrogen counts only when very low (N < 140 kg/ha, half the Card's low limit) over 80% or more of the cropland, because below-280 is the norm in 78% of MWS. Organic carbon counts when 80% or more of the cropland is below 0.5% (since 22 Nov 2026; was half), the same share as the other nutrients. Two deficient nutrients trigger the rule; severe at 95%. Before the change, P < 10 and K < 110 never held, so the rule had reduced to low N plus low OC and fired almost everywhere. The OpenLandMap organic carbon (oc_olm) describes tree-cover area and is not used here. Nitrogen values of 0 are read as missing (CS-91).",
+   "public_note": "Two or more major nutrients are low or only moderate over most of the cropland in this micro-watershed: phosphorus (s_p_medium), potassium (s_k_medium), very low nitrogen (s_n_very_low) or organic carbon (s_oc_low). Crops here depend on fertiliser and organic matter to reach normal yields. The rule is checked where farming covers at least a tenth of the area (sys_cropland). Further validation should be done through community interactions and documented on Commons Connect, asking about Soil Health Card results, fertiliser use and whether yields respond to manure."
+  },
+  {
+   "id": "soil.erosion",
+   "group": "soil",
+   "sheet_pathway": "soil_health",
+   "type": "stress",
+   "label": "Erosion risk on sloping farmland",
+   "node": "S_soil",
+   "signals": {
+    "system": [
+     "sys_cropland"
+    ],
+    "stress": [
+     "s_runoff_high",
+     "s_cultivated"
+    ],
+    "context": [
+     "ctx_sloping"
+    ]
+   },
+   "systems": "sys_cropland",
+   "trigger": "ctx_sloping and s_runoff_high and s_cultivated",
+   "intensity": "100 * min(s_runoff_high, s_cultivated) * (0.5 + 0.5 * ctx_sloping)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "wischmeier_slope",
+    "pmksy_wdc"
+   ],
+   "interpretation": "Substantial cultivation on sloping land with high runoff: topsoil loss risk; priority for ridge-to-valley treatment and contour measures.",
+   "rationale": "A risk rule rather than a measurement. All three must hold: hill and gentle slopes make up at least 30% of the MWS (ctx_sloping, required), the runoff coefficient is high (s_runoff_high), and at least 30% of the MWS is cultivated (s_cultivated).",
+   "public_note": "Much of this micro-watershed is cultivated (s_cultivated) on sloping land (ctx_sloping), and a high share of rainfall runs off (s_runoff_high). Under these conditions topsoil washes away, fields lose fertility and water-holding capacity, and the silt fills tanks downstream. The rule is checked where farming covers at least a tenth of the area (sys_cropland). Further validation should be done through community interactions and documented on Commons Connect, asking whether fields show gullies, exposed stones or thinning soil after heavy rain.",
+   "replaces": "soil_erosion"
+  },
+  {
+   "id": "productivity.farmland_abandonment",
+   "group": "productivity",
+   "sheet_pathway": "decreasing_productivity",
+   "type": "stress",
+   "label": "Farmland going out of use",
+   "node": "S_soil",
+   "signals": {
+    "system": [
+     "sys_cropland"
+    ],
+    "stress": [
+     "s_farm_to_scrub"
+    ],
+    "context": [
+     "ctx_under_sown",
+     "ctx_single_season"
+    ]
+   },
+   "systems": "sys_cropland",
+   "trigger": "(s_farm_to_scrub) and (ctx_under_sown or ctx_single_season)",
+   "intensity": "100 * s_farm_to_scrub",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "core_stack",
+    "igfri_vision"
+   ],
+   "interpretation": "Cultivated land going out of use: erosion, salinity, water loss or abandonment.",
+   "rationale": "Farmland that became barren or scrub between 2017 and 2024, above 3% of the MWS (s_farm_to_scrub). It captures abandonment as well as degradation; the community question separates the two. Since 22 Nov 2026 the rule counts only outside intensive and moderate cropping regimes: in an under-sown kharif regime (ctx_under_sown) or a single-season regime (ctx_single_season), from the cropping-regime context (contexts.json). On the ground truth this removed most false alarms in intensively cropped MWS.",
+   "public_note": "Between 2017 and 2024 a noticeable share of farmland in this micro-watershed turned into scrub or barren land (s_farm_to_scrub). This can reflect soil degradation, loss of irrigation water, salinity, or households leaving farming. It is flagged where much of the kharif land is left unsown (ctx_under_sown) or land is cropped only once a year (ctx_single_season). The rule is checked where farming covers at least a tenth of the area (sys_cropland). Further validation should be done through community interactions and documented on Commons Connect, asking why fields went out of cultivation.",
+   "replaces": "land_degradation"
+  },
+  {
+   "id": "productivity.declining_intensity",
+   "group": "productivity",
+   "sheet_pathway": "decreasing_productivity",
+   "type": "stress",
+   "label": "Cropping intensity declining",
+   "node": "O_yield",
+   "signals": {
+    "system": [
+     "sys_cropland"
+    ],
+    "stress": [
+     "s_ci_decline",
+     "s_ci_fell",
+     "s_crop_area_decline"
+    ],
+    "context": [
+     "s_soge_stage",
+     "s_drought_years",
+     "s_farm_to_scrub",
+     "ctx_under_sown",
+     "ctx_single_season"
+    ]
+   },
+   "systems": "sys_cropland",
+   "trigger": "(s_ci_decline or s_ci_fell or s_crop_area_decline) and (ctx_under_sown or ctx_single_season)",
+   "intensity": "100 * avg(max(s_ci_decline, s_ci_fell), s_crop_area_decline) * (0.7 + 0.3 * max(s_soge_stage, s_drought_years, s_farm_to_scrub))",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "expert_judgement"
+   ],
+   "interpretation": "Fewer crops per year or less land cropped; often the visible end of water or soil stress.",
+   "rationale": "Cropping intensity declining (s_ci_decline) or net cropped area shrinking (s_crop_area_decline) triggers it. Until 21 Nov 2026 both were required (or either at its severe level), to guard against noise in the cropping series (CS-70); the ground-truth check showed that missed most labelled low-yield MWS, so either decline now counts. Intensity is the average of the two grades, so a single decline gives a lower intensity than both together. Groundwater pressure, frequent drought and farmland abandonment (context role) are the likely causes and raise intensity, following the 'pattern, then cause' structure. Since 22 Nov 2026 the rule counts only outside intensive and moderate cropping regimes: in an under-sown kharif regime (ctx_under_sown) or a single-season regime (ctx_single_season), from the cropping-regime context (contexts.json). On the ground truth this removed most false alarms in intensively cropped MWS. Since 22 Nov 2026 a fall in cropping intensity between the first two and last two years (s_ci_fell) also counts alongside the trend (s_ci_decline), following the Signal_Verification sheet's measure; the stronger of the two enters the intensity.",
+   "public_note": "Over 2017–24 this micro-watershed has been cropped less: cropping intensity fell, as a trend (s_ci_decline) or between the first and last years (s_ci_fell), or the net cropped area shrank (s_crop_area_decline), and the decline is stronger where both fell. It is more serious where it coincides with heavy groundwater use (s_soge_stage), frequent drought (s_drought_years) or farmland turning to scrub (s_farm_to_scrub), which point to its likely causes. It is flagged where much of the kharif land is left unsown (ctx_under_sown) or land is cropped only once a year (ctx_single_season). The rule is checked where farming covers at least a tenth of the area (sys_cropland). Further validation should be done through community interactions and documented on Commons Connect, asking whether fewer crops are grown than before and why."
+  },
+  {
+   "id": "productivity.rice_fallow_opportunity",
+   "group": "productivity",
+   "sheet_pathway": "decreasing_productivity",
+   "type": "opportunity",
+   "label": "Unused rabi on residual moisture (rice fallows)",
+   "node": "O_rabi",
+   "signals": {
+    "system": [
+     "sys_rice_rainfed"
+    ],
+    "stress": [
+     "s_low_ci",
+     "s_kharif_only"
+    ],
+    "context": []
+   },
+   "systems": "sys_rice_rainfed",
+   "trigger": "s_low_ci or s_kharif_only",
+   "intensity": "100 * (0.7 * max(s_low_ci, s_kharif_only) + 0.3 * min(s_low_ci, s_kharif_only))",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "gumma2016"
+   ],
+   "interpretation": "After rainfed paddy, land stays fallow although soil moisture could support short-duration pulses or oilseeds.",
+   "rationale": "In sub-humid rainfed systems, cropping intensity below 1.3 (s_low_ci) or a kharif-only share above 40% (s_kharif_only) suggests paddy land is left fallow in rabi although residual moisture could support pulses or oilseeds. CoRE over-detects second crops here (CS-70), so the community question on what follows the paddy harvest is the main check.",
+   "public_note": "Much of the rainfed paddy land here carries only one crop a year (s_kharif_only, s_low_ci), although the soil usually holds enough moisture after the harvest for short-duration pulses or oilseeds such as lentil, black gram, lathyrus or mustard. The opportunity is checked where rainfed sub-humid farming covers at least 15% of the area (sys_rice_rainfed). Further validation should be done through community interactions and documented on Commons Connect, asking what happens on paddy fields after harvest and what stops a second crop (seed, grazing, moisture).",
+   "replaces": "rice_fallow_underuse"
+  },
+  {
+   "id": "urban_encroachment",
+   "group": null,
+   "sheet_pathway": null,
+   "type": "stress",
+   "label": "Farmland lost to built-up",
+   "node": "P_urban",
+   "signals": {
+    "system": [
+     "sys_peri_urban",
+     "sys_cropland_20"
+    ],
+    "stress": [
+     "s_farm_to_built",
+     "s_built_trend"
+    ],
+    "context": []
+   },
+   "systems": "sys_peri_urban or sys_cropland_20",
+   "trigger": "s_farm_to_built or s_built_trend",
+   "intensity": "100 * max(s_farm_to_built, s_built_trend)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "census2011"
+   ],
+   "interpretation": "Settlement expansion is taking farmland and drainage paths.",
+   "rationale": "Farm or tree land converted to built-up above 3% of the MWS (s_farm_to_built), or built-up share rising by 0.4 percentage points a year (s_built_trend). Thresholds were raised after the first run flagged small village growth.",
+   "public_note": "Settlements are expanding onto farmland in this micro-watershed: a noticeable share of farm or tree land became built-up (s_farm_to_built) or the built-up share keeps rising (s_built_trend). Besides the loss of cropland, new construction often blocks drainage lines and tank inflows. The rule is checked where peri-urban land covers at least 3% or farming at least a fifth of the area (sys_peri_urban, sys_cropland_20). Further validation should be done through community interactions and documented on Commons Connect, asking whether farmland is being sold for house plots, roads or industry.",
+   "replaces": "urban_encroachment"
+  },
+  {
+   "id": "livestock_water_scarcity",
+   "group": null,
+   "sheet_pathway": "water_scarcity",
+   "type": "stress",
+   "label": "Water scarcity for livestock",
+   "node": "S_swb",
+   "signals": {
+    "system": [
+     "sys_pastoral"
+    ],
+    "stress": [
+     "s_livestock_dense",
+     "s_summer_water_low"
+    ],
+    "context": [
+     "ctx_headwater",
+     "ctx_no_river",
+     "ctx_low_nrega_water"
+    ]
+   },
+   "systems": "sys_pastoral",
+   "trigger": "s_livestock_dense and s_summer_water_low",
+   "intensity": "100 * min(s_livestock_dense, s_summer_water_low) * (0.8 + 0.2 * max(ctx_headwater, ctx_no_river, ctx_low_nrega_water))",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "igfri_vision",
+    "expert_judgement"
+   ],
+   "interpretation": "Many animals and little surface water in summer: herders travel far or migrate for water.",
+   "rationale": "Livestock density (s_livestock_dense) together with little surface water left in summer (s_summer_water_low; an MWS with no water body counts as none). Headwater position, the absence of a river and few NREGA water works (context) raise intensity: there is no other summer source and little investment in ponds and troughs.",
+   "public_note": "This micro-watershed carries many animals for its land (s_livestock_dense) while little of its surface water lasts into summer (s_summer_water_low), so animals may go short of drinking water in the hottest months. The stress is greater where no river flows through (ctx_no_river), in headwater micro-watersheds without inflow (ctx_headwater), and where few NREGA irrigation or soil and water conservation works have been built (ctx_low_nrega_water). The rule is checked where pastoral land covers at least 5% of the area (sys_pastoral). Further validation should be done through community interactions and documented on Commons Connect, asking where animals drink in summer and whether herders have to travel or migrate for water."
+  },
+  {
+   "id": "fodder.grazing_pressure",
+   "group": "fodder",
+   "sheet_pathway": "fodder_risk",
+   "type": "stress",
+   "label": "Grazing pressure on commons",
+   "node": "S_commons",
+   "signals": {
+    "system": [
+     "sys_pastoral"
+    ],
+    "stress": [
+     "s_grazing_density"
+    ],
+    "context": [
+     "s_commons_shrinking"
+    ]
+   },
+   "systems": "sys_pastoral",
+   "trigger": "s_grazing_density",
+   "intensity": "100 * s_grazing_density * (0.8 + 0.2 * s_commons_shrinking)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "igfri_vision",
+    "fao_tlu"
+   ],
+   "interpretation": "More animals than the commons can feed; expect degradation and fodder deficits, especially for sheep and goat herders.",
+   "rationale": "Livestock units per hectare of open commons (s_grazing_density). Common grazing lands carry well under 1 TLU per ha and animals also use fallows and forest, so 5 TLU per ha of commons (10 severe) is flagged. A shrinking commons area (s_commons_shrinking) raises intensity.",
+   "public_note": "There are many more animals than the open commons of this micro-watershed can feed (s_grazing_density), measured as livestock units per hectare of scrub and barren commons. Where the commons are also shrinking (s_commons_shrinking) the pressure grows. Overgrazed commons lose cover and soil, and herders face fodder shortages, especially in the dry season. The rule is checked where pastoral land covers at least 5% of the area (sys_pastoral). Further validation should be done through community interactions and documented on Commons Connect, asking whether commons fodder lasts through the dry season and how grazing is managed.",
+   "replaces": "grazing_pressure"
+  },
+  {
+   "id": "fodder.commons_degradation",
+   "group": "fodder",
+   "sheet_pathway": "fodder_risk",
+   "type": "stress",
+   "label": "Commons degrading",
+   "node": "S_commons",
+   "signals": {
+    "system": [
+     "sys_pastoral"
+    ],
+    "stress": [
+     "s_commons_shrinking",
+     "s_grass_tree_loss",
+     "s_shrub_ndvi_decline",
+     "s_livestock_dense",
+     "s_grazing_density",
+     "s_shrub_tree_loss_ha",
+     "s_fringe_loss"
+    ],
+    "context": []
+   },
+   "systems": "sys_pastoral",
+   "trigger": "s_grass_tree_loss or s_shrub_tree_loss_ha or s_shrub_ndvi_decline or s_fringe_loss or (s_commons_shrinking and (s_livestock_dense or s_grazing_density))",
+   "intensity": "100 * max(s_grass_tree_loss, s_shrub_tree_loss_ha, s_shrub_ndvi_decline, s_fringe_loss, min(s_commons_shrinking, max(s_livestock_dense, s_grazing_density)))",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "igfri_vision",
+    "expert_judgement"
+   ],
+   "interpretation": "Scrub and grassland commons are shrinking, losing trees or getting less green; fodder supply is falling.",
+   "rationale": "Trees lost in shrub-tree commons (s_grass_tree_loss) or shrubland greenness declining (s_shrub_ndvi_decline) is degradation in itself. A shrinking commons (s_commons_shrinking) counts only where many animals depend on it (s_livestock_dense or s_grazing_density): on its own it mostly reflects scrub being brought under the plough, which the first run flagged in almost every Ananthapur MWS. Low confidence: the newer layers are not yet validated in the pilot. Since 22 Nov 2026 two more grazing-land losses count, following the Signal_Verification sheet's fodder signals: trees lost in shrub-tree commons over more than 2 ha (s_shrub_tree_loss_ha, sheet sig_01) and forest-edge loss (s_fringe_loss, sheet sig_02), since forest edges are grazed. Forest-edge loss also counts towards forest-fringe degradation.",
+   "public_note": "The grazing commons of this micro-watershed are degrading: trees within shrub-tree commons are being lost (s_grass_tree_loss), the shrubland is becoming less green over time (s_shrub_ndvi_decline), or the commons are shrinking (s_commons_shrinking) while many animals depend on them (s_livestock_dense, s_grazing_density). This points to worsening fodder shortages. Trees lost over a sizeable area of the shrub-tree commons (s_shrub_tree_loss_ha) and thinning forest edges (s_fringe_loss), where animals also graze, count too. The rule is checked where pastoral land covers at least 5% of the area (sys_pastoral). Further validation should be done through community interactions and documented on Commons Connect, asking how fodder availability has changed and whether the community manages grazing on its commons, including through Forest Rights Act claims."
+  },
+  {
+   "id": "fishery_potential",
+   "group": null,
+   "sheet_pathway": "good_water_potential",
+   "type": "opportunity",
+   "label": "Water bodies suited to fish culture",
+   "node": "S_swb",
+   "signals": {
+    "system": [
+     "sys_waterbodies"
+    ],
+    "stress": [
+     "s_swb_zaid_persist_high",
+     "s_swb_rabi_persist_high",
+     "s_waterbody_extent"
+    ],
+    "context": [
+     "ctx_shg_strong",
+     "ctx_swc_works"
+    ]
+   },
+   "systems": "sys_waterbodies",
+   "trigger": "s_waterbody_extent and (s_swb_zaid_persist_high or (nknown(s_swb_zaid_persist_high) == 0 and s_swb_rabi_persist_high))",
+   "intensity": "100 * min(s_waterbody_extent, max(s_swb_zaid_persist_high, 0.8 * s_swb_rabi_persist_high)) * (0.7 + 0.15 * ctx_shg_strong + 0.15 * ctx_swc_works)",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "pmmsy_guidelines",
+    "expert_judgement"
+   ],
+   "interpretation": "Water bodies hold water long enough for a fish crop; a livelihood option beyond farming.",
+   "rationale": "Fish culture needs water bodies of some size (s_waterbody_extent) that hold water for six months or more: at least 30% of the water spread left in summer (s_swb_zaid_persist_high). Where the summer series is not available, the top quarter of rabi persistence (s_swb_rabi_persist_high) is used instead, at a lower intensity. Two institutional enablers raise intensity: strong self-help groups (ctx_shg_strong) make collective ponds easier to manage, and active NREGA soil and water conservation (ctx_swc_works) shows a panchayat that builds and maintains ponds. Enablers follow the Signal_Verification sheet's structure, without its thresholds.",
+   "public_note": "Water bodies in this micro-watershed are large enough (s_waterbody_extent) and keep water into the summer (s_swb_zaid_persist_high), or hold most of their monsoon water through rabi (s_swb_rabi_persist_high), which is needed for a fish crop of six months or more. Where many households are in self-help groups (ctx_shg_strong), community or SHG-run fisheries are easier to organise, as they are where the panchayat already runs NREGA soil and water conservation works (ctx_swc_works). The opportunity is checked where water bodies cover at least 0.5% of the area (sys_waterbodies). Further validation should be done through community interactions and documented on Commons Connect, asking how long ponds hold water, who controls them, and whether groups are interested in fish rearing."
+  },
+  {
+   "id": "agroforestry_opportunity",
+   "group": null,
+   "sheet_pathway": "transition_from_crops_to_agroforestry",
+   "type": "opportunity",
+   "label": "Tree-based restoration opportunity",
+   "node": "S_tree",
+   "signals": {
+    "system": [
+     "sys_any"
+    ],
+    "stress": [
+     "s_rest_wide",
+     "s_rest_mosaic"
+    ],
+    "context": [
+     "s_farm_to_scrub",
+     "s_ci_decline",
+     "ctx_plantation_works",
+     "ctx_shg_strong",
+     "ctx_fpo_access"
+    ]
+   },
+   "systems": "sys_any",
+   "trigger": "s_rest_wide or s_rest_mosaic_g >= 1",
+   "intensity": "100 * max(s_rest_wide, 0.8 * s_rest_mosaic) * (0.7 + 0.15 * max(s_farm_to_scrub, s_ci_decline) + 0.15 * avg(ctx_plantation_works, ctx_shg_strong, ctx_fpo_access))",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "wri_restoration"
+   ],
+   "interpretation": "Land suitable for tree-based restoration: wide-scale (degraded open land) or mosaic (trees on farms).",
+   "rationale": "Wide-scale restoration area of 20% or more (s_rest_wide), or a very large mosaic restoration area (s_rest_mosaic at its severe level), from the restoration opportunity layer. Two kinds of context raise intensity. Need: farmland going out of use or declining cropping (s_farm_to_scrub, s_ci_decline) make a shift from crops to trees more relevant. Feasibility: NREGA plantation works (ctx_plantation_works), strong self-help groups (ctx_shg_strong), and a farmer producer organisation to market produce (ctx_fpo_access). Distance to a cooperative is not used: the facilities data place most villages more than 50 km from one, which looks incomplete. Feasibility enablers follow the Signal_Verification sheet's structure, without its thresholds.",
+   "public_note": "A large part of this micro-watershed is suited to tree-based restoration, either as wide-scale restoration of degraded open land (s_rest_wide) or as trees integrated with farms (s_rest_mosaic). Where farmland is going out of use (s_farm_to_scrub) or being cropped less (s_ci_decline), moving to agroforestry or plantations can restore income and soil. It is easier to act on where the panchayat already runs NREGA plantation works (ctx_plantation_works), many households are in self-help groups (ctx_shg_strong), and a farmer producer organisation can help sell tree produce (ctx_fpo_access). Further validation should be done through community interactions and documented on Commons Connect, asking which land the community controls, what trees people want, and whether water and protection from grazing can be arranged.",
+   "replaces": "restoration_opportunity"
+  },
+  {
+   "id": "forest.tree_cover_loss",
+   "group": "forest",
+   "sheet_pathway": "forest_degradation",
+   "type": "stress",
+   "label": "Net loss of tree cover",
+   "node": "S_tree",
+   "signals": {
+    "system": [
+     "sys_trees",
+     "sys_forest"
+    ],
+    "stress": [
+     "s_net_tree_loss",
+     "s_forest_to_farm",
+     "s_net_tree_neg",
+     "s_gain_below_loss",
+     "s_forest_to_farm_rel"
+    ],
+    "context": [
+     "ctx_mfp_dependent",
+     "ctx_large_forest"
+    ]
+   },
+   "systems": "sys_trees",
+   "trigger": "s_net_tree_loss or (s_forest_to_farm and s_net_tree_neg) or (sys_forest and s_gain_below_loss) or (s_forest_to_farm_rel and ctx_large_forest)",
+   "intensity": "100 * max(s_net_tree_loss, min(s_forest_to_farm, s_net_tree_neg), min(sys_forest, s_gain_below_loss), min(s_forest_to_farm_rel, ctx_large_forest)) * (0.8 + 0.2 * ctx_mfp_dependent)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "isfr2023",
+    "core_stack"
+   ],
+   "interpretation": "Forest is being cleared faster than it regrows; forest-dependent households lose NTFP, fuel and fodder.",
+   "rationale": "Net tree-cover change of −2% of the MWS or worse (s_net_tree_loss), or forest converted to farmland above 5% (s_forest_to_farm) when net change is at least −1% (s_net_tree_neg). The second path catches clearing masked by planting elsewhere. Households living off minor forest produce (context) raise intensity. Year-to-year classification noise is large, so look at the maps before acting. Since 22 Nov 2026 it also fires where forest covers at least 10% of the MWS (sys_forest) and tree-cover gain is below 0.7 of the loss (s_gain_below_loss), so that loss is judged against regrowth and not only against the MWS area; this follows the Signal_Verification sheet's forest pattern. Since 22 Nov 2026 forest converted to farm over 6% or more of the forest area also counts where the MWS has at least 600 ha of forest (s_forest_to_farm_rel with ctx_large_forest), following the Signal_Verification sheet's sig_03. This catches conversion inside forests that gained tree cover elsewhere. The 600 ha condition is absolute, so small forested MWS cannot trigger this way.",
+   "public_note": "Tree cover in this micro-watershed has fallen on balance between 2017 and 2024 (s_net_tree_loss), or forest has been cleared for farming (s_forest_to_farm) without being made up elsewhere (s_net_tree_neg). The loss matters most where households depend on minor forest produce for their living (ctx_mfp_dependent). Where forest covers a tenth of the area or more, it is also flagged when much less tree cover was gained than lost (s_gain_below_loss). In large forests (ctx_large_forest), it is also flagged where a noticeable part of the forest has been turned into farmland (s_forest_to_farm_rel), even if trees were planted or regrew elsewhere. The rule is checked where forest or tree crops cover at least 15% of the area (sys_trees). Further validation should be done through community interactions and documented on Commons Connect, asking whether forest products have declined, whether forest has been cleared for fields or plantations, and whether community forest rights have been claimed.",
+   "replaces": "forest_loss"
+  },
+  {
+   "id": "forest.fringe_degradation",
+   "group": "forest",
+   "sheet_pathway": "forest_degradation",
+   "type": "stress",
+   "label": "Forest edges degrading",
+   "node": "S_tree",
+   "signals": {
+    "system": [
+     "sys_forest"
+    ],
+    "stress": [
+     "s_fringe_loss",
+     "s_farm_degradation"
+    ],
+    "context": [
+     "ctx_mfp_dependent",
+     "s_livestock_dense"
+    ]
+   },
+   "systems": "sys_forest",
+   "trigger": "s_fringe_loss or s_farm_degradation",
+   "intensity": "100 * max(s_fringe_loss, s_farm_degradation) * (0.8 + 0.2 * max(ctx_mfp_dependent, s_livestock_dense))",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "isfr2023",
+    "expert_judgement"
+   ],
+   "interpretation": "Trees are being lost or thinned along forest edges, where people and animals enter the forest.",
+   "rationale": "Share of the 50 m forest edge zone deforested or degraded (s_fringe_loss), graded against the pooled distribution (top quarter, severe top tenth) because the layer's period is undocumented and the median MWS already shows 27% of its fringe changed. Edge degradation often precedes loss in the interior and is driven by grazing, fuelwood and encroachment, so dependence on forest produce and high livestock density (context) raise intensity. Since 22 Nov 2026 farmland degrading to barren, scrub or built-up land over 4% or more of a forested MWS (s_farm_degradation) also counts, as pressure on the forest margin; that layer covers the whole MWS, not only the edge zone. Low confidence until the layer is validated in the pilot.",
+   "public_note": "The edges of the forest in this micro-watershed are losing or thinning their tree cover faster than in most micro-watersheds of the sample (s_fringe_loss). Edges are where grazing, fuelwood collection and encroachment act first, and their decline often comes before loss deeper in the forest. It is also flagged where farmland in this forested micro-watershed is turning to barren, scrub or built-up land (s_farm_degradation), which adds pressure on the forest margin. The concern is greater where households rely on forest produce (ctx_mfp_dependent) or graze many animals (s_livestock_dense). The rule is checked where the forest-fringe system covers at least a tenth of the area (sys_forest). Further validation should be done through community interactions and documented on Commons Connect, asking how forest edges are used and protected."
+  },
+  {
+   "id": "forest.fire",
+   "group": "forest",
+   "sheet_pathway": "forest_degradation",
+   "type": "stress",
+   "label": "Frequent forest fires",
+   "node": "S_tree",
+   "signals": {
+    "system": [
+     "sys_forest"
+    ],
+    "stress": [
+     "s_fire_frequent"
+    ],
+    "context": []
+   },
+   "systems": "sys_forest",
+   "trigger": "s_fire_frequent",
+   "intensity": "100 * s_fire_frequent",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "fsi_fire"
+   ],
+   "interpretation": "Repeated fires degrade forest, kill regeneration and reduce NTFP.",
+   "rationale": "Fire detections per 100 km² per year (s_fire_frequent) compared with pooled percentiles, since fire-proneness is relative (FSI ranks forest by fire frequency).",
+   "public_note": "Satellites detect fires in this micro-watershed more often than in most others (s_fire_frequent). Repeated fires kill young trees, degrade the forest floor and reduce forest produce. The rule is checked where the forest-fringe system covers at least a tenth of the area (sys_forest). Further validation should be done through community interactions and documented on Commons Connect, asking how often fires occur, why they are set, and whether fire lines or community patrols exist."
+  },
+  {
+   "id": "multidimensional_vulnerability",
+   "group": null,
+   "sheet_pathway": "multi_sector_vulnerability",
+   "type": "stress",
+   "label": "Multi-sector vulnerability",
+   "node": "M_social",
+   "signals": {
+    "system": [
+     "sys_socio"
+    ],
+    "stress": [
+     "s_st_share",
+     "s_sc_share",
+     "s_low_literacy",
+     "s_low_nrega",
+     "s_bank_far",
+     "s_low_shg",
+     "s_kuccha"
+    ],
+    "context": []
+   },
+   "systems": "sys_socio",
+   "trigger": "ntrue(s_st_share or s_sc_share, s_low_literacy, s_low_nrega, s_bank_far, s_low_shg, s_kuccha) >= 2",
+   "intensity": "100 * avg(max(s_st_share, s_sc_share), s_low_literacy, s_low_nrega, s_bank_far, s_low_shg, s_kuccha)",
+   "severe_at": 70,
+   "confidence": "medium",
+   "sources": [
+    "census2011",
+    "mission_antyodaya",
+    "rbi_5km",
+    "nrlm_framework"
+   ],
+   "interpretation": "Several kinds of disadvantage overlap. Raises the priority of any other stress in the MWS; check eligibility for SC/ST, housing, livelihood and financial inclusion programmes.",
+   "rationale": "Six dimensions are counted: historical marginalisation (Scheduled Tribe or Caste share), low literacy, little NREGA work, a distant bank branch, low self-help group coverage and many kuccha houses. Two or more trigger the rule (changed from three on 21 Nov 2026 after the ground-truth check: all three labelled positives had exactly two). Intensity is the average grade across the dimensions with data. Several dimensions come from village surveys (Mission Antyodaya 2018–20, facility distances) apportioned to the MWS by area, and are missing where an MWS has no village link (CS-88).",
+   "public_note": "Several kinds of disadvantage overlap in this micro-watershed: a large Scheduled Tribe or Scheduled Caste population (s_st_share, s_sc_share), low literacy (s_low_literacy), little use of NREGA works (s_low_nrega), a bank branch far away (s_bank_far), few households in self-help groups (s_low_shg) and many kuccha houses (s_kuccha). It is flagged when two or more of these hold. Layered with water, soil, forest or livestock stresses, this points to areas facing compound stress that need attention first. Further validation should be done through community interactions and documented on Commons Connect, asking about seasonal migration, access to entitlements and credit, and how conditions have changed in recent years.",
+   "replaces": "social_vulnerability"
+  },
+  {
+   "id": "drinking_water.scarcity",
+   "group": "drinking_water",
+   "sheet_pathway": "water_security_safety_domestic_use",
+   "type": "stress",
+   "label": "Drinking water scarcity",
+   "node": "O_drinking",
+   "signals": {
+    "system": [
+     "sys_socio"
+    ],
+    "stress": [
+     "s_soge_stage",
+     "s_wl_fall",
+     "s_summer_water_low",
+     "s_low_piped_water"
+    ],
+    "context": [
+     "ctx_hard_rock",
+     "ctx_headwater",
+     "s_swb_shrinking"
+    ]
+   },
+   "systems": "sys_socio",
+   "trigger": "(s_soge_stage or s_wl_fall) and (s_summer_water_low or s_low_piped_water)",
+   "intensity": "100 * avg(max(s_soge_stage, s_wl_fall), max(s_summer_water_low, s_low_piped_water)) * (0.75 + 0.25 * max(ctx_hard_rock, ctx_headwater, s_swb_shrinking))",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "jjm_guidelines",
+    "cgwb_dgwr2023",
+    "expert_judgement"
+   ],
+   "interpretation": "Groundwater, the main drinking source, is under pressure and there is no reliable summer alternative.",
+   "rationale": "Rural drinking water mostly comes from groundwater, so the rule needs groundwater pressure (s_soge_stage or s_wl_fall) and no reliable alternative: little surface water in summer (s_summer_water_low) or few piped connections (s_low_piped_water). Hard rock, headwater position and shrinking water bodies (context) raise intensity.",
+   "public_note": "Drinking water in this micro-watershed is at risk in the dry months: groundwater, the main drinking source, is under pressure (s_soge_stage, s_wl_fall), and there is no reliable alternative because little surface water lasts into summer (s_summer_water_low) or few households have a piped connection (s_low_piped_water). Hard-rock aquifers (ctx_hard_rock), headwater position (ctx_headwater) and shrinking water bodies (s_swb_shrinking) make it worse. The rule applies to every micro-watershed (sys_socio). Further validation should be done through community interactions and documented on Commons Connect, asking whether hand pumps and wells fail in summer, whether water is brought by tanker, and whether taps supply water all year."
+  },
+  {
+   "id": "drinking_water.salinity",
+   "group": "drinking_water",
+   "sheet_pathway": "water_security_safety_domestic_use",
+   "type": "stress",
+   "label": "Saline groundwater",
+   "node": "D_aquifer",
+   "signals": {
+    "system": [
+     "sys_socio"
+    ],
+    "stress": [
+     "s_saline"
+    ],
+    "context": [
+     "s_low_piped_water"
+    ]
+   },
+   "systems": "sys_socio",
+   "trigger": "s_saline",
+   "intensity": "60 * s_saline + 40 * s_saline * s_low_piped_water",
+   "severe_at": 70,
+   "confidence": "high",
+   "sources": [
+    "cgwb_amravati",
+    "cgwb_dgwr2023"
+   ],
+   "interpretation": "Groundwater unsuitable for drinking or irrigation in parts of the aquifer; rainwater harvesting and piped supply matter more.",
+   "rationale": "Taken directly from the CGWB block category 'Saline' (s_saline). The data cannot grade salinity, so intensity is 60 (moderate), rising toward severe where few households have piped water (s_low_piped_water) and must rely on the saline source.",
+   "public_note": "Groundwater in this block is assessed as saline by the Central Ground Water Board (s_saline), so wells may give water that is unfit to drink and harms sensitive crops. The concern is greater where few households have a piped supply (s_low_piped_water). The rule applies to every micro-watershed (sys_socio). Further validation should be done through community interactions and documented on Commons Connect, asking whether well water tastes salty, leaves white deposits, or has changed colour, and what households drink instead.",
+   "replaces": "saline_groundwater"
+  },
+  {
+   "id": "drinking_water.mining",
+   "group": "drinking_water",
+   "sheet_pathway": "water_security_safety_domestic_use",
+   "type": "stress",
+   "label": "Mining near water sources",
+   "node": "D_mining",
+   "signals": {
+    "system": [
+     "sys_socio"
+    ],
+    "stress": [
+     "s_mining"
+    ],
+    "context": [
+     "s_low_piped_water"
+    ]
+   },
+   "systems": "sys_socio",
+   "trigger": "s_mining",
+   "intensity": "60 * s_mining + 40 * s_mining * s_low_piped_water",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "moefcc_parivesh",
+    "expert_judgement"
+   ],
+   "interpretation": "Mining in the micro-watershed may contaminate wells, streams and ponds with sediment, metals or acid drainage.",
+   "rationale": "Mining sites or projects in the MWS (s_mining, from the CoRE Stack mining layer of environmental-clearance proposals and mapped sites) are a hazard for drinking-water quality through sediment, metals and acid mine drainage. The data show presence, not contamination, so the rule is low confidence: intensity is 30 for one site, 60 for three or more, and rises toward severe where few households have piped water (s_low_piped_water) and drink from local sources. Mining as a water-quality hazard follows the Signal_Verification sheet's structure. Only mining inside the MWS is counted; mines upstream are not yet traced.",
+   "public_note": "There is mining in this micro-watershed (s_mining), recorded in the environmental-clearance or mining-site data. Mining can make nearby wells, streams and ponds muddy or contaminated with metals. The concern is greater where few households have a piped supply (s_low_piped_water) and drink from these sources. The rule applies to every micro-watershed (sys_socio). The data show that mining is present, not that water is contaminated. Further validation should be done through community interactions and documented on Commons Connect, asking whether water near the mines has changed in colour, taste or smell, whether people or animals fall ill after drinking it, and whether water has ever been tested."
+  },
+  {
+   "id": "flood_exposure",
+   "group": null,
+   "sheet_pathway": null,
+   "type": "stress",
+   "label": "Flood exposure",
+   "node": "D_flood",
+   "signals": {
+    "system": [
+     "sys_any"
+    ],
+    "stress": [
+     "s_kharif_water",
+     "s_water_any"
+    ],
+    "context": [
+     "ctx_alluvial_plain",
+     "ctx_river",
+     "ctx_flat"
+    ]
+   },
+   "systems": "sys_any",
+   "trigger": "(s_kharif_water or s_water_any) and (ctx_alluvial_plain or (ctx_river and ctx_flat))",
+   "intensity": "100 * max(s_kharif_water, s_water_any) * (0.8 + 0.2 * ctx_river)",
+   "severe_at": 70,
+   "confidence": "low",
+   "sources": [
+    "nih_ballia"
+   ],
+   "interpretation": "Seasonal water spread on flat land near rivers: likely flooding of kharif crops, settlements and grazing land.",
+   "rationale": "Water seen in the monsoon but not after it (s_kharif_water), or a large water share (s_water_any), on an alluvial plain or flat land with a river (context, one required). It cannot tell flood damage from wetlands or river beds. Floods are a stress that can hit any system present, so the rule applies wherever farming, settlement or grazing land is present. The rule itself applies everywhere; it is shown under each production system that is present (cropland for agriculture, pastoral land for livestock, settlement for peri-urban, and always for households), because a flood is a stress on whatever it reaches.",
+   "public_note": "Water spreads over land in this micro-watershed during the monsoon and recedes afterwards (s_kharif_water), or a large share of the area is under water (s_water_any), on flat alluvial land (ctx_alluvial_plain) or flat land along a river (ctx_river, ctx_flat). This pattern indicates exposure to floods that can damage kharif crops, homes and grazing land. It is shown under every production system present here: farming, livestock, settlements and households. Further validation should be done through community interactions and documented on Commons Connect, asking how often floods damage crops or homes and how long water stays.",
+   "replaces": "flood_exposure"
+  }
+ ],
+ "confidence_scale": {
+  "high": "Established mechanism with published thresholds and indicators that measure it directly.",
+  "medium": "Established mechanism, but the indicator is a proxy or the threshold is judgement-based.",
+  "low": "Plausible mechanism or a model-derived indicator with known bias; treat as a prompt to look closer."
+ },
+ "evaluation": [
+  "Signals first. Every signal in signals.json is evaluated once per MWS. A system signal is a yes/no condition on the system mix (for example groundwater-using systems hold at least 10%). A stress or context signal compares one indicator with a threshold in the direction that is bad, using the first absolute threshold whose context matches, or a percentile pooled across all MWS in the run when no absolute value fits or the indicator is known to be biased.",
+  "Grades. A threshold signal has a grade: 0 when the threshold is not crossed, 0.5 at the threshold, rising in a straight line to 1 at the severe threshold. A signal is on when its grade is at least 0.5. Yes/no signals grade 0 or 1. Missing data gives an unknown signal.",
+  "Systems. A rule is checked only where its 'systems' expression holds, so a forest MWS is not flagged for irrigation problems. The socio-economic system is cross-cutting and present in every MWS. Where a rule does not apply, it is shown as not applicable.",
+  "Trigger. The 'trigger' expression combines stress and context signals with and/or. 'or' where any one symptom is enough; 'and' where a stress is a co-incident change (irrigation rising while groundwater falls) or needs a setting (flat land in a canal command). Unknown counts as unknown: an 'or' can still trigger on another signal, an 'and' cannot.",
+  "Intensity. A number from 0 to 100 computed from the grades: usually 100 times the grade of the evidence, multiplied by an amplifier factor between about 0.75 and 1 that rises with context signals (hard rock, headwater position, high cropping intensity). It is computed whether or not the rule triggers, so a rule that did not trigger can still show partial evidence. A triggered rule with intensity of at least 'severe_at' (70 by default) is severe; otherwise moderate.",
+  "Hierarchy. Rules are causal pathways, nested in groups where several share a mechanism (groundwater.*). taxonomy.json places them under observed stresses within production systems. An observed stress is flagged when any of its rules of the same type is, and takes the highest intensity among them. It is shown only where its production system is present, so the flood rule appears under agriculture, livestock, peri-urban and households wherever each of these is present.",
+  "Confidence. Set per rule from the confidence scale below. It sets how firmly the data result is held before community answers (questions.json).",
+  "Public note. Each rule carries a plain-language note naming the signals it uses, where it is checked, what makes it more intense and what to verify with the community."
+ ]
+}

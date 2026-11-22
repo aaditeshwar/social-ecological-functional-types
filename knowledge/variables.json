@@ -1,0 +1,1028 @@
+{
+ "_about": "Indicator definitions. Each 'expr' is evaluated per micro-watershed (MWS) with the safe expression language in seft/expr.py. Dataset aliases: lulc=lulc_vector, ci=croppingintensity_annual, drought=croppingdrought_kharif, hydro=hydrological_annual, swb=surfacewaterbodies_annual, aquifer=aquifer_vector, terrain, soge=soge_vector, rest=restoration_vector, degr=change_detection_degradation, tcd=change_detection_deforestation (formerly change_detection_tree_cover_decrease), tci=change_detection_afforestation (formerly _increase), urb=change_detection_urbanization, canal (n, projects), gc=green_credit (n), mine=mining (n: mining sites or projects), vill=village census and livestock apportioned to the MWS by area of intersection, soil=soil_health, nrega=nrega_annual (yearly work counts by category; series named by category, e.g. nrega.community_assets), anty=antyodaya (Mission Antyodaya village survey, household counts apportioned by area), fac=facilities_proximity (village distances, area-weighted mean), river=river (n rows), conn=mws_connectivity (n_upstream), fringe=forest_fringes, fire=forest_fire, tig=tree_in_grassland, ndvi=ndvi. Rows in the documented schema (unit- and year-suffixed columns, CS-74) are mapped to these names by seft/schema.py. Column names of the newer datasets are lower-cased with spaces and hyphens replaced by '_'; yearly columns ending in _YYYY or _YYYY-YYYY become series. 'area' is MWS area in ha. Annual columns are series over agricultural years 2017-2024. Variables may use earlier variables by id. 'series': true marks helper series that are not exported. 'min_coverage' names a coverage variable that must be >= 0.2 (MIN_COVERAGE in seft/indicators.py) or the value is set to missing. Coverage is below 1 mainly where an MWS extends beyond the district: only villages inside the selected district are listed by the API. Density-type variables divide by the area of the covered villages, so partial coverage does not bias them.",
+ "version": "0.3",
+ "years": "2017-2024 (agricultural years)",
+ "groups": {
+  "landcover": "Land use and land cover (mean of annual shares of MWS area)",
+  "cropping": "Cropping pattern and intensity",
+  "drought": "Kharif meteorological / agricultural drought",
+  "water": "Water balance, groundwater and surface water",
+  "context": "Static context: aquifer, terrain, groundwater assessment",
+  "change": "Land-cover change 2017-2024 (share of MWS area)",
+  "society": "Village population and livestock (apportioned by area)",
+  "programmes": "Existing programme footprint",
+  "soil": "Soil nutrients (Soil Health layer)",
+  "institutions": "Village services and institutions",
+  "forest": "Forest condition"
+ },
+ "variables": [
+  {
+   "id": "crop_ts",
+   "series": true,
+   "group": "cropping",
+   "expr": "ci.single_cropped_area + ci.doubly_cropped_area + ci.triply_cropped_area",
+   "unit": "ha",
+   "label": "Net cropped area (series)"
+  },
+  {
+   "id": "irr_ts",
+   "series": true,
+   "group": "cropping",
+   "expr": "ci.single_non_kharif_cropped_area + ci.doubly_cropped_area + ci.triply_cropped_area",
+   "unit": "ha",
+   "label": "Area cropped outside kharif (series)"
+  },
+  {
+   "id": "dbl_ts",
+   "series": true,
+   "group": "cropping",
+   "expr": "ci.doubly_cropped_area + ci.triply_cropped_area",
+   "unit": "ha",
+   "label": "Double+triple cropped area (series)"
+  },
+  {
+   "id": "f_crop",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Cropland share of MWS",
+   "expr": "mean(div(crop_ts, area))",
+   "description": "Mean annual net cropped area (single+double+triple) / MWS area."
+  },
+  {
+   "id": "f_forest",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Tree/forest share",
+   "expr": "mean(div(lulc.tree_forest_area, area))"
+  },
+  {
+   "id": "forest_area_ha",
+   "group": "landcover",
+   "unit": "ha",
+   "label": "Tree/forest area (ha)",
+   "expr": "f_forest * area"
+  },
+  {
+   "id": "f_shrub",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Shrub/scrub share",
+   "expr": "mean(div(lulc.shrub_scrub_area, area))"
+  },
+  {
+   "id": "f_barren",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Barren share",
+   "expr": "mean(div(lulc.barrenlands_area, area))"
+  },
+  {
+   "id": "f_built",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Built-up share (mean)",
+   "expr": "mean(div(lulc.built_up_area, area))",
+   "note": "The loader renames built-up_area to built_up_area."
+  },
+  {
+   "id": "f_built_last",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Built-up share (latest year)",
+   "expr": "last(div(lulc.built_up_area, area))"
+  },
+  {
+   "id": "f_commons",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Open commons share (shrub+barren)",
+   "expr": "f_shrub + f_barren",
+   "description": "Proxy for grazing commons and wastelands."
+  },
+  {
+   "id": "f_water_any",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Water share (any season)",
+   "expr": "mean(div(lulc.k_water_area + lulc.kr_water_area + lulc.krz_water_area, area))"
+  },
+  {
+   "id": "f_water_perennial",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Perennial water share (kharif+rabi+zaid)",
+   "expr": "mean(div(lulc.krz_water_area, area))"
+  },
+  {
+   "id": "f_water_kharif_only",
+   "group": "landcover",
+   "unit": "share",
+   "label": "Kharif-only water share",
+   "expr": "mean(div(lulc.k_water_area, area))",
+   "description": "Water seen only in the monsoon season: seasonal ponding, flood spread or tanks that dry by rabi."
+  },
+  {
+   "id": "irr_share",
+   "group": "cropping",
+   "unit": "share",
+   "label": "Non-kharif cropped share of cropland",
+   "expr": "mean(div(irr_ts, crop_ts))",
+   "description": "Share of net cropped area that carries a crop outside kharif (double, triple or rabi-only). In the dry season this requires irrigation or residual moisture, so it is the main irrigation proxy."
+  },
+  {
+   "id": "double_share",
+   "group": "cropping",
+   "unit": "share",
+   "label": "Double/triple cropped share of cropland",
+   "expr": "mean(div(dbl_ts, crop_ts))"
+  },
+  {
+   "id": "rabi_kharif_water",
+   "group": "water",
+   "unit": "ratio",
+   "label": "Rabi water-body area over kharif water-body area (mean of years)",
+   "expr": "mean(div(swb.rabi_area, swb.kharif_area))",
+   "description": "Below 1 means surface water shrinks between kharif and rabi."
+  },
+  {
+   "id": "rabi_only_share",
+   "group": "cropping",
+   "unit": "share",
+   "label": "Rabi-only share of cropland",
+   "expr": "mean(div(ci.single_non_kharif_cropped_area, crop_ts))",
+   "description": "Single crop grown only after the monsoon: residual-moisture (black soils) or irrigated rabi."
+  },
+  {
+   "id": "rainfed_share",
+   "group": "cropping",
+   "unit": "share",
+   "label": "Kharif-only share of cropland",
+   "expr": "mean(div(ci.single_kharif_cropped_area, crop_ts))"
+  },
+  {
+   "id": "ci_mean",
+   "group": "cropping",
+   "unit": "ratio",
+   "label": "Cropping intensity (mean)",
+   "expr": "mean(ci.cropping_intensity)"
+  },
+  {
+   "id": "ci_slope",
+   "group": "cropping",
+   "unit": "per yr",
+   "label": "Cropping intensity trend",
+   "expr": "slope(ci.cropping_intensity)",
+   "description": "Theil-Sen slope, 2017-2024."
+  },
+  {
+   "id": "ci_endpoint_change",
+   "group": "cropping",
+   "unit": "ratio",
+   "label": "Cropping intensity, last 2 years minus first 2",
+   "expr": "late(ci.cropping_intensity, 2) - early(ci.cropping_intensity, 2)"
+  },
+  {
+   "id": "triple_ha",
+   "group": "agriculture",
+   "unit": "ha",
+   "label": "Triple-cropped area (mean)",
+   "expr": "mean(ci.triply_cropped_area)"
+  },
+  {
+   "id": "single_kharif_ha",
+   "group": "agriculture",
+   "unit": "ha",
+   "label": "Kharif-only cropped area (mean)",
+   "expr": "mean(ci.single_kharif_cropped_area)"
+  },
+  {
+   "id": "ci_cv",
+   "group": "cropping",
+   "unit": "ratio",
+   "label": "Cropping intensity CV",
+   "expr": "cv(ci.cropping_intensity)"
+  },
+  {
+   "id": "double_slope_pp",
+   "group": "cropping",
+   "unit": "pp of MWS per yr",
+   "label": "Trend in double-cropped area",
+   "expr": "slope(div(dbl_ts, area)) * 100",
+   "description": "Change in double+triple cropped share of the MWS, percentage points per year."
+  },
+  {
+   "id": "crop_slope_pp",
+   "group": "cropping",
+   "unit": "pp of MWS per yr",
+   "label": "Trend in net cropped area",
+   "expr": "slope(div(crop_ts, area)) * 100"
+  },
+  {
+   "id": "kharif_cv",
+   "group": "cropping",
+   "unit": "ratio",
+   "label": "Kharif cropped area CV",
+   "expr": "cv(drought.kharif_cropped)"
+  },
+  {
+   "id": "kharif_min_ratio",
+   "group": "cropping",
+   "unit": "ratio",
+   "label": "Worst-year kharif area / best-year",
+   "expr": "div(min(drought.kharif_cropped), max(drought.kharif_cropped))"
+  },
+  {
+   "id": "kharif_sown_mean",
+   "group": "agriculture",
+   "unit": "%",
+   "label": "Kharif area sown (mean, % of reference)",
+   "expr": "mean(drought.kharif_cropped_area)",
+   "description": "Mean kharif cropped area as a percentage of the reference kharif area (drought dataset), so values below 100 mean part of the kharif cropland went unsown."
+  },
+  {
+   "id": "dr_modsev_mean",
+   "group": "drought",
+   "unit": "weeks/yr",
+   "label": "Moderate+severe drought weeks (mean)",
+   "expr": "mean(drought.moderate + drought.severe)"
+  },
+  {
+   "id": "dr_severe_mean",
+   "group": "drought",
+   "unit": "weeks/yr",
+   "label": "Severe drought weeks (mean)",
+   "expr": "mean(drought.severe)"
+  },
+  {
+   "id": "dr_years_modsev4",
+   "group": "drought",
+   "unit": "years",
+   "label": "Years with >=4 moderate+severe weeks",
+   "expr": "count(drought.moderate + drought.severe >= 4)"
+  },
+  {
+   "id": "dr_modsev_max",
+   "group": "drought",
+   "unit": "weeks",
+   "label": "Worst year moderate+severe weeks",
+   "expr": "max(drought.moderate + drought.severe)"
+  },
+  {
+   "id": "dry_spell_mean",
+   "group": "drought",
+   "unit": "weeks/yr",
+   "label": "Dry-spell weeks (mean)",
+   "expr": "mean(drought.dry_spell)"
+  },
+  {
+   "id": "dry_spell_years3",
+   "group": "drought",
+   "unit": "years",
+   "label": "Years with >=3 dry-spell weeks",
+   "expr": "count(drought.dry_spell >= 3)"
+  },
+  {
+   "id": "onset_sd_days",
+   "group": "drought",
+   "unit": "days",
+   "label": "Monsoon onset variability (SD)",
+   "expr": "std(doy(drought.monsoon_onset))"
+  },
+  {
+   "id": "precip_mean",
+   "group": "water",
+   "unit": "mm/yr",
+   "label": "Precipitation (mean)",
+   "expr": "mean(hydro.precipitation)"
+  },
+  {
+   "id": "precip_cv",
+   "group": "water",
+   "unit": "ratio",
+   "label": "Precipitation CV",
+   "expr": "cv(hydro.precipitation)"
+  },
+  {
+   "id": "precip_min",
+   "group": "climate",
+   "unit": "mm",
+   "label": "Driest year's rainfall (rescaled to district normal)",
+   "expr": "min(hydro.precipitation) * rain_factor",
+   "description": "Lowest annual rainfall over the record, rescaled like rain_norm."
+  },
+  {
+   "id": "kharif_rain_share",
+   "group": "climate",
+   "unit": "share",
+   "label": "Share of annual rainfall falling in kharif",
+   "expr": "div(mean(hseas.precipitation_kharif), mean(hydro.precipitation))",
+   "source": "hydrological_seasonal",
+   "description": "Mean kharif rainfall over mean annual rainfall. On CoRE's seasons a sizeable part of the monsoon falls in 'zaid', so this measures how much rain falls outside the main kharif window (including north-east monsoon rainfall)."
+  },
+  {
+   "id": "et_mean",
+   "group": "water",
+   "unit": "mm/yr",
+   "label": "Evapotranspiration (mean)",
+   "expr": "mean(hydro.et)"
+  },
+  {
+   "id": "et_p_ratio",
+   "group": "water",
+   "unit": "ratio",
+   "label": "ET / precipitation",
+   "expr": "div(sum(hydro.et), sum(hydro.precipitation))",
+   "description": "Above ~0.9 the landscape consumes almost all rainfall; above 1 it draws on storage or imported (canal) water."
+  },
+  {
+   "id": "et_slope",
+   "group": "water",
+   "unit": "mm/yr per yr",
+   "label": "ET trend",
+   "expr": "slope(hydro.et)"
+  },
+  {
+   "id": "runoff_ratio",
+   "group": "water",
+   "unit": "ratio",
+   "label": "Runoff coefficient",
+   "expr": "div(sum(hydro.runoff), sum(hydro.precipitation))"
+  },
+  {
+   "id": "dg_mean",
+   "group": "water",
+   "unit": "mm/yr",
+   "label": "Groundwater storage change (mean)",
+   "expr": "mean(hydro.delta_g)"
+  },
+  {
+   "id": "dg_sum",
+   "group": "water",
+   "unit": "mm",
+   "label": "Cumulative groundwater change 2017-24",
+   "expr": "sum(hydro.delta_g)"
+  },
+  {
+   "id": "dg_neg_frac",
+   "group": "water",
+   "unit": "share of years",
+   "label": "Years with net groundwater loss",
+   "expr": "frac(hydro.delta_g < 0)"
+  },
+  {
+   "id": "dg_late_mean",
+   "group": "water",
+   "unit": "mm/yr",
+   "label": "Groundwater change, last 3 years",
+   "expr": "late(hydro.delta_g, 3)"
+  },
+  {
+   "id": "wl_cum",
+   "group": "water",
+   "unit": "m",
+   "label": "Cumulative water-level change 2017-24",
+   "expr": "sum(hydro.welldepth)",
+   "description": "Sum of the annual 'welldepth' column (storage change divided by specific yield). Positive = rise."
+  },
+  {
+   "id": "wl_trend",
+   "group": "water",
+   "unit": "m/yr",
+   "label": "Water-level trend",
+   "expr": "slope(cumsum(hydro.welldepth))"
+  },
+  {
+   "id": "swb_frac",
+   "group": "water",
+   "unit": "share",
+   "label": "Surface water-body share (mean)",
+   "expr": "mean(div(swb.total_area, area))"
+  },
+  {
+   "id": "swb_rabi_persist",
+   "group": "water",
+   "unit": "ratio",
+   "label": "Water-body persistence into rabi",
+   "expr": "div(sum(swb.rabi_area), sum(swb.total_area))"
+  },
+  {
+   "id": "swb_zaid_persist",
+   "group": "water",
+   "unit": "ratio",
+   "label": "Water-body persistence into summer",
+   "expr": "div(sum(swb.zaid_area), sum(swb.total_area))"
+  },
+  {
+   "id": "swb_slope_pct",
+   "group": "water",
+   "unit": "% per yr",
+   "label": "Trend in water-body area (relative)",
+   "expr": "div(slope(swb.total_area), mean(swb.total_area)) * 100"
+  },
+  {
+   "id": "swb_rabi_slope_pct",
+   "group": "water",
+   "unit": "% per yr",
+   "label": "Trend in rabi water-body area (relative)",
+   "expr": "div(slope(swb.rabi_area), mean(swb.rabi_area)) * 100"
+  },
+  {
+   "id": "aquifer_class",
+   "group": "context",
+   "unit": "class",
+   "label": "Aquifer class",
+   "expr": "aquifer.aquifer_class"
+  },
+  {
+   "id": "aquifer_alluvium_pct",
+   "group": "context",
+   "unit": "%",
+   "label": "Alluvium share of aquifer",
+   "expr": "aquifer.pa_alluvium"
+  },
+  {
+   "id": "aquifer_basalt_pct",
+   "group": "context",
+   "unit": "%",
+   "label": "Basalt share of aquifer",
+   "expr": "aquifer.pa_basalt"
+  },
+  {
+   "id": "soge_class",
+   "group": "context",
+   "unit": "class",
+   "label": "Groundwater assessment category (block)",
+   "expr": "soge.class_name"
+  },
+  {
+   "id": "soge_stage",
+   "group": "context",
+   "unit": "%",
+   "label": "Stage of groundwater extraction",
+   "expr": "soge.soge_dev"
+  },
+  {
+   "id": "terrain_class",
+   "group": "context",
+   "unit": "class",
+   "label": "Terrain cluster",
+   "expr": "terrain.terrain_description"
+  },
+  {
+   "id": "f_plain",
+   "group": "context",
+   "unit": "share",
+   "label": "Plain share",
+   "expr": "div(terrain.plain_area, 100)"
+  },
+  {
+   "id": "f_hill",
+   "group": "context",
+   "unit": "share",
+   "label": "Hill-slope + ridge share",
+   "expr": "div(terrain.hill_slope_area + terrain.ridge_area, 100)"
+  },
+  {
+   "id": "f_slopy",
+   "group": "context",
+   "unit": "share",
+   "label": "Gentle-slope share",
+   "expr": "div(terrain.slopy_area, 100)"
+  },
+  {
+   "id": "n_canals",
+   "group": "context",
+   "unit": "count",
+   "label": "Canals intersecting MWS",
+   "expr": "canal.n"
+  },
+  {
+   "id": "degr_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Farmland degraded (to barren/scrub/built)",
+   "expr": "div(degr.total_degradation_area, area)"
+  },
+  {
+   "id": "farm_to_barren_scrub_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Farmland to barren or scrub",
+   "expr": "div(degr.farm_to_barren_area + degr.farm_to_scrub_land_area, area)"
+  },
+  {
+   "id": "tcd_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Tree cover lost",
+   "expr": "div(tcd.total_tree_cover_decrease_area, area)"
+  },
+  {
+   "id": "tci_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Tree cover gained",
+   "expr": "div(tci.total_tree_cover_increase_area, area)"
+  },
+  {
+   "id": "net_tree_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Net tree cover change",
+   "expr": "tci_frac - tcd_frac"
+  },
+  {
+   "id": "tree_gain_loss_ratio",
+   "group": "forest",
+   "unit": "ratio",
+   "label": "Tree-cover gain over tree-cover loss",
+   "expr": "div(tci.total_tree_cover_increase_area, tcd.total_tree_cover_decrease_area)",
+   "description": "Below 1 means more tree cover was lost than gained, relative to the loss itself rather than to the MWS area."
+  },
+  {
+   "id": "forest_to_farm_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Forest converted to farm",
+   "expr": "div(tcd.forest_to_farm_area, area)"
+  },
+  {
+   "id": "forest_to_farm_rel",
+   "group": "change",
+   "unit": "share",
+   "label": "Forest converted to farm, as a share of the forest area",
+   "expr": "div(forest_to_farm_frac, f_forest)"
+  },
+  {
+   "id": "forest_loss_rel",
+   "group": "change",
+   "unit": "share of tree cover",
+   "label": "Tree cover lost relative to tree cover",
+   "expr": "div(tcd.total_tree_cover_decrease_area, max(first(lulc.tree_forest_area), 1))"
+  },
+  {
+   "id": "urb_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "New built-up area",
+   "expr": "div(urb.total_urbanization_area, area)"
+  },
+  {
+   "id": "farm_to_built_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Farm/tree to built-up",
+   "expr": "div(urb.tree_farm_to_built_up_area, area)"
+  },
+  {
+   "id": "built_slope_pp",
+   "group": "change",
+   "unit": "pp per yr",
+   "label": "Built-up share trend",
+   "expr": "slope(div(lulc.built_up_area, area)) * 100"
+  },
+  {
+   "id": "shrub_slope_pp",
+   "group": "change",
+   "unit": "pp per yr",
+   "label": "Trend in open commons (shrub+barren) share",
+   "expr": "slope(div(lulc.shrub_scrub_area + lulc.barrenlands_area, area)) * 100"
+  },
+  {
+   "id": "tree_slope_pp",
+   "group": "change",
+   "unit": "pp per yr",
+   "label": "Trend in tree cover share",
+   "expr": "slope(div(lulc.tree_forest_area, area)) * 100"
+  },
+  {
+   "id": "rest_wide_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Wide-scale restoration opportunity",
+   "expr": "div(rest.wide_scale_restoration_area, area)"
+  },
+  {
+   "id": "rest_mosaic_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Mosaic restoration opportunity",
+   "expr": "div(rest.mosaic_restoration_area, area)"
+  },
+  {
+   "id": "rest_protect_frac",
+   "group": "change",
+   "unit": "share",
+   "label": "Protection area",
+   "expr": "div(rest.protection_area, area)"
+  },
+  {
+   "id": "cov_social",
+   "group": "society",
+   "unit": "share",
+   "label": "Share of MWS covered by villages with census data",
+   "expr": "div(vill.area_social, area)"
+  },
+  {
+   "id": "cov_livestock",
+   "group": "society",
+   "unit": "share",
+   "label": "Share of MWS covered by villages with livestock data",
+   "expr": "div(vill.area_livestock, area)"
+  },
+  {
+   "id": "pop",
+   "group": "society",
+   "unit": "persons",
+   "label": "Population (apportioned)",
+   "expr": "vill.pop",
+   "min_coverage": "cov_social"
+  },
+  {
+   "id": "pop_density",
+   "group": "society",
+   "unit": "persons/km2",
+   "label": "Population density",
+   "expr": "div(vill.pop, vill.area_social / 100)",
+   "min_coverage": "cov_social"
+  },
+  {
+   "id": "st_share",
+   "group": "society",
+   "unit": "share",
+   "label": "Scheduled Tribe share",
+   "expr": "div(vill.st, vill.pop)",
+   "min_coverage": "cov_social"
+  },
+  {
+   "id": "sc_share",
+   "group": "society",
+   "unit": "share",
+   "label": "Scheduled Caste share",
+   "expr": "div(vill.sc, vill.pop)",
+   "min_coverage": "cov_social"
+  },
+  {
+   "id": "literacy",
+   "group": "society",
+   "unit": "%",
+   "label": "Literacy rate",
+   "expr": "vill.literacy",
+   "min_coverage": "cov_social"
+  },
+  {
+   "id": "tlu",
+   "group": "society",
+   "unit": "TLU",
+   "label": "Tropical livestock units",
+   "expr": "0.5 * vill.cattle + 0.5 * vill.buffalo + 0.1 * vill.sheep + 0.1 * vill.goat + 0.2 * vill.pig",
+   "description": "FAO tropical livestock unit coefficients for South Asia (cattle 0.5, buffalo 0.5, sheep 0.1, goat 0.1, pig 0.2).",
+   "min_coverage": "cov_livestock",
+   "source": "fao_tlu"
+  },
+  {
+   "id": "tlu_per_ha",
+   "group": "society",
+   "unit": "TLU/ha",
+   "label": "Livestock density",
+   "expr": "div(tlu, vill.area_livestock)",
+   "min_coverage": "cov_livestock"
+  },
+  {
+   "id": "tlu_per_ha_grazing",
+   "group": "society",
+   "unit": "TLU/ha",
+   "label": "Livestock per ha of open commons",
+   "expr": "div(tlu_per_ha, max(f_commons, 0.03))",
+   "min_coverage": "cov_livestock"
+  },
+  {
+   "id": "small_rum_share",
+   "group": "society",
+   "unit": "share of TLU",
+   "label": "Sheep and goat share of livestock",
+   "expr": "div(0.1 * (vill.sheep + vill.goat), tlu)",
+   "min_coverage": "cov_livestock"
+  },
+  {
+   "id": "tlu_per_capita",
+   "group": "society",
+   "unit": "TLU/person",
+   "label": "Livestock per person",
+   "expr": "div(tlu, vill.pop)",
+   "min_coverage": "cov_livestock"
+  },
+  {
+   "id": "gc_projects",
+   "group": "programmes",
+   "unit": "count",
+   "label": "Green Credit projects",
+   "expr": "gc.n",
+   "description": "An empty green_credit section means no Green Credit project in the MWS."
+  },
+  {
+   "id": "mining_projects",
+   "group": "pressure",
+   "unit": "count",
+   "label": "Mining sites or projects in the MWS",
+   "expr": "mine.n",
+   "source": "mining",
+   "description": "Rows of the CoRE Stack mining layer in this MWS: environmental-clearance mining proposals (MoEFCC) and mapped mining sites whose proposal is listed as 'unknown'. Missing when the dataset was not fetched."
+  },
+  {
+   "id": "rain_norm",
+   "group": "water",
+   "unit": "mm/yr",
+   "label": "Rainfall rescaled to district normal",
+   "expr": "precip_mean * rain_factor",
+   "description": "rain_factor = district normal / district median of precip_mean (contexts.json rainfall_normals); 1 when no normal is given. Set by the pipeline."
+  },
+  {
+   "id": "f_sloping",
+   "group": "context",
+   "unit": "share",
+   "label": "Sloping land share (hill slope + ridge + gentle slope)",
+   "expr": "f_hill + f_slopy"
+  },
+  {
+   "id": "swb_zaid_persist0",
+   "group": "water",
+   "unit": "ratio",
+   "label": "Water spread surviving into summer (0 where no water body)",
+   "expr": "div(sum(swb.zaid_area), sum(swb.total_area), 0)",
+   "description": "Like swb_zaid_persist, but an MWS with no water body scores 0 (no surface water in summer) instead of missing."
+  },
+  {
+   "id": "soil_n_low_frac",
+   "group": "soil",
+   "unit": "share",
+   "label": "Share of cropped area with low available nitrogen (< 280 kg/ha)",
+   "expr": "frac_below_nz(280, [soil.n_p05_in_kg_per_ha, soil.n_p10_in_kg_per_ha, soil.n_p20_in_kg_per_ha, soil.n_p30_in_kg_per_ha, soil.n_p40_in_kg_per_ha, soil.n_p50_in_kg_per_ha, soil.n_p60_in_kg_per_ha, soil.n_p70_in_kg_per_ha, soil.n_p80_in_kg_per_ha, soil.n_p90_in_kg_per_ha, soil.n_p95_in_kg_per_ha])",
+   "description": "Interpolated from the soil_health percentiles, which describe the cropped area of the MWS (e.g. n_p30 is the value below which 30% of the cropped area lies). 280 kg/ha is the Soil Health Card 'low' class limit. Nitrogen values of exactly 0 are read as missing (CS-91): the share is taken over the cropped area that has data, and the value is missing if 90% or more is zero.",
+   "source": "shc_ratings"
+  },
+  {
+   "id": "soil_p_low_frac",
+   "group": "soil",
+   "unit": "share",
+   "label": "Share of cropped area with low available phosphorus (< 10 kg/ha)",
+   "expr": "frac_below(10, [soil.p_p05_in_kg_per_ha, soil.p_p10_in_kg_per_ha, soil.p_p20_in_kg_per_ha, soil.p_p30_in_kg_per_ha, soil.p_p40_in_kg_per_ha, soil.p_p50_in_kg_per_ha, soil.p_p60_in_kg_per_ha, soil.p_p70_in_kg_per_ha, soil.p_p80_in_kg_per_ha, soil.p_p90_in_kg_per_ha, soil.p_p95_in_kg_per_ha])",
+   "source": "shc_ratings",
+   "description": "Interpolated from the soil_health percentiles, which describe the cropped area of the MWS (e.g. p_p30 is the value below which 30% of the cropped area lies). 10 kg/ha is the Soil Health Card 'low' class limit."
+  },
+  {
+   "id": "soil_k_low_frac",
+   "group": "soil",
+   "unit": "share",
+   "label": "Share of cropped area with low available potassium (< 110 kg/ha)",
+   "expr": "frac_below(110, [soil.k_p05_in_kg_per_ha, soil.k_p10_in_kg_per_ha, soil.k_p20_in_kg_per_ha, soil.k_p30_in_kg_per_ha, soil.k_p40_in_kg_per_ha, soil.k_p50_in_kg_per_ha, soil.k_p60_in_kg_per_ha, soil.k_p70_in_kg_per_ha, soil.k_p80_in_kg_per_ha, soil.k_p90_in_kg_per_ha, soil.k_p95_in_kg_per_ha])",
+   "source": "shc_ratings",
+   "description": "Interpolated from the soil_health percentiles, which describe the cropped area of the MWS (e.g. k_p30 is the value below which 30% of the cropped area lies). 110 kg/ha is the Soil Health Card 'low' class limit."
+  },
+  {
+   "id": "soil_oc_low_frac",
+   "group": "soil",
+   "unit": "share",
+   "label": "Share of cropped area with low organic carbon (< 0.5%)",
+   "expr": "frac_below(0.5, [soil.oc_p05_in_percent, soil.oc_p10_in_percent, soil.oc_p20_in_percent, soil.oc_p30_in_percent, soil.oc_p40_in_percent, soil.oc_p50_in_percent, soil.oc_p60_in_percent, soil.oc_p70_in_percent, soil.oc_p80_in_percent, soil.oc_p90_in_percent, soil.oc_p95_in_percent])",
+   "source": "shc_ratings",
+   "description": "Interpolated from the soil_health percentiles, which describe the cropped area of the MWS (e.g. oc_p30 is the value below which 30% of the cropped area lies). 0.5% is the Soil Health Card 'low' class limit."
+  },
+  {
+   "id": "soil_p_below_high_frac",
+   "group": "soil",
+   "unit": "share",
+   "label": "Share of cropped area with phosphorus below the high class (< 25 kg/ha)",
+   "expr": "frac_below(25, [soil.p_p05_in_kg_per_ha, soil.p_p10_in_kg_per_ha, soil.p_p20_in_kg_per_ha, soil.p_p30_in_kg_per_ha, soil.p_p40_in_kg_per_ha, soil.p_p50_in_kg_per_ha, soil.p_p60_in_kg_per_ha, soil.p_p70_in_kg_per_ha, soil.p_p80_in_kg_per_ha, soil.p_p90_in_kg_per_ha, soil.p_p95_in_kg_per_ha])",
+   "description": "25 kg/ha is the Soil Health Card medium/high boundary for available P, so this counts low and medium values."
+  },
+  {
+   "id": "soil_k_below_high_frac",
+   "group": "soil",
+   "unit": "share",
+   "label": "Share of cropped area with potassium below the high class (< 280 kg/ha)",
+   "expr": "frac_below(280, [soil.k_p05_in_kg_per_ha, soil.k_p10_in_kg_per_ha, soil.k_p20_in_kg_per_ha, soil.k_p30_in_kg_per_ha, soil.k_p40_in_kg_per_ha, soil.k_p50_in_kg_per_ha, soil.k_p60_in_kg_per_ha, soil.k_p70_in_kg_per_ha, soil.k_p80_in_kg_per_ha, soil.k_p90_in_kg_per_ha, soil.k_p95_in_kg_per_ha])",
+   "description": "280 kg/ha is the Soil Health Card medium/high boundary for available K, so this counts low and medium values."
+  },
+  {
+   "id": "soil_n_very_low_frac",
+   "group": "soil",
+   "unit": "share",
+   "label": "Share of cropped area with very low nitrogen (< 140 kg/ha)",
+   "expr": "frac_below_nz(140, [soil.n_p05_in_kg_per_ha, soil.n_p10_in_kg_per_ha, soil.n_p20_in_kg_per_ha, soil.n_p30_in_kg_per_ha, soil.n_p40_in_kg_per_ha, soil.n_p50_in_kg_per_ha, soil.n_p60_in_kg_per_ha, soil.n_p70_in_kg_per_ha, soil.n_p80_in_kg_per_ha, soil.n_p90_in_kg_per_ha, soil.n_p95_in_kg_per_ha])",
+   "description": "Half the Soil Health Card low limit (280 kg/ha). Below-280 holds over most cropland in 78% of MWS, so only very low N is counted as a deficiency. Zeros are read as missing (CS-91)."
+  },
+  {
+   "id": "soil_n_median",
+   "group": "soil",
+   "unit": "kg/ha",
+   "label": "Median available nitrogen over cropped area",
+   "expr": "nan if soil.n_p50_in_kg_per_ha == 0 else soil.n_p50_in_kg_per_ha",
+   "description": "Missing where the median is 0, which marks missing nitrogen data (CS-91)."
+  },
+  {
+   "id": "soil_oc_median",
+   "group": "soil",
+   "unit": "%",
+   "label": "Median organic carbon over cropped area",
+   "expr": "soil.oc_p50_in_percent"
+  },
+  {
+   "id": "nrega_works",
+   "group": "institutions",
+   "unit": "count",
+   "label": "NREGA works 2017–24 (all categories)",
+   "expr": "sum(nz(nrega.community_assets)) + sum(nz(nrega.irrigation_on_farms)) + sum(nz(nrega.land_restoration)) + sum(nz(nrega.off_farm_livelihood_assets)) + sum(nz(nrega.other_farm_works)) + sum(nz(nrega.plantations)) + sum(nz(nrega.soil_and_water_conservation))",
+   "min_coverage": "nrega_present"
+  },
+  {
+   "id": "nrega_present",
+   "group": "institutions",
+   "unit": "flag",
+   "label": "NREGA data available",
+   "expr": "1.0 if known(nrega.n) else 0.0",
+   "series": true
+  },
+  {
+   "id": "nrega_works_per_1000ha",
+   "group": "institutions",
+   "unit": "per 1000 ha",
+   "label": "NREGA works per 1000 ha, 2017–24",
+   "expr": "div(nrega_works, area / 1000)",
+   "min_coverage": "nrega_present"
+  },
+  {
+   "id": "nrega_swc_per_1000ha",
+   "group": "institutions",
+   "unit": "per 1000 ha",
+   "label": "NREGA soil and water conservation works per 1000 ha, 2017–24",
+   "expr": "div(sum(nz(nrega.soil_and_water_conservation)) + sum(nz(nrega.land_restoration)), area / 1000)",
+   "min_coverage": "nrega_present"
+  },
+  {
+   "id": "nrega_water_per_1000ha",
+   "group": "institutions",
+   "unit": "per 1000 ha",
+   "label": "NREGA irrigation and soil-water conservation works per 1000 ha, 2017–24",
+   "expr": "div(sum(nz(nrega.irrigation_on_farms)) + sum(nz(nrega.soil_and_water_conservation)), area / 1000)",
+   "min_coverage": "nrega_present",
+   "description": "Public investment in water works: farm irrigation plus soil and water conservation (check dams, farm ponds, bunds)."
+  },
+  {
+   "id": "nrega_plantation_per_1000ha",
+   "group": "institutions",
+   "unit": "per 1000 ha",
+   "label": "NREGA plantation works per 1000 ha, 2017–24",
+   "expr": "div(sum(nz(nrega.plantations)), area / 1000)",
+   "min_coverage": "nrega_present"
+  },
+  {
+   "id": "cov_anty",
+   "group": "society",
+   "unit": "share",
+   "label": "Share of MWS covered by villages in the Mission Antyodaya survey",
+   "expr": "div(anty.area_covered, area)"
+  },
+  {
+   "id": "shg_coverage",
+   "group": "institutions",
+   "unit": "share",
+   "label": "Households in self-help groups",
+   "expr": "div(anty.total_hhd_mobilized_into_shg, anty.total_hhd)",
+   "min_coverage": "cov_anty",
+   "source": "mission_antyodaya"
+  },
+  {
+   "id": "piped_water_coverage",
+   "group": "institutions",
+   "unit": "share",
+   "label": "Households with a piped water connection",
+   "expr": "div(anty.total_hhd_having_piped_water_connection, anty.total_hhd)",
+   "min_coverage": "cov_anty",
+   "source": "mission_antyodaya"
+  },
+  {
+   "id": "kuccha_share",
+   "group": "society",
+   "unit": "share",
+   "label": "Households in kuccha (mud) houses",
+   "expr": "div(anty.total_hhd_with_kuccha_wall_kuccha_roof, anty.total_hhd)",
+   "min_coverage": "cov_anty",
+   "source": "mission_antyodaya"
+  },
+  {
+   "id": "mfp_dependence",
+   "group": "society",
+   "unit": "share",
+   "label": "Households living only on minor forest produce",
+   "expr": "div(anty.total_hhd_source_of_minor_forest_production, anty.total_hhd)",
+   "min_coverage": "cov_anty",
+   "source": "mission_antyodaya"
+  },
+  {
+   "id": "fpo_access",
+   "group": "institutions",
+   "unit": "share",
+   "label": "Villages reporting a farmer producer organisation (FPO)",
+   "expr": "div(anty.fpo_available, anty.fpo_known)",
+   "min_coverage": "cov_anty",
+   "source": "mission_antyodaya",
+   "description": "Share of the MWS's villages (weighted by overlap area) whose Mission Antyodaya record lists an FPO, alone or with a PACS. A blank answer in a surveyed village is read as neither."
+  },
+  {
+   "id": "cov_fac",
+   "group": "society",
+   "unit": "share",
+   "label": "Share of MWS covered by villages with facility distances",
+   "expr": "div(fac.area_covered, area)"
+  },
+  {
+   "id": "bank_distance_km",
+   "group": "institutions",
+   "unit": "km",
+   "label": "Distance to the nearest bank branch",
+   "expr": "fac.bank_branch_distance_in_km",
+   "description": "Straight-line distance from the village centre, averaged over the MWS's villages by area.",
+   "min_coverage": "cov_fac"
+  },
+  {
+   "id": "cooperative_distance_km",
+   "group": "institutions",
+   "unit": "km",
+   "label": "Distance to the nearest cooperative society",
+   "expr": "fac.cooperative_cat_distance_in_km",
+   "min_coverage": "cov_fac",
+   "source": "facilities_proximity",
+   "description": "Exported for review only: 76% of sample villages are more than 50 km from a listed cooperative, which looks like incomplete coverage (see the API issues log), so no signal uses it."
+  },
+  {
+   "id": "financial_access_km",
+   "group": "institutions",
+   "unit": "km",
+   "label": "Distance to the farthest of bank branch, ATM, bank mitra and common service centre",
+   "expr": "fac.financial_inclusion_cat_distance_in_km",
+   "min_coverage": "cov_fac"
+  },
+  {
+   "id": "river_present",
+   "group": "context",
+   "unit": "flag",
+   "label": "A mapped river flows through the MWS",
+   "expr": "(1.0 if river.n > 0 else 0.0) if known(river.n) else nan"
+  },
+  {
+   "id": "n_upstream",
+   "group": "context",
+   "unit": "count",
+   "label": "Number of upstream micro-watersheds",
+   "expr": "conn.n_upstream"
+  },
+  {
+   "id": "fringe_loss_frac",
+   "group": "forest",
+   "unit": "share",
+   "label": "Forest fringe deforested or degraded",
+   "expr": "div(fringe.tree_deforestation_fringe_area_in_ha + fringe.tree_degradation_fringe_area_in_ha, fringe.forest_fringe_area_in_ha)",
+   "description": "Share of the 50 m edge zone around stable forest that lost or thinned tree cover."
+  },
+  {
+   "id": "fire_per_100km2",
+   "group": "forest",
+   "unit": "per 100 km2 per yr",
+   "label": "Fire detections per 100 km² per year",
+   "expr": "div(mean(fire.fire_count_per_year), area / 10000)"
+  },
+  {
+   "id": "grass_tree_loss_frac",
+   "group": "forest",
+   "unit": "share",
+   "label": "Tree loss in shrub-tree commons",
+   "expr": "div(tig.tree_loss_in_tree_in_shrub_area_in_ha, tig.shrubs_trees_area_in_ha)"
+  },
+  {
+   "id": "grass_tree_loss_ha",
+   "group": "forest",
+   "unit": "ha",
+   "label": "Tree loss in shrub-tree commons (ha)",
+   "expr": "tig.tree_loss_in_tree_in_shrub_area_in_ha"
+  },
+  {
+   "id": "shrub_ndvi_slope",
+   "group": "forest",
+   "unit": "NDVI per period",
+   "label": "Trend in shrubland greenness (NDVI)",
+   "expr": "ndvi.shrub_slope"
+  },
+  {
+   "id": "shrub_ndvi_decreasing",
+   "group": "forest",
+   "label": "Shrub NDVI trend decreasing",
+   "unit": "flag",
+   "expr": "(1.0 if ndvi.shrub_trend == 'Decreasing' else 0.0) if is_text(ndvi.shrub_trend) else nan",
+   "description": "1 when the ndvi dataset classes the shrubland NDVI trend as 'Decreasing'. Used instead of shrub_slope, which the API rounds to two decimals so that 96% of values are 0 (CS-87).",
+   "sources": [
+    "core_stack"
+   ]
+  }
+ ]
+}

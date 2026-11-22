@@ -1,0 +1,128 @@
+{
+ "note": "get_tehsil_data datasets downloaded by seft.cli fetch. level: mws or village; MWS-level datasets are checked against the MWS count from GeoServer. bytes_per_row is an informational size estimate. All datasets come from one v2 request per tehsil without the data= filter, which also returns forest_fire, forest_fringes, tree_in_grassland and ndvi (CS-83). Tree-cover change keeps the v2 names (change_detection_tree_cover_decrease / _increase); v1 calls them change_detection_deforestation / _afforestation. 'optional': true marks a dataset the API may leave out (green_credit; mining, which lists only MWS with a mining project; hydrological_seasonal, used by the drought context ctx_low_kharif_rain and the Signal_Verification sheet rules); audit does not count it as missing. The full response of each tehsil is kept in data/raw/<...>/_response.json.gz, so a dataset added here later is extracted locally without a new request (--force re-downloads).",
+ "datasets": {
+  "lulc_vector": {
+   "level": "mws",
+   "bytes_per_row": 1600
+  },
+  "croppingintensity_annual": {
+   "level": "mws",
+   "bytes_per_row": 1100
+  },
+  "croppingdrought_kharif": {
+   "level": "mws",
+   "bytes_per_row": 930
+  },
+  "hydrological_annual": {
+   "level": "mws",
+   "bytes_per_row": 830
+  },
+  "surfacewaterbodies_annual": {
+   "level": "mws",
+   "bytes_per_row": 640
+  },
+  "aquifer_vector": {
+   "level": "mws",
+   "bytes_per_row": 350
+  },
+  "mws_intersect_villages": {
+   "level": "mws",
+   "bytes_per_row": 320
+  },
+  "change_detection_tree_cover_decrease": {
+   "level": "mws",
+   "bytes_per_row": 240
+  },
+  "change_detection_tree_cover_increase": {
+   "level": "mws",
+   "bytes_per_row": 240
+  },
+  "terrain": {
+   "level": "mws",
+   "bytes_per_row": 220
+  },
+  "change_detection_urbanization": {
+   "level": "mws",
+   "bytes_per_row": 210
+  },
+  "change_detection_degradation": {
+   "level": "mws",
+   "bytes_per_row": 190
+  },
+  "restoration_vector": {
+   "level": "mws",
+   "bytes_per_row": 160
+  },
+  "soge_vector": {
+   "level": "mws",
+   "bytes_per_row": 105
+  },
+  "canal": {
+   "level": "mws",
+   "bytes_per_row": 60
+  },
+  "green_credit": {
+   "level": "mws",
+   "bytes_per_row": 60,
+   "optional": true
+  },
+  "livestock": {
+   "level": "village",
+   "bytes_per_row": 450
+  },
+  "social_economic_indicator": {
+   "level": "village",
+   "bytes_per_row": 260
+  },
+  "soil_health": {
+   "level": "mws",
+   "bytes_per_row": 700
+  },
+  "nrega_annual": {
+   "level": "mws",
+   "bytes_per_row": 1500
+  },
+  "antyodaya": {
+   "level": "village",
+   "bytes_per_row": 2000
+  },
+  "facilities_proximity": {
+   "level": "village",
+   "bytes_per_row": 900
+  },
+  "river": {
+   "level": "mws",
+   "bytes_per_row": 40
+  },
+  "mws_connectivity": {
+   "level": "mws",
+   "bytes_per_row": 80
+  },
+  "forest_fringes": {
+   "level": "mws",
+   "bytes_per_row": 120
+  },
+  "forest_fire": {
+   "level": "mws",
+   "bytes_per_row": 60
+  },
+  "tree_in_grassland": {
+   "level": "mws",
+   "bytes_per_row": 200
+  },
+  "ndvi": {
+   "level": "mws",
+   "bytes_per_row": 120
+  },
+  "mining": {
+   "level": "mws",
+   "bytes_per_row": 200,
+   "optional": true
+  },
+  "hydrological_seasonal": {
+   "level": "mws",
+   "bytes_per_row": 900,
+   "optional": true
+  }
+ }
+}

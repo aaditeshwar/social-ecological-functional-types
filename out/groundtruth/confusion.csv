@@ -1,0 +1,31 @@
+pathway,label,rules,n,TP,FP,FN,TN,unknown,no data,accuracy,balanced_accuracy,f1,precision,recall,specificity
+agriculture.groundwater,Groundwater,atlas,23,0,7,1,15,0,0,0.652,0.341,0.0,0.0,0.0,0.682
+agriculture.groundwater,Groundwater,"atlas, no gate",23,0,9,1,13,0,0,0.565,0.295,0.0,0.0,0.0,0.591
+agriculture.groundwater,Groundwater,sheet,23,1,8,0,14,0,0,0.652,0.818,0.2,0.111,1.0,0.636
+agriculture.drought,Drought,atlas,23,5,1,1,16,0,0,0.913,0.887,0.833,0.833,0.833,0.941
+agriculture.drought,Drought,"atlas, no gate",23,5,1,1,16,0,0,0.913,0.887,0.833,0.833,0.833,0.941
+agriculture.drought,Drought,sheet,23,5,0,1,17,0,0,0.957,0.916,0.909,1.0,0.833,1.0
+agriculture.irrigation,Irrigation,atlas,23,6,2,0,15,0,0,0.913,0.941,0.857,0.75,1.0,0.882
+agriculture.irrigation,Irrigation,"atlas, no gate",23,6,8,0,9,0,0,0.652,0.764,0.6,0.429,1.0,0.529
+agriculture.irrigation,Irrigation,sheet,23,6,3,0,14,0,0,0.87,0.912,0.8,0.667,1.0,0.824
+agriculture.low_yield,Low yield,atlas,23,5,3,2,13,0,0,0.783,0.763,0.667,0.625,0.714,0.812
+agriculture.low_yield,Low yield,"atlas, no gate",23,5,3,2,13,0,0,0.783,0.763,0.667,0.625,0.714,0.812
+agriculture.low_yield,Low yield,sheet,23,7,1,0,15,0,0,0.957,0.969,0.933,0.875,1.0,0.938
+agriculture.soil_degradation,Soil degradation,atlas,23,4,3,1,15,0,0,0.826,0.817,0.666,0.571,0.8,0.833
+agriculture.soil_degradation,Soil degradation,"atlas, no gate",23,4,3,1,15,0,0,0.826,0.817,0.666,0.571,0.8,0.833
+agriculture.soil_degradation,Soil degradation,sheet,23,4,2,1,16,0,0,0.87,0.845,0.727,0.667,0.8,0.889
+ntfp.forest_degradation,Forest degradation,atlas,12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+ntfp.forest_degradation,Forest degradation,"atlas, no gate",12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+ntfp.forest_degradation,Forest degradation,sheet,12,8,1,0,3,0,0,0.917,0.875,0.941,0.889,1.0,0.75
+waterbodies.siltation,Siltation,atlas,3,0,0,3,0,0,0,0.0,,0.0,,0.0,
+waterbodies.siltation,Siltation,"atlas, no gate",3,0,0,3,0,0,0,0.0,,0.0,,0.0,
+waterbodies.siltation,Siltation,sheet,3,3,0,0,0,0,0,1.0,,1.0,1.0,1.0,
+livelihood.livestock_water,Livestock water,atlas,6,0,0,1,5,0,0,0.833,0.5,0.0,,0.0,1.0
+livelihood.livestock_water,Livestock water,"atlas, no gate",6,0,0,1,5,0,0,0.833,0.5,0.0,,0.0,1.0
+livelihood.livestock_water,Livestock water,sheet,6,1,0,0,5,0,0,1.0,1.0,1.0,1.0,1.0,1.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),atlas,6,3,0,2,1,0,0,0.667,0.8,0.75,1.0,0.6,1.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),"atlas, no gate",6,5,1,0,0,0,0,0.833,0.5,0.909,0.833,1.0,0.0
+livelihood.livestock_decline,Livestock decline (fodder shortage),sheet,6,5,0,0,1,0,0,1.0,1.0,1.0,1.0,1.0,1.0
+socio-economic.caste,Multi-sector vulnerability (caste),atlas,3,2,0,1,0,0,0,0.667,,0.8,1.0,0.667,
+socio-economic.caste,Multi-sector vulnerability (caste),"atlas, no gate",3,2,0,1,0,0,0,0.667,,0.8,1.0,0.667,
+socio-economic.caste,Multi-sector vulnerability (caste),sheet,3,2,0,1,0,0,0,0.667,,0.8,1.0,0.667,

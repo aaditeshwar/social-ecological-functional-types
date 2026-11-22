@@ -1,0 +1,1334 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta charset="utf-8">
+<title>Watershed Systems Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a working atlas. Map on the left, a reading pane on the right; methodology tabs behave like appendices of a survey report. */
+:root{
+  --bg:#f3f5f2; --surface:#ffffff; --sunk:#e8ece7; --ink:#1b2622; --muted:#5b6a64; --line:#cfd8d2;
+  --accent:#2c6a6e; --accent-ink:#ffffff; --select:#d89a1e;
+  --ok:#3f8a5a; --warn:#c7861c; --bad:#b8402f; --na:#b9c2bd;
+  --font-display:"Literata", Georgia, "Times New Roman", serif;
+  --font-body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121816; --surface:#1a2320; --sunk:#222d29; --ink:#e3ebe6; --muted:#9aaba3; --line:#33423c;
+  --accent:#6fb5b9; --accent-ink:#0d1614; --select:#f0b847; --ok:#6cc08a; --warn:#e6a94a; --bad:#ec7a66; --na:#4a5853; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121816; --surface:#1a2320; --sunk:#222d29; --ink:#e3ebe6; --muted:#9aaba3; --line:#33423c;
+  --accent:#6fb5b9; --accent-ink:#0d1614; --select:#f0b847; --ok:#6cc08a; --warn:#e6a94a; --bad:#ec7a66; --na:#4a5853; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--font-body);font-size:14px;line-height:1.5;padding-inline:16px;padding-block:0 32px}
+h1,h2,h3{font-family:var(--font-display);font-weight:650;text-wrap:balance;margin:0}
+h1{font-size:1.55rem;letter-spacing:-.01em}
+h2{font-size:1.2rem}
+h3{font-size:1rem}
+p{margin:0}
+a{color:var(--accent)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--select);outline-offset:2px}
+.mono{font-family:var(--font-mono);font-size:.82em}
+.muted{color:var(--muted)}
+.wrap{max-width:1440px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;padding-block:18px 4px;border-bottom:1px solid var(--line)}
+header.top .sub{color:var(--muted);max-width:70ch}
+nav.tabs{display:flex;gap:2px;flex-wrap:wrap}
+nav.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 10px;cursor:pointer;color:var(--muted);font-weight:500}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.crumbs button{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:3px 8px;cursor:pointer}
+.crumbs button[disabled]{cursor:default;background:var(--sunk);font-weight:600}
+.crumbs span.sep{color:var(--muted)}
+.pickers{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pickers label{max-width:100%;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+select{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:5px 6px;min-width:0;max-width:100%;text-transform:none;letter-spacing:0;font-size:.9rem}
+.explore{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.explore{grid-template-columns:minmax(0,1fr)}}
+.mapbox{position:sticky;top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;gap:8px;min-width:0}
+@media (max-width:900px){.mapbox{position:static}}
+.canvaswrap{position:relative;background:var(--sunk);border:1px solid var(--line);border-radius:6px;overflow:hidden;height:min(68vh,620px);min-height:320px;touch-action:none}
+canvas{display:block;width:100%;height:100%;cursor:grab}
+canvas.drag{cursor:grabbing}
+.zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}
+.zoom button{width:30px;height:30px;border-radius:4px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:16px;line-height:1}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:4px 7px;font-size:.78rem;max-width:240px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.mapctl{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.mapctl>label.pickers{flex-direction:column;align-items:stretch;gap:2px;min-width:0;max-width:100%}
+#mm{width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.ramp{height:10px;border-radius:2px;width:180px;display:inline-block;vertical-align:middle}
+.pane{display:flex;flex-direction:column;gap:16px;min-width:0}
+.block{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.mixbar{display:flex;height:18px;border-radius:3px;overflow:hidden;background:var(--sunk)}
+.mixbar span{height:100%}
+.mixlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px 14px;font-size:.82rem}
+.mixlist div{display:flex;justify-content:space-between;gap:6px}
+.mixlist i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+.num{font-variant-numeric:tabular-nums;font-family:var(--font-mono);font-size:.8rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:.78rem;background:var(--sunk)}
+.pill{display:inline-block;border-radius:3px;padding:0 6px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#fff}
+.pill.severe{background:var(--bad)} .pill.moderate{background:var(--warn)} .pill.opp{background:var(--ok)} .pill.mod{background:#7b6aa8}
+.pill.conf{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.stress{border-left:4px solid var(--warn);padding:8px 10px;background:var(--bg);border-radius:0 4px 4px 0;display:flex;flex-direction:column;gap:6px}
+.stress.severe{border-left-color:var(--bad)} .stress.opportunity{border-left-color:var(--ok)}
+.pwblock{border:1px solid var(--line);border-radius:4px;padding:8px 10px;display:flex;flex-direction:column;gap:8px}
+.pwhd{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.ibar{display:inline-flex;align-items:center;gap:6px;font-size:.78rem}.ibar .t{width:80px;height:8px;background:var(--sunk);border-radius:2px;overflow:hidden;display:inline-block}.ibar .t span{display:block;height:100%}
+.sub{padding-left:14px}.sub .bar{font-size:.74rem}
+.on{color:var(--bad);font-weight:600}.on.opp{color:var(--ok)}
+.role{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.pubnote{background:var(--sunk);padding:8px 10px;border-radius:4px;font-size:.85rem}
+.stress .hd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:space-between}
+details>summary{cursor:pointer;color:var(--accent);font-size:.82rem}
+.tbl{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:.8rem}
+th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+td.r,th.r{text-align:right}
+.met{color:var(--bad);font-weight:600}
+.bars{display:flex;flex-direction:column;gap:4px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 120px 42px;gap:8px;align-items:center;font-size:.8rem;cursor:pointer}
+.bar .t{height:9px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.bar .t span{display:block;height:100%}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.dcard{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left}
+.dcard:hover{border-color:var(--accent)}
+.doc{max-width:900px;display:flex;flex-direction:column;gap:14px}
+.doc p,.doc li{max-width:75ch}
+.doc ol,.doc ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--font-mono);font-size:.82em;background:var(--sunk);padding:0 3px;border-radius:3px;word-break:break-word}
+.graphwrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.graphwrap svg{display:block}
+.gnode{cursor:pointer}
+.gdetail{min-height:90px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.filters>label.pickers{flex-direction:column;align-items:stretch;gap:2px;min-width:0;max-width:100%}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:4px;padding:6px 12px;cursor:pointer;font-weight:500}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.dl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.note{font-size:.8rem;color:var(--muted)}
+.loading{padding:20px;color:var(--muted)}
+fieldset.q{border:1px solid var(--line);border-radius:4px;padding:8px 10px;margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
+.opts{display:flex;flex-direction:column;gap:3px}
+.opts label{display:flex;gap:6px;align-items:flex-start;font-size:.85rem}
+.walk{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.btn[for]{display:inline-block}
+.vref{border-bottom:1px dotted var(--accent);cursor:help}
+.vref:hover,.vref:focus-visible{background:var(--sunk)}
+.fref{border-bottom-style:dashed;font-style:italic}
+pre.kex{margin:0;background:var(--sunk);border-radius:4px;padding:8px 10px;font-family:var(--font-mono);font-size:.75rem;line-height:1.45;overflow-x:auto;max-height:340px;white-space:pre}
+#vtip{position:fixed;z-index:20;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.8rem;line-height:1.45;box-shadow:0 4px 16px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow:auto}
+#vtip p{margin:0}
+#vtip .tipx{overflow-x:auto}
+#vtip code{white-space:pre-wrap}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">CoRE Stack · social-ecological functional types</div>
+      <h1>Watershed Systems Atlas</h1>
+      <p class="sub">Eight districts, 4,598 micro-watersheds. Each watershed is read as a mixture of farming and land-use systems; a causal knowledge graph turns its indicators into stresses, opportunities and matching government schemes.</p>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </header>
+  <main id="main"></main>
+</div>
+
+<script>
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let IDX=null, K=null;
+const BUNDLES={};
+const S={tab:"explore", level:"india", district:null, tehsil:null, mws:null, mode:"dominant", modeArg:null, showVillages:true};
+try{const t=localStorage.getItem("wsa_tab"); if(t) S.tab=t;}catch(e){}
+
+const TABS=[["explore","Explore"],["graph","Knowledge graph"],["archetypes","System archetypes"],["rules","Observed stresses"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
+
+/* ---------- helpers ---------- */
+const VAR={}, ARCH={}, STR={}, SCH={}, SRC={}, NODE={}, QBY={}, HLP={}, SIG={}, PSY={}, OSX={}, GRP={}; let ALLQ=[];
+let VIDX={}, SIGIDX={};
+function indexKnowledge(){
+  K.variables.variables.forEach(v=>VAR[v.id]=v);
+  VAR.rain_norm=VAR.rain_norm||{id:"rain_norm",label:"Rainfall rescaled to district normal",unit:"mm/yr"};
+  K.archetypes.archetypes.forEach(a=>ARCH[a.id]=a);
+  K.causal_graph.stresses.forEach(s=>STR[s.id]=s);
+  K.schemes.schemes.forEach(s=>SCH[s.id]=s);
+  K.sources.sources.forEach(s=>SRC[s.id]=s);
+  K.causal_graph.nodes.forEach(n=>NODE[n.id]=n);
+  K.archetypes.helpers.forEach(h=>HLP[h.id]=h);
+  ALLQ=[...K.questions.system_questions,...K.questions.stress_questions]; ALLQ.forEach(q=>QBY[q.id]=q);
+  IDX.var_ids.forEach((v,i)=>VIDX[v]=i);
+  K.signals.signals.forEach(x=>SIG[x.id]=x);
+  K.taxonomy.groups.forEach(g=>GRP[g.id]=g);
+  K.taxonomy.production_systems.forEach(p=>{PSY[p.id]=p;p.observed_stresses.forEach(o=>{const rules=o.pathways.flatMap(x=>GRP[x]?GRP[x].children:[x]);
+    OSX[p.id+"."+o.id]={ps:p,os:o,rules,types:[...new Set(rules.map(c=>STR[c].type))]};});});
+  (IDX.signal_ids||[]).forEach((v,i)=>SIGIDX[v]=i);
+}
+/* production system -> observed stress -> causal pathway (taxonomy.json). Keys: '<system>.<observed stress>' for
+   its own type, '<system>.<observed stress>:<other type>' for rules of the other type inside it. Mirror of seft/stresses.py os_keys. */
+function pwKeys(){return Object.entries(OSX).flatMap(([k,x])=>[k,...x.types.filter(t=>t!==x.os.type).sort().map(t=>k+":"+t)]);}
+function pwSplit(k){const [b,t]=k.split(":");return [b,t||OSX[b].os.type];}
+function pwChildren(k){const [b,t]=pwSplit(k);return OSX[b].rules.filter(c=>STR[c].type===t);}
+function pwLabel(k){const [b,t]=pwSplit(k);const x=OSX[b];return x.os.label+(t!==x.os.type?" (opportunities)":"");}
+function pwFull(k){return OSX[pwSplit(k)[0]].ps.label+" › "+pwLabel(k);}
+function pwOpp(k){return pwSplit(k)[1]==="opportunity";}
+function psOn(m,ps,se){const sg=PSY[ps].signal;if(se)return se[sg];const g=m.sg?m.sg[SIGIDX[sg]]:null;return g==null?null:g>=0.5;}
+function grpLabel(id){const r=STR[id];return r&&r.group?GRP[r.group].label+" › "+r.label:(r?r.label:id);}
+function placesOf(id){return Object.entries(OSX).filter(([k,x])=>x.rules.includes(id)).map(([k,x])=>x.ps.label+" › "+x.os.label);}
+function fmtVal(v,unit){
+  if(v===null||v===undefined||(typeof v==="number"&&isNaN(v))) return "–";
+  if(typeof v!=="number") return esc(v);
+  if(unit==="share"||unit==="share of years"||unit==="share of TLU"||unit==="share of tree cover") return (v*100).toFixed(Math.abs(v)<0.1?1:0)+"%";
+  const a=Math.abs(v);
+  if(a>=1000) return Math.round(v).toLocaleString("en-IN");
+  if(a>=100) return v.toFixed(0);
+  if(a>=10) return v.toFixed(1);
+  return v.toFixed(2);
+}
+function unitLabel(u){return (u&&!/^share/.test(u))?` ${u}`:""}
+function srcLinks(ids){
+  return (ids||[]).filter(Boolean).map(id=>{const s=SRC[id]; if(!s) return esc(id);
+    const label=esc(s.citation.split(/[.(]/)[0].slice(0,60));
+    return s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" title="${esc(s.citation)}">${label}</a>`:`<span title="${esc(s.citation)}">${label}</span>`}).join("; ");
+}
+function stressType(id){return STR[id]?.type||"stress"}
+function sLabel(id){return STR[id]?STR[id].label:OSX[id]?pwFull(id):id}
+function intColor(v,opp){const t=Math.max(0,Math.min(1,((v??50)-40)/60));return opp?mix("#b9dfc2","#1f6b3f",t):mix("#f2c98a","#a3301f",t);}
+function ibar(v,opp){if(v==null)return '<span class="ibar muted">intensity –</span>';return `<span class="ibar" title="Intensity on a 0–100 scale"><span class="t"><span style="width:${v}%;background:${intColor(v,opp)}"></span></span><span class="num">${Math.round(v)}</span></span>`;}
+function mixBar(shares,ids){
+  return `<div class="mixbar" role="img" aria-label="System mix">${ids.map((a,i)=>{const v=shares[i]; return v>0.003?`<span style="width:${(v*100).toFixed(2)}%;background:${ARCH[a].color}" title="${esc(ARCH[a].label)} ${(v*100).toFixed(0)}%"></span>`:""}).join("")}</div>`;
+}
+function mixList(shares,ids,min=0.02){
+  const rows=ids.map((a,i)=>[a,shares[i]]).filter(x=>x[1]>=min).sort((a,b)=>b[1]-a[1]);
+  return `<div class="mixlist">${rows.map(([a,v])=>`<div><span><i style="background:${ARCH[a].color}"></i>${esc(ARCH[a].label)}</span><span class="num">${(v*100).toFixed(0)}%</span></div>`).join("")}</div>`;
+}
+/* ---------- data loading ----------
+   Bundles live in data/ next to this page (built by `python -m seft.webdata`).
+   Over http(s) the page fetches data/<name>.json. Opened straight from disk (file://), browsers block
+   fetch, so it loads data/<name>.js instead, which sets window.SEFT_DATA[<name>]. A page published with
+   the bundles beside it (no data/ folder) is also supported. */
+window.SEFT_DATA=window.SEFT_DATA||{};
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>no(new Error("missing "+src));document.head.appendChild(s);});}
+async function loadData(name){
+  if(window.SEFT_DATA[name]) return window.SEFT_DATA[name];
+  if(location.protocol!=="file:"){
+    for(const base of ["data/",""]){try{const r=await fetch(base+name+".json"); if(r.ok) return (window.SEFT_DATA[name]=await r.json());}catch(e){}}
+  }
+  await loadScript("data/"+name+".js");
+  if(!window.SEFT_DATA[name]) throw new Error("data/"+name+".js did not define the bundle");
+  return window.SEFT_DATA[name];
+}
+async function loadBundle(slug){
+  if(BUNDLES[slug]) return BUNDLES[slug];
+  const b=await loadData(`d_${slug}`);
+  b.geo={}; b.mwsById={};
+  b.mws.forEach(m=>{b.mwsById[m.u]=m; m.paths=decode(m.g);});
+  b.tehsils.forEach(t=>t.paths=decode(t.geom));
+  b.vById={}; b.villages.forEach(v=>b.vById[v[0]]=v);
+  b.outlinePaths=decode(b.outline);
+  BUNDLES[slug]=b; return b;
+}
+function decode(s){
+  if(!s) return [];
+  return s.split("|").filter(Boolean).map(part=>{const v=part.split(",").map(Number); let x=0,y=0; const ring=[];
+    for(let i=0;i+1<v.length;i+=2){x+=v[i];y+=v[i+1];ring.push([x/1e4,y/1e4]);} return ring;});
+}
+function curDistrict(){return IDX.districts.find(d=>d.district===S.district)}
+
+/*CORE-START*/
+/* ---------- expression evaluator: scalar mirror of seft/expr.py ---------- */
+const PyEval=(()=>{
+  const KW=new Set(["and","or","not","in","if","else","True","False","None"]);
+  const isNum=v=>typeof v==="number";
+  const unk=v=>v===null||v===undefined||(isNum(v)&&!isFinite(v));
+  function tok(s){const t=[];let i=0;
+    while(i<s.length){const c=s[i];
+      if(/\s/.test(c)){i++;continue}
+      if(/[0-9]/.test(c)||(c==="."&&/[0-9]/.test(s[i+1]||""))){let j=i;while(j<s.length&&/[0-9.eE]/.test(s[j]))j++;t.push({t:"num",v:parseFloat(s.slice(i,j))});i=j;continue}
+      if(/[A-Za-z_]/.test(c)){let j=i;while(j<s.length&&/[A-Za-z0-9_.]/.test(s[j]))j++;const w=s.slice(i,j);t.push(KW.has(w)?{t:"kw",v:w}:{t:"name",v:w});i=j;continue}
+      if(c==="'"||c==='"'){let j=i+1;while(j<s.length&&s[j]!==c)j++;t.push({t:"str",v:s.slice(i+1,j)});i=j+1;continue}
+      const two=s.slice(i,i+2);if(["==","!=","<=",">="].includes(two)){t.push({t:"op",v:two});i+=2;continue}
+      t.push({t:"op",v:c});i++;}
+    return t;}
+  const truth=v=>unk(v)?null:!!v;
+  const F={
+    nz:(x,d=0)=>unk(x)?d:x,
+    min:(...a)=>{const v=a.filter(x=>!unk(x));return v.length?Math.min(...v):null},
+    max:(...a)=>{const v=a.filter(x=>!unk(x));return v.length?Math.max(...v):null},
+    ramp:(x,lo,hi)=>{if(unk(x))return null;if(lo===hi)return x>=hi?1:0;return Math.min(Math.max((x-lo)/(hi-lo),0),1)},
+    div:(a,b,d=null)=>(unk(a)||unk(b)||b===0)?d:a/b,
+    clip:(x,lo=0,hi=1)=>unk(x)?null:Math.min(Math.max(x,lo),hi),
+    abs:x=>unk(x)?null:Math.abs(x), isnan:x=>unk(x), known:x=>!unk(x),
+    ntrue:(...a)=>a.flat().filter(x=>!unk(x)&&!!x).length,
+    nknown:(...a)=>a.flat().filter(x=>!unk(x)).length,
+    avg:(...a)=>{const v=a.flat().filter(x=>!unk(x)).map(Number);return v.length?v.reduce((t,x)=>t+x,0)/v.length:null}
+  };
+  function ev(src,env){
+    const T=tok(src);let p=0;
+    const peek=()=>T[p], next=()=>T[p++];
+    const is=(t,v)=>T[p]&&T[p].t===t&&(v===undefined||T[p].v===v);
+    const expect=(t,v)=>{if(!is(t,v))throw new Error("parse error in "+src);return next()};
+    function look(name){
+      if(name==="nan")return null;
+      const parts=name.split(".");let v=env[parts[0]];
+      for(const k of parts.slice(1)){v=(v&&typeof v==="object")?v[k]:undefined}
+      return v===undefined?null:v;}
+    function ifexp(){const a=orx();if(is("kw","if")){next();const c=truth(orx());expect("kw","else");const b=ifexp();return c===null?null:(c?a:b)}return a}
+    function orx(){let v=[andx()];while(is("kw","or")){next();v.push(andx())}
+      if(v.length===1)return v[0];const t=v.map(truth);if(t.includes(true))return true;return t.includes(null)?null:false}
+    function andx(){let v=[notx()];while(is("kw","and")){next();v.push(notx())}
+      if(v.length===1)return v[0];const t=v.map(truth);if(t.includes(false))return false;return t.includes(null)?null:true}
+    function notx(){if(is("kw","not")){next();const t=truth(notx());return t===null?null:!t}return cmp()}
+    function cmp(){let a=sum();
+      while(true){let op=null;
+        if(is("op")&&["==","!=","<","<=",">",">="].includes(peek().v))op=next().v;
+        else if(is("kw","in")){next();op="in"}
+        else if(is("kw","not")&&T[p+1]&&T[p+1].t==="kw"&&T[p+1].v==="in"){p+=2;op="not in"}
+        if(!op)return a;
+        const b=sum();
+        if(op==="in"||op==="not in"){const r=Array.isArray(b)&&b.includes(a);a=op==="in"?r:!r;continue}
+        if(isNum(a)&&isNum(b)||(unk(a)&&(isNum(b)||unk(b)))||(unk(b)&&isNum(a))){
+          if(unk(a)||unk(b)){a=null;continue}
+          a={"==":a===b,"!=":a!==b,"<":a<b,"<=":a<=b,">":a>b,">=":a>=b}[op];continue}
+        if(op==="=="){a=a===b;continue} if(op==="!="){a=a!==b;continue}
+        throw new Error("bad comparison in "+src);}}
+    function sum(){let a=term();while(is("op","+")||is("op","-")){const o=next().v,b=term();a=(unk(a)||unk(b))?null:(o==="+"?a+b:a-b)}return a}
+    function term(){let a=unary();while(is("op","*")||is("op","/")){const o=next().v,b=unary();a=(unk(a)||unk(b))?null:(o==="*"?a*b:(b===0?null:a/b))}return a}
+    function unary(){if(is("op","-")){next();const v=unary();return unk(v)?null:-v}if(is("op","+")){next();return unary()}return prim()}
+    function prim(){const t=next();if(!t)throw new Error("unexpected end in "+src);
+      if(t.t==="num"||t.t==="str")return t.v;
+      if(t.t==="kw"){if(t.v==="True")return true;if(t.v==="False")return false;if(t.v==="None")return null}
+      if(t.t==="op"&&t.v==="("){const v=ifexp();expect("op",")");return v}
+      if(t.t==="op"&&t.v==="["){const a=[];if(!is("op","]")){a.push(ifexp());while(is("op",",")){next();a.push(ifexp())}}expect("op","]");return a}
+      if(t.t==="name"){
+        if(is("op","(")){next();const f=F[t.v];if(!f)throw new Error("function not allowed: "+t.v);const a=[];
+          if(!is("op",")")){a.push(ifexp());while(is("op",",")){next();a.push(ifexp())}}expect("op",")");return f(...a)}
+        return look(t.v);}
+      throw new Error("unexpected token in "+src);}
+    const v=ifexp();if(p!==T.length)throw new Error("trailing tokens in "+src);return v;}
+  function safe(src,env){try{return ev(src,env)}catch(e){return null}}
+  function names(src){return [...new Set(tok(src).filter(t=>t.t==="name").map(t=>t.v.split(".")[0]))]}
+  return {ev,safe,names,unk};
+})();
+
+/* ---------- system mix, re-assessment and scheme matching: mirror of seft/archetypes.py, assess.py, schemes.py ---------- */
+function envFor(m,d){
+  const e={};IDX.var_ids.forEach((v,i)=>e[v]=m.i[i]);
+  e.ctx={};K.contexts.dimensions.forEach((x,i)=>e.ctx[x.id]=m.c[i]);
+  e.district=d.district;e.state=d.state;
+  K.archetypes.archetypes.forEach((a,i)=>e["share_"+a.id]=m.m[i]);
+  return e;}
+function applyShift(sh,x){
+  const s={...sh};let moved=0;
+  x.from.forEach(a=>{moved+=(s[a]||0)*x.fraction;s[a]=(s[a]||0)*(1-x.fraction)});
+  const to=Array.isArray(x.to)?x.to:[x.to];const base=to.reduce((t,a)=>t+(s[a]||0),0);
+  to.forEach((a,i)=>{s[a]=(s[a]||0)+(base>1e-9?moved*(s[a]||0)/base:(i===0?moved:0))});
+  return s;}
+function computeMix(m,d,sets,shifts){
+  const A=K.archetypes,env=envFor(m,d),H={};
+  A.helpers.forEach(h=>{const v=(h.id in sets)?sets[h.id]:PyEval.safe(h.expr,env);env[h.id]=v;H[h.id]=v});
+  const raw={};A.archetypes.forEach(a=>{const v=PyEval.safe(a.share,env);raw[a.id]=(typeof v==="number"&&isFinite(v))?Math.max(v,0):0});
+  const tot=Object.values(raw).reduce((s,v)=>s+v,0);let sh={...raw};const fill=A.normalisation.fill;
+  if(tot<1&&tot>0)sh[fill]+=1-tot;else if(tot>1)for(const k in sh)sh[k]/=tot;
+  const closed={...sh};
+  shifts.forEach(x=>{sh=applyShift(sh,x)});
+  return {shares:sh,closed,raw,tot,helpers:H,env};}
+function collectAnswers(answers){
+  const sets={},shifts=[],lrs={},sevFlag=new Set(),used={},setBy={};
+  for(const [qid,oid] of Object.entries(answers||{})){
+    const q=QBY[qid];if(!q)continue;const o=q.options.find(o=>o.id===oid);if(!o)continue;
+    for(const [h,v] of Object.entries(o.set||{})){sets[h]=v;setBy[h]=qid}
+    (o.shift||[]).forEach(x=>shifts.push({...x,q:qid}));
+    o.stress.forEach(e=>{lrs[e.id]=(lrs[e.id]||1)*e.lr;(used[e.id]=used[e.id]||[]).push([qid,e.lr]);if(e.severe)sevFlag.add(e.id)});}
+  return {sets,shifts,lrs,sevFlag,used,setBy};}
+function priorFor(code,inten,conf){
+  /* mirror of seft/assess.py prior(): rises with the rule's intensity (0-100), shrunk toward 0.5 by confidence */
+  const A=K.questions.assessment,bp=A.base_prior,I=(inten||0)/100;let base;
+  if(code===2)base=bp.triggered_min+(bp.triggered_max-bp.triggered_min)*I;
+  else if(code===1)base=bp.not_triggered+(bp.partial_max-bp.not_triggered)*I;
+  else if(code===0)return null;
+  else base=bp.unknown;
+  return 0.5+(base-0.5)*(A.confidence_shrink[conf]??0.8);}
+function sigEnv(m){const e={};(IDX.signal_ids||[]).forEach((k,i)=>{const g=m.sg?m.sg[i]:null;e[k]=g==null?null:g>=0.5;e[k+"_g"]=g});return e;}
+function bandFor(p){for(const b of K.questions.assessment.bands)if(p>=b.min)return b.label;return "unlikely"}
+function assessMws(m,d,answers){
+  const A=K.questions.assessment,ids=K.archetypes.archetypes.map(a=>a.id);
+  const C=collectAnswers(answers);
+  const sysChanged=Object.keys(C.sets).length>0||C.shifts.length>0;
+  const mix=computeMix(m,d,C.sets,C.shifts);
+  const shares=sysChanged?ids.map(a=>Math.round(mix.shares[a]*1000)/1000):m.m.slice();
+  const env=mix.env;ids.forEach((a,i)=>env["share_"+a]=shares[i]);
+  /* bundle per rule: [status code, severity, intensity, would-be code, would-be severity] */
+  let se=null;
+  if(sysChanged){se=sigEnv(m);K.signals.signals.forEach(x=>{if(x.kind==="system"&&x.expr){const v=PyEval.safe(x.expr,env);se[x.id]=v===null?null:!!v;se[x.id+"_g"]=v===null?null:(v?1:0)}})}
+  const st={};
+  K.causal_graph.stresses.forEach(s=>{
+    const x=m.s[s.id];let code=x[0],sev=x[1];const inten=x[2];
+    if(sysChanged){const ap=PyEval.safe(s.systems,se);
+      if(ap===true){code=x[3]===2?2:(x[3]===1?1:-1);sev=x[4]}else{code=ap===false?0:-1;sev=0}}
+    const p0=priorFor(code,inten,s.confidence);
+    if(p0===null){st[s.id]={code,sev,inten,prior:null,post:null,band:null,positive:false,asev:null,used:[]};return}
+    const odds=p0/(1-p0)*(C.lrs[s.id]||1);const p=odds/(1+odds);const pos=p>=A.positive_at;
+    const asev=pos?(((x[4]===2&&p>=p0-1e-9)||(C.sevFlag.has(s.id)&&p>=A.severe_at))?"severe":"moderate"):null;
+    st[s.id]={code,sev,inten,prior:p0,post:p,band:bandFor(p),positive:pos,asev,used:C.used[s.id]||[]};});
+  const positive=new Set(Object.keys(st).filter(k=>st[k].positive));
+  return {mix,shares,sysChanged,st,pw:pathwaysOf(st,m,se),se,positive,schemes:matchSchemes(m,shares,positive,sysChanged?env:null,d),C};}
+const ORDER_CODE=[2,1,-1,0];
+function pathwaysOf(st,m,se){
+  /* mirror of seft/stresses.py hierarchy(): an observed stress is not applicable where its production system is
+     absent; otherwise any rule of the key's type -> flagged; intensity = max of applicable rules */
+  const out={};
+  pwKeys().forEach(k=>{const ch=pwChildren(k);const on=psOn(m,OSX[pwSplit(k)[0]].ps.id,se);
+    if(on!==true){out[k]={code:on===false?0:-1,inten:null,positive:false,pos:[],post:null,asev:null,children:ch};return}
+    const rs=ch.map(c=>st[c]);const code=ORDER_CODE.find(c=>rs.some(r=>r.code===c));
+    const its=rs.filter(r=>r.code!==0&&r.inten!=null).map(r=>r.inten);
+    const pos=ch.filter(c=>st[c].positive);const posts=rs.map(r=>r.post).filter(v=>v!=null);
+    out[k]={code,inten:its.length?Math.max(...its):null,positive:pos.length>0,pos,post:posts.length?Math.max(...posts):null,
+      asev:pos.length?(pos.some(c=>st[c].asev==="severe")?"severe":"moderate"):null,children:ch};});
+  return out;}
+function pwData(m,k){/* pathway result from data alone: [code, intensity, severe?] */
+  const on=psOn(m,OSX[pwSplit(k)[0]].ps.id);if(on!==true)return [on===false?0:-1,null,false];
+  const ch=pwChildren(k);const xs=ch.map(c=>m.s[c]);const code=ORDER_CODE.find(c=>xs.some(x=>x[0]===c));
+  const its=xs.filter(x=>x[0]!==0&&x[2]!=null).map(x=>x[2]);
+  return [code,its.length?Math.max(...its):null,xs.some(x=>x[0]===2&&x[1]===2)];}
+function matchSchemes(m,shares,positive,env,d){
+  /* m.el = schemes whose state and condition fit (computed in Python). A condition that uses system
+     shares is re-checked here when answers changed the mix. */
+  const min=K.schemes.match_rules.archetype_min_share;const ids=K.archetypes.archetypes.map(a=>a.id);
+  const big=new Set(ids.filter((a,i)=>shares[i]>=min));const out=[];const el=new Set(m.el);
+  K.schemes.schemes.forEach(s=>{const id=s.id;
+    if(env&&s.condition&&/share_/.test(s.condition)){if(s.state&&s.state!==d.state)return;if(PyEval.safe(s.condition,env)!==true)return}
+    else if(!el.has(id))return;const hit=s.addresses.filter(x=>positive.has(x));if(!hit.length)return;
+    const arch=s.archetypes.filter(a=>big.has(a));if(s.archetypes.length&&!arch.length)return;
+    out.push([id,hit,hit.length+0.5*arch.length+(s.level==="state"?0.25:0)])});
+  out.sort((a,b)=>b[2]-a[2]);return out;}
+/*CORE-END*/
+
+
+/* ---------- tabs ---------- */
+function renderTabs(){
+  $("#tabs").innerHTML=TABS.map(([id,l])=>`<button role="tab" aria-selected="${S.tab===id}" data-tab="${id}">${l}</button>`).join("");
+  $("#tabs").onclick=e=>{const b=e.target.closest("button"); if(!b) return; S.tab=b.dataset.tab; try{localStorage.setItem("wsa_tab",S.tab)}catch(e){} render();};
+}
+function render(){
+  renderTabs();
+  const m=$("#main");
+  if(S.tab==="explore") return renderExplore(m);
+  if(S.tab==="graph") return renderGraph(m);
+  if(S.tab==="archetypes") return renderArchetypes(m);
+  if(S.tab==="rules") return renderRules(m);
+  if(S.tab==="questions") return renderQuestions(m);
+  if(S.tab==="schemes") return renderSchemes(m);
+  if(S.tab==="method") return renderMethod(m);
+  if(S.tab==="data") return renderData(m);
+}
+
+/* ---------- explore ---------- */
+let MAP=null;
+function renderExplore(m){
+  m.innerHTML=`<div class="explore">
+    <section class="mapbox" aria-label="Map">
+      <div class="crumbs" id="crumbs"></div>
+      <div class="pickers" id="pickers"></div>
+      <div class="canvaswrap" id="cw"><canvas id="cv" aria-label="Map of the selected area"></canvas>
+        <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit" aria-label="Fit to area" style="font-size:12px">⤢</button></div>
+        <div class="tip" id="tip" hidden></div></div>
+      <div class="mapctl" id="mapctl"></div>
+      <div class="legend" id="legend"></div>
+      <p class="note">Drag to pan, scroll or pinch to zoom, click to drill down. Villages are drawn at tehsil level as points.</p>
+    </section>
+    <section class="pane" id="pane"></section></div>`;
+  MAP=new MapView($("#cv"),$("#cw"));
+  $("#zin").onclick=()=>MAP.zoomBy(1.5); $("#zout").onclick=()=>MAP.zoomBy(1/1.5); $("#zfit").onclick=()=>MAP.fit();
+  refreshExplore(true);
+}
+async function go(level,arg){
+  if(level==="india"){S.level="india";S.district=S.tehsil=S.mws=null;}
+  if(level==="district"){S.district=arg;S.tehsil=S.mws=null;S.level="district";
+    $("#pane").innerHTML=`<div class="loading">Loading ${esc(arg)}…</div>`; await loadBundle(curDistrict().slug);}
+  if(level==="tehsil"){S.tehsil=arg;S.mws=null;S.level="tehsil";}
+  if(level==="mws"){S.mws=arg;S.level="mws"; const b=BUNDLES[curDistrict().slug]; if(!S.tehsil) S.tehsil=b.mwsById[arg].t;}
+  refreshExplore(level!=="mws");
+}
+function refreshExplore(refit){
+  renderCrumbs(); renderPickers(); renderMapCtl(); renderPane();
+  MAP.setScene(); if(refit) MAP.fit(); else MAP.draw();
+}
+function renderCrumbs(){
+  const parts=[["india","India"]];
+  if(S.district) parts.push(["district",S.district]);
+  if(S.tehsil) parts.push(["tehsil",S.tehsil]);
+  if(S.mws) parts.push(["mws","MWS "+S.mws]);
+  $("#crumbs").innerHTML=parts.map(([l,n],i)=>`<button data-l="${l}" ${i===parts.length-1?"disabled":""}>${esc(n)}</button>`).join('<span class="sep">›</span>');
+  $("#crumbs").onclick=e=>{const b=e.target.closest("button"); if(!b||b.disabled) return; const l=b.dataset.l;
+    if(l==="india") go("india"); else if(l==="district") go("district",S.district); else if(l==="tehsil") go("tehsil",S.tehsil);};
+}
+function renderPickers(){
+  const ds=IDX.districts.slice().sort((a,b)=>a.state.localeCompare(b.state)||a.district.localeCompare(b.district));
+  let h=`<label for="pd">District<select id="pd"><option value="">Select district…</option>${ds.map(d=>`<option value="${esc(d.district)}" ${d.district===S.district?"selected":""}>${esc(d.district)}, ${esc(d.state)}</option>`).join("")}</select></label>`;
+  if(S.district){const d=curDistrict();
+    h+=`<label for="pt">Tehsil<select id="pt"><option value="">All tehsils</option>${d.tehsils.map(t=>`<option ${t===S.tehsil?"selected":""}>${esc(t)}</option>`).join("")}</select></label>`;}
+  if(S.tehsil){const b=BUNDLES[curDistrict().slug]; const ms=b.mws.filter(m=>m.ts.includes(S.tehsil)).sort((a,b)=>a.u.localeCompare(b.u,undefined,{numeric:true}));
+    h+=`<label for="pm">Micro-watershed<select id="pm"><option value="">Select MWS…</option>${ms.map(m=>`<option value="${m.u}" ${m.u===S.mws?"selected":""}>${m.u} · ${esc(ARCH[m.dom]?.label||"")}</option>`).join("")}</select></label>`;}
+  $("#pickers").innerHTML=h;
+  $("#pd").onchange=e=>e.target.value?go("district",e.target.value):go("india");
+  if($("#pt")) $("#pt").onchange=e=>e.target.value?go("tehsil",e.target.value):go("district",S.district);
+  if($("#pm")) $("#pm").onchange=e=>e.target.value?go("mws",e.target.value):go("tehsil",S.tehsil);
+}
+function renderMapCtl(){
+  const arch=K.archetypes.archetypes.filter(a=>a.id!=="other");
+  const pws=pwKeys();
+  const vars=K.variables.variables.filter(v=>!v.series&&!["aquifer_class","soge_class","terrain_class"].includes(v.id));
+  const opt=(v,l,sel)=>`<option value="${v}" ${sel?"selected":""}>${esc(l)}</option>`;
+  let h=`<label class="pickers" for="mm"><span class="eyebrow">Colour by</span><select id="mm">
+    ${opt("dominant","Dominant system",S.mode==="dominant")}${opt("nstress","Number of stress pathways flagged",S.mode==="nstress")}
+    ${K.taxonomy.production_systems.map(ps=>`<optgroup label="${esc(ps.label)}: observed stresses">${pws.filter(k=>OSX[pwSplit(k)[0]].ps.id===ps.id).map(k=>opt("pw:"+k,pwLabel(k),S.mode==="pw"&&S.modeArg===k)).join("")}</optgroup>`).join("")}
+    ${K.taxonomy.groups.map(g=>`<optgroup label="Causal pathways: ${esc(g.label)}">${g.children.map(c=>opt("stress:"+c,STR[c].label,S.mode==="stress"&&S.modeArg===c)).join("")}</optgroup>`).join("")}
+    <optgroup label="Causal pathways: stand-alone">${K.causal_graph.stresses.filter(r=>!r.group).map(r=>opt("stress:"+r.id,r.label,S.mode==="stress"&&S.modeArg===r.id)).join("")}</optgroup>
+    <optgroup label="System share">${arch.map(a=>opt("share:"+a.id,a.label,S.mode==="share"&&S.modeArg===a.id)).join("")}</optgroup>
+    <optgroup label="Indicator">${vars.map(v=>opt("var:"+v.id,v.label,S.mode==="var"&&S.modeArg===v.id)).join("")}</optgroup>
+  </select></label>`;
+  if(S.level==="tehsil"||S.level==="mws") h+=`<label class="note"><input type="checkbox" id="sv" ${S.showVillages?"checked":""}> Villages</label>`;
+  $("#mapctl").innerHTML=h;
+  $("#mm").onchange=e=>{const [a,...b]=e.target.value.split(":"); S.mode=a; S.modeArg=b.join(":")||null; MAP.draw(); renderLegend();};
+  if($("#sv")) $("#sv").onchange=e=>{S.showVillages=e.target.checked; MAP.draw();};
+  renderLegend();
+}
+const SEQ=["#f1eec4","#c9e2a6","#8fcb93","#4fae8e","#2a8484","#225e7c","#2b3c6b"];
+function seqColor(t){if(t===null||isNaN(t)) return null; t=Math.max(0,Math.min(1,t)); const i=t*(SEQ.length-1),a=Math.floor(i),f=i-a; if(a>=SEQ.length-1) return SEQ[SEQ.length-1]; return mix(SEQ[a],SEQ[a+1],f);}
+function mix(c1,c2,f){const p=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)); const a=p(c1),b=p(c2); return "#"+a.map((x,i)=>Math.round(x+(b[i]-x)*f).toString(16).padStart(2,"0")).join("");}
+let RANGE=null;
+function computeRange(){
+  RANGE=null; if(S.mode!=="var"&&S.mode!=="nstress") return;
+  const b=S.district&&BUNDLES[curDistrict().slug]; const ms=b?b.mws:[];
+  const vals=ms.map(m=>S.mode==="nstress"?nStress(m):m.i[VIDX[S.modeArg]]).filter(v=>typeof v==="number"&&!isNaN(v)).sort((a,b)=>a-b);
+  if(!vals.length) return;
+  const q=p=>vals[Math.min(vals.length-1,Math.floor(p*(vals.length-1)))];
+  RANGE=S.mode==="nstress"?[0,Math.max(1,vals[vals.length-1])]:[q(0.05),q(0.95)];
+}
+function curD(){return curDistrict()}
+function nStress(m){const keys=pwKeys().filter(k=>!pwOpp(k));
+  if(hasApplied(m.u)){const R=getAssess(m,curD());return keys.filter(k=>R.pw[k].positive).length}
+  return keys.filter(k=>pwData(m,k)[0]===2).length;}
+function mwsColor(m){
+  if(S.mode==="dominant"){ if(hasApplied(m.u)){const R=getAssess(m,curD()); if(R.sysChanged){const ids=K.archetypes.archetypes.map(a=>a.id); let bi=0; ids.forEach((a,i)=>{if(a!=="other"&&R.shares[i]>R.shares[bi])bi=i}); return ARCH[ids[bi]].color;}} return ARCH[m.dom]?.color||"#999";}
+  if(S.mode==="share"){const i=K.archetypes.archetypes.findIndex(a=>a.id===S.modeArg); return seqColor(m.m[i]/0.8);}
+  if((S.mode==="stress"||S.mode==="pw")&&hasApplied(m.u)){const R=getAssess(m,curD()); const a=S.mode==="pw"?R.pw[S.modeArg]:R.st[S.modeArg]; if(!a) return null;
+    const opp=S.mode==="pw"?pwOpp(S.modeArg):stressType(S.modeArg)==="opportunity";
+    if(a.code===0) return MAP.css("--sunk"); if(a.positive) return intColor(a.inten,opp); return MAP.css("--line");}
+  if(S.mode==="stress"){const x=m.s[S.modeArg]; if(!x) return null; if(x[0]===2) return intColor(x[2],stressType(S.modeArg)==="opportunity"); if(x[0]===1) return MAP.css("--line"); if(x[0]===0) return MAP.css("--sunk"); return MAP.css("--bg");}
+  if(S.mode==="pw"){const [c,v]=pwData(m,S.modeArg); if(c===2) return intColor(v,pwOpp(S.modeArg)); if(c===1) return MAP.css("--line"); if(c===0) return MAP.css("--sunk"); return MAP.css("--bg");}
+  if(S.mode==="nstress"||S.mode==="var"){if(!RANGE) return null; const v=S.mode==="nstress"?nStress(m):m.i[VIDX[S.modeArg]]; if(typeof v!=="number") return null; return seqColor((v-RANGE[0])/((RANGE[1]-RANGE[0])||1));}
+  return "#999";
+}
+function renderLegend(){
+  computeRange(); const L=$("#legend"); if(!L) return;
+  if(S.level==="india"&&S.mode==="dominant"){L.innerHTML=`<span>Districts coloured by their largest farming or land-use system.</span>`+legendArch(); return;}
+  if(S.mode==="dominant"){L.innerHTML=legendArch(); return;}
+  if(S.mode==="stress"||S.mode==="pw"){const o=S.mode==="pw"?pwOpp(S.modeArg):stressType(S.modeArg)==="opportunity";
+    L.innerHTML=`<span>${S.mode==="pw"?esc(pwFull(S.modeArg))+" (highest causal pathway)":esc(grpLabel(S.modeArg))}: ${o?"present":"triggered"}, by intensity</span> <span class="ramp" style="background:linear-gradient(90deg,${intColor(40,o)},${intColor(70,o)},${intColor(100,o)})"></span> <span class="num">40 → 100</span><span><i style="background:var(--line)"></i>Evaluated, not triggered</span><span><i style="background:var(--sunk);border:1px solid var(--line)"></i>Not applicable (system absent)</span><span><i style="background:var(--bg);border:1px solid var(--line)"></i>Insufficient data</span>`; return;}
+  if(S.mode==="share"){L.innerHTML=`<span>Share of MWS area</span> <span class="ramp" style="background:linear-gradient(90deg,${SEQ.join(",")})"></span> <span class="num">0% → 80%+</span>`; return;}
+  if(RANGE){const u=S.mode==="var"?VAR[S.modeArg].unit:""; L.innerHTML=`<span>${S.mode==="nstress"?"Stress pathways flagged":esc(VAR[S.modeArg].label)}</span> <span class="ramp" style="background:linear-gradient(90deg,${SEQ.join(",")})"></span> <span class="num">${fmtVal(RANGE[0],u)} → ${fmtVal(RANGE[1],u)}</span>${S.mode==="var"?'<span>(district 5th–95th percentile)</span>':""}`;}
+  else L.innerHTML=S.level==="india"?"<span>Select a district to colour watersheds by this measure.</span>":"";
+}
+function legendArch(){return K.archetypes.archetypes.filter(a=>a.id!=="other").map(a=>`<span><i style="background:${a.color}"></i>${esc(a.label)}</span>`).join("");}
+
+/* ---------- map ---------- */
+class MapView{
+  constructor(cv,box){this.cv=cv;this.box=box;this.ctx=cv.getContext("2d");this.view={x:0,y:0,s:1};this.feats=[];this.bind();
+    new ResizeObserver(()=>{this.resize();this.draw();}).observe(box); this.resize();}
+  resize(){const r=this.box.getBoundingClientRect(),d=window.devicePixelRatio||1; this.w=r.width;this.h=r.height; this.cv.width=r.width*d; this.cv.height=r.height*d; this.dpr=d;}
+  proj(lon,lat){return [lon*this.kx,-lat];}
+  setScene(){
+    this.feats=[];
+    if(S.level==="india"){
+      this.kx=Math.cos(22*Math.PI/180);
+      IDX.states.forEach(([n,g])=>this.feats.push({kind:"state",name:n,paths:decode(g)}));
+      IDX.districts.forEach(d=>this.feats.push({kind:"district",d,paths:decode(d.outline)}));
+      this.bounds=[68,6.5,97.5,37.2];
+    } else {
+      const d=curDistrict(), b=BUNDLES[d.slug]; const bb=d.bounds; this.kx=Math.cos((bb[1]+bb[3])/2*Math.PI/180);
+      b.mws.forEach(m=>this.feats.push({kind:"mws",m,paths:m.paths}));
+      b.tehsils.forEach(t=>this.feats.push({kind:"teh",t,paths:t.paths}));
+      this.bounds=bb;
+      if(S.tehsil){const t=b.tehsils.find(t=>t.name===S.tehsil); const xs=[],ys=[]; t.paths.forEach(r=>r.forEach(([x,y])=>{xs.push(x);ys.push(y);})); if(xs.length) this.bounds=[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)];}
+      this.village=b;
+    }
+    this.feats.forEach(f=>{f.p2=new Path2D(); f.paths.forEach(r=>{r.forEach(([x,y],i)=>{const [X,Y]=this.proj(x,y); i?f.p2.lineTo(X,Y):f.p2.moveTo(X,Y);}); f.p2.closePath();});});
+  }
+  fit(){const [a,b,c,d]=this.bounds; const [x0,y0]=this.proj(a,d),[x1,y1]=this.proj(c,b); const pad=18;
+    const s=Math.min((this.w-2*pad)/(x1-x0),(this.h-2*pad)/(y1-y0)); this.view={s,x:(this.w-(x1-x0)*s)/2-x0*s,y:(this.h-(y1-y0)*s)/2-y0*s}; this.draw();}
+  zoomBy(f,cx=this.w/2,cy=this.h/2){const v=this.view; v.x=cx-(cx-v.x)*f; v.y=cy-(cy-v.y)*f; v.s*=f; this.draw();}
+  toWorld(px,py){return [(px-this.view.x)/this.view.s,(py-this.view.y)/this.view.s];}
+  css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+  draw(){
+    if(!this.feats) return; const c=this.ctx,v=this.view; c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,this.cv.width,this.cv.height);
+    c.setTransform(this.dpr*v.s,0,0,this.dpr*v.s,this.dpr*v.x,this.dpr*v.y);
+    const lw=1/v.s, line=this.css("--line"), ink=this.css("--ink"), sunk=this.css("--surface"), sel=this.css("--select");
+    if(S.level==="india"){
+      for(const f of this.feats){ if(f.kind==="state"){c.fillStyle=sunk; c.fill(f.p2,"evenodd"); c.strokeStyle=line; c.lineWidth=lw; c.stroke(f.p2);} }
+      for(const f of this.feats){ if(f.kind==="district"){const d=f.d; const dom=Object.entries(d.mix).filter(([k])=>k!=="other").sort((a,b)=>b[1]-a[1])[0][0];
+        let col=ARCH[dom].color; if(S.mode==="stress") col=seqColor((d.stress_rate[S.modeArg]||0)/0.7)||col;
+        c.fillStyle=col; c.fill(f.p2); c.strokeStyle=f===this.hover?sel:ink; c.lineWidth=(f===this.hover?3:1.2)*lw; c.stroke(f.p2);} }
+      c.setTransform(this.dpr,0,0,this.dpr,0,0); c.font="600 11px "+getComputedStyle(document.body).fontFamily; c.fillStyle=ink;
+      IDX.districts.forEach(d=>{const [X,Y]=this.proj((d.bounds[0]+d.bounds[2])/2,d.bounds[3]); c.fillText(d.district, v.x+X*v.s+8, v.y+Y*v.s-2);});
+      return;
+    }
+    const inTeh=m=>!S.tehsil||m.ts.includes(S.tehsil);
+    for(const f of this.feats){ if(f.kind!=="mws") continue; const col=mwsColor(f.m);
+      c.globalAlpha=inTeh(f.m)?1:0.25; c.fillStyle=col||this.css("--na"); c.fill(f.p2); c.strokeStyle="rgba(255,255,255,.55)"; c.lineWidth=0.6*lw; c.stroke(f.p2);}
+    c.globalAlpha=1;
+    for(const f of this.feats){ if(f.kind!=="teh") continue; c.strokeStyle=ink; c.lineWidth=(f.t.name===S.tehsil?2.4:1.1)*lw; c.stroke(f.p2);}
+    for(const f of this.feats){ if(f.kind==="mws"&&(f.m.u===S.mws||f===this.hover)){c.strokeStyle=sel; c.lineWidth=(f.m.u===S.mws?3.5:2)*lw; c.stroke(f.p2);} }
+    if((S.level==="tehsil"||S.level==="mws")&&S.showVillages){
+      const b=this.village; c.fillStyle=ink; const r=2.2*lw; const clus=S.mws?new Set(b.mwsById[S.mws].v):null;
+      b.villages.forEach(vv=>{ if(vv[2]!==S.tehsil&&!(clus&&clus.has(vv[0]))) return; if(vv[15]==null) return; const [X,Y]=this.proj(vv[15]/1e4,vv[16]/1e4);
+        c.beginPath(); c.arc(X,Y,clus&&clus.has(vv[0])?r*1.8:r,0,7); c.fillStyle=clus&&clus.has(vv[0])?sel:ink; c.fill();});
+    }
+    c.setTransform(this.dpr,0,0,this.dpr,0,0);
+    this.scalebar(c,ink);
+  }
+  scalebar(c,ink){ // km per pixel from degrees: 1 deg lat = 111.32 km; world units are degrees of latitude
+    const kmPerPx=111.32/this.view.s; const target=90*kmPerPx; const nice=[1,2,5,10,20,50,100,200,500].find(n=>n>=target*0.6)||500; const px=nice/kmPerPx;
+    c.fillStyle=ink; c.fillRect(12,this.h-16,px,3); c.font="11px "+getComputedStyle(document.body).fontFamily; c.fillText(nice+" km",12,this.h-21);
+  }
+  hit(px,py){const [X,Y]=this.toWorld(px,py); const c=this.ctx;
+    const order=S.level==="india"?this.feats.filter(f=>f.kind==="district"):(S.level==="district"?this.feats.filter(f=>f.kind==="teh"):this.feats.filter(f=>f.kind==="mws"));
+    c.setTransform(1,0,0,1,0,0);
+    if(S.level!=="india"&&S.level!=="district"){ // prefer MWS of selected tehsil
+      const pri=order.filter(f=>f.m.ts.includes(S.tehsil)); for(const f of pri) if(c.isPointInPath(f.p2,X,Y)) return f; }
+    for(const f of order) if(c.isPointInPath(f.p2,X,Y)) return f; return null;}
+  bind(){
+    const cv=this.cv; let drag=null, moved=false; const pts=new Map(); let pinch=null;
+    cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId); pts.set(e.pointerId,[e.offsetX,e.offsetY]); drag=[e.offsetX,e.offsetY,this.view.x,this.view.y]; moved=false;
+      if(pts.size===2){const [a,b]=[...pts.values()]; pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),s:this.view.s};}});
+    cv.addEventListener("pointermove",e=>{
+      if(pts.has(e.pointerId)) pts.set(e.pointerId,[e.offsetX,e.offsetY]);
+      if(pinch&&pts.size===2){const [a,b]=[...pts.values()]; const d=Math.hypot(a[0]-b[0],a[1]-b[1]); const f=(pinch.s*d/pinch.d)/this.view.s; this.zoomBy(f,(a[0]+b[0])/2,(a[1]+b[1])/2); moved=true; return;}
+      if(drag&&pts.size===1){const dx=e.offsetX-drag[0],dy=e.offsetY-drag[1]; if(Math.abs(dx)+Math.abs(dy)>3){moved=true; cv.classList.add("drag");} this.view.x=drag[2]+dx; this.view.y=drag[3]+dy; this.draw(); return;}
+      const f=this.hit(e.offsetX,e.offsetY); if(f!==this.hover){this.hover=f; this.draw();} this.tip(f,e.offsetX,e.offsetY);});
+    const end=e=>{pts.delete(e.pointerId); if(pts.size<2) pinch=null; cv.classList.remove("drag");
+      if(drag&&!moved&&e.type==="pointerup"){const f=this.hit(e.offsetX,e.offsetY); if(f) this.click(f);} drag=null;};
+    cv.addEventListener("pointerup",end); cv.addEventListener("pointercancel",end);
+    cv.addEventListener("pointerleave",()=>{this.hover=null; $("#tip").hidden=true; this.draw();});
+    cv.addEventListener("wheel",e=>{e.preventDefault(); const f=Math.exp(-e.deltaY*(e.ctrlKey?0.01:0.0025)); this.zoomBy(f,e.offsetX,e.offsetY);},{passive:false});
+  }
+  tip(f,x,y){const t=$("#tip"); if(!f){t.hidden=true;return;} let h="";
+    if(f.kind==="district") h=`<b>${esc(f.d.district)}</b>, ${esc(f.d.state)}<br>${f.d.n_mws} MWS · click to open`;
+    else if(f.kind==="teh") h=`<b>${esc(f.t.name)}</b> tehsil<br>${f.t.n_mws} MWS · click to open`;
+    else if(f.kind==="mws"){const m=f.m; h=`<b>MWS ${m.u}</b> · ${esc(m.t)}<br>${esc(ARCH[m.dom]?.label||"")}<br>${nStress(m)} stresses triggered`;
+      if(S.mode==="var") h+=`<br>${esc(VAR[S.modeArg].label)}: ${fmtVal(m.i[VIDX[S.modeArg]],VAR[S.modeArg].unit)}${unitLabel(VAR[S.modeArg].unit)}`;}
+    t.innerHTML=h; t.hidden=false; t.style.left=Math.min(x+12,this.w-200)+"px"; t.style.top=Math.min(y+12,this.h-70)+"px";}
+  click(f){ if(f.kind==="district") go("district",f.d.district); else if(f.kind==="teh") go("tehsil",f.t.name); else if(f.kind==="mws") go("mws",f.m.u); }
+}
+
+/* ---------- pane ---------- */
+function aggregate(ms){
+  const ids=K.archetypes.archetypes.map(a=>a.id); const tot=ms.reduce((s,m)=>s+m.a,0)||1;
+  const shares=ids.map((_,i)=>ms.reduce((s,m)=>s+m.a*m.m[i],0)/tot);
+  const rates={}; K.causal_graph.stresses.forEach(s=>{rates[s.id]=ms.filter(m=>m.s[s.id]&&m.s[s.id][0]===2).length/(ms.length||1);});
+  pwKeys().forEach(k=>{rates[k]=ms.filter(m=>pwData(m,k)[0]===2).length/(ms.length||1);});
+  pwKeys().forEach(k=>{const ps=OSX[pwSplit(k)[0]].ps.id;pwChildren(k).forEach(c=>{rates[k+"|"+c]=ms.filter(m=>psOn(m,ps)===true&&m.s[c][0]===2).length/(ms.length||1);});});
+  const sch={}; ms.forEach(m=>m.sc.forEach(([id])=>sch[id]=(sch[id]||0)+1));
+  return {ids,shares,rates,sch,n:ms.length,area:tot};
+}
+function stressBars(rates){
+  /* production system -> observed stress -> causal pathways; an observed stress is triggered when any of its pathways is */
+  const bar=(key,label,v,opp,cls="")=>`<div class="bar ${cls}" data-k="${esc(key)}" title="Colour the map by this"><span>${label}</span><span class="t"><span style="width:${(v*100).toFixed(1)}%;background:${opp?"var(--ok)":"var(--bad)"}"></span></span><span class="num">${(v*100).toFixed(0)}%</span></div>`;
+  const row=k=>{const opp=pwOpp(k);const ch=pwChildren(k);
+    return bar("pw:"+k,`<b>${esc(pwLabel(k))}</b>`,rates[k]||0,opp)+(ch.length>1||(ch.length===1&&STR[ch[0]].label!==pwLabel(k))?`<div class="sub bars">${ch.map(c=>bar("stress:"+c,esc(grpLabel(c)),rates[k+"|"+c]||0,opp)).join("")}</div>`:"");};
+  return K.taxonomy.production_systems.map(ps=>{const ks=pwKeys().filter(k=>OSX[pwSplit(k)[0]].ps.id===ps.id).sort((a,b)=>(pwOpp(a)-pwOpp(b))||((rates[b]||0)-(rates[a]||0)));
+    return `<div class="eyebrow" style="margin-top:8px">${esc(ps.label)}</div><div class="bars">${ks.map(row).join("")}</div>`;}).join("")+
+    `<p class="note">Share of watersheds where each observed stress is triggered (any of its causal pathways, counted only where the production system is present), with its causal pathways below. Green bars are opportunities. Click a row to colour the map by intensity.</p>`;
+}
+function schemeList(sch,n,limit=12){
+  const rows=Object.entries(sch).sort((a,b)=>b[1]-a[1]).slice(0,limit);
+  return `<div class="tbl"><table><thead><tr><th>Scheme</th><th>Level</th><th class="r">MWS</th></tr></thead><tbody>${rows.map(([id,c])=>`<tr><td>${esc(SCH[id].name)}</td><td>${SCH[id].level==="state"?esc(SCH[id].state):"Central"}</td><td class="r num">${c} <span class="muted">(${(c/n*100).toFixed(0)}%)</span></td></tr>`).join("")}</tbody></table></div>`;
+}
+function renderPane(){
+  const p=$("#pane");
+  if(S.level==="india"){
+    p.innerHTML=`<div class="block"><div class="eyebrow">Choose a district</div><p class="muted">Each card shows how the district's land divides among the system archetypes and its most common stresses. Districts were chosen because at least four of their tehsils are populated in the CoRE Stack.</p></div>
+      <div class="cards">${IDX.districts.map(d=>{const ids=K.archetypes.archetypes.map(a=>a.id); const sh=ids.map(a=>d.mix[a]);
+        const top=Object.entries(d.stress_rate).filter(([k])=>OSX[k]&&OSX[k].os.type==="stress").sort((a,b)=>b[1]-a[1]).slice(0,3);
+        return `<button class="dcard" data-d="${esc(d.district)}"><span><b>${esc(d.district)}</b> <span class="muted">${esc(d.state)}</span></span>${mixBar(sh,ids)}<span class="note">${d.n_mws.toLocaleString()} MWS · ${d.tehsils.length} tehsils · ${d.n_villages.toLocaleString()} villages</span><span class="note">${top.map(([k,v])=>`${esc(sLabel(k))} ${(v*100).toFixed(0)}%`).join(" · ")}</span></button>`;}).join("")}</div>`;
+    p.querySelectorAll(".dcard").forEach(b=>b.onclick=()=>go("district",b.dataset.d));
+    return;
+  }
+  const d=curDistrict(), b=BUNDLES[d.slug];
+  if(S.level==="district"||S.level==="tehsil"){
+    const ms=S.level==="tehsil"?b.mws.filter(m=>m.ts.includes(S.tehsil)):b.mws; const A=aggregate(ms);
+    const title=S.level==="tehsil"?`${esc(S.tehsil)} tehsil`:`${esc(d.district)} district`;
+    const sub=S.level==="tehsil"?`${A.n} micro-watersheds (including ${ms.filter(m=>m.t!==S.tehsil).length} shared with neighbouring tehsils)`:`${A.n.toLocaleString()} micro-watersheds · ${b.villages.length.toLocaleString()} villages · ${(A.area/100).toFixed(0)} km²`;
+    let teh="";
+    if(S.level==="district"){teh=`<div class="block"><div class="eyebrow">Tehsils</div><div class="tbl"><table><thead><tr><th>Tehsil</th><th>System mix</th><th class="r">MWS</th></tr></thead><tbody>${b.tehsils.map(t=>{const mt=b.mws.filter(m=>m.ts.includes(t.name)); const a=aggregate(mt); return `<tr data-t="${esc(t.name)}" style="cursor:pointer"><td><a href="#" onclick="return false">${esc(t.name)}</a></td><td style="min-width:140px">${mixBar(a.shares,a.ids)}</td><td class="r num">${mt.length}</td></tr>`;}).join("")}</tbody></table></div></div>`;}
+    p.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.state)}</div><h2>${title}</h2><p class="muted">${sub}</p>${mixBar(A.shares,A.ids)}${mixList(A.shares,A.ids)}
+      <p class="note">Shares are area-weighted means of each watershed's system mix. ${d.rain_factor!==1?`Rainfall regime uses CoRE precipitation rescaled by ×${d.rain_factor} to the district normal.`:""}</p></div>
+      <div class="block">${stressBars(A.rates)}</div>${teh}
+      <div class="block"><div class="eyebrow">Schemes most often matched</div>${schemeList(A.sch,A.n)}<p class="note">Open a watershed to see why each scheme is suggested.</p></div>`;
+    p.querySelectorAll(".bar[data-k]").forEach(el=>el.onclick=()=>{const [a,...b]=el.dataset.k.split(":");S.mode=a;S.modeArg=b.join(":"); renderMapCtl(); MAP.draw();});
+    p.querySelectorAll("tr[data-t]").forEach(el=>el.onclick=()=>go("tehsil",el.dataset.t));
+    return;
+  }
+  renderMws(p,b.mwsById[S.mws],b,d);
+}
+/*MWS-START*/
+/* ---------- community answers (per viewer, kept in this browser) ---------- */
+let ANS={},APPLIED={};
+try{ANS=JSON.parse(localStorage.getItem("wsa_answers")||"{}")||{}}catch(e){ANS={}}
+APPLIED=JSON.parse(JSON.stringify(ANS));
+function saveAns(){try{localStorage.setItem("wsa_answers",JSON.stringify(ANS))}catch(e){}}
+const ACACHE=new Map();
+function getAssess(m,d){const a=APPLIED[m.u]||{};const key=m.u+"|"+JSON.stringify(a);
+  if(!ACACHE.has(key)){if(ACACHE.size>400)ACACHE.clear();ACACHE.set(key,assessMws(m,d,a))}return ACACHE.get(key)}
+function hasApplied(u){return APPLIED[u]&&Object.keys(APPLIED[u]).length>0}
+function sameAns(a,b){return JSON.stringify(a||{})===JSON.stringify(b||{})}
+const pct=p=>p==null?"–":Math.round(p*100)+"%";
+const ALIAS_DS={soil:"soil_health",nrega:"nrega_annual",anty:"antyodaya (Mission Antyodaya, apportioned by area)",fac:"facilities_proximity (area-weighted)",river:"river",conn:"mws_connectivity",fringe:"forest_fringes",fire:"forest_fire",tig:"tree_in_grassland",ndvi:"ndvi",lulc:"lulc_vector",ci:"croppingintensity_annual",drought:"croppingdrought_kharif",hydro:"hydrological_annual",swb:"surfacewaterbodies_annual",aquifer:"aquifer_vector",terrain:"terrain",soge:"soge_vector",rest:"restoration_vector",degr:"change_detection_degradation",tcd:"change_detection_tree_cover_decrease",tci:"change_detection_tree_cover_increase",urb:"change_detection_urbanization",canal:"canal",gc:"green_credit",vill:"village census and livestock (apportioned by area)"};
+function varSources(id,seen=new Set()){
+  const out=new Set();if(seen.has(id))return out;seen.add(id);
+  if(id==="rain_factor"){out.add("district rainfall normal (contexts.json)");return out}
+  const v=VAR[id];if(!v)return out;
+  PyEval.names(v.expr).forEach(n=>{if(ALIAS_DS[n])out.add(ALIAS_DS[n]);else if(VAR[n]||n==="rain_factor")varSources(n,seen).forEach(x=>out.add(x));else if(n==="area")out.add("MWS area")});
+  return out;}
+function depVars(expr,seen=new Set()){
+  const vars=new Set(),helpers=new Set();
+  PyEval.names(expr).forEach(n=>{if(seen.has(n))return;seen.add(n);
+    if(HLP[n]){helpers.add(n);const r=depVars(HLP[n].expr,seen);r.vars.forEach(x=>vars.add(x));r.helpers.forEach(x=>helpers.add(x))}
+    else if(VAR[n])vars.add(n)});
+  return {vars,helpers};}
+function varChip(id){if(!refKind(id))return esc(id);
+  return `<span class="chip">${vref(id)}</span>`}
+function questionsSetting(helper){return ALLQ.filter(q=>q.options.some(o=>o.set&&helper in o.set))}
+function questionsShifting(arch){return ALLQ.filter(q=>q.options.some(o=>(o.shift||[]).some(x=>x.from.includes(arch)||(Array.isArray(x.to)?x.to:[x.to]).includes(arch))))}
+function questionsFor(stress){return ALLQ.filter(q=>q.options.some(o=>o.stress.some(e=>e.id===stress)))}
+function effectText(o){
+  const parts=o.stress.map(e=>`${e.lr>1?"×":"×"}${e.lr} ${esc(sLabel(e.id))}${e.severe?" (can make severe)":""}`);
+  Object.entries(o.set||{}).forEach(([h,v])=>parts.push(`sets ${esc(HLP[h]?.label||h)} = ${v}`));
+  (o.shift||[]).forEach(x=>parts.push(`moves ${Math.round(x.fraction*100)}% of ${x.from.map(a=>esc(ARCH[a].label)).join(" + ")} to ${(Array.isArray(x.to)?x.to:[x.to]).map(a=>esc(ARCH[a].label)).join(" / ")}`));
+  return parts.join("; ")||"no change";}
+
+/* ---------- functions of the expression language (mirror of seft/expr.py FUNCS) ---------- */
+const FN={
+ ntrue:["ntrue(a, b, …)","Number of arguments that are true; unknown ones are not counted.","ntrue(s_low_literacy, s_bank_far, s_low_shg) >= 2 = at least two of the three dimensions hold"],
+ nknown:["nknown(a, b, …)","Number of arguments whose value is known (not missing).","nknown(s_low_nrega, s_bank_far) <= 1 = at most one of them has data"],
+ avg:["avg(a, b, …)","Mean of the known arguments; missing ones are skipped.","avg(s_n_low, s_p_low, s_k_low, s_oc_low) = average grade of the nutrient signals"],
+ frac_below:["frac_below(t, [p05, …, p95])","Share of the MWS area below t, interpolated from the eleven percentiles (p05 to p95) that the API gives; below p05 gives 0, at or above p95 gives 1.","frac_below(280, [soil.n_p05_in_kg_per_ha, …]) = share of the MWS with nitrogen below 280 kg/ha"],
+ is_text:["is_text(x)","True when x is a non-empty text value, such as a trend class read from the API.","is_text(ndvi.shrub_trend) = true when the trend class was returned"],
+ mean:["mean(x)","Average of the valid (non-missing) values. On a series over 2017–24 it gives the mean across years; on a single number it returns that number.","mean(div(lulc.tree_forest_area, area)) = mean yearly tree-cover share of the MWS"],
+ median:["median(x)","Median of the valid values of a series.","median(hydro.precipitation)"],
+ sum:["sum(x)","Total of the valid values of a series.","sum(hydro.delta_g) = cumulative groundwater change 2017–24"],
+ min:["min(x) or min(a, b, …)","With one series: its smallest valid value. With several arguments: the smallest of them, ignoring missing ones.","min(drought.kharif_cropped) = worst year's kharif area"],
+ max:["max(x) or max(a, b, …)","With one series: its largest valid value. With several arguments: the largest of them, ignoring missing ones. Often used to set a floor.","max(f_commons, 0.03) = commons share, but never below 3%"],
+ first:["first(x)","First valid value of a series (the earliest year with data).","first(lulc.tree_forest_area) = tree cover at the start"],
+ last:["last(x)","Last valid value of a series (the latest year with data).","last(div(lulc.built_up_area, area)) = built-up share in the latest year"],
+ range:["range(x)","Largest minus smallest valid value of a series.","range(ci.cropping_intensity)"],
+ std:["std(x)","Sample standard deviation of the valid values; needs at least 2 values.","std(doy(drought.monsoon_onset)) = spread of monsoon onset dates, in days"],
+ cv:["cv(x)","Coefficient of variation: standard deviation divided by the absolute mean. Needs at least 3 valid values. 0 means no year-to-year change; 0.2 means a typical swing of 20% around the mean.","cv(hydro.precipitation)"],
+ slope:["slope(x)","Theil–Sen trend: the median of the slopes between every pair of years, in units per year. Robust to one unusual year. Needs at least 4 valid years.","slope(ci.cropping_intensity) = change in cropping intensity per year"],
+ mk_p:["mk_p(x)","Two-sided p-value of the Mann–Kendall trend test (normal approximation). Small values mean a consistent upward or downward trend. Needs at least 4 values.","mk_p(hydro.delta_g) < 0.1"],
+ early:["early(x, k=3)","Mean of the first k values of a series (default the first 3 years).","early(swb.total_area)"],
+ late:["late(x, k=3)","Mean of the last k values of a series (default the last 3 years). Used to look at recent conditions only.","late(hydro.delta_g, 3) = mean groundwater change in 2022–24"],
+ frac:["frac(condition)","Share of years in which a yearly condition is true, out of the years with data.","frac(hydro.delta_g < 0) = share of years with net groundwater loss"],
+ count:["count(condition)","Number of years in which a yearly condition is true.","count(drought.moderate + drought.severe >= 4) = seasons with 4 or more drought weeks"],
+ runs:["runs(condition)","Longest run of consecutive years in which a condition is true.","runs(hydro.delta_g < 0)"],
+ cumsum:["cumsum(x)","Running total of a series (missing years count as 0). Turns yearly changes into a level.","slope(cumsum(hydro.welldepth)) = trend of the water level"],
+ div:["div(a, b, default)","Division that never fails: returns default (missing if not given) when b is 0 or either value is missing. Works on series year by year.","div(lulc.tree_forest_area, area) = tree-cover share"],
+ nz:["nz(x, default=0)","Replaces a missing value with a default (0 unless given).","nz(soge_stage, 50) = block stage of extraction, or 50% where unknown"],
+ ramp:["ramp(x, lo, hi)","Linear 0-to-1 scale: 0 at or below lo, 1 at or above hi, in proportion between them. Turns an indicator into a weight without a hard cut-off. If lo is greater than hi the scale runs downward.","ramp(nz(soge_stage, 50), 20, 70) = 0 at ≤20% extraction, 0.5 at 45%, 1 at ≥70%"],
+ clip:["clip(x, lo=0, hi=1)","Limits a value to the range lo to hi.","clip(irr_share, 0, 1)"],
+ abs:["abs(x)","Absolute value.","abs(slope(swb.total_area))"],
+ ifelse:["ifelse(condition, a, b)","a when the condition is true, b when false, missing when unknown. Same as a if condition else b.","ifelse(n_canals >= 1, 0.5, 0)"],
+ isnan:["isnan(x)","True when the value is missing.","isnan(st_share)"],
+ known:["known(x)","True when the value is not missing.","known(literacy)"],
+ contains:["contains(list, item)","True when the list contains the item.","contains(canal.projects, 'Nira')"],
+ doy:["doy(dates)","Day of the year (1–366) for each date in a list of dates such as monsoon onset.","std(doy(drought.monsoon_onset))"],
+ len:["len(x)","Number of items in a list.","len(canal.projects)"]
+};
+
+/* ---------- variable references and hover tips ---------- */
+const DS_LABEL={soil_health:"soil nutrients",nrega_annual:"NREGA works",river:"rivers",mws_connectivity:"watershed connectivity",forest_fringes:"forest edges",forest_fire:"forest fires",tree_in_grassland:"trees in grassland",ndvi:"vegetation greenness",lulc_vector:"land use / land cover",croppingintensity_annual:"cropping intensity",croppingdrought_kharif:"kharif drought",hydrological_annual:"water balance",surfacewaterbodies_annual:"surface water bodies",aquifer_vector:"aquifer",terrain:"terrain",soge_vector:"groundwater assessment (CGWB)",restoration_vector:"restoration opportunity",change_detection_degradation:"farmland degradation",change_detection_tree_cover_decrease:"tree cover loss",change_detection_tree_cover_increase:"tree cover gain",change_detection_urbanization:"urbanisation",canal:"canals",green_credit:"Green Credit projects"};
+function refKind(n){
+  if(/^fn:/.test(n)) return FN[n.slice(3)]?"fn":null;
+  if(VAR[n]) return "var"; if(HLP[n]) return "hlp";
+  if(SIG[n]||(/_g$/.test(n)&&SIG[n.slice(0,-2)])) return "sig";
+  if(/^share_/.test(n)&&ARCH[n.slice(6)]) return "share";
+  if(/^ctx\./.test(n)) return "ctx";
+  const a=n.split(".")[0]; if(ALIAS_DS[a]&&n.includes(".")) return "col";
+  if(n==="area") return "area"; if(n==="rain_factor") return "rf";
+  return null;}
+function refLabel(n){const k=refKind(n);
+  return k==="var"?VAR[n].label:k==="hlp"?HLP[n].label:k==="sig"?(SIG[n]||SIG[n.slice(0,-2)]).label:k==="share"?"Share: "+ARCH[n.slice(6)].label:n;}
+const KIND_LABEL={system:"System signal: where a rule is checked",stress:"Stress signal: evidence",context:"Context or amplifier signal"};
+/* Threshold rules of a signal in words. A threshold signal is "on" from the threshold (grade 0.5) and reaches
+   grade 1 at the severe threshold. The first condition ('when') that holds for the MWS decides; pooled
+   percentiles (over all MWS in the run) are used when no condition holds or absolute values are switched off. */
+function thrText(x,opts={}){const u=VAR[x.var]?.unit||"",lo=x.direction==="low",d=lo?"≤":"≥";
+  const ul=/^(ratio|share|fraction|flag|unitless|0-1)$/i.test(u)?"":esc(unitLabel(u));
+  const pair=(v,sv)=>`on at ${d} ${fmtVal(v,u)}${ul}, severe at ${d} ${fmtVal(sv,u)}${ul}`;
+  const ts=x.thresholds||[], useAbs=x.use_absolute!==false;
+  const lines=[];
+  if(useAbs) ts.forEach((t,i)=>{const cond=t.when&&t.when!=="True";
+    lines.push(`${cond?`If <code>${exprHtml(t.when)}</code>: `:(ts.length>1?"Otherwise: ":"")}${pair(t.value,t.severe)}.`);});
+  const alwaysAbs=useAbs&&ts.some(t=>!t.when||t.when==="True");
+  const pf=x.percentile_fallback; const pool=(IDX.signal_thresholds||{})[x.id]; const pv=pool&&pool[pool.length-1];
+  if(pf&&!alwaysAbs){const w=lo?"at or below":"at or above";
+    lines.push(`${lines.length?"Otherwise, c":"C"}ompared with all MWS in the run: on ${w} the ${pf.pct}th percentile${pv?` (${fmtVal(pv[0],u)})`:""}, severe ${w} the ${pf.severe_pct}th${pv?` (${fmtVal(pv[1],u)})`:""}.`);}
+  if(!useAbs&&ts.length) lines.push(`<span class="muted">Absolute values (${ts.map(t=>pair(t.value,t.severe)).join("; ")}) are recorded but switched off for this indicator.</span>`);
+  return opts.inline?lines.join(" "):lines.map(l=>`<div>${l}</div>`).join("");}
+function indicatorHtml(id){const v=VAR[id]; if(!v) return vref(id);
+  return `${vref(id)}${v.unit?` <span class="muted">(${esc(v.unit)})</span>`:""} = <code>${exprHtml(v.expr)}</code>`;}
+function rulesUsing(id){return K.causal_graph.stresses.filter(r=>Object.values(r.signals).some(l=>l.includes(id)));}
+/* a named reference with a hover / focus tip */
+function vref(n,text){if(!refKind(n)) return esc(text??n);
+  return `<span class="vref" tabindex="0" data-ref="${esc(n)}">${esc(text??refLabel(n))}</span>`;}
+/* an expression with every known name made hoverable */
+function exprHtml(src){
+  if(src==null) return "";
+  const parts=String(src).split(/([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?)/);
+  return parts.map((part,i)=>{
+    if(i%2===0) return esc(part);
+    if(FN[part]&&/^\s*\(/.test(parts[i+1]||"")) return `<span class="vref fref" tabindex="0" data-ref="fn:${esc(part)}">${esc(part)}</span>`;
+    return refKind(part)?`<span class="vref" tabindex="0" data-ref="${esc(part)}">${esc(part)}</span>`:esc(part);}).join("");}
+function directRefs(expr){
+  const out={vars:[],hlps:[],cols:[]};
+  const toks=String(expr).match(/[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?/g)||[];
+  [...new Set(toks)].forEach(n=>{const k=refKind(n); if(k==="var") out.vars.push(n); else if(k==="hlp") out.hlps.push(n); else if(k==="col") out.cols.push(n);});
+  return out;}
+function tipHtml(n){
+  const k=refKind(n);
+  if(k==="fn"){const [sig,desc,ex]=FN[n.slice(3)];
+    return `<b class="mono">${esc(sig)}</b><p>${esc(desc)}</p><div class="tipx"><span class="muted">Example:</span> <code>${esc(ex)}</code></div><div class="muted">Function of the expression language (seft/expr.py)</div>`;}
+  if(k==="var"){const v=VAR[n]; const ds=[...varSources(n)];
+    return `<b>${esc(v.label)}</b> <span class="muted">${esc(v.unit||"")}</span><div class="mono">${esc(n)}</div>${v.description?`<p>${esc(v.description)}</p>`:""}<div class="tipx"><code>${esc(v.expr)}</code></div><div class="muted">Indicator (variables.json, ${esc(K.variables.groups[v.group]||v.group)})${ds.length?" · data: "+esc(ds.map(d=>DS_LABEL[d]?`${DS_LABEL[d]} (${d})`:d).join(", ")):""}</div>`;}
+  if(k==="hlp"){const h=HLP[n]; const r=directRefs(h.expr);
+    return `<b>${esc(h.label)}</b><div class="mono">${esc(n)}</div><p>${esc(h.note||"")}</p><div class="tipx"><code>${esc(h.expr)}</code></div><div class="muted">Weight (archetypes.json helpers)${r.vars.length||r.hlps.length?" · built from: "+esc([...r.vars.map(x=>VAR[x].label),...r.hlps.map(x=>HLP[x].label)].join(", ")):""}</div>`;}
+  if(k==="sig"){const g=!SIG[n];const x=SIG[g?n.slice(0,-2):n];const us=rulesUsing(x.id);
+    return `<b>${esc(x.label)}</b><div class="mono">${esc(n)}</div>${g?`<p>Grade of this signal: 0 when the threshold is not crossed, 0.5 at the threshold, rising to 1 at the severe threshold.</p>`:""}
+      ${x.expr?`<p>Yes/no condition:</p><div class="tipx"><code>${exprHtml(x.expr)}</code></div>`:`<p><b>Indicator:</b> ${indicatorHtml(x.var)}</p><p><b>Threshold</b> (${x.direction==="low"?"low":"high"} values are the problem):</p>${thrText(x)}`}${x.note?`<p>${esc(x.note)}</p>`:""}
+      <div class="muted">${esc(KIND_LABEL[x.kind])} (signals.json)${us.length?" · used by: "+esc(us.map(r=>r.label).join(", ")):""}</div>`;}
+  if(k==="share"){const a=ARCH[n.slice(6)]; return `<b>Share of ${esc(a.label)}</b><p>Fraction of the MWS area assigned to this system, after closing to 100% and any community answers.</p>`;}
+  if(k==="ctx"){const dim=K.contexts.dimensions.find(d=>d.id===n.slice(4)); return dim?`<b>${esc(dim.label)}</b><p>Context class of the MWS: ${dim.classes.map(c=>`<span class="mono">${esc(c.id)}</span> = ${esc(c.label)}`).join("; ")}.</p><div class="muted">contexts.json</div>`:esc(n);}
+  if(k==="col"){const [a,c]=n.split("."); const ds=ALIAS_DS[a];
+    return `<b>${esc(c)}</b><p>Column of the CoRE Stack dataset <span class="mono">${esc(ds)}</span>${DS_LABEL[ds]?` (${esc(DS_LABEL[ds])})`:""}. Annual columns are series over 2017–24.</p>`;}
+  if(k==="area") return `<b>MWS area</b><p>Area of the micro-watershed in hectares.</p>`;
+  if(k==="rf") return `<b>Rainfall factor</b><p>District rainfall normal divided by the district median of CoRE precipitation (contexts.json, rainfall_normals). 1 when no normal is given.</p>`;
+  return esc(n);}
+(function initTips(){
+  const tip=document.createElement("div"); tip.id="vtip"; tip.setAttribute("role","tooltip"); tip.hidden=true; document.body.appendChild(tip);
+  let cur=null;
+  const show=el=>{ if(!K) return; cur=el; tip.innerHTML=tipHtml(el.dataset.ref); tip.hidden=false;
+    const r=el.getBoundingClientRect(), w=Math.min(360,window.innerWidth-24); tip.style.width=w+"px";
+    let x=Math.min(Math.max(12,r.left),window.innerWidth-w-12); let y=r.bottom+6;
+    tip.style.left=x+"px"; tip.style.top=y+"px";
+    const th=tip.getBoundingClientRect().height; if(y+th>window.innerHeight-8&&r.top-th-6>8) tip.style.top=(r.top-th-6)+"px";};
+  const hide=()=>{cur=null; tip.hidden=true;};
+  document.addEventListener("mouseover",e=>{const el=e.target.closest(".vref"); if(el&&el!==cur) show(el); else if(!el&&cur&&!e.target.closest("#vtip")) hide();});
+  document.addEventListener("focusin",e=>{const el=e.target.closest(".vref"); if(el) show(el);});
+  document.addEventListener("focusout",e=>{if(e.target.closest(".vref")) hide();});
+  document.addEventListener("click",e=>{const el=e.target.closest(".vref"); if(el){ if(cur===el) hide(); else show(el); } else if(!e.target.closest("#vtip")) hide();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape") hide();});
+  window.addEventListener("scroll",hide,{passive:true});
+})();
+
+/* ---------- MWS view ---------- */
+function bandPill(st,type){
+  if(!st||st.band==null)return "";
+  const cls=st.band==="confirmed"?(type==="opportunity"?"opp":"severe"):st.band==="likely"?(type==="opportunity"?"opp":"moderate"):"conf";
+  return `<span class="pill ${cls}">${esc(st.band)}</span>`;}
+function dataLabel(x){const i=x[2]==null?"":` · intensity ${Math.round(x[2])}`;
+  return x[0]===2?`triggered${x[1]===2?" (severe)":""}${i}`:x[0]===1?`not triggered${(x[2]||0)>0?`, partial evidence${i}`:""}`:x[0]===0?"not applicable":"insufficient data";}
+function stressCardHtml(id,st,x,m,R,opts={}){
+  const s=STR[id],t=s.type;
+  const sevPill=st.positive&&t==="stress"?`<span class="pill ${st.asev==="severe"?"severe":"moderate"}">${st.asev}</span>`:"";
+  const ans=st.used.length?` → <b>${pct(st.post)}</b> after ${st.used.length} answer${st.used.length>1?"s":""} <span class="muted">(${st.used.map(([q,lr])=>`${esc(QBY[q].text.slice(0,48))}… ×${lr}`).join("; ")})</span>`:"";
+  return `<div class="stress ${t==="stress"?(st.asev==="severe"?"severe":""):t}" ${opts.muted?'style="border-left-color:var(--na)"':""}><div class="hd"><b>${esc(s.label)}</b><span>${ibar(st.inten,t==="opportunity")} ${bandPill(st,t)} ${sevPill} <span class="pill conf">${esc(s.confidence)} confidence rule</span></span></div>
+    <p class="note">${esc(s.interpretation)}</p>
+    <p class="note">Data: ${dataLabel(x)} · probability before answers ${pct(st.prior)}${ans}</p>
+    <details><summary>Signals behind this result</summary>${sigTable(s,m,R)}<p class="note"><b>Trigger:</b> <code>${exprHtml(s.trigger)}</code><br><b>Intensity:</b> <code>${exprHtml(s.intensity)}</code> · severe at ${s.severe_at}</p></details>
+    <details><summary>Public note</summary><p class="pubnote">${pubHtml(s.public_note)}</p></details></div>`;}
+function pubHtml(t){return esc(t).replace(/\b(?:s|ctx|sys)_[a-z0-9_]+\b/g,n=>SIG[n]?vref(n,n):n);}
+function sigRow(id,role,m,R){
+  const x=SIG[id],i=SIGIDX[id];let g=m.sg?m.sg[i]:null;
+  if(x.kind==="system"&&R&&R.sysChanged&&R.se) g=R.se[id+"_g"];
+  const on=g==null?null:g>=0.5;
+  let val="–",thr="";
+  if(x.var){const u=VAR[x.var]?.unit;val=fmtVal(m.i[VIDX[x.var]],u)+esc(unitLabel(u));
+    const c=((IDX.signal_thresholds||{})[id]||[])[m.sb?m.sb[i]:-1];
+    thr=c?`on at ${x.direction==="low"?"≤":"≥"} ${fmtVal(c[0],u)}, severe at ${x.direction==="low"?"≤":"≥"} ${fmtVal(c[1],u)} <span class="muted">(${c[2]==="absolute"?(c[3]&&c[3]!=="True"?"absolute, as "+esc(c[3]):"absolute"):esc(c[2].replace("pooled p","percentile of all MWS: p"))})</span>`:'<span class="muted">no threshold applies</span>';}
+  else thr=`<code>${exprHtml(x.expr)}</code>`;
+  const st=on===null?'<span class="muted">unknown</span>':on?`<span class="on ${x.kind==="system"?"opp":""}">on</span>`:"off";
+  return `<tr><td><span class="role">${role}</span><br>${vref(id)}</td><td class="r num">${val}</td><td>${thr}</td><td class="r num">${g==null?"–":g.toFixed(2)}</td><td>${st}</td></tr>`;}
+function sigTable(s,m,R){
+  const roles=[["system","system"],["stress","stress"],["context","context"]];
+  const rows=roles.flatMap(([k,l])=>(s.signals[k]||[]).map(id=>sigRow(id,l,m,R))).join("");
+  return `<div class="tbl"><table><thead><tr><th>Signal</th><th class="r">Value</th><th>Threshold</th><th class="r">Grade</th><th>State</th></tr></thead><tbody>${rows}</tbody></table></div>`;}
+function pathwayBlock(k,R,m,opts={}){
+  const [b,t]=pwSplit(k);const X=OSX[b];const a=R.pw[k];const opp=t==="opportunity";
+  const ch=a.children.slice().sort((x,y)=>(R.st[y].positive-R.st[x].positive)||((R.st[y].inten||0)-(R.st[x].inten||0)));
+  const shown=opts.all?ch:ch.filter(c=>R.st[c].positive);const rest=ch.filter(c=>!shown.includes(c)&&R.st[c].code!==0);
+  const card=(c,muted)=>`${STR[c].group?`<div class="role">${esc(GRP[STR[c].group].label)} pathway</div>`:""}${stressCardHtml(c,R.st[c],m.s[c],m,R,{muted})}`;
+  return `<div class="pwblock"><div class="pwhd"><span><span class="eyebrow">${esc(X.ps.label)} · observed ${opp?"opportunity":"stress"}</span><br><b>${esc(pwLabel(k))}</b></span><span>${ibar(a.inten,opp)} ${a.positive?`<span class="pill ${opp?"opp":a.asev==="severe"?"severe":"moderate"}">${opp?"present":a.asev}</span>`:""}</span></div>
+    <p class="note">${esc(X.os.about)}</p>
+    ${shown.map(c=>card(c,!R.st[c].positive)).join("")}
+    ${rest.length?`<details><summary>Other causal pathways evaluated (${rest.length})</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">${rest.map(c=>card(c,true)).join("")}</div></details>`:""}</div>`;}
+function mixTable(R,m,ids){
+  const before=m.m;
+  const rows=ids.map((a,i)=>[a,R.shares[i],before[i]]).filter(r=>r[1]>=0.01||r[2]>=0.01).sort((a,b)=>b[1]-a[1]);
+  return `<div class="tbl"><table><thead><tr><th>System</th><th class="r">Share</th>${R.sysChanged?'<th class="r">From data</th>':""}<th>Listed as</th><th>Rule confidence</th></tr></thead><tbody>${rows.map(([a,v,v0])=>{const A=ARCH[a];
+    const pres=a==="other"?'<span class="muted">residual</span>':(v>=A.present_at?'<b>present</b>':`<span class="muted">minor (&lt; ${Math.round(A.present_at*100)}%)</span>`);
+    return `<tr><td><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${A.color};margin-right:5px"></i>${esc(A.label)}</td><td class="r num">${pct(v)}</td>${R.sysChanged?`<td class="r num muted">${pct(v0)}</td>`:""}<td>${pres}</td><td title="${esc(A.confidence_reason)}">${esc(A.confidence)}</td></tr>`}).join("")}</tbody></table></div>`;}
+function fmtN(v){return v==null||(typeof v==="number"&&!isFinite(v))?"–":(typeof v==="number"?(Math.abs(v)>=100?v.toFixed(0):v.toFixed(3).replace(/0+$/,"").replace(/\.$/,"")):esc(v))}
+function substitute(expr,env){return esc(expr).replace(/[A-Za-z_][A-Za-z0-9_]*/g,n=>(n in env&&(typeof env[n]==="number"||env[n]===null)&&!["nz","min","max","ramp","div"].includes(n))?`<b>${fmtN(env[n])}</b>`:n)}
+function mixWalk(R,m){
+  const env=R.mix.env,setBy=R.C.setBy,A=K.archetypes;
+  const lc=[["f_crop","Cropland"],["f_forest","Tree cover"],["f_commons","Open commons (shrub + barren)"],["f_built_last","Built-up (last year)"],["f_water_any","Water (any season)"]];
+  const lcSum=lc.reduce((s,[k])=>s+(env[k]||0),0);
+  return `<div class="walk">
+   <p class="note">Every number below is for this MWS. Bold values are substituted into the rule from <span class="mono">archetypes.json</span>.</p>
+   <div class="eyebrow">1 · Land cover (mean share of MWS, 2017–24)</div>
+   <div class="tbl"><table><tbody>${lc.map(([k,l])=>`<tr><td>${vref(k,l)}</td><td class="r num">${pct(env[k])}</td></tr>`).join("")}<tr><td><b>Sum</b></td><td class="r num"><b>${pct(lcSum)}</b></td></tr></tbody></table></div>
+   <div class="eyebrow">2 · Cropland by season</div>
+   <div class="tbl"><table><tbody><tr><td>Kharif only (no crop after the monsoon)</td><td class="r num">${pct(env.rainfed_share)}</td></tr><tr><td>Also cropped in rabi or summer</td><td class="r num">${pct(env.irr_share)}</td></tr></tbody></table></div>
+   <div class="eyebrow">3 · Weights inferred from other data</div>
+   <div class="tbl"><table><thead><tr><th>Weight</th><th>Rule</th><th class="r">Value</th></tr></thead><tbody>${A.helpers.map(h=>`<tr><td>${vref(h.id)}</td><td><code>${setBy[h.id]?`set by answer: ${esc(QBY[setBy[h.id]].text.slice(0,60))}…`:substitute(h.expr,env)}</code></td><td class="r num">${fmtN(R.mix.helpers[h.id])}</td></tr>`).join("")}</tbody></table></div>
+   <div class="eyebrow">4 · Raw shares, closing to 100%, and answers</div>
+   <div class="tbl"><table><thead><tr><th>System</th><th>Rule with this MWS's values</th><th class="r">Raw</th><th class="r">Closed</th><th class="r">Final</th></tr></thead><tbody>${A.archetypes.map((a,i)=>`<tr><td>${esc(a.label)}</td><td><code>${substitute(a.share,env)}</code></td><td class="r num">${pct(R.mix.raw[a.id])}</td><td class="r num">${pct(R.mix.closed[a.id])}</td><td class="r num"><b>${pct(R.shares[i])}</b></td></tr>`).join("")}
+   <tr><td><b>Total</b></td><td></td><td class="r num"><b>${pct(R.mix.tot)}</b></td><td class="r num">100%</td><td class="r num">100%</td></tr></tbody></table></div>
+   <p class="note">${R.mix.tot<0.999?`The raw shares add up to ${pct(R.mix.tot)}; the remaining ${pct(1-R.mix.tot)} is land the land-cover layer did not classify, added to "${esc(ARCH.other.label)}".`:R.mix.tot>1.001?`The raw shares add up to ${pct(R.mix.tot)} because cropland and built-up come from different layers and overlap slightly; every share is divided by ${R.mix.tot.toFixed(3)}.`:"The raw shares already add up to 100%."} ${R.C.shifts.length?"Community answers then moved share between systems without changing the total.":""}</p></div>`;}
+function questionHtml(q,uid){
+  const cur=(ANS[uid]||{})[q.id];const inf=[...new Set(q.options.flatMap(o=>o.stress.map(e=>e.id)))];
+  return `<fieldset class="q" data-q="${q.id}"><legend>${esc(q.text)}</legend>
+    <div class="opts">${q.options.map(o=>`<label><input type="radio" name="q_${q.id}" value="${o.id}" ${cur===o.id?"checked":""}> ${esc(o.label)}</label>`).join("")}
+      <label class="muted"><input type="radio" name="q_${q.id}" value="" ${!cur?"checked":""}> Not asked or don't know</label></div>
+    <p class="note">${q.origin.startsWith("CoRE")?'<span class="chip">From CoRE insights</span> ':""}${inf.length?"Informs: "+inf.map(x=>esc(sLabel(x))).join(", "):""}${q.options.some(o=>o.set||o.shift)?(inf.length?" · ":"")+"Adjusts the system mix":""}</p></fieldset>`;}
+function renderMws(p,m,b,d){
+  const ids=K.archetypes.archetypes.map(a=>a.id);const R=getAssess(m,d);
+  const dims=K.contexts.dimensions;
+  const ctxChips=m.c.map((c,i)=>{if(!c)return "";const cl=dims[i].classes.find(x=>x.id===c);return `<span class="chip" title="${esc(dims[i].label)}">${esc(cl?cl.label:c)}</span>`}).join("");
+  const dom=ids.filter(a=>a!=="other").reduce((best,a)=>R.shares[ids.indexOf(a)]>R.shares[ids.indexOf(best)]?a:best,ids[0]);
+  const all=K.causal_graph.stresses.map(s=>s.id);
+  const pos=all.filter(k=>R.st[k].positive);
+  const evald=all.filter(k=>!R.st[k].positive&&R.st[k].code!==0);
+  const na=all.filter(k=>R.st[k].code===0);
+  const psIdx=Object.fromEntries(K.taxonomy.production_systems.map((x,i)=>[x.id,i]));
+  const pk=pwKeys().sort((a,c)=>(psIdx[OSX[pwSplit(a)[0]].ps.id]-psIdx[OSX[pwSplit(c)[0]].ps.id])||((R.pw[c].inten||0)-(R.pw[a].inten||0)));
+  const pwPosS=pk.filter(k=>!pwOpp(k)&&R.pw[k].positive), pwPosO=pk.filter(k=>pwOpp(k)&&R.pw[k].positive);
+  const psPresent=K.taxonomy.production_systems.filter(ps=>psOn(m,ps.id,R.se)===true).map(ps=>ps.label);
+  const pwEval=pk.filter(k=>!R.pw[k].positive&&R.pw[k].code!==0);
+  const envData=envFor(m,d);
+  const sysQ=K.questions.system_questions.filter(q=>!q.show_if||PyEval.safe(q.show_if,envData)===true);
+  const relevant=new Set([...pos,...evald]);
+  const strQ=K.questions.stress_questions.filter(q=>q.stresses.some(s=>relevant.has(s)));
+  strQ.sort((a,c)=>Math.max(...c.stresses.map(s=>R.st[s].positive?2:relevant.has(s)?1:0))-Math.max(...a.stresses.map(s=>R.st[s].positive?2:relevant.has(s)?1:0)));
+  void pos;
+  const otherQ=K.questions.stress_questions.filter(q=>!strQ.includes(q));
+  const pending=!sameAns(ANS[m.u],APPLIED[m.u]);
+  const nAns=Object.keys(ANS[m.u]||{}).length;
+  const vill=m.v.map(id=>b.vById[id]).filter(Boolean).sort((a,c)=>(c[5]||0)-(a[5]||0));
+  const varRows=Object.entries(K.variables.groups).map(([g,gl])=>{const vs=K.variables.variables.filter(v=>v.group===g&&!v.series);return `<tr><th colspan="2">${esc(gl)}</th></tr>`+vs.map(v=>`<tr><td>${vref(v.id)}</td><td class="r num">${fmtVal(m.i[VIDX[v.id]],v.unit)}${esc(unitLabel(v.unit))}</td></tr>`).join("")}).join("");
+  const status=`<p class="note" id="ansStatus">${pending?`<b>${nAns} answer${nAns===1?"":"s"} not yet applied.</b> `:""}${hasApplied(m.u)?`${Object.keys(APPLIED[m.u]).length} community answer(s) applied to this MWS.`:"No community answers applied yet; results are from data alone."}</p>`;
+  p.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.district)} · ${esc(m.t)}${m.ts.length>1?` (also in ${esc(m.ts.filter(t=>t!==m.t).join(", "))})`:""}</div>
+      <h2>Micro-watershed ${m.u}</h2><p class="muted">${(m.a/100).toFixed(1)} km² · ${m.v.length} villages assigned · dominant system: <b>${esc(ARCH[dom].label)}</b> · plus the cross-cutting socio-economic system</p>
+      ${mixBar(R.shares,ids)}${mixTable(R,m,ids)}
+      <p class="note">All systems with at least 1% are listed, whatever their confidence. "Present" means the share reaches the system's threshold. Confidence describes how directly the data measure that system; it never scales the share. ${R.sysChanged?"Shares reflect the community answers applied below.":""}</p>
+      <div class="chips">${ctxChips}</div>${m.cp.length?`<p class="note">Canals: ${esc(m.cp.join(", "))}</p>`:""}
+      <details><summary>How this mix was computed</summary>${mixWalk(R,m)}</details>
+      <div class="filters"><button class="btn ghost" id="dlm">Download this watershed (JSON)</button></div></div>
+    <div class="block" id="sysq"><div class="eyebrow">Check the systems with the community (${sysQ.length})</div>
+      <p class="note">Answers replace an inferred weight (for example the canal weight) or move share between systems, then the mix is recomputed. Stress rules that depend on the mix are re-checked too.</p>
+      ${sysQ.map(q=>questionHtml(q,m.u)).join("")||'<p class="muted">No system questions apply here.</p>'}
+      <div class="filters"><button class="btn" data-apply>Re-compute system mix</button></div></div>
+    <div class="block"><div class="eyebrow">Observed stresses (${pwPosS.length} flagged)</div>
+      <p class="note">Production systems present here: ${esc(psPresent.join(", "))}. Each observed stress is flagged when any of its causal pathways is likely present. Intensity (0–100) comes from how far the signals pass their thresholds; an observed stress shows its highest causal pathway.</p>
+      ${pwPosS.length?pwPosS.map(k=>pathwayBlock(k,R,m)).join(""):'<p class="muted">No observed stress is likely present.</p>'}</div>
+    <div class="block"><div class="eyebrow">Opportunities (${pwPosO.length})</div>
+      ${pwPosO.length?pwPosO.map(k=>pathwayBlock(k,R,m)).join(""):'<p class="muted">No opportunity is flagged.</p>'}
+      <details><summary>Observed stresses evaluated, not present (${pwEval.length})</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">${pwEval.map(k=>pathwayBlock(k,R,m,{all:true})).join("")}</div></details>
+      <p class="note">Causal pathways not applicable to this system mix: ${na.map(k=>esc(sLabel(k))).join(", ")||"none"}.</p></div>
+    <div class="block" id="strq"><div class="eyebrow">Ask the community (${strQ.length} questions)</div>
+      <p class="note">Questions for the stresses evaluated here, those already present first. Each answer is evidence for or against a stress and changes its probability (see the Community questions tab). Answers are kept in this browser; save them to use with the Python pipeline.</p>
+      ${status}
+      ${strQ.map(q=>questionHtml(q,m.u)).join("")}
+      ${otherQ.length?`<details><summary>Questions for stresses that do not apply here (${otherQ.length})</summary>${otherQ.map(q=>questionHtml(q,m.u)).join("")}</details>`:""}
+      <div class="filters"><button class="btn" data-apply>Re-assess stresses</button><button class="btn ghost" id="clr">Clear answers for this MWS</button><button class="btn ghost" id="sva">Save all answers (JSON)</button></div></div>
+    <div class="block"><div class="eyebrow">Suggested schemes (${R.schemes.length})</div>${R.schemes.length?`<div class="tbl"><table><thead><tr><th>Scheme</th><th>Because of</th></tr></thead><tbody>${R.schemes.map(([id,bc])=>{const s=SCH[id];return `<tr><td><b>${esc(s.name)}</b><br><span class="note">${s.level==="state"?esc(s.state):"Central"} · ${esc(s.relevant_components.slice(0,3).join(", "))}</span>${s.caution?`<br><span class="note" style="color:var(--bad)">Caution: ${esc(s.caution)}</span>`:""}</td><td>${bc.map(x=>esc(sLabel(x))).join(", ")}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">No scheme matched.</p>'}
+      <p class="note">Schemes follow the stresses that are present${hasApplied(m.u)?" after the community answers":""}.</p></div>
+    <div class="block"><div class="eyebrow">Village cluster (${vill.length})</div><p class="note">Villages assigned to this watershed by largest area of overlap. Livestock and census values are for the whole village.</p>
+      ${vill.length?`<div class="tbl"><table><thead><tr><th>Village</th><th class="r">Pop.</th><th class="r">ST</th><th class="r">SC</th><th class="r">Literacy</th><th class="r">Livestock</th><th class="r">Sheep+goat</th><th class="r">Overlap</th></tr></thead><tbody>${vill.map(v=>`<tr><td>${esc(v[1]||v[0])}</td><td class="r num">${v[5]??"–"}</td><td class="r num">${v[5]?Math.round((v[7]||0)/v[5]*100)+"%":"–"}</td><td class="r num">${v[5]?Math.round((v[6]||0)/v[5]*100)+"%":"–"}</td><td class="r num">${v[8]!=null?v[8].toFixed(0)+"%":"–"}</td><td class="r num">${v[9]??"–"}</td><td class="r num">${v[9]!=null?(v[13]||0)+(v[14]||0):"–"}</td><td class="r num">${v[4]!=null?Math.round(v[4]*100)+"%":"–"}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">No village falls mainly in this watershed.</p>'}</div>
+    <div class="block"><details><summary>All indicators</summary><div class="tbl"><table><tbody>${varRows}</tbody></table></div></details></div>`;
+  $("#dlm").onclick=()=>saveFile(`mws_${m.u}.json`,JSON.stringify(mwsExport(m,b,d),null,1));
+  p.querySelectorAll("fieldset.q").forEach(fs=>fs.addEventListener("change",e=>{
+    const q=fs.dataset.q,v=e.target.value;ANS[m.u]=ANS[m.u]||{};
+    if(v)ANS[m.u][q]=v;else delete ANS[m.u][q];
+    if(!Object.keys(ANS[m.u]).length)delete ANS[m.u];
+    saveAns();const n=Object.keys(ANS[m.u]||{}).length;const pend=!sameAns(ANS[m.u],APPLIED[m.u]);
+    $("#ansStatus").innerHTML=`${pend?`<b>${n} answer${n===1?"":"s"} not yet applied.</b> Click Re-assess stresses.`:"All answers applied."}`;}));
+  p.querySelectorAll("[data-apply]").forEach(bt=>bt.onclick=()=>{
+    if(ANS[m.u])APPLIED[m.u]=JSON.parse(JSON.stringify(ANS[m.u]));else delete APPLIED[m.u];
+    const y=window.scrollY;renderPane();MAP.draw();window.scrollTo(0,y);toast(hasApplied(m.u)?"Re-assessed with "+Object.keys(APPLIED[m.u]).length+" answers":"Showing results from data alone");});
+  $("#clr").onclick=()=>{delete ANS[m.u];delete APPLIED[m.u];saveAns();renderPane();MAP.draw();toast("Answers cleared for "+m.u)};
+  $("#sva").onclick=saveAnswers;
+}
+function saveAnswers(){
+  if(!Object.keys(ANS).length){toast("No answers to save yet");return}
+  saveFile("community_answers.json",JSON.stringify({about:"Community answers by micro-watershed. Use with: python -m seft.cli run --answers community_answers.json",saved:new Date().toISOString(),answers:ANS},null,1));}
+function loadAnswers(file){
+  const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);const a=j.answers||j;let n=0;
+    for(const [u,qs] of Object.entries(a)){if(typeof qs!=="object")continue;ANS[u]={...(ANS[u]||{}),...qs};APPLIED[u]={...ANS[u]};n++}
+    saveAns();toast(`Loaded answers for ${n} MWS`);render();}catch(e){toast("That file is not an answers JSON")}};r.readAsText(file);}
+function mwsExport(m,b,d){
+  const ids=K.archetypes.archetypes.map(a=>a.id),dims=K.contexts.dimensions.map(x=>x.id);const R=getAssess(m,d);
+  const ind={};IDX.var_ids.forEach((v,i)=>ind[v]=m.i[i]);
+  const stresses={};Object.entries(m.s).forEach(([k,x])=>{const a=R.st[k];const r=STR[k];stresses[k]={group:r.group,sheet_pathway:r.sheet_pathway,type:r.type,data_status:["not applicable","not triggered","triggered"][x[0]]||"insufficient data",data_severity:x[0]===2?(x[1]===2?"severe":"moderate"):null,intensity:x[2],
+    prior:a.prior,posterior:a.post,band:a.band,present:a.positive,severity:a.asev,answers_used:a.used.map(u=>u[0]),
+    signals:Object.fromEntries(Object.entries(r.signals).flatMap(([role,ids])=>ids.map(id=>{const i=SIGIDX[id];const c=((IDX.signal_thresholds||{})[id]||[])[m.sb?m.sb[i]:-1];return [id,{role,grade:m.sg?m.sg[i]:null,threshold:c?c[0]:null,severe_threshold:c?c[1]:null,basis:c?c[2]:null}]})))}});
+  const observed={};Object.entries(R.pw).forEach(([k,a])=>{observed[k]={label:pwFull(k),present:a.positive,intensity:a.inten,severity:a.asev,posterior:a.post,present_rules:a.pos}});
+  return {uid:m.u,district:d.district,state:d.state,home_tehsil:m.t,tehsils:m.ts,area_ha:m.a,
+    context:Object.fromEntries(dims.map((x,i)=>[x,m.c[i]])),system_shares:Object.fromEntries(ids.map((a,i)=>[a,R.shares[i]])),system_shares_from_data:Object.fromEntries(ids.map((a,i)=>[a,m.m[i]])),
+    community_answers:APPLIED[m.u]||{},indicators:ind,observed_stresses:observed,causal_pathways:stresses,schemes:R.schemes.map(([id,bc])=>({id,name:SCH[id].name,because:bc})),canals:m.cp,
+    villages:m.v.map(id=>{const v=b.vById[id];return v?Object.fromEntries(b.village_cols.map((c,i)=>[c,v[i]])):{id}})};}
+/*MWS-END*/
+
+/* ---------- downloads ---------- */
+let DL=undefined;
+async function getDL(){ if(DL!==undefined) return DL; try{ DL=window.claude?await window.claude.use("downloads"):null;}catch(e){DL=null;} return DL;}
+async function saveFile(name,data){
+  const dl=await getDL();
+  if(!dl){ /* outside claude.ai: ordinary browser download */
+    try{const blob=data instanceof Blob?data:new Blob([data],{type:name.endsWith(".json")?"application/json":"text/plain"});
+      const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast("Saved "+name);}
+    catch(e){toast("Could not save "+name);} return;}
+  try{await dl.save({filename:name,data}); toast("Saved "+name);}catch(e){ if(e&&e.code==="declined") return; toast("Could not save "+name+(e&&e.message?": "+e.message:""));}
+}
+async function saveUrl(name){
+  /* CSV tables sit in data/csv/ locally, or beside the page when published */
+  if(location.protocol==="file:"){const a=document.createElement("a");a.href="data/csv/"+name;a.download=name;document.body.appendChild(a);a.click();a.remove();return;}
+  toast("Preparing "+name+"…");
+  for(const p of ["data/csv/"+name,name]){try{const r=await fetch(p); if(!r.ok) continue; await saveFile(name,await r.blob()); return;}catch(e){}}
+  toast("Could not find "+name+". Run python -m seft.webdata to copy the CSV tables into web/data/csv.");
+}
+function toast(msg){let t=$("#toast"); if(!t){t=document.createElement("div"); t.id="toast"; t.setAttribute("role","status"); t.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:4px;font-size:.85rem;z-index:9;max-width:90vw"; document.body.appendChild(t);} t.textContent=msg; t.hidden=false; clearTimeout(t._h); t._h=setTimeout(()=>t.hidden=true,4000);}
+
+function renderData(m){
+  const files=[["mws_all.csv","All watersheds: indicators, context, system shares, observed-stress status and intensity, causal-pathway status, intensity, severity and probability, schemes (one row per MWS)"],["villages_all.csv","All villages: census and livestock values, assigned MWS and overlap share"]];
+  IDX.districts.forEach(d=>{files.push([`mws_${d.slug}.csv`,`${d.district}: watersheds`]);files.push([`villages_${d.slug}.csv`,`${d.district}: villages`]);});
+  const kfiles=["variables","contexts","archetypes","signals","taxonomy","causal_graph","schemes","questions","sources"];
+  m.innerHTML=`<div class="doc"><h2>Data downloads</h2>
+    <p>Everything shown in the atlas can be saved: first the knowledge files that hold the logic, then the result tables. Watershed tables carry every indicator in <code>variables.json</code>, the context class on each dimension, the share of each system archetype, the status and intensity of each observed stress within each production system, and the status, intensity (0–100), severity and probability of each causal pathway. Missing values are blank.</p>
+    <p class="note" id="dlnote"></p>
+    <div><div class="eyebrow">Knowledge files (editable logic)</div><p class="note">The rules, thresholds, weights, schemes and questions behind every result. Their structure is described in Methodology › Knowledge files.</p>${kfiles.map(f=>`<div class="dl"><span><b class="mono">${f}.json</b><br><span class="note">${esc((KSCHEMA.find(x=>x.file===f+".json")||{}).role||"")}</span></span><button class="btn ghost" data-k="${f}">Save</button></div>`).join("")}</div>
+    <div><div class="eyebrow">Tables</div>${files.map(([f,l])=>`<div class="dl"><span><b class="mono">${f}</b><br><span class="note">${esc(l)}</span></span><button class="btn ghost" data-f="${f}">Save</button></div>`).join("")}</div>
+    <div><div class="eyebrow">Community answers</div><p class="note">Answers you enter in Explore are kept in this browser. Save them to share with your team or to run the Python pipeline with <code>--answers</code>; load a saved file to restore them.</p><div class="filters"><button class="btn ghost" id="dsave">Save all answers (JSON)</button><label class="btn ghost" for="dload" style="cursor:pointer">Load answers…</label><input type="file" id="dload" accept=".json,application/json" hidden></div></div>
+    <div><div class="eyebrow">Code</div><p class="note">The Python package (<span class="mono">seft_repo.zip</span>) was delivered alongside this atlas. Run <code>python -m seft.cli run</code> to rebuild every table and these bundles; <code>python -m seft.cli fetch</code> pulls new districts from the API.</p></div></div></div>`;
+  m.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>saveUrl(b.dataset.f));
+  m.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>saveFile(b.dataset.k+".json",JSON.stringify(K[b.dataset.k],null,1)));
+  $("#dsave").onclick=saveAnswers; $("#dload").onchange=e=>{if(e.target.files[0])loadAnswers(e.target.files[0])};
+  
+}
+
+/* ---------- knowledge graph ---------- */
+function renderGraph(m){
+  const G=K.causal_graph;
+  const cols=[["driver","Drivers"],["pressure","Pressures"],["state","States"],["stress","Stress rules"],["outcome","Outcomes"]];
+  const nodes=[...G.nodes.map(n=>({...n})), ...G.stresses.map(s=>({id:s.id,type:s.type==="stress"?"stress":"stress",stype:s.type,label:s.label,description:s.interpretation,indicators:[...new Set([...s.signals.stress,...s.signals.context].map(id=>SIG[id]?.var).filter(Boolean))]}))];
+  nodes.forEach(n=>{if(n.type==="modifier") n.col=4; else n.col=cols.findIndex(c=>c[0]===n.type);});
+  const W=1240, colW=1180/5, rowH=34, top=40;
+  const byCol=[[],[],[],[],[]]; nodes.forEach(n=>byCol[n.col].push(n));
+  const H=Math.max(...byCol.map(c=>c.length))*rowH+top+20;
+  byCol.forEach((c,ci)=>{const off=(H-top-c.length*rowH)/2; c.forEach((n,i)=>{n.x=ci*colW+12; n.y=top+off*0.4+i*rowH; n.w=colW-34;});});
+  const N=Object.fromEntries(nodes.map(n=>[n.id,n]));
+  const conf={high:2.2,medium:1.4,low:0.9};
+  const signCol={"+":"var(--bad)","-":"var(--accent)","?":"var(--muted)"};
+  const edges=G.edges.map((e,i)=>{const a=N[e.from],b=N[e.to]; let x1,y1,x2,y2;
+    if(a.col<b.col){x1=a.x+a.w;y1=a.y+11;x2=b.x;y2=b.y+11;} else if(a.col>b.col){x1=a.x;y1=a.y+11;x2=b.x+b.w;y2=b.y+11;} else {x1=a.x+a.w;y1=a.y+11;x2=b.x+b.w;y2=b.y+11;}
+    const dx=a.col===b.col?60:(x2-x1)/2;
+    const d=a.col===b.col?`M${x1},${y1} C${x1+dx},${y1} ${x2+dx},${y2} ${x2},${y2}`:`M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
+    return `<path data-e="${i}" data-a="${e.from}" data-b="${e.to}" d="${d}" fill="none" style="stroke:${signCol[e.sign]}" stroke-width="${conf[e.confidence]}" stroke-opacity=".45" ${e.confidence==="low"?'stroke-dasharray="4 3"':""} marker-end="url(#ar${e.sign==="+"?"p":e.sign==="-"?"m":"q"})"/>`;}).join("");
+  const fill=n=>n.type==="driver"?"#e3e8e2":n.type==="pressure"?"#f3dfc4":n.type==="state"?"#d8e9e2":n.type==="outcome"?"#ecd6d2":n.type==="modifier"?"#e2dcef":(n.stype==="opportunity"?"#d6ecd9":n.stype==="modifier"?"#e2dcef":"#f6d5cd");
+  const nodeSvg=nodes.map(n=>`<g class="gnode" data-n="${n.id}" tabindex="0"><rect x="${n.x}" y="${n.y}" width="${n.w}" height="24" rx="3" style="fill:${fill(n)};stroke:var(--line)"/><text x="${n.x+7}" y="${n.y+16}" font-size="11.5" fill="#1b2622">${esc(n.label.length>34?n.label.slice(0,33)+"…":n.label)}</text></g>`).join("");
+  const heads=cols.map((c,i)=>`<text x="${i*colW+12}" y="22" font-size="11" style="fill:var(--muted)" letter-spacing=".08em">${c[1].toUpperCase()}</text>`).join("");
+  m.innerHTML=`<div class="doc" style="max-width:none"><div><h2>Causal knowledge graph</h2><p class="muted">Drivers act through pressures on landscape states; stress rules read those states from CoRE Stack indicators. Red links increase the target, teal links decrease it, grey links are contested. Line weight shows confidence; dashed lines are low confidence. Click a node to see its links, conditions and sources.</p></div>
+    <div class="graphwrap"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Causal graph">
+    <defs>${[["p","var(--bad)"],["m","var(--accent)"],["q","var(--muted)"]].map(([k,c])=>`<marker id="ar${k}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:${c}"/></marker>`).join("")}</defs>
+    ${heads}<g id="edges">${edges}</g>${nodeSvg}</svg></div>
+    <div class="block gdetail" id="gd"><p class="muted">Select a node.</p></div></div>`;
+  const show=id=>{
+    m.querySelectorAll("#edges path").forEach(p=>{const on=p.dataset.a===id||p.dataset.b===id; p.setAttribute("stroke-opacity",on?".95":".08");});
+    const n=N[id]; const ins=G.edges.filter(e=>e.to===id), outs=G.edges.filter(e=>e.from===id);
+    const er=e=>`<tr><td>${esc(N[e.from].label)} → ${esc(N[e.to].label)}</td><td>${esc(e.sign)}</td><td>${esc(e.mechanism)}</td><td>${e.condition?`<code>${exprHtml(e.condition)}</code>`:"always"}</td><td>${esc(e.confidence)}</td><td>${srcLinks(e.sources)}</td></tr>`;
+    $("#gd").innerHTML=`<div class="eyebrow">${esc(n.stype||n.type)}</div><h3>${esc(n.label)}</h3><p>${esc(n.description||"")}</p>
+      ${n.indicators&&n.indicators.length?`<p class="note">Indicators: ${n.indicators.map(v=>vref(v,VAR[v]?.label||v)).join(", ")}</p>`:""}
+      ${STR[id]?`<p class="note">Shown under: <b>${esc(placesOf(id).join("; "))}</b>. See the <a href="#" id="tor">rule</a> for its signals.</p>`:""}
+      <div class="tbl"><table><thead><tr><th>Link</th><th>Sign</th><th>Mechanism</th><th>Holds when</th><th>Confidence</th><th>Sources</th></tr></thead><tbody>${[...ins,...outs].map(er).join("")}</tbody></table></div>`;
+    if($("#tor")) $("#tor").onclick=e=>{e.preventDefault(); S.tab="rules"; render(); setTimeout(()=>document.getElementById("r_"+id)?.scrollIntoView(),50);};
+  };
+  m.querySelectorAll(".gnode").forEach(g=>{g.onclick=()=>show(g.dataset.n); g.onkeydown=e=>{if(e.key==="Enter") show(g.dataset.n);};});
+}
+
+/*TABS-START*/
+/* ---------- archetypes ---------- */
+function renderArchetypes(m){
+  const A=K.archetypes;const ids=A.archetypes.map(a=>a.id);const R=A.confidence_rubric;
+  const matrix=`<div class="tbl"><table><thead><tr><th>District</th>${A.archetypes.map(a=>`<th class="r" title="${esc(a.label)}"><i style="display:inline-block;width:9px;height:9px;background:${a.color};border-radius:2px"></i> ${esc(a.label.split(/[ ,(]/)[0])}</th>`).join("")}</tr></thead><tbody>${IDX.districts.map(d=>`<tr><td>${esc(d.district)}</td>${ids.map(a=>`<td class="r num">${(d.mix[a]*100).toFixed(0)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  const usedBy=h=>A.archetypes.filter(a=>depVars(a.share).helpers.has(h)).map(a=>a.label);
+  const inputsTable=expr=>{const r=directRefs(expr);
+    const rows=[...r.vars.map(v=>[vref(v),"Indicator",esc(VAR[v].unit||""),esc([...varSources(v)].map(d=>DS_LABEL[d]||d).join(", ")||"derived")]),
+                ...r.hlps.map(h=>{const rr=directRefs(HLP[h].expr);const isShare=/share of MWS/.test(HLP[h].label);return [vref(h),isShare?"Intermediate share":"Weight (0–1)",isShare?"share":"",`built from ${[...rr.vars.map(x=>vref(x)),...rr.hlps.map(x=>vref(x))].join(", ")||"–"}`]})];
+    return rows.length?`<div class="tbl"><table><thead><tr><th>Name in the rule</th><th>Kind</th><th>Unit</th><th>Comes from</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:"";};
+  const qEffect=(o,a,chain)=>{const parts=[];
+    Object.entries(o.set||{}).forEach(([h,v])=>{if(chain.has(h)) parts.push(`sets ${vref(h)} to <b>${v}</b>`);});
+    (o.shift||[]).forEach(x=>{const to=Array.isArray(x.to)?x.to:[x.to];
+      if(x.from.includes(a.id)) parts.push(`moves <b>${Math.round(x.fraction*100)}%</b> of this share to ${to.map(t=>esc(ARCH[t].label)).join(" / ")}`);
+      else if(to.includes(a.id)) parts.push(`adds <b>${Math.round(x.fraction*100)}%</b> of ${x.from.map(f=>esc(ARCH[f].label)).join(" + ")} share${to.length>1?" (split with "+to.filter(t=>t!==a.id).map(t=>esc(ARCH[t].label)).join(", ")+")":""}`);});
+    if(!parts.length&&(Object.keys(o.set||{}).length||(o.shift||[]).length)) parts.push('<span class="muted">changes other weights; this share moves only through re-closing to 100%</span>');
+    return parts.join("; ")||'<span class="muted">no change to the mix</span>';};
+  const card=a=>{const dv=depVars(a.share);const chain=dv.helpers;
+    const qs=ALLQ.filter(q=>q.options.some(o=>Object.keys(o.set||{}).some(h=>chain.has(h))||(o.shift||[]).some(x=>x.from.includes(a.id)||(Array.isArray(x.to)?x.to:[x.to]).includes(a.id))));
+    return `<div class="block" id="a_${a.id}"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><i style="width:14px;height:14px;border-radius:3px;background:${a.color};display:inline-block"></i><h3>${esc(a.label)}</h3><span class="pill conf">${esc(a.confidence)} confidence</span></div>
+      <p>${esc(a.description)}</p>${a.where?`<p class="note"><b>Where:</b> ${esc(a.where)}</p>`:""}
+      ${a.signatures&&a.signatures.length?`<p class="note"><b>Signatures:</b> ${esc(a.signatures.join("; "))}</p>`:""}
+      <p><b>How the share is computed.</b> ${esc(a.share_explained)}</p>
+      <p class="note"><b>Share rule:</b> <code>${exprHtml(a.share)}</code>${a.id!=="other"?` · listed as present at ≥ ${Math.round(a.present_at*100)}%`:""}</p>
+      <div><div class="eyebrow">Inputs to the rule</div>${inputsTable(a.share)}
+        <p class="note">Each name in the rule is either an indicator (one of the ${K.variables.variables.filter(v=>!v.series).length} in Methodology › Indicators, computed from CoRE Stack data) or a weight (listed under Weights at the end of this page, itself built from indicators and other weights). Hover a name for its definition.</p></div>
+      <p class="note"><b>Why ${esc(a.confidence)} confidence:</b> ${esc(a.confidence_reason)}</p>
+      ${qs.length?`<details><summary>Community questions for this system (${qs.length})</summary><div class="tbl"><table><thead><tr><th>Question</th><th>Answer → effect on this system</th></tr></thead><tbody>${qs.map(q=>`<tr><td>${esc(q.text)}${q.show_if?`<br><span class="note">Asked when <code>${exprHtml(q.show_if)}</code></span>`:""}</td><td>${q.options.map(o=>`${esc(o.label)}: ${qEffect(o,a,chain)}`).join("<br>")}</td></tr>`).join("")}</tbody></table></div></details>`:'<p class="note">No community question adjusts this system directly.</p>'}
+      ${a.key_stresses.length?`<p class="note"><b>Typical stresses:</b> ${a.key_stresses.map(s=>esc(sLabel(s))).join(", ")}</p>`:""}
+      ${a.sources.length?`<p class="note"><b>Sources:</b> ${srcLinks(a.sources)}</p>`:""}</div>`};
+  m.innerHTML=`<div class="doc"><h2>System archetypes</h2>
+    <p>The basis set has nine production systems and one residual class, which share the watershed's area, plus a cross-cutting socio-economic system that is present in every watershed and is not an area share. Each watershed's area is split among them, following the idea of social-ecological functional types (Vallejos et al. 2020). Unlike that study, which clustered census tracts, every share here comes from an explicit rule that can be traced and edited in <span class="mono">archetypes.json</span>. Open any watershed in Explore and expand "How this mix was computed" to see these rules with its own numbers. In every rule, hover a name (dotted underline) for its definition, or a function such as <i>ramp</i> or <i>slope</i> (italic) for what it computes.</p>
+    <div class="block"><h3>Step by step</h3><ol>${A.method.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
+      <p class="note">Each split multiplies a measured land-cover or cropping-season share by a weight between 0 and 1, and the complementary weight goes to the other branch. Within cropland, the canal, tank, groundwater and residual weights always add up to 1. So the shares are a partition of the watershed, not independent scores.</p></div>
+    <div class="block"><h3>How shares add up to 100%</h3><p>${esc(A.normalisation.rule)}</p><p class="note">${esc(A.normalisation.observed)}</p></div>
+    <div class="block"><h3>Which systems are listed, and does confidence change the share?</h3><p>${esc(A.presence_rule)}</p><p>${esc(R.about)}</p>
+      <div class="tbl"><table><thead><tr><th>Confidence</th><th>Meaning</th><th>Systems</th></tr></thead><tbody>${["high","medium","low"].map(c=>`<tr><td><b>${c}</b></td><td>${esc(R[c])}</td><td>${A.archetypes.filter(a=>a.confidence===c&&a.id!=="other").map(a=>esc(a.label)).join(", ")}</td></tr>`).join("")}</tbody></table></div></div>
+    <div class="block"><h3>Checking the mix with the community</h3><p>Seven system questions (Community questions tab) let a field team correct the weakest inferences. An answer either sets a weight directly (for example, "rabi water comes from borewells" sets the canal and tank weights near zero and groundwater plausibility to 1) or moves a fraction of share from one group of systems to another (for example, "less than 10% of land is irrigated" moves 60% of the irrigated shares to rainfed). Both keep the total at 100%. The questions are aimed at the low- and medium-confidence splits: water source, forest versus orchards, grazing use of commons, and town versus village.</p></div>
+    <div class="block"><div class="eyebrow">Area-weighted mix by district</div>${matrix}</div>
+    ${A.archetypes.map(card).join("")}
+    ${(A.cross_cutting||[]).map(c=>`<div class="block" id="a_${c.id}"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><i style="width:14px;height:14px;border-radius:3px;background:${c.color};display:inline-block"></i><h3>${esc(c.label)}</h3><span class="pill conf">cross-cutting</span><span class="pill conf">${esc(c.confidence)} confidence</span></div>
+      <p>${esc(c.description)}</p><p class="note"><b>Signatures:</b> ${esc(c.signatures.join("; "))}</p>
+      <p class="note"><b>System signal:</b> ${vref(c.signal)} (always on). Rules checked in this system: ${c.key_stresses.map(x=>esc(sLabel(x))).join(", ")}.</p>
+      <p class="note"><b>Why ${esc(c.confidence)} confidence:</b> ${esc(c.confidence_reason)}</p><p class="note"><b>Sources:</b> ${srcLinks(c.sources)}</p></div>`).join("")}
+    <div class="block" id="weights"><div class="eyebrow">Weights</div><p class="note">Weights are numbers between 0 and 1 (two are area shares) computed for each MWS before the share rules, in the order listed. A community answer can replace a weight, and the weights after it are then recomputed.</p><div class="tbl"><table><thead><tr><th>Weight</th><th>Rule</th><th>Built from</th><th>Justification</th><th>Used by</th><th>Set by question</th></tr></thead><tbody>${A.helpers.map(h=>{const r=directRefs(h.expr);return `<tr><td><b>${vref(h.id)}</b><br><span class="mono muted">${esc(h.id)}</span></td><td><code>${exprHtml(h.expr)}</code></td><td>${[...r.vars.map(v=>vref(v)),...r.hlps.map(x=>vref(x))].join(", ")||"–"}</td><td>${esc(h.note||"")}${h.sources?` <span class="note">(${srcLinks(h.sources)})</span>`:""}</td><td>${esc(usedBy(h.id).join(", "))||"–"}</td><td>${questionsSetting(h.id).map(q=>esc(q.text.slice(0,70))+"…").join("<br>")||"–"}</td></tr>`}).join("")}</tbody></table></div></div></div></div></div>`;
+}
+
+/* ---------- rules ---------- */
+function workedExample(){
+  const A=K.questions.assessment,bp=A.base_prior;const I=60;const p0=0.5+(bp.triggered_min+(bp.triggered_max-bp.triggered_min)*I/100-0.5)*A.confidence_shrink.medium;const lr=0.4;const o=p0/(1-p0)*lr;const p=o/(1+o);
+  const q0=0.5+(bp.not_triggered-0.5)*A.confidence_shrink.medium;const o2=q0/(1-q0)*3*2;const p2=o2/(1+o2);
+  return `A medium-confidence rule that triggered with intensity ${I} starts at ${pct(p0)}. One answer with likelihood ratio ${lr} (moderate evidence against) gives odds ${(p0/(1-p0)).toFixed(2)} × ${lr} = ${o.toFixed(2)}, so ${pct(p)}: "${bandFor(p)}", and it no longer counts as present. A rule that did not trigger and has no partial evidence starts at ${pct(q0)}; two supporting answers (×3 and ×2) take it to ${pct(p2)}: "${bandFor(p2)}".`;}
+function sigLibrary(){
+  const kinds=[["system","System signals","Where a rule is checked: a condition on the system mix. The socio-economic system signal is always on."],["stress","Stress signals","Evidence of a problem, or for an opportunity. Each has a normal and a severe threshold; its grade runs from 0.5 at the threshold to 1 at the severe threshold."],["context","Context and amplifier signals","Settings a rule may require (flat land, no canal) or that raise intensity (hard rock, headwater position)."]];
+  return kinds.map(([k,l,a])=>{const xs=K.signals.signals.filter(x=>x.kind===k);
+    return `<details><summary><b>${l}</b> (${xs.length})</summary><p class="note">${a}</p><div class="tbl"><table><thead><tr><th>Signal</th><th>Indicator or condition</th><th>Threshold (on / severe)</th><th>Used by</th></tr></thead><tbody>${xs.map(x=>`<tr id="g_${x.id}"><td>${vref(x.id)}<br><span class="mono muted">${esc(x.id)}</span></td><td>${x.var?indicatorHtml(x.var)+`<br><span class="muted">${x.direction==="low"?"low":"high"} values are the problem</span>`:`<code>${exprHtml(x.expr)}</code>`}${x.note?`<br><span class="note">${esc(x.note)}</span>`:""}</td><td>${x.var?thrText(x):"yes / no"}${(x.thresholds||[]).some(t=>t.sources&&t.sources.length)?`<br><span class="note">${srcLinks([...new Set((x.thresholds||[]).flatMap(t=>t.sources||[]))])}</span>`:""}</td><td class="note">${rulesUsing(x.id).map(r=>esc(r.label)).join("; ")||"–"}</td></tr>`).join("")}</tbody></table></div></details>`;}).join("");}
+function ruleBlock(s){const qs=questionsFor(s.id);const respond=K.schemes.schemes.filter(x=>x.addresses.includes(s.id)).map(x=>esc(x.name)).join("; ");
+  const roleRow=(k,l)=>(s.signals[k]||[]).length?`<tr><td><span class="role">${l}</span></td><td>${s.signals[k].map(id=>vref(id)).join(", ")}</td></tr>`:"";
+  return `<div class="block" id="r_${s.id}"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><h3>${esc(s.label)}</h3><span class="pill ${s.type==="opportunity"?"opp":"moderate"}">${s.type}</span><span class="pill conf">${esc(s.confidence)} confidence</span><span class="mono muted">${esc(s.id)}</span></div>
+    <p class="note">Shown under: <b>${esc(placesOf(s.id).join("; "))}</b> · Signal_Verification pattern: ${s.sheet_pathway?`<span class="mono">${esc(s.sheet_pathway)}</span>`:"none (added in the atlas)"}</p>
+    <p class="pubnote">${pubHtml(s.public_note)}</p>
+    <p>${esc(s.interpretation)}</p>
+    <p><b>Why these choices.</b> ${esc(s.rationale||"")}</p>
+    <div class="tbl"><table><tbody>${roleRow("system","System signals")}${roleRow("stress","Stress signals")}${roleRow("context","Context / amplifiers")}
+      <tr><td><span class="role">Checked where</span></td><td><code>${exprHtml(s.systems)}</code></td></tr>
+      <tr><td><span class="role">Trigger</span></td><td><code>${exprHtml(s.trigger)}</code></td></tr>
+      <tr><td><span class="role">Intensity (0–100)</span></td><td><code>${exprHtml(s.intensity)}</code> · severe at ${s.severe_at}</td></tr></tbody></table></div>
+    ${qs.length?`<details><summary>Community questions for this rule (${qs.length})</summary><div class="tbl"><table><thead><tr><th>Question</th><th>Answer → likelihood ratio</th></tr></thead><tbody>${qs.map(q=>`<tr><td>${esc(q.text)}</td><td>${q.options.map(o=>{const e=o.stress.find(e=>e.id===s.id);return `${esc(o.label)}: <b>${e?"×"+e.lr+(e.severe?" (severe)":""):"×1"}</b>`}).join("<br>")}</td></tr>`).join("")}</tbody></table></div></details>`:""}
+    ${s.replaces?`<p class="note">Replaces the earlier rule <span class="mono">${esc(s.replaces)}</span>.</p>`:""}
+    <p class="note"><b>Sources:</b> ${srcLinks(s.sources)}</p><p class="note"><b>Schemes that respond:</b> ${respond||"–"}</p></div>`;}
+function renderRules(m){
+  const G=K.causal_graph,A=K.questions.assessment,T=K.taxonomy,bp=A.base_prior;
+  const link=x=>GRP[x]?`<a href="#g_${x}" data-jump="g_${x}"><b>${esc(GRP[x].label)}</b></a> (${GRP[x].children.map(c=>`<a href="#r_${c}" data-jump="r_${c}">${esc(STR[c].label)}</a>${STR[c].type==="opportunity"?' <span class="muted">opportunity</span>':""}`).join(" · ")})`:`<a href="#r_${x}" data-jump="r_${x}">${esc(STR[x].label)}</a>`;
+  const tree=T.production_systems.map(ps=>`<div class="block"><h3>${esc(ps.label)}</h3><p class="note">${esc(ps.about)} Archetypes: ${ps.archetypes.map(a=>esc(ARCH[a].label)).join(", ")||"cross-cutting, every watershed"}. Shown where ${vref(ps.signal)} is on.</p>
+      <ul>${ps.observed_stresses.map(o=>`<li><b>${esc(o.label)}</b>${o.type==="opportunity"?' <span class="muted">(opportunity)</span>':""}: ${o.pathways.map(link).join("; ")}</li>`).join("")}</ul></div>`).join("");
+  m.innerHTML=`<div class="doc"><h2>Observed stresses and causal pathways</h2>
+    <p>Stresses follow three levels. <b>Production systems</b> group the system archetypes: agriculture, livestock and commons, forest, peri-urban, and the cross-cutting socio-economic system of households. Each has its <b>observed stresses</b>, such as water security issues or fodder issues. Each observed stress is made of <b>causal pathways</b>: rules written as combinations of signals from <span class="mono">signals.json</span>, nested where several share a mechanism (<span class="mono">groundwater.over_extraction</span>, <span class="mono">groundwater.irrigation_expansion</span>). An observed stress is flagged when any of its causal pathways is, takes the highest of their intensities, and is shown only where its production system is present. Floods are one rule shown under every production system it can hit. Every rule records the matching pathway of the Signal_Verification sheet and carries a public note in plain words for communities and field teams. Hover a name (dotted underline) for its definition, or a function such as <i>avg</i> or <i>ntrue</i> (italic) for what it computes.</p>
+    <div class="block"><h3>How a rule is evaluated</h3><ol>${G.evaluation.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
+      <div class="chips">${Object.entries(G.confidence_scale).map(([k,v])=>`<span class="chip"><b>${k}</b>: ${esc(v)}</span>`).join("")}</div></div>
+    <div class="block"><h3>How community answers change the result</h3>
+      <p>The data result is turned into a probability that the stress is present. A triggered rule starts between ${pct(bp.triggered_min)} and ${pct(bp.triggered_max)}, rising with its intensity; a rule that did not trigger starts between ${pct(bp.not_triggered)} and ${pct(bp.partial_max)}, depending on how much partial evidence it has; missing data starts at ${pct(bp.unknown)}. The rule's confidence then pulls this toward 50% (${Object.entries(A.confidence_shrink).map(([k,v])=>`${k} ×${v}`).join(", ")}): ${esc(A.shrink_rule)}</p>
+      <p>Each answer has a likelihood ratio for every rule it informs: how much more likely that answer is if the stress is present than if it is not. The odds are multiplied by each ratio (Bayes' rule, treating answers as independent). The result is placed in a band: ${A.bands.map(b=>`${esc(b.label)} ≥ ${pct(b.min)}`).join(", ")}. A rule counts as present, and drives scheme matching, at ${pct(A.positive_at)} or more; its observed stress is present when any of its rules is. ${esc(A.severity_rule)}</p>
+      <p class="note">${workedExample()}</p>
+      <p class="note">Likelihood-ratio scale used when writing the questions: ${Object.entries(K.questions.lr_scale).map(([k,v])=>`${k} = ${esc(v)}`).join("; ")}.</p></div>
+    <h3>Production systems and observed stresses</h3>${tree}
+    <div class="block" id="siglib"><h3>Signal library</h3><p class="note">${esc(K.signals._about||"")}</p>${sigLibrary()}</div>
+    ${T.groups.map(g=>`<div id="g_${g.id}" style="margin-top:14px"><div class="eyebrow">Causal pathway group · Signal_Verification: ${esc(g.sheet_pathway)}</div><h3>${esc(g.label)}</h3><p class="note">${esc(g.about)}</p></div>${g.children.map(c=>ruleBlock(STR[c])).join("")}`).join("")}
+    <div style="margin-top:14px"><div class="eyebrow">Stand-alone causal pathways</div></div>${K.causal_graph.stresses.filter(r=>!r.group).map(ruleBlock).join("")}</div>`;
+  m.querySelectorAll("[data-jump]").forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById(a.dataset.jump)?.scrollIntoView();});
+}
+
+/* ---------- community questions ---------- */
+function renderQuestions(m){
+  const Q=K.questions;
+  const qBlock=q=>`<div class="block"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between"><h3 style="max-width:70ch">${esc(q.text)}</h3>${q.origin.startsWith("CoRE")?'<span class="chip">From CoRE insights</span>':'<span class="chip">New</span>'}</div>
+     <p class="note">${esc(q.rationale)}</p>${q.show_if?`<p class="note">Asked when <code>${exprHtml(q.show_if)}</code></p>`:""}
+     <div class="tbl"><table><thead><tr><th>Answer</th><th>Effect</th></tr></thead><tbody>${q.options.map(o=>`<tr><td>${esc(o.label)}</td><td>${effectText(o)}</td></tr>`).join("")}</tbody></table></div>
+     <p class="note">Origin: ${esc(q.origin)} · id <span class="mono">${q.id}</span></p></div>`;
+  m.innerHTML=`<div class="doc"><h2>Community questions</h2>
+    <p>Multiple-choice questions a field team can ask in a village meeting to confirm or correct what the data suggest. Thirteen reuse the follow-up MCQs of the CoRE insights evidence cards, with their wording and choices; the rest were written for stresses and system splits those cards do not cover. In Explore, open a watershed, answer any questions, and click Re-assess stresses.</p>
+    <div class="block"><h3>How answers are used</h3><ul>
+      <li><b>Stresses.</b> ${esc(Q.assessment.about)} Details and a worked example are on the Stress rules tab.</li>
+      <li><b>Systems.</b> An answer can set one of the inferred weights in <span class="mono">archetypes.json</span> (the mix is then recomputed from the rules) or move a fraction of share between systems. Rules whose applicability depends on the mix are re-checked.</li>
+      <li><b>Schemes</b> are re-matched to the stresses that are present after the answers.</li>
+      <li><b>Saving.</b> Answers stay in your browser. Save them as JSON (Explore or Data tab) and run <code>python -m seft.cli run --answers community_answers.json</code> to get the same results in the CSV tables.</li></ul>
+      <div class="filters"><button class="btn ghost" id="qsave">Save all answers (JSON)</button><label class="btn ghost" for="qload" style="cursor:pointer">Load answers…</label><input type="file" id="qload" accept=".json,application/json" hidden></div></div>
+    <h3>About the farming systems (${Q.system_questions.length})</h3>${Q.system_questions.map(qBlock).join("")}
+    <h3>About stresses and opportunities (${Q.stress_questions.length})</h3>${Q.stress_questions.map(qBlock).join("")}</div>`;
+  $("#qsave").onclick=saveAnswers;$("#qload").onchange=e=>{if(e.target.files[0])loadAnswers(e.target.files[0])};
+}
+/*TABS-END*/
+
+/* ---------- schemes ---------- */
+function renderSchemes(m){
+  const states=[...new Set(K.schemes.schemes.map(s=>s.state).filter(Boolean))].sort();
+  m.innerHTML=`<div class="doc" style="max-width:none"><h2>Schemes</h2><p class="muted" style="max-width:75ch">${esc(K.schemes._about)}</p>
+    <div class="filters"><label class="pickers" for="fs"><span class="eyebrow">Level</span><select id="fs"><option value="">All</option><option value="central">Central</option>${states.map(s=>`<option>${esc(s)}</option>`).join("")}</select></label>
+    <label class="pickers" for="fx"><span class="eyebrow">Responds to</span><select id="fx"><option value="">Any stress</option>${K.taxonomy.production_systems.map(ps=>`<optgroup label="${esc(ps.label)}">${ps.observed_stresses.map(o=>`<option value="os:${ps.id}.${o.id}">${esc(o.label)} (any pathway)</option>`).join("")}</optgroup>`).join("")}<optgroup label="Causal pathways">${K.causal_graph.stresses.map(r=>`<option value="${r.id}">${esc(grpLabel(r.id))}</option>`).join("")}</optgroup></select></label></div>
+    <div class="tbl"><table id="st"></table></div></div>`;
+  const draw=()=>{const f=$("#fs").value, x=$("#fx").value;
+    const rows=K.schemes.schemes.filter(s=>(!f||(f==="central"?s.level==="central":s.state===f))&&(!x||(x.startsWith("os:")?s.addresses.some(a=>OSX[x.slice(3)].rules.includes(a)):s.addresses.includes(x))));
+    $("#st").innerHTML=`<thead><tr><th>Scheme</th><th>Purpose and components</th><th>Responds to</th><th>Systems</th><th>Condition</th><th>Status</th></tr></thead><tbody>${rows.map(s=>`<tr><td><b>${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`:esc(s.name)}</b><br><span class="note">${s.level==="state"?esc(s.state):"Central"} · ${esc(s.department)}</span></td>
+      <td>${esc(s.purpose)}<br><span class="note">${esc(s.relevant_components.join("; "))}</span>${s.caution?`<br><span class="note" style="color:var(--bad)">Caution: ${esc(s.caution)}</span>`:""}${s.notes?`<br><span class="note">${esc(s.notes)}</span>`:""}</td>
+      <td>${s.addresses.map(a=>`${esc(grpLabel(a))}`).join("<br>")}</td><td>${s.archetypes.map(a=>esc(ARCH[a].label)).join(", ")||"any"}</td><td>${s.condition?`<code>${exprHtml(s.condition)}</code>`:"–"}</td><td class="note">${esc(s.status)}</td></tr>`).join("")}</tbody>`;};
+  $("#fs").onchange=draw; $("#fx").onchange=draw; draw();
+}
+
+/* ---------- methodology ---------- */
+/* ---------- knowledge file structure (shown on the Methodology tab) ---------- */
+const KSCHEMA=[
+ {file:"variables.json",role:"Indicator definitions: every number computed from CoRE Stack data for an MWS.",top:[["groups","id → label of the indicator groups"],["variables","list of indicators (below)"],["years","agricultural years covered"]],
+  list:"variables",fields:[["id","name used in every other expression"],["label, unit, group","display text, unit, and group id from groups"],["expr","expression over dataset columns (alias.column) and earlier ids"],["description, note, source","optional explanation and source id"],["min_coverage","optional: id of a coverage indicator that must be ≥ 20%, else the value is blank"],["series","optional: true for helper series, not exported"]]},
+ {file:"contexts.json",role:"Context classes that thresholds and causal links can be conditioned on, and district rainfall normals.",top:[["dimensions","list of context dimensions (below)"],["rainfall_normals","district → {mm, source, note}; used to rescale CoRE precipitation"]],
+  list:"dimensions",fields:[["id, label","dimension name, used as ctx.<id>"],["classes","list of {id, label, expr}; the first class whose expr holds is assigned"],["note, sources","justification and source ids"]]},
+ {file:"archetypes.json",role:"The system basis set and the rules that split each MWS among the systems.",top:[["method","the steps, in words"],["helpers","weights, evaluated in order before the shares: {id, label, expr, note, sources}"],["archetypes","list of systems (below)"],["normalisation","fill (class that takes unclassified land), rule, observed"],["confidence_rubric","meaning of high / medium / low"],["presence_rule","when a system is listed as present"]],
+  list:"archetypes",fields:[["id, label, color","name and map colour"],["share","expression giving the raw share of MWS area"],["present_at","share at which the system is listed as present"],["confidence, confidence_reason","rating and why"],["share_explained, description, signatures, where","explanations shown on this page"],["key_stresses, sources","stress ids and source ids"]]},
+ {file:"signals.json",role:"The signal library: yes/no conditions and thresholded indicators that rules are written in.",top:[["grading","how a threshold signal is graded (0, then 0.5 at the threshold to 1 at the severe threshold)"],["signals","list of signals (below)"]],
+  list:"signals",fields:[["id, kind, label","name used in rules; kind is system (where a rule is checked), stress (evidence) or context (setting or amplifier)"],["expr","for yes/no signals: an expression over indicators, ctx.<dimension> and share_<system>"],["var, direction","for threshold signals: the indicator and which direction is bad (high / low)"],["thresholds","list of {when, value, severe, sources, note}; the first whose 'when' holds is used"],["use_absolute, percentile_fallback","switch absolute values off for a biased indicator; pooled percentiles {pct, severe_pct} used otherwise or when none matches"],["note, sources","justification and source ids"]]},
+ {file:"taxonomy.json",role:"Production systems, their observed stresses, and the causal-pathway groups.",top:[["aggregation","how observed stresses are rolled up from their rules"],["production_systems","list (below)"],["groups","{id, label, about, sheet_pathway, children}: rules that share a mechanism, ids '<group>.<rule>'"]],
+  list:"production_systems",fields:[["id, label, about","agriculture, livestock, forest, peri_urban, socio_economic"],["archetypes","system archetypes it groups (empty for the cross-cutting socio-economic system)"],["signal","system signal that says whether it is present in a watershed"],["observed_stresses","list of {id, label, type (stress / opportunity), pathways (group ids or rule ids), about, public_note}"]]},
+ {file:"causal_graph.json",role:"The causal knowledge graph and the causal-pathway rules that read it.",top:[["nodes","{id, type (driver / pressure / state / outcome), label, description, indicators}"],["edges","{from, to, sign (+ / − / ?), mechanism, confidence, condition, sources}"],["stresses","list of rules (below)"],["evaluation","how a rule is evaluated, in words"],["confidence_scale","meaning of high / medium / low"]],
+  list:"stresses",fields:[["id, group, sheet_pathway","'<group>.<rule>' or a plain id; its group in taxonomy.json; the matching Signal_Verification pathway"],["type, label, node","stress or opportunity, name, and the graph node it reads"],["signals","{system, stress, context}: the signal ids the rule uses, by role"],["systems","expression over system signals: where the rule is checked"],["trigger","expression over signals (true / false); '<id>_g' is a signal's grade"],["intensity, severe_at","expression over grades, scaled 0–100; a triggered rule is severe at severe_at or more"],["public_note","plain-language note for communities and field teams"],["confidence, rationale, interpretation, sources, replaces","rating, reasons, meaning, source ids, and the earlier rule id it replaces"]]},
+ {file:"schemes.json",role:"Central and state schemes and the signals they respond to.",top:[["match_rules","archetype_min_share for scheme matching"],["schemes","list of schemes (below)"]],
+  list:"schemes",fields:[["id, name, level, state, department","identity; state is null for central schemes"],["addresses","stress ids the scheme responds to"],["archetypes","systems it fits (empty = any)"],["condition","optional eligibility expression"],["purpose, relevant_components, caution, notes, status, url","shown in the Schemes tab"]]},
+ {file:"questions.json",role:"Community MCQs and how answers change the systems and the stresses.",top:[["assessment","base_prior, confidence_shrink, positive_at, severe_at, bands and the rules in words"],["lr_scale","the likelihood-ratio scale used to write options"],["system_questions","questions that adjust the system mix"],["stress_questions","questions that inform stresses"]],
+  list:"stress_questions",fields:[["id, text, rationale, origin","question, why it is asked, and whether it comes from CoRE insights"],["stresses / show_if","stress ids it informs, or the condition for showing a system question"],["options","list of {id, label, stress [{id, lr, severe}], set {weight: value}, shift [{from, to, fraction}]}"]]},
+ {file:"sources.json",role:"Bibliography. Every sources list in the other files holds ids from here.",top:[["sources","list of sources (below)"]],
+  list:"sources",fields:[["id","referenced from other files"],["citation, url","reference"],["used_for","what the source supports"]]}
+];
+const DRAWS={"Study area and data":["config/locations.json","config/datasets.json"],"Indicators":["variables.json"],"Contexts":["contexts.json"],"System archetypes":["archetypes.json","variables.json"],"Signals, rules and pathways":["signals.json","causal_graph.json","taxonomy.json"],"Community questions and re-assessment":["questions.json","causal_graph.json","archetypes.json"],"Thresholds":["signals.json","variables.json","sources.json"],"Village clusters and schemes":["schemes.json","causal_graph.json"],"Sources":["sources.json"]};
+function drawsOn(t){const f=DRAWS[t];return f?`<p class="note">Draws on: ${f.map(x=>`<a href="#kfiles" class="mono" data-kf>${x}</a>`).join(", ")}</p>`:"";}
+/* examples shown for each knowledge file: real entries, long text shortened */
+function trimJ(o,n=110){
+  if(typeof o==="string") return o.length>n?o.slice(0,n-1)+"…":o;
+  if(Array.isArray(o)) return o.map(x=>trimJ(x,n));
+  if(o&&typeof o==="object"){const r={};for(const [k,v] of Object.entries(o)) r[k]=trimJ(v,n);return r;}
+  return o;}
+function pick(list,key,id){return (list||[]).find(x=>x[key]===id);}
+function only(o,keys){if(!o) return null;const r={};keys.forEach(k=>{if(k in o) r[k]=o[k]});return r;}
+const KEX={
+ "variables.json":[
+  ["A share averaged over the years. div() divides safely; the annual series are averaged with mean().",()=>pick(K.variables.variables,"id","irr_share")],
+  ["A trend indicator: frac() counts how often a yearly condition holds.",()=>pick(K.variables.variables,"id","dg_neg_frac")],
+  ["A village-based indicator, blanked when villages with data cover too little of the MWS (min_coverage).",()=>pick(K.variables.variables,"id","tlu_per_ha")]],
+ "contexts.json":[
+  ["A context dimension. The first class whose expr holds is assigned, so saline is tested before alluvium and hard rock.",()=>pick(K.contexts.dimensions,"id","aquifer")],
+  ["A district rainfall normal used to rescale CoRE precipitation.",()=>({Godda:K.contexts.rainfall_normals.Godda})]],
+ "archetypes.json":[
+  ["A weight (helper): 0 at 20% block extraction, 1 at 70%, in between in proportion.",()=>pick(K.archetypes.helpers,"id","gw_plaus")],
+  ["A system: its share rule multiplies measured shares by weights.",()=>only(pick(K.archetypes.archetypes,"id","canal_irrigated"),["id","label","color","share","present_at","confidence","confidence_reason","key_stresses","sources"])],
+  ["How shares are closed to 100%.",()=>only(K.archetypes.normalisation,["fill","rule"])]],
+ "causal_graph.json":[
+  ["A node: a landscape state, with the indicators that measure it.",()=>pick(K.causal_graph.nodes,"id","S_gw")],
+  ["An edge that holds only in one context (condition).",()=>(K.causal_graph.edges.find(e=>e.condition)||K.causal_graph.edges[0])],
+  ["A causal-pathway rule in the groundwater group. Signals are listed by role; the trigger combines them, the intensity uses their grades.",()=>only(pick(K.causal_graph.stresses,"id","groundwater.over_extraction"),["id","group","sheet_pathway","type","label","node","signals","systems","trigger","intensity","severe_at","confidence","public_note"])]],
+ "signals.json":[
+  ["A threshold signal with an absolute threshold from a published norm.",()=>pick(K.signals.signals,"id","s_soge_stage")],
+  ["A threshold signal on a biased indicator: absolute values switched off, pooled percentiles used.",()=>pick(K.signals.signals,"id","s_wl_fall")],
+  ["A system signal and a context signal (yes / no).",()=>[pick(K.signals.signals,"id","sys_gw_users"),pick(K.signals.signals,"id","ctx_hard_rock")]]],
+ "taxonomy.json":[
+  ["A production system with its observed stresses (the first two shown). 'pathways' holds group ids or rule ids.",()=>{const p=K.taxonomy.production_systems[0];return {...only(p,["id","label","signal","archetypes"]),observed_stresses:p.observed_stresses.slice(0,2)}}],
+  ["A causal-pathway group.",()=>K.taxonomy.groups[0]]],
+ "schemes.json":[
+  ["A central scheme limited by a condition and fitting particular systems.",()=>pick(K.schemes.schemes,"id","atal_bhujal")],
+  ["A state scheme (state set) for one district.",()=>pick(K.schemes.schemes,"id","mh_pocra")]],
+ "questions.json":[
+  ["A stress question from CoRE insights. Each option multiplies the odds of the listed rules by lr.",()=>pick(K.questions.stress_questions,"id","gw_well_depth")],
+  ["A new question for the drinking-water rules.",()=>pick(K.questions.stress_questions,"id","jjm_taps")],
+  ["A system question. Options override weights (set) instead of, or as well as, changing stresses.",()=>pick(K.questions.system_questions,"id","sys_rabi_source")],
+  ["Settings for turning data results into probabilities (the prior rises with intensity).",()=>only(K.questions.assessment,["base_prior","confidence_shrink","positive_at","severe_at","bands"])]],
+ "sources.json":[
+  ["A source, cited by id elsewhere.",()=>pick(K.sources.sources,"id","cgwb_gec2015")]]
+};
+function kexHtml(file){
+  const ex=(KEX[file]||[]).map(([cap,get])=>{let o=null;try{o=get()}catch(e){} if(!o) return "";
+    return `<p class="note"><b>Example.</b> ${esc(cap)}</p><pre class="kex">${esc(JSON.stringify(trimJ(o),null,1))}</pre>`;}).join("");
+  return ex?`<div class="eyebrow">Examples from the current file</div>${ex}`:"";}
+function fnTableHtml(){
+  return `<details><summary>Functions available in expressions (${Object.keys(FN).length})</summary><div class="tbl"><table><thead><tr><th>Function</th><th>What it does</th><th>Example</th></tr></thead><tbody>${Object.entries(FN).map(([k,[sig,d,ex]])=>`<tr><td class="mono">${esc(sig)}</td><td>${esc(d)}</td><td><code>${exprHtml(ex.split(" = ")[0])}</code>${ex.includes(" = ")?`<br><span class="note">${esc(ex.split(" = ").slice(1).join(" = "))}</span>`:""}</td></tr>`).join("")}</tbody></table></div></details>`;}
+
+function kschemaHtml(){
+  const count=f=>{const k=f.replace(".json","");const d=K[k];if(!d)return "";const S=KSCHEMA.find(x=>x.file===f);const l=d[S.list];return Array.isArray(l)?` · ${l.length} ${S.list.replace(/_/g," ")}`:"";};
+  return `<div class="block" id="kfiles"><h3>Knowledge files and their structure</h3>
+   <p>All logic sits in nine JSON files in <span class="mono">knowledge/</span>, with the locations in <span class="mono">config/</span>. Every file has an <span class="mono">_about</span> text and a <span class="mono">version</span>. Formulas and conditions are expressions in a small safe language: arithmetic, comparisons, <span class="mono">and / or / not</span>, dataset columns as <span class="mono">alias.column</span> (for example <span class="mono">lulc.tree_forest_area</span>), earlier ids, <span class="mono">ctx.&lt;dimension&gt;</span>, <span class="mono">share_&lt;system&gt;</span>, and functions such as <span class="mono">mean</span>, <span class="mono">slope</span>, <span class="mono">div</span> and <span class="mono">ramp</span>. Fields that cite evidence hold ids from <span class="mono">sources.json</span>. <span class="mono">knowledge/README.md</span> in the code explains how to edit them. Function names in formulas are shown in italics; hover one for what it does.</p>
+   ${fnTableHtml()}
+   ${KSCHEMA.map(S=>`<details><summary><b class="mono">${S.file}</b> — ${esc(S.role)}${count(S.file)}</summary>
+     <div class="tbl"><table><thead><tr><th>Top-level key</th><th>Holds</th></tr></thead><tbody>${S.top.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>
+     <div class="tbl"><table><thead><tr><th>Fields of each entry in <span class="mono">${esc(S.list)}</span></th><th>Meaning</th></tr></thead><tbody>${S.fields.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>${kexHtml(S.file)}</details>`).join("")}
+   <p class="note">How the files connect: indicators (variables) feed contexts, weights and shares (archetypes) and signals. System signals read the shares; stress and context signals read indicators. Rules (causal_graph) combine signals; taxonomy places them as causal pathways under observed stresses within production systems. Rules that are present, together with shares and eligibility conditions, select schemes. Question options point at rule ids, weights and systems.</p></div>`;}
+
+function renderMethod(m){
+  const C=K.contexts;
+  const norms=Object.entries(C.rainfall_normals).filter(([k])=>k!=="_about");
+  m.innerHTML=`<div class="doc"><h2>Methodology</h2>
+  <div class="block"><h3>Purpose and framing</h3>
+   <p>The atlas follows the idea of social-ecological functional types (SEFTs) from Vallejos et al. (2020, <i>Ecosystems</i> 23:471–484), who grouped census tracts of the Argentine Chaco by how ecosystems function and how people use them. Their types came from clustering and did not model relationships. Here the same idea is made explicit and causal: each micro-watershed (MWS) is decomposed into a mixture of system archetypes using transparent rules, and a knowledge graph of causal pathways turns CoRE Stack indicators into stresses and opportunities, conditioned on aquifer, rainfall, terrain and canal context. Stresses follow production system → observed stress → causal pathway, with causal pathways written as combinations of signals, and carry an intensity from 0 to 100. All logic lives in nine JSON files that experts can read and edit.</p></div>
+  <div class="block"><h3>Study area and data</h3>${drawsOn("Study area and data")}
+   <ul><li>Eight districts with at least four populated tehsils in CoRE Stack: Pune and Amaravati (Maharashtra), Ananthapur and Srikakulam (Andhra Pradesh), Godda (Jharkhand), Koraput (Odisha), Udaipur (Rajasthan) and Ballia (Uttar Pradesh). Keonjhar was dropped because the API does not resolve its name.</li>
+   <li>73 tehsils were pulled from the CoRE Stack <code>get_tehsil_data</code> API: land use (2017–24), cropping intensity, kharif drought weeks and dry spells, hydrological balance, surface water bodies, aquifer, terrain, groundwater assessment category, canals, Green Credit projects, tree-cover and degradation change, urbanisation, restoration opportunity, village livestock and census values. The empty <code>drought</code> section was ignored in favour of the kharif drought data. An empty <code>green_credit</code> section is read as no project.</li>
+   <li>Where API responses were truncated (land use for tehsils with more than about 118 MWS), values were back-filled from the CoRE Stack GeoServer, which matches the API exactly where both exist. Watershed and village geometry also come from GeoServer.</li>
+   <li>972 watersheds straddle tehsil boundaries and are returned by each tehsil, sometimes with different hydrology and drought values. Each is counted once, using the copy from its home tehsil (the one with most village area inside it), which leaves 4,598 unique watersheds.</li></ul></div>
+  <div class="block"><h3>Indicators</h3>${drawsOn("Indicators")}<p>Indicators are defined as expressions over the raw series in <code>variables.json</code>: means of annual shares, robust Theil–Sen trends, coefficients of variation, worst-to-best ratios, counts of years past a level, cumulative changes and co-incident changes (for example, double-cropped area rising while groundwater falls). Village population and livestock are apportioned to watersheds by area of intersection; density measures divide by the area of villages with data, and are left blank when less than 20% of the watershed is covered. Livestock is expressed in tropical livestock units (FAO: cattle and buffalo 0.5, sheep and goats 0.1, pigs 0.2).</p>
+   <details><summary>All ${K.variables.variables.filter(v=>!v.series).length} indicator definitions</summary><div class="tbl"><table><thead><tr><th>Id</th><th>Label</th><th>Unit</th><th>Expression</th></tr></thead><tbody>${K.variables.variables.filter(v=>!v.series).map(v=>`<tr><td class="mono">${esc(v.id)}</td><td>${vref(v.id)}${v.description?`<br><span class="note">${esc(v.description)}</span>`:""}</td><td>${esc(v.unit||"")}</td><td><code>${exprHtml(v.expr)}</code></td></tr>`).join("")}</tbody></table></div></details></div>
+  <div class="block"><h3>Contexts</h3>${drawsOn("Contexts")}<p>Every watershed is placed in one class on each context dimension. Thresholds and causal links can be conditioned on these classes.</p>
+   ${C.dimensions.map(d=>`<p><b>${esc(d.label)}.</b> ${d.classes.map(c=>`${esc(c.label)} <code>${exprHtml(c.expr)}</code>`).join("; ")}. ${esc(d.note||"")} <span class="note">(${srcLinks(d.sources)})</span></p>`).join("")}
+   <p class="note">${esc(C.rainfall_normals._about)}</p>
+   <div class="tbl"><table><thead><tr><th>District</th><th class="r">Normal (mm)</th><th>Source / note</th></tr></thead><tbody>${norms.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r num">${v.mm??"–"}</td><td>${srcLinks([v.source])} ${esc(v.note||"")}</td></tr>`).join("")}</tbody></table></div></div>
+  <div class="block"><h3>System archetypes</h3>${drawsOn("System archetypes")}<p>The basis set was built from district contingency plans (ICAR-CRIDA), CGWB groundwater reports and the CoRE Stack distributions: rainfed dryland, rainfed sub-humid rice-based, groundwater-irrigated, canal-irrigated, tank-irrigated, forest fringe, tree crops, pastoral and peri-urban, plus a residual class for water, unclassified and other land. Each watershed is split among them as a partition of its area: land cover is split first, cropland then by season and water source, tree cover by forest versus plantation, commons by grazing use and built-up by density. Each split is a measured share multiplied by a weight between 0 and 1. The raw shares are closed to 100% (any unclassified remainder goes to the residual class; overlaps are scaled down). All systems at 1% or more are shown; a system is "present" at its own threshold. Rule confidence (high, medium, low) describes how directly the data measure the system and never changes the share. Non-kharif greenness alone over-states irrigation in sub-humid districts (CoRE gives Godda a cropping intensity of 1.48 against about 1.08 in the contingency plan), so groundwater irrigation is scaled by the block stage of extraction. The System archetypes tab has every rule, its variables and confidence; each watershed shows the calculation with its own numbers.</p></div>
+  <div class="block"><h3>Signals, rules and pathways</h3>${drawsOn("Signals, rules and pathways")}<p>Stresses follow the chain production system → observed stress → causal pathway. The ${K.taxonomy.production_systems.length} production systems group the archetypes (agriculture, livestock and commons, forest, peri-urban) plus the cross-cutting socio-economic system of households. Each has its observed stresses (${Object.keys(OSX).length} in all), and each observed stress is made of causal pathways: ${K.causal_graph.stresses.length} rules, nested in groups where several share a mechanism (groundwater, drought, irrigation, soil, productivity, fodder, forest, drinking water). An observed stress is shown only where its production system is present, is flagged when any of its causal pathways is, and takes the highest of their intensities. Floods are one rule shown under every production system it can hit.</p>
+   <p>Rules are written over a library of ${K.signals.signals.length} signals of three kinds. <b>System signals</b> say where a rule is checked, and whether a production system is present. <b>Stress signals</b> are the evidence: an indicator compared with a normal and a severe threshold. <b>Context signals</b> are settings a rule may require (flat land, no canal) or that amplify it (hard rock, headwater position, high cropping intensity). Each threshold signal has a grade: 0 below the threshold, 0.5 at it, rising to 1 at the severe threshold. A rule's trigger combines signals with and/or; its intensity is an expression over the grades, scaled to 0–100, usually the grade of the evidence multiplied by an amplifier factor between 0.75 and 1. A triggered rule with intensity of ${K.causal_graph.stresses[0].severe_at} or more is severe. Each rule records the matching pathway of the Signal_Verification sheet; the sheet's expressions were used only to see which part identifies the system, the stress and the context, and its thresholds were not borrowed. Data were refreshed directly from the API on 16 November 2026, including soil nutrients, NREGA, Mission Antyodaya, facility distances, rivers, connectivity, forest edges, fires, trees in grassland and NDVI (the last four through API v1). Signals are missing only where a dataset has no row for an MWS (for example, MWS without village links); rules that need them then show insufficient data.</p></div>
+  <div class="block"><h3>Community questions and re-assessment</h3>${drawsOn("Community questions and re-assessment")}<p>Data alone leave some stresses and system splits uncertain, so the atlas carries ${ALLQ.length} multiple-choice questions for village meetings (<span class="mono">questions.json</span>). Thirteen are the follow-up MCQs from the CoRE insights evidence cards (well deepening, borewell density, salinity, tank siltation, irrigated share, NTFP decline, forest fragmentation, fire, forest governance, FRA claims, migration, landholding, income), mapped to these rules; the rest are new. For stresses, the data result sets a prior probability (by trigger status, intensity and rule confidence), and each answer multiplies the odds by a likelihood ratio, as in a Bayesian update. For systems, an answer sets an inferred weight or moves share between systems. Schemes are then re-matched. The page and the Python pipeline (<code>--answers</code>) use the same rules and give the same results, except where a value sits within rounding of a threshold. The likelihood ratios are expert judgement on a fixed scale and should be calibrated against field data as answers accumulate.</p></div>
+  <div class="block"><h3>Thresholds</h3>${drawsOn("Thresholds")}<p>Absolute thresholds come from published norms where they exist: CGWB stage-of-extraction categories (70%, 90%, 100%), CGWB decadal water-level fall classes, the Drought Manual's 3–4 week dry-spell trigger and sown-area impact indicator, the Census town density of 400 persons/km², and IGFRI grazing capacity. Where no norm exists, values are expert judgement and are labelled so. Thresholds can differ by context, for example a lower drought threshold for sub-humid systems that are less adapted to dry spells.</p>
+   <p>The CoRE Stack groundwater balance is a model estimate with a strong negative bias across the pilot: the median watershed loses 76 mm of storage a year and its water level falls 1.3 m a year, including watersheds in Safe blocks. Absolute water-level thresholds are therefore kept in the signals but switched off (<code>use_absolute: false</code>), and the pooled 25th or 75th percentile is used instead. The same applies to the share of years with storage loss and to rising water levels in canal commands. An expert can switch them back on once the series has been checked against observation wells.</p></div>
+  <div class="block"><h3>Village clusters and schemes</h3>${drawsOn("Village clusters and schemes")}<p>A village belongs to the watershed it overlaps most. Its whole population and livestock are listed in that watershed's cluster, while watershed indicators use area-apportioned values. Schemes are matched when they respond to a triggered stress or opportunity, belong to the right state, meet their eligibility condition and, where listed, fit one of the watershed's main systems. Scheme coverage and names change; every entry carries a status note and should be checked before use.</p></div>
+  ${kschemaHtml()}
+  <div class="block"><h3>Known limitations</h3><ul>
+   <li>CoRE precipitation is spatially smooth: the 450 to over 2,000 mm gradient across Pune appears as 627–874 mm, and Pune is left uncorrected.</li>
+   <li>The tree/forest class includes orchards and plantations, and is much higher than Forest Survey figures in Koraput and Udaipur. The split between natural forest and tree crops relies on slope, contiguity and tribal share.</li>
+   <li>Canals are recorded only where a canal line crosses the watershed; command area is not known. Ballia's canals are mostly missing.</li>
+   <li>Tree-cover change and built-up change contain year-to-year classification noise; check the map before acting on a single watershed.</li>
+   <li>Kharif drought data cover only 32 of 62 watersheds in Boarijor (Godda). Livestock responses for Jaypur and Ballia were truncated by the API.</li>
+   <li>In 18% of watersheds, mostly in hilly and cloudy tehsils, the CoRE land-cover classes cover only 80–90% of the area (CS-73). The remainder is shown as unclassified land in the residual class, so production systems there are slightly understated rather than inflated.</li>
+   <li>The literacy rate in CoRE counts children aged 0–6 in the denominator and runs about 15% below the Census 7+ rate.</li></ul></div>
+  <div class="block"><h3>Sources</h3>${drawsOn("Sources")}<ol>${K.sources.sources.map(s=>`<li>${esc(s.citation)} ${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">link</a>`:""}<br><span class="note">Used for: ${esc(s.used_for)}</span></li>`).join("")}</ol></div></div>`;
+}
+
+/* ---------- boot ---------- */
+(async()=>{
+  renderTabs(); $("#main").innerHTML=`<div class="loading">Loading the atlas…</div>`;
+  try{ IDX=await loadData("index"); K=IDX.knowledge; indexKnowledge(); render(); }
+  catch(e){ $("#main").innerHTML=`<div class="loading"><p><b>The atlas data did not load.</b></p><p>The page looks for <code>data/index.json</code> (or <code>data/index.js</code> when opened directly from disk) in the folder that holds this page. Build it with <code>python -m seft.cli run</code> followed by <code>python -m seft.webdata</code>, or serve the folder with <code>python -m http.server -d web 8000</code> and open http://localhost:8000.</p><p class="note">${esc(e.message||e)}</p></div>`; }
+})();
+</script>
+
+</body></html>

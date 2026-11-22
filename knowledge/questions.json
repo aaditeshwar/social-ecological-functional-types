@@ -1,0 +1,2045 @@
+{
+ "_about": "Questions to ask the local community about a micro-watershed. Each option carries likelihood ratios (lr) for stress, opportunity and modifier rules in causal_graph.json, and system questions can also override archetype helper weights ('set') or move share between archetypes ('shift'). Questions taken from the CoRE insights evidence cards keep their wording and choices; 'origin' says which.",
+ "version": "0.3",
+ "assessment": {
+  "about": "The data-based result sets a prior probability that the stress is present, rising with the rule's intensity. Each answer multiplies the odds by its likelihood ratio. The posterior is placed in a band. A stress counts as positive for scheme matching when the posterior is at least positive_at. Answers about a rule also update its observed stress, which is positive when any of its rules is.",
+  "base_prior": {
+   "triggered_min": 0.6,
+   "triggered_max": 0.9,
+   "partial_max": 0.35,
+   "not_triggered": 0.15,
+   "unknown": 0.4
+  },
+  "partial_rule": "Triggered: prior = triggered_min + (triggered_max − triggered_min) × intensity/100. Not triggered: prior = not_triggered + (partial_max − not_triggered) × intensity/100, so partial evidence starts higher. Unknown: 0.4.",
+  "confidence_shrink": {
+   "high": 1.0,
+   "medium": 0.8,
+   "low": 0.6
+  },
+  "shrink_rule": "prior = 0.5 + (base_prior - 0.5) × shrink. A low-confidence rule's data result is held less firmly, so answers move it further.",
+  "positive_at": 0.5,
+  "severe_at": 0.85,
+  "severity_rule": "A positive rule is severe when the data say severe (intensity at or above the rule's severe_at) and the answers have not lowered its probability, or when an answer marked severe was given and the probability is at least severe_at.",
+  "bands": [
+   {
+    "min": 0.8,
+    "label": "confirmed"
+   },
+   {
+    "min": 0.5,
+    "label": "likely"
+   },
+   {
+    "min": 0.25,
+    "label": "uncertain"
+   },
+   {
+    "min": 0,
+    "label": "unlikely"
+   }
+  ],
+  "unknown_rule": "A rule with missing data starts just below the positive line (0.4), so it is not counted as present until an answer supports it."
+ },
+ "lr_scale": {
+  "4 to 6": "strong evidence for",
+  "2 to 3": "moderate evidence for",
+  "1.2 to 1.5": "weak evidence for",
+  "1": "no information",
+  "0.6 to 0.8": "weak evidence against",
+  "0.3 to 0.5": "moderate evidence against",
+  "0.2": "strong evidence against"
+ },
+ "system_questions": [
+  {
+   "id": "sys_irrigated_share",
+   "origin": "CoRE insights field form, follow-up MCQ for irrigated_area_ha (rainfed_risk)",
+   "show_if": "f_crop >= 0.1",
+   "text": "What share of the cultivated land receives any irrigation — from canals, tanks, borewells or farm ponds — in the rabi or summer season?",
+   "rationale": "The satellite counts any rabi greenness as a second crop. When farmers report much less irrigation than the irrigated archetypes imply, 60% of the irrigated share moves to rainfed systems; when they report more than 30% and the model shows mostly rainfed land, 40% of rainfed share moves to irrigated systems (in proportion to the current irrigated shares, or to groundwater if there are none).",
+   "options": [
+    {
+     "id": "low",
+     "label": "Less than 10%",
+     "stress": [
+      {
+       "id": "drought.kharif_drought",
+       "lr": 1.5
+      },
+      {
+       "id": "drought.unstable_sowing",
+       "lr": 1.5
+      },
+      {
+       "id": "groundwater.water_balance_deficit",
+       "lr": 0.5
+      },
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 0.7
+      }
+     ],
+     "shift": [
+      {
+       "from": [
+        "groundwater_irrigated",
+        "canal_irrigated",
+        "tank_irrigated"
+       ],
+       "to": [
+        "rainfed_dryland",
+        "rainfed_rice_subhumid"
+       ],
+       "fraction": 0.6
+      }
+     ]
+    },
+    {
+     "id": "moderate",
+     "label": "10–30%",
+     "stress": []
+    },
+    {
+     "id": "high",
+     "label": "More than 30%",
+     "stress": [
+      {
+       "id": "drought.kharif_drought",
+       "lr": 0.8
+      },
+      {
+       "id": "groundwater.water_balance_deficit",
+       "lr": 1.3
+      }
+     ],
+     "shift": [
+      {
+       "from": [
+        "rainfed_dryland",
+        "rainfed_rice_subhumid"
+       ],
+       "to": [
+        "groundwater_irrigated",
+        "canal_irrigated",
+        "tank_irrigated"
+       ],
+       "fraction": 0.4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sys_rabi_source",
+   "origin": "New for this atlas",
+   "show_if": "f_crop >= 0.1",
+   "text": "Where does most of the water for rabi and summer crops come from?",
+   "rationale": "Replaces the inferred attribution of non-kharif cropping (canal weight, tank weight, groundwater plausibility) with the answer, and recomputes the mix.",
+   "options": [
+    {
+     "id": "canal",
+     "label": "Canal",
+     "stress": [
+      {
+       "id": "groundwater.water_balance_deficit",
+       "lr": 0.9
+      }
+     ],
+     "set": {
+      "canal_w": 0.8,
+      "tank_w": 0.05,
+      "gw_plaus": 1.0
+     }
+    },
+    {
+     "id": "bore",
+     "label": "Borewells, tubewells or dug wells",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 1.3
+      }
+     ],
+     "set": {
+      "canal_w": 0.05,
+      "tank_w": 0.05,
+      "gw_plaus": 1.0
+     }
+    },
+    {
+     "id": "tank",
+     "label": "Tanks, ponds or check dams",
+     "stress": [
+      {
+       "id": "waterbody_shrinkage",
+       "lr": 1.2
+      }
+     ],
+     "set": {
+      "canal_w": 0.05,
+      "tank_w": 0.7,
+      "gw_plaus": 1.0
+     }
+    },
+    {
+     "id": "none",
+     "label": "No irrigation; second crops grow on residual moisture",
+     "stress": [],
+     "set": {
+      "canal_w": 0.0,
+      "tank_w": 0.0,
+      "gw_plaus": 0.0
+     }
+    }
+   ]
+  },
+  {
+   "id": "sys_after_paddy",
+   "origin": "New for this atlas",
+   "show_if": "share_rainfed_rice_subhumid >= 0.05 or rain_norm >= 1000",
+   "text": "After the kharif paddy harvest, what happens on most paddy fields?",
+   "rationale": "In sub-humid districts CoRE sees much more second cropping than district statistics report. This sorts it into fallow, rainfed relay crops or irrigated crops.",
+   "options": [
+    {
+     "id": "fallow",
+     "label": "Left fallow",
+     "stress": [
+      {
+       "id": "productivity.rice_fallow_opportunity",
+       "lr": 4
+      }
+     ],
+     "set": {
+      "gw_plaus": 0.0,
+      "canal_w": 0.0,
+      "tank_w": 0.0
+     }
+    },
+    {
+     "id": "pulses",
+     "label": "Pulses or oilseeds on residual moisture",
+     "stress": [
+      {
+       "id": "productivity.rice_fallow_opportunity",
+       "lr": 0.3
+      }
+     ],
+     "set": {
+      "gw_plaus": 0.0,
+      "tank_w": 0.0
+     }
+    },
+    {
+     "id": "irrigated",
+     "label": "An irrigated second crop",
+     "stress": [
+      {
+       "id": "productivity.rice_fallow_opportunity",
+       "lr": 0.3
+      }
+     ],
+     "shift": [
+      {
+       "from": [
+        "rainfed_rice_subhumid"
+       ],
+       "to": [
+        "groundwater_irrigated",
+        "canal_irrigated",
+        "tank_irrigated"
+       ],
+       "fraction": 0.4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sys_canal_reliability",
+   "origin": "New for this atlas",
+   "show_if": "n_canals >= 1",
+   "text": "Does canal water reach the fields of this area reliably in rabi?",
+   "rationale": "A canal crossing the MWS says nothing about delivery. The answer sets the canal weight.",
+   "options": [
+    {
+     "id": "reliable",
+     "label": "Yes, up to the tail end",
+     "stress": [
+      {
+       "id": "irrigation.waterlogging",
+       "lr": 1.3
+      },
+      {
+       "id": "groundwater.water_balance_deficit",
+       "lr": 0.8
+      }
+     ],
+     "set": {
+      "canal_w": 0.85
+     }
+    },
+    {
+     "id": "partly",
+     "label": "Only to fields near the canal or in good years",
+     "stress": [],
+     "set": {
+      "canal_w": 0.4
+     }
+    },
+    {
+     "id": "rarely",
+     "label": "Rarely or never",
+     "stress": [
+      {
+       "id": "groundwater.water_balance_deficit",
+       "lr": 1.2
+      }
+     ],
+     "set": {
+      "canal_w": 0.05
+     }
+    }
+   ]
+  },
+  {
+   "id": "sys_tree_type",
+   "origin": "New for this atlas",
+   "show_if": "f_forest >= 0.1",
+   "text": "Is the tree cover in this area mostly natural forest, or orchards and plantations?",
+   "rationale": "The land-cover layer does not separate forest from orchards; the answer sets the natural weight.",
+   "options": [
+    {
+     "id": "natural",
+     "label": "Mostly natural forest",
+     "stress": [],
+     "set": {
+      "natural_w": 0.9
+     }
+    },
+    {
+     "id": "mixed",
+     "label": "A mix",
+     "stress": [],
+     "set": {
+      "natural_w": 0.5
+     }
+    },
+    {
+     "id": "orchards",
+     "label": "Mostly orchards, plantations or farm trees",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 0.8
+      }
+     ],
+     "set": {
+      "natural_w": 0.15
+     }
+    }
+   ]
+  },
+  {
+   "id": "sys_grazing",
+   "origin": "New for this atlas",
+   "show_if": "f_commons >= 0.03",
+   "text": "Do many households graze sheep or goats on the village commons, or move with their flocks seasonally?",
+   "rationale": "Sets the pastoral weight on open commons, which is otherwise inferred from the livestock census.",
+   "options": [
+    {
+     "id": "many",
+     "label": "Many",
+     "stress": [
+      {
+       "id": "fodder.grazing_pressure",
+       "lr": 1.5
+      }
+     ],
+     "set": {
+      "pastoral_w": 0.95
+     }
+    },
+    {
+     "id": "some",
+     "label": "Some",
+     "stress": [],
+     "set": {
+      "pastoral_w": 0.6
+     }
+    },
+    {
+     "id": "none",
+     "label": "Hardly any; commons are not used for grazing",
+     "stress": [
+      {
+       "id": "fodder.grazing_pressure",
+       "lr": 0.5
+      }
+     ],
+     "set": {
+      "pastoral_w": 0.2
+     }
+    }
+   ]
+  },
+  {
+   "id": "sys_settlement",
+   "origin": "New for this atlas",
+   "show_if": "f_built_last >= 0.03",
+   "text": "Is this area part of a town or a fast-growing suburb, or is it a village?",
+   "rationale": "Sets how much of the built-up land counts as the peri-urban system.",
+   "options": [
+    {
+     "id": "town",
+     "label": "Town or suburb",
+     "stress": [
+      {
+       "id": "urban_encroachment",
+       "lr": 1.5
+      }
+     ],
+     "set": {
+      "urban_w": 1.0
+     }
+    },
+    {
+     "id": "large_village",
+     "label": "Large village with some new housing",
+     "stress": [],
+     "set": {
+      "urban_w": 0.6
+     }
+    },
+    {
+     "id": "village",
+     "label": "Village",
+     "stress": [
+      {
+       "id": "urban_encroachment",
+       "lr": 0.7
+      }
+     ],
+     "set": {
+      "urban_w": 0.3
+     }
+    }
+   ]
+  }
+ ],
+ "stress_questions": [
+  {
+   "id": "gw_well_depth",
+   "stresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for annual_well_depth_m (groundwater_stress, irrigation_challenges)",
+   "text": "Has the depth of your borewell or dug well increased over the past 5–10 years? Have any shallow dug wells in your village gone completely dry during the rabi or summer season?",
+   "rationale": "A fall of more than 3 m over 8 years (about 0.4 m a year) confirms groundwater stress in hard-rock aquifers; seasonal failure of dug wells is close to definitive. This also substitutes for the biased modelled water level.",
+   "options": [
+    {
+     "id": "stable",
+     "label": "Well depth has stayed roughly the same (within ~1 m)",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 0.4
+      },
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 0.5
+      }
+     ]
+    },
+    {
+     "id": "deepening",
+     "label": "Wells have deepened by more than 2–3 m in the last 5–10 years",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 3
+      },
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 2
+      }
+     ]
+    },
+    {
+     "id": "failed",
+     "label": "Springs or shallow wells have dried up permanently or for much longer",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 5,
+       "severe": true
+      },
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 2.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gw_borewell_density",
+   "stresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "groundwater.water_balance_deficit"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for borewell_density (groundwater_stress)",
+   "text": "Roughly how many borewells or tubewells are there in your village or the surrounding area?",
+   "rationale": "Well density is the pressure behind extraction; many wells sharing a low-storage aquifer interfere with each other.",
+   "options": [
+    {
+     "id": "few",
+     "label": "Very few (fewer than 10 within 2–3 km)",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 0.4
+      },
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 0.5
+      },
+      {
+       "id": "groundwater.water_balance_deficit",
+       "lr": 0.7
+      }
+     ]
+    },
+    {
+     "id": "moderate",
+     "label": "Moderate (10–50 within 2–3 km)",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 1.5
+      },
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "many",
+     "label": "More than 50 within 2–3 km",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 3
+      },
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 2
+      },
+      {
+       "id": "groundwater.water_balance_deficit",
+       "lr": 1.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gw_new_wells_rabi",
+   "stresses": [
+    "groundwater.irrigation_expansion",
+    "groundwater.over_extraction"
+   ],
+   "origin": "New for this atlas",
+   "text": "In the last 5 years, has the area under rabi or summer crops changed, and where did the water for it come from?",
+   "rationale": "Separates expansion paid for by new borewells (the stress) from expansion supplied by canals or tanks, and catches places where irrigation has already contracted because wells failed.",
+   "options": [
+    {
+     "id": "no_change",
+     "label": "Little change in rabi or summer area",
+     "stress": [
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 0.4
+      }
+     ]
+    },
+    {
+     "id": "grew_bore",
+     "label": "Grown, mostly with new borewells or deeper wells",
+     "stress": [
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 4
+      },
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 1.5
+      }
+     ]
+    },
+    {
+     "id": "grew_surface",
+     "label": "Grown, mostly with canal, tank or farm-pond water",
+     "stress": [
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 0.3
+      },
+      {
+       "id": "groundwater.water_balance_deficit",
+       "lr": 0.8
+      }
+     ]
+    },
+    {
+     "id": "shrank",
+     "label": "Shrunk because wells ran dry",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 3,
+       "severe": true
+      },
+      {
+       "id": "groundwater.irrigation_expansion",
+       "lr": 0.7
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gw_salinity",
+   "stresses": [
+    "drinking_water.salinity",
+    "irrigation.waterlogging"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for groundwater_salinity (groundwater_stress)",
+   "text": "Have farmers noticed that borewell or well water has become saltier, leaves white deposits on soil or pipes, or is no longer suitable for certain sensitive crops?",
+   "rationale": "Confirms salinity where the block is assessed as saline, and finds it where the block average hides a saline pocket or where canal irrigation is raising salts.",
+   "options": [
+    {
+     "id": "none",
+     "label": "No — water quality has not changed; no saltiness or deposits",
+     "stress": [
+      {
+       "id": "drinking_water.salinity",
+       "lr": 0.2
+      },
+      {
+       "id": "irrigation.waterlogging",
+       "lr": 0.7
+      }
+     ]
+    },
+    {
+     "id": "mild",
+     "label": "Some salinity or white deposits; still usable for some crops",
+     "stress": [
+      {
+       "id": "drinking_water.salinity",
+       "lr": 3
+      },
+      {
+       "id": "irrigation.waterlogging",
+       "lr": 1.5
+      }
+     ]
+    },
+    {
+     "id": "severe",
+     "label": "Brackish or salty water; crop damage or unsuitable for irrigation",
+     "stress": [
+      {
+       "id": "drinking_water.salinity",
+       "lr": 6,
+       "severe": true
+      },
+      {
+       "id": "irrigation.waterlogging",
+       "lr": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "drinking_summer",
+   "stresses": [
+    "groundwater.over_extraction",
+    "groundwater.recharge_opportunity"
+   ],
+   "origin": "New for this atlas",
+   "text": "During summer, do households face a shortage of drinking water (hand pumps failing, water brought by tanker)?",
+   "rationale": "Drinking-water failure in summer is the most widely noticed sign of a falling water table and a common demand that recharge work responds to.",
+   "options": [
+    {
+     "id": "never",
+     "label": "Rarely or never",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 0.6
+      }
+     ]
+    },
+    {
+     "id": "some_years",
+     "label": "In dry years",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 1.3
+      },
+      {
+       "id": "groundwater.recharge_opportunity",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "every_year",
+     "label": "Almost every year, with tankers or long walks",
+     "stress": [
+      {
+       "id": "groundwater.over_extraction",
+       "lr": 2.5
+      },
+      {
+       "id": "groundwater.recharge_opportunity",
+       "lr": 1.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tank_siltation",
+   "stresses": [
+    "waterbody_shrinkage",
+    "groundwater.recharge_opportunity"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for tank_siltation_status (irrigation_challenges)",
+   "text": "Are the local tanks, ponds or check dams visibly silted up, shallower than they used to be, or drying out faster after the monsoon than they did 10 years ago?",
+   "rationale": "Siltation is the main reason tank storage declines and cannot be seen in the water-spread series.",
+   "options": [
+    {
+     "id": "none",
+     "label": "Not visibly silted; depth and retention similar to before",
+     "stress": [
+      {
+       "id": "waterbody_shrinkage",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "moderate",
+     "label": "Visible siltation or shallower than before; dries somewhat faster",
+     "stress": [
+      {
+       "id": "waterbody_shrinkage",
+       "lr": 2.5
+      },
+      {
+       "id": "groundwater.recharge_opportunity",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "severe",
+     "label": "Heavily silted, much shallower, or drying out quickly after the monsoon",
+     "stress": [
+      {
+       "id": "waterbody_shrinkage",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "groundwater.recharge_opportunity",
+       "lr": 1.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tank_encroach",
+   "stresses": [
+    "waterbody_shrinkage",
+    "urban_encroachment"
+   ],
+   "origin": "New for this atlas",
+   "text": "Have tank beds, foreshores or the channels that feed the tanks been encroached, cultivated or built over?",
+   "rationale": "Encroachment of the bed and supply channels is the second main cause of tank decline and points to the restoration needed.",
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "waterbody_shrinkage",
+       "lr": 0.7
+      }
+     ]
+    },
+    {
+     "id": "some",
+     "label": "In some tanks or channels",
+     "stress": [
+      {
+       "id": "waterbody_shrinkage",
+       "lr": 1.8
+      }
+     ]
+    },
+    {
+     "id": "wide",
+     "label": "Widely, or channels are blocked",
+     "stress": [
+      {
+       "id": "waterbody_shrinkage",
+       "lr": 3
+      },
+      {
+       "id": "urban_encroachment",
+       "lr": 1.3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kharif_dry_spells",
+   "stresses": [
+    "drought.kharif_drought"
+   ],
+   "origin": "New for this atlas",
+   "text": "In how many of the last 5 kharif seasons did crops suffer from long breaks in rain (two weeks or more) at sowing or flowering?",
+   "rationale": "Checks the modelled drought weeks against farmers' own record of the seasons that mattered.",
+   "options": [
+    {
+     "id": "0_1",
+     "label": "None or one season",
+     "stress": [
+      {
+       "id": "drought.kharif_drought",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "2_3",
+     "label": "Two or three seasons",
+     "stress": [
+      {
+       "id": "drought.kharif_drought",
+       "lr": 2
+      }
+     ]
+    },
+    {
+     "id": "4_5",
+     "label": "Four or five seasons",
+     "stress": [
+      {
+       "id": "drought.kharif_drought",
+       "lr": 4,
+       "severe": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kharif_unsown",
+   "stresses": [
+    "drought.unstable_sowing",
+    "drought.kharif_drought"
+   ],
+   "origin": "New for this atlas",
+   "text": "In a bad monsoon year, how much farmland is left unsown or has to be re-sown?",
+   "rationale": "The Drought Manual uses shortfall in sown area as an impact indicator; re-sowing is a cost the satellite series does not show.",
+   "options": [
+    {
+     "id": "little",
+     "label": "Very little",
+     "stress": [
+      {
+       "id": "drought.unstable_sowing",
+       "lr": 0.3
+      },
+      {
+       "id": "drought.kharif_drought",
+       "lr": 0.7
+      }
+     ]
+    },
+    {
+     "id": "quarter",
+     "label": "About a quarter",
+     "stress": [
+      {
+       "id": "drought.unstable_sowing",
+       "lr": 2.5
+      },
+      {
+       "id": "drought.kharif_drought",
+       "lr": 1.5
+      }
+     ]
+    },
+    {
+     "id": "half",
+     "label": "Half or more",
+     "stress": [
+      {
+       "id": "drought.unstable_sowing",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "drought.kharif_drought",
+       "lr": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "forest_ntfp",
+   "stresses": [
+    "forest.tree_cover_loss"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for ntfp_species_presence (forest_degradation)",
+   "text": "Have community members noticed a reduction in key forest products like mahua flowers, tendu leaves, harra fruit or achar seeds over the past 5–10 years?",
+   "rationale": "Loss of NTFP species is the livelihood consequence of forest degradation and can occur without a change visible in tree cover.",
+   "options": [
+    {
+     "id": "abundant",
+     "label": "NTFP species are still common and easy to find",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 0.4
+      }
+     ]
+    },
+    {
+     "id": "reduced",
+     "label": "Some species are harder to find than 5–10 years ago",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 2
+      }
+     ]
+    },
+    {
+     "id": "rare",
+     "label": "Several species that used to be common are now rare or absent",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 3.5,
+       "severe": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "forest_fragmentation",
+   "stresses": [
+    "forest.tree_cover_loss"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for forest_patch_connectivity (forest_degradation, encroachment)",
+   "text": "Are the remaining forest patches connected to each other, or are they isolated small patches surrounded by fields? Has this changed in recent years?",
+   "rationale": "Fragmentation by new fields and roads is a typical pattern of encroachment that net tree-cover change can miss.",
+   "options": [
+    {
+     "id": "connected",
+     "label": "Forest areas remain connected; little new fragmentation",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 0.5
+      }
+     ]
+    },
+    {
+     "id": "partial",
+     "label": "Some patches separated by fields, roads or cleared land",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 1.8
+      }
+     ]
+    },
+    {
+     "id": "isolated",
+     "label": "Forest broken into small isolated patches",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "forest_clearing",
+   "stresses": [
+    "forest.tree_cover_loss",
+    "agroforestry_opportunity"
+   ],
+   "origin": "New for this atlas",
+   "text": "In the last 10 years, has forest near the village been cleared for fields, shifting cultivation (podu) or plantations such as cashew or eucalyptus?",
+   "rationale": "Directly asks about the conversion the 'forest converted to farmland' criterion measures, and separates plantation from clearing.",
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 0.4
+      }
+     ]
+    },
+    {
+     "id": "some",
+     "label": "Some patches",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 2
+      },
+      {
+       "id": "agroforestry_opportunity",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "large",
+     "label": "Large areas",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "agroforestry_opportunity",
+       "lr": 1.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "forest_fire",
+   "stresses": [
+    "forest.tree_cover_loss"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for forest_fire_frequency (forest_degradation)",
+   "text": "How often do forest fires occur in or near the forests used by your community? Have they become more frequent or severe?",
+   "rationale": "Repeated fire degrades forest gradually; a moderate signal.",
+   "options": [
+    {
+     "id": "rare",
+     "label": "Rare; no increase in recent years",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 0.8
+      }
+     ]
+    },
+    {
+     "id": "occasional",
+     "label": "Occasional fires; frequency or severity increasing",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 1.5
+      }
+     ]
+    },
+    {
+     "id": "frequent",
+     "label": "Frequent or repeated fires in the same patches",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 2.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "forest_governance",
+   "stresses": [
+    "forest.tree_cover_loss",
+    "agroforestry_opportunity"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for community_forest_governance_status (forest_degradation)",
+   "text": "Does the village have a functioning forest protection committee (Van Suraksha Samiti, JFM committee) or recognised Community Forest Resource rights, with patrols or bylaws against illegal felling and fire?",
+   "rationale": "Weak evidence about loss, but strong context for what can be done: active institutions make restoration feasible.",
+   "options": [
+    {
+     "id": "active",
+     "label": "Active committee or recognised CFR with patrols or bylaws",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 0.7
+      },
+      {
+       "id": "agroforestry_opportunity",
+       "lr": 1.5
+      }
+     ]
+    },
+    {
+     "id": "inactive",
+     "label": "Committee exists on paper but little enforcement",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 1.2
+      }
+     ]
+    },
+    {
+     "id": "none",
+     "label": "No functioning forest governance institution",
+     "stress": [
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 1.5
+      },
+      {
+       "id": "agroforestry_opportunity",
+       "lr": 1.2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fra_claims",
+   "stresses": [
+    "multidimensional_vulnerability",
+    "forest.tree_cover_loss"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for fra_claims_filed_count (encroachment)",
+   "text": "Have households or the community filed individual or community forest rights claims under the Forest Rights Act? How many have been recognised?",
+   "rationale": "Pending or rejected claims indicate tenure insecurity for forest-dependent households.",
+   "options": [
+    {
+     "id": "none",
+     "label": "No FRA claims filed",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.5
+      }
+     ]
+    },
+    {
+     "id": "pending",
+     "label": "Claims filed but mostly pending or rejected",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.8
+      },
+      {
+       "id": "forest.tree_cover_loss",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "recognised",
+     "label": "Several claims recognised",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 0.8
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "erosion_gullies",
+   "stresses": [
+    "soil.erosion",
+    "productivity.farmland_abandonment"
+   ],
+   "origin": "New for this atlas",
+   "text": "Do fields on slopes show gullies, exposed stones or roots, or thinning soil after heavy rain?",
+   "rationale": "The erosion rule is a risk estimate from slope and runoff; visible gullying confirms it.",
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "soil.erosion",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "some",
+     "label": "In some fields",
+     "stress": [
+      {
+       "id": "soil.erosion",
+       "lr": 2.5
+      }
+     ]
+    },
+    {
+     "id": "many",
+     "label": "In many fields",
+     "stress": [
+      {
+       "id": "soil.erosion",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "productivity.farmland_abandonment",
+       "lr": 1.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fields_abandoned",
+   "stresses": [
+    "productivity.farmland_abandonment"
+   ],
+   "origin": "New for this atlas",
+   "text": "Have fields gone out of cultivation in the last 10 years?",
+   "rationale": "Separates degradation (soil, water or salinity) from voluntary fallowing, both of which appear as farmland turning to scrub.",
+   "options": [
+    {
+     "id": "none",
+     "label": "No",
+     "stress": [
+      {
+       "id": "productivity.farmland_abandonment",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "few",
+     "label": "A few, mainly because owners moved away or for other work",
+     "stress": [
+      {
+       "id": "productivity.farmland_abandonment",
+       "lr": 1.2
+      }
+     ]
+    },
+    {
+     "id": "many",
+     "label": "Many, because of poor soil, lack of water or salinity",
+     "stress": [
+      {
+       "id": "productivity.farmland_abandonment",
+       "lr": 3.5,
+       "severe": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "waterlogging",
+   "stresses": [
+    "irrigation.waterlogging",
+    "productivity.farmland_abandonment"
+   ],
+   "origin": "New for this atlas",
+   "text": "Do fields stay waterlogged long after the monsoon, or show white salt crusts?",
+   "rationale": "Direct check of a low-confidence, model-based rule.",
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "irrigation.waterlogging",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "some",
+     "label": "Some low-lying fields",
+     "stress": [
+      {
+       "id": "irrigation.waterlogging",
+       "lr": 2.5
+      }
+     ]
+    },
+    {
+     "id": "wide",
+     "label": "Widespread",
+     "stress": [
+      {
+       "id": "irrigation.waterlogging",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "productivity.farmland_abandonment",
+       "lr": 1.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fodder_commons",
+   "stresses": [
+    "fodder.grazing_pressure"
+   ],
+   "origin": "New for this atlas",
+   "text": "Is fodder from the village commons enough for the animals through the dry season?",
+   "rationale": "Fodder shortfall is the practical sign that grazing exceeds carrying capacity.",
+   "options": [
+    {
+     "id": "enough",
+     "label": "Enough through the dry season",
+     "stress": [
+      {
+       "id": "fodder.grazing_pressure",
+       "lr": 0.4
+      }
+     ]
+    },
+    {
+     "id": "short",
+     "label": "Runs short from about January to March",
+     "stress": [
+      {
+       "id": "fodder.grazing_pressure",
+       "lr": 2
+      }
+     ]
+    },
+    {
+     "id": "bare",
+     "label": "Commons are bare; animals are taken away or fodder is bought",
+     "stress": [
+      {
+       "id": "fodder.grazing_pressure",
+       "lr": 3.5,
+       "severe": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "land_sale",
+   "stresses": [
+    "urban_encroachment"
+   ],
+   "origin": "New for this atlas",
+   "text": "Is farmland near the village being sold for house plots, roads or industry?",
+   "rationale": "Confirms built-up growth that the land-cover series can over-state through classification noise.",
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "urban_encroachment",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "some",
+     "label": "Some",
+     "stress": [
+      {
+       "id": "urban_encroachment",
+       "lr": 2
+      }
+     ]
+    },
+    {
+     "id": "rapid",
+     "label": "Rapidly",
+     "stress": [
+      {
+       "id": "urban_encroachment",
+       "lr": 4,
+       "severe": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "flooding",
+   "stresses": [
+    "flood_exposure"
+   ],
+   "origin": "New for this atlas",
+   "text": "How often do floods or river overflow damage kharif crops or homes?",
+   "rationale": "The flood rule sees seasonal water spread but cannot tell flood damage from wetlands.",
+   "options": [
+    {
+     "id": "rarely",
+     "label": "Rarely",
+     "stress": [
+      {
+       "id": "flood_exposure",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "sometimes",
+     "label": "Once every 3–5 years",
+     "stress": [
+      {
+       "id": "flood_exposure",
+       "lr": 2.5
+      }
+     ]
+    },
+    {
+     "id": "often",
+     "label": "Most years",
+     "stress": [
+      {
+       "id": "flood_exposure",
+       "lr": 4,
+       "severe": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "recharge_sites",
+   "stresses": [
+    "groundwater.recharge_opportunity"
+   ],
+   "origin": "New for this atlas",
+   "text": "Are there streams or gullies where monsoon runoff flows out of the village with no check dam or percolation tank?",
+   "rationale": "Confirms that untreated runoff exists, which the opportunity assumes.",
+   "options": [
+    {
+     "id": "several",
+     "label": "Yes, several",
+     "stress": [
+      {
+       "id": "groundwater.recharge_opportunity",
+       "lr": 3
+      }
+     ]
+    },
+    {
+     "id": "few",
+     "label": "One or two",
+     "stress": [
+      {
+       "id": "groundwater.recharge_opportunity",
+       "lr": 1.5
+      }
+     ]
+    },
+    {
+     "id": "none",
+     "label": "No, the drainage lines are already treated",
+     "stress": [
+      {
+       "id": "groundwater.recharge_opportunity",
+       "lr": 0.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "restoration_land",
+   "stresses": [
+    "agroforestry_opportunity"
+   ],
+   "origin": "New for this atlas",
+   "text": "Is there degraded common or forest land that the gram panchayat or community could protect or plant?",
+   "rationale": "Restoration needs land the community controls, which the WRI layer does not show.",
+   "options": [
+    {
+     "id": "large",
+     "label": "Yes, large areas",
+     "stress": [
+      {
+       "id": "agroforestry_opportunity",
+       "lr": 3
+      }
+     ]
+    },
+    {
+     "id": "small",
+     "label": "Small patches",
+     "stress": [
+      {
+       "id": "agroforestry_opportunity",
+       "lr": 1.5
+      }
+     ]
+    },
+    {
+     "id": "none",
+     "label": "None available",
+     "stress": [
+      {
+       "id": "agroforestry_opportunity",
+       "lr": 0.4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "migration",
+   "stresses": [
+    "multidimensional_vulnerability",
+    "drought.kharif_drought"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for migrant_household_percent (multi_sector_vulnerability)",
+   "text": "Roughly what proportion of households have one or more members who migrate seasonally or permanently for work outside the village?",
+   "rationale": "More than 30% of households with migrants confirms multi-sector hardship.",
+   "options": [
+    {
+     "id": "low",
+     "label": "Very few (under about 10%)",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 0.6
+      }
+     ]
+    },
+    {
+     "id": "moderate",
+     "label": "A moderate share (about 10–30%)",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "high",
+     "label": "Many (over about 30%)",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 2.5
+      },
+      {
+       "id": "drought.kharif_drought",
+       "lr": 1.2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "landholding",
+   "stresses": [
+    "multidimensional_vulnerability"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for landholding_size_distribution (small_landholding)",
+   "text": "Approximately what proportion of farming households own less than 1 hectare of land?",
+   "rationale": "Marginal holdings limit coping capacity and eligibility for some schemes.",
+   "options": [
+    {
+     "id": "minority",
+     "label": "Less than a quarter",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 0.7
+      }
+     ]
+    },
+    {
+     "id": "about_half",
+     "label": "About half",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "majority",
+     "label": "More than half",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "income",
+   "stresses": [
+    "multidimensional_vulnerability"
+   ],
+   "origin": "CoRE insights field form, follow-up MCQ for household_income_inr (multi_sector_vulnerability, small_landholding)",
+   "text": "What is the approximate annual income of a typical household from all sources?",
+   "rationale": "Direct measure of economic vulnerability, which census variables only proxy.",
+   "options": [
+    {
+     "id": "below_50k",
+     "label": "Below ₹50,000",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 2
+      }
+     ]
+    },
+    {
+     "id": "50k_100k",
+     "label": "₹50,000 to ₹1,00,000",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.1
+      }
+     ]
+    },
+    {
+     "id": "above_100k",
+     "label": "Above ₹1,00,000",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 0.6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "soil_fertiliser",
+   "stresses": [
+    "soil.nutrient_deficiency",
+    "productivity.declining_intensity"
+   ],
+   "origin": "New: reconciliation with Signal_Verification pathways",
+   "text": "Over the last 5–10 years, have farmers needed more fertiliser to get the same yield? Do Soil Health Cards from this village show low nitrogen, phosphorus or potash?",
+   "rationale": "Rising fertiliser need for the same yield and low Soil Health Card ratings are direct field evidence of nutrient depletion; the CoRE soil layer is predicted, not sampled.",
+   "options": [
+    {
+     "id": "same",
+     "label": "Yields hold with the same fertiliser; cards show medium or high levels",
+     "stress": [
+      {
+       "id": "soil.nutrient_deficiency",
+       "lr": 0.4
+      }
+     ]
+    },
+    {
+     "id": "more",
+     "label": "More fertiliser is needed for the same yield, or cards show one nutrient low",
+     "stress": [
+      {
+       "id": "soil.nutrient_deficiency",
+       "lr": 2
+      },
+      {
+       "id": "productivity.declining_intensity",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "low",
+     "label": "Cards show two or more nutrients low and yields are falling despite fertiliser",
+     "stress": [
+      {
+       "id": "soil.nutrient_deficiency",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "productivity.declining_intensity",
+       "lr": 1.8
+      }
+     ]
+    }
+   ],
+   "show_if": "f_crop >= 0.1"
+  },
+  {
+   "id": "livestock_summer_water",
+   "stresses": [
+    "livestock_water_scarcity"
+   ],
+   "origin": "New: reconciliation with Signal_Verification pathways",
+   "text": "In April–June, where do cattle, sheep and goats drink? How far do herders have to take them?",
+   "rationale": "Distance to summer water is the most direct measure of livestock water scarcity.",
+   "options": [
+    {
+     "id": "near",
+     "label": "Village ponds or troughs within the village all summer",
+     "stress": [
+      {
+       "id": "livestock_water_scarcity",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "far",
+     "label": "Animals walk more than 2–3 km, or water is bought or carted",
+     "stress": [
+      {
+       "id": "livestock_water_scarcity",
+       "lr": 3
+      }
+     ]
+    },
+    {
+     "id": "migrate",
+     "label": "Herders migrate with animals for water, or animals have died for lack of water",
+     "stress": [
+      {
+       "id": "livestock_water_scarcity",
+       "lr": 5,
+       "severe": true
+      }
+     ]
+    }
+   ],
+   "show_if": "share_pastoral >= 0.05"
+  },
+  {
+   "id": "fishery_ponds",
+   "stresses": [
+    "fishery_potential"
+   ],
+   "origin": "New: reconciliation with Signal_Verification pathways",
+   "text": "Do any village tanks or ponds hold water for six months or more, and are fish reared in them today?",
+   "rationale": "A fish crop needs water for at least six months and a group with rights over the pond.",
+   "options": [
+    {
+     "id": "no_water",
+     "label": "No pond holds water for six months",
+     "stress": [
+      {
+       "id": "fishery_potential",
+       "lr": 0.2
+      }
+     ]
+    },
+    {
+     "id": "possible",
+     "label": "Ponds hold water but fish are not reared, or only by a few",
+     "stress": [
+      {
+       "id": "fishery_potential",
+       "lr": 2.5
+      }
+     ]
+    },
+    {
+     "id": "active",
+     "label": "Fish are already reared by a group or under lease",
+     "stress": [
+      {
+       "id": "fishery_potential",
+       "lr": 1.2
+      }
+     ]
+    }
+   ],
+   "show_if": "swb_frac >= 0.005"
+  },
+  {
+   "id": "shg_membership",
+   "stresses": [
+    "multidimensional_vulnerability"
+   ],
+   "origin": "New: reconciliation with Signal_Verification pathways",
+   "text": "About what share of households have a woman in a self-help group that meets regularly and has a bank linkage?",
+   "rationale": "Active SHGs provide credit and collective action; the Mission Antyodaya count may be out of date.",
+   "options": [
+    {
+     "id": "most",
+     "label": "More than half",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 0.6
+      }
+     ]
+    },
+    {
+     "id": "some",
+     "label": "A quarter to a half",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.1
+      }
+     ]
+    },
+    {
+     "id": "few",
+     "label": "Fewer than a quarter, or groups are inactive",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.8
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bank_access",
+   "stresses": [
+    "multidimensional_vulnerability"
+   ],
+   "origin": "New: reconciliation with Signal_Verification pathways",
+   "text": "How far is the nearest bank branch, ATM or bank mitra (business correspondent) that people actually use?",
+   "rationale": "Distance to banking limits savings, credit and receipt of benefits; the facility layer does not include bank mitras.",
+   "options": [
+    {
+     "id": "near",
+     "label": "Within the village or under 2 km",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 0.6
+      }
+     ]
+    },
+    {
+     "id": "mid",
+     "label": "2–5 km",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.1
+      }
+     ]
+    },
+    {
+     "id": "far",
+     "label": "More than 5 km, or people rely on moneylenders",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nrega_work",
+   "stresses": [
+    "multidimensional_vulnerability"
+   ],
+   "origin": "New: reconciliation with Signal_Verification pathways",
+   "text": "In the past year, did households who asked for NREGA work get it, and for about how many days?",
+   "rationale": "Access to NREGA work is a buffer in bad years; low work shown in the data may reflect low demand or denied demand, which only the community can say.",
+   "options": [
+    {
+     "id": "good",
+     "label": "Most who asked got work for 50 days or more",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 0.6
+      }
+     ]
+    },
+    {
+     "id": "partial",
+     "label": "Work was given, but for few days or with late payment",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 1.3
+      }
+     ]
+    },
+    {
+     "id": "none",
+     "label": "Little or no work was given although people asked",
+     "stress": [
+      {
+       "id": "multidimensional_vulnerability",
+       "lr": 2.2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "drinking_water_quality",
+   "stresses": [
+    "drinking_water.salinity",
+    "drinking_water.scarcity"
+   ],
+   "origin": "New: reconciliation with Signal_Verification pathways",
+   "text": "Does water from hand pumps or wells taste salty or bitter, leave white or red deposits, change colour, or cause stomach or joint problems?",
+   "rationale": "Taste, deposits and colour are reliable signs of salinity, iron or fluoride, which the block category reports only coarsely.",
+   "options": [
+    {
+     "id": "fine",
+     "label": "No complaints about taste or colour",
+     "stress": [
+      {
+       "id": "drinking_water.salinity",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "some",
+     "label": "Some sources taste salty or leave deposits",
+     "stress": [
+      {
+       "id": "drinking_water.salinity",
+       "lr": 2.5
+      }
+     ]
+    },
+    {
+     "id": "unsafe",
+     "label": "Most sources are unusable for drinking; people fetch from elsewhere",
+     "stress": [
+      {
+       "id": "drinking_water.salinity",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "drinking_water.scarcity",
+       "lr": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "jjm_taps",
+   "stresses": [
+    "drinking_water.scarcity"
+   ],
+   "origin": "New: reconciliation with Signal_Verification pathways",
+   "text": "Do households have a working tap (Jal Jeevan Mission) that supplies water every day, including in summer?",
+   "rationale": "A tap connection that works through summer removes most drinking-water scarcity; connections that run dry do not.",
+   "options": [
+    {
+     "id": "daily",
+     "label": "Most households get tap water every day all year",
+     "stress": [
+      {
+       "id": "drinking_water.scarcity",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "irregular",
+     "label": "Taps exist but run dry or irregular in summer",
+     "stress": [
+      {
+       "id": "drinking_water.scarcity",
+       "lr": 2
+      }
+     ]
+    },
+    {
+     "id": "none",
+     "label": "Few households have taps; people use hand pumps, wells or tankers",
+     "stress": [
+      {
+       "id": "drinking_water.scarcity",
+       "lr": 2.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mining_water",
+   "stresses": [
+    "drinking_water.mining"
+   ],
+   "origin": "New for the Signal_Verification water-quality pattern (mining)",
+   "text": "Near the mines in or around the village, has the water in wells, handpumps, streams or ponds changed in colour, taste or smell, or have people or animals fallen ill after drinking it?",
+   "rationale": "The mining layer shows that mining is present, not that water is affected; the community can confirm whether nearby sources are degraded.",
+   "options": [
+    {
+     "id": "no",
+     "label": "No change in water near the mines, or no mines nearby",
+     "stress": [
+      {
+       "id": "drinking_water.mining",
+       "lr": 0.3
+      }
+     ]
+    },
+    {
+     "id": "some",
+     "label": "Water is sometimes muddy or tastes different, especially after rain",
+     "stress": [
+      {
+       "id": "drinking_water.mining",
+       "lr": 2.5
+      }
+     ]
+    },
+    {
+     "id": "bad",
+     "label": "Water is discoloured or bad-tasting most of the time, or people or animals have fallen ill",
+     "stress": [
+      {
+       "id": "drinking_water.mining",
+       "lr": 5,
+       "severe": true
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

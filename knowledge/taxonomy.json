@@ -1,0 +1,317 @@
+{
+ "_about": "Hierarchy: production system → observed stress → causal pathway. Production systems group the archetypes (archetypes.json); socio-economic is cross-cutting. Each production system lists its observed stresses, and each observed stress lists causal pathways: a group id from 'groups' (rules '<group>.<rule>' in causal_graph.json) or a stand-alone rule id. An observed stress is shown only where its production system's signal is on, and is flagged when any of its rules of the same type is triggered; its intensity is the highest among them. A rule can sit under several production systems (flood_exposure). Opportunity rules inside a stress group (groundwater.recharge_opportunity, productivity.rice_fallow_opportunity) roll up separately as that observed stress's opportunities.",
+ "version": "0.4",
+ "aggregation": {
+  "trigger": "any rule of the same type triggered, where the production system is present",
+  "intensity": "max of the rules' intensities",
+  "severe": "any triggered rule severe",
+  "status_order": [
+   "triggered",
+   "not triggered",
+   "insufficient data",
+   "unknown",
+   "not applicable"
+  ]
+ },
+ "production_systems": [
+  {
+   "id": "agriculture",
+   "label": "Agriculture",
+   "signal": "ps_agriculture",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "groundwater_irrigated",
+    "canal_irrigated",
+    "tank_irrigated",
+    "tree_crops"
+   ],
+   "about": "Rainfed and irrigated farming, and orchards and farm trees.",
+   "observed_stresses": [
+    {
+     "id": "water_security",
+     "label": "Water security issues",
+     "type": "stress",
+     "pathways": [
+      "groundwater",
+      "drought",
+      "irrigation"
+     ],
+     "about": "Water for crops is under pressure: groundwater is being depleted, kharif crops face recurrent drought, or tank and canal irrigation falls short or waterlogs fields.",
+     "public_note": "Water for crops is under pressure: groundwater is being depleted, kharif crops face recurrent drought, or tank and canal irrigation falls short or waterlogs fields. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "land_soil",
+     "label": "Land degradation and soil issues",
+     "type": "stress",
+     "pathways": [
+      "soil",
+      "productivity"
+     ],
+     "about": "Soils are low in nutrients or eroding, and farmland is cropped less or going out of use.",
+     "public_note": "Soils are low in nutrients or eroding, and farmland is cropped less or going out of use. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "waterbody",
+     "label": "Waterbody issues",
+     "type": "stress",
+     "pathways": [
+      "waterbody_shrinkage"
+     ],
+     "about": "Tanks and ponds that serve farms hold less water or dry earlier.",
+     "public_note": "Tanks and ponds that serve farms hold less water or dry earlier. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "flood",
+     "label": "Flood issues",
+     "type": "stress",
+     "pathways": [
+      "flood_exposure"
+     ],
+     "about": "Kharif crops on flat land near rivers are exposed to floods.",
+     "public_note": "Kharif crops on flat land near rivers are exposed to floods. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "agroforestry_opportunity",
+     "label": "Agroforestry opportunity",
+     "type": "opportunity",
+     "pathways": [
+      "agroforestry_opportunity"
+     ],
+     "about": "Land suited to trees, especially where cropping is declining.",
+     "public_note": "Land suited to trees, especially where cropping is declining. Further validation should be done through community interactions and documented on Commons Connect."
+    }
+   ]
+  },
+  {
+   "id": "livestock",
+   "label": "Livestock and commons",
+   "signal": "ps_livestock",
+   "archetypes": [
+    "pastoral"
+   ],
+   "about": "Grazing on commons, fallows and forest; sheep, goat and cattle herding.",
+   "observed_stresses": [
+    {
+     "id": "fodder",
+     "label": "Fodder issues",
+     "type": "stress",
+     "pathways": [
+      "fodder"
+     ],
+     "about": "Commons carry more animals than they can feed, or are shrinking and degrading.",
+     "public_note": "Commons carry more animals than they can feed, or are shrinking and degrading. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "water",
+     "label": "Water issues",
+     "type": "stress",
+     "pathways": [
+      "livestock_water_scarcity"
+     ],
+     "about": "Animals go short of drinking water in summer.",
+     "public_note": "Animals go short of drinking water in summer. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "flood",
+     "label": "Flood issues",
+     "type": "stress",
+     "pathways": [
+      "flood_exposure"
+     ],
+     "about": "Grazing land on flat land near rivers is exposed to floods.",
+     "public_note": "Grazing land on flat land near rivers is exposed to floods. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "fishery_opportunity",
+     "label": "Fishery opportunity",
+     "type": "opportunity",
+     "pathways": [
+      "fishery_potential"
+     ],
+     "about": "Water bodies that hold water long enough for a fish crop.",
+     "public_note": "Water bodies that hold water long enough for a fish crop. Further validation should be done through community interactions and documented on Commons Connect."
+    }
+   ]
+  },
+  {
+   "id": "forest",
+   "label": "Forest",
+   "signal": "ps_forest",
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "about": "Forest and forest-fringe livelihoods: NTFP, fuel, fodder.",
+   "observed_stresses": [
+    {
+     "id": "forest_degradation",
+     "label": "Forest degradation",
+     "type": "stress",
+     "pathways": [
+      "forest"
+     ],
+     "about": "Tree cover lost or thinned, forest edges degrading, and frequent fires.",
+     "public_note": "Tree cover lost or thinned, forest edges degrading, and frequent fires. Further validation should be done through community interactions and documented on Commons Connect."
+    }
+   ]
+  },
+  {
+   "id": "peri_urban",
+   "label": "Peri-urban",
+   "signal": "ps_peri_urban",
+   "archetypes": [
+    "peri_urban"
+   ],
+   "about": "Towns, growing villages and settlement.",
+   "observed_stresses": [
+    {
+     "id": "land_pressure",
+     "label": "Land pressure",
+     "type": "stress",
+     "pathways": [
+      "urban_encroachment"
+     ],
+     "about": "Settlements are expanding onto farmland and drainage paths.",
+     "public_note": "Settlements are expanding onto farmland and drainage paths. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "flood",
+     "label": "Flood issues",
+     "type": "stress",
+     "pathways": [
+      "flood_exposure"
+     ],
+     "about": "Settlements on flat land near rivers are exposed to floods.",
+     "public_note": "Settlements on flat land near rivers are exposed to floods. Further validation should be done through community interactions and documented on Commons Connect."
+    }
+   ]
+  },
+  {
+   "id": "socio_economic",
+   "label": "Socio-economic (households)",
+   "signal": "ps_socio",
+   "archetypes": [],
+   "cross_cutting": true,
+   "about": "The people of the watershed, present in every MWS whatever its land use.",
+   "observed_stresses": [
+    {
+     "id": "drinking_water",
+     "label": "Drinking water",
+     "type": "stress",
+     "pathways": [
+      "drinking_water"
+     ],
+     "about": "Drinking water is scarce in summer or unsafe because groundwater is saline.",
+     "public_note": "Drinking water is scarce in summer or unsafe because groundwater is saline. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "vulnerability",
+     "label": "Multi-dimensional vulnerability",
+     "type": "stress",
+     "pathways": [
+      "multidimensional_vulnerability"
+     ],
+     "about": "Several kinds of social and economic disadvantage overlap; raises the priority of every other stress here.",
+     "public_note": "Several kinds of social and economic disadvantage overlap; raises the priority of every other stress here. Further validation should be done through community interactions and documented on Commons Connect."
+    },
+    {
+     "id": "flood",
+     "label": "Flood issues",
+     "type": "stress",
+     "pathways": [
+      "flood_exposure"
+     ],
+     "about": "Homes on flat land near rivers are exposed to floods.",
+     "public_note": "Homes on flat land near rivers are exposed to floods. Further validation should be done through community interactions and documented on Commons Connect."
+    }
+   ]
+  }
+ ],
+ "groups": [
+  {
+   "id": "groundwater",
+   "label": "Groundwater",
+   "about": "Groundwater used faster than it is replenished, and where it could be recharged.",
+   "sheet_pathway": "groundwater_stress",
+   "children": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "groundwater.water_balance_deficit",
+    "groundwater.recharge_opportunity"
+   ]
+  },
+  {
+   "id": "drought",
+   "label": "Drought",
+   "about": "Rainfed crops repeatedly short of moisture during the monsoon.",
+   "sheet_pathway": "high_drought_risk",
+   "children": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing"
+   ]
+  },
+  {
+   "id": "irrigation",
+   "label": "Irrigation difficulties",
+   "about": "Tank and canal irrigation falling short, or causing waterlogging.",
+   "sheet_pathway": "high_irrigation_difficulties",
+   "children": [
+    "irrigation.rabi_water_shortfall",
+    "irrigation.waterlogging"
+   ]
+  },
+  {
+   "id": "soil",
+   "label": "Soil",
+   "about": "Soils low in nutrients or losing topsoil.",
+   "sheet_pathway": "soil_health",
+   "children": [
+    "soil.nutrient_deficiency",
+    "soil.erosion"
+   ]
+  },
+  {
+   "id": "productivity",
+   "label": "Productivity",
+   "about": "Farmland cropped less or going out of use, or land that could carry a second crop.",
+   "sheet_pathway": "decreasing_productivity",
+   "children": [
+    "productivity.farmland_abandonment",
+    "productivity.declining_intensity",
+    "productivity.rice_fallow_opportunity"
+   ]
+  },
+  {
+   "id": "fodder",
+   "label": "Fodder",
+   "about": "Grazing commons overstocked or degrading.",
+   "sheet_pathway": "fodder_risk",
+   "children": [
+    "fodder.grazing_pressure",
+    "fodder.commons_degradation"
+   ]
+  },
+  {
+   "id": "forest",
+   "label": "Forest",
+   "about": "Tree cover lost, edges degrading, frequent fires.",
+   "sheet_pathway": "forest_degradation",
+   "children": [
+    "forest.tree_cover_loss",
+    "forest.fringe_degradation",
+    "forest.fire"
+   ]
+  },
+  {
+   "id": "drinking_water",
+   "label": "Drinking water",
+   "about": "Drinking water scarce in summer, or unsafe from saline aquifers or mining.",
+   "sheet_pathway": "water_security_safety_domestic_use",
+   "children": [
+    "drinking_water.scarcity",
+    "drinking_water.salinity",
+    "drinking_water.mining"
+   ]
+  }
+ ]
+}

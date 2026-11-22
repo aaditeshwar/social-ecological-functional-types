@@ -1,0 +1,4566 @@
+[
+ {
+  "label": "Andhra Pradesh",
+  "state_id": "11",
+  "district": [
+   {
+    "label": "Ananthapur",
+    "district_id": "185",
+    "blocks": [
+     {
+      "label": "Amadagur",
+      "block_id": "1493",
+      "tehsil_id": "1493"
+     },
+     {
+      "label": "Gandlapenta",
+      "block_id": "1520",
+      "tehsil_id": "1520"
+     },
+     {
+      "label": "Nallacheruvu",
+      "block_id": "1566",
+      "tehsil_id": "1566"
+     },
+     {
+      "label": "Nambulipulikunta",
+      "block_id": "1914",
+      "tehsil_id": "1914"
+     },
+     {
+      "label": "Obuladevaracheruvu",
+      "block_id": "1627",
+      "tehsil_id": "1627"
+     },
+     {
+      "label": "Raptadu",
+      "block_id": "1938",
+      "tehsil_id": "1938"
+     },
+     {
+      "label": "Talupula",
+      "block_id": "2033",
+      "tehsil_id": "2033"
+     },
+     {
+      "label": "Tanakal",
+      "block_id": "2034",
+      "tehsil_id": "2034"
+     }
+    ]
+   },
+   {
+    "label": "Chittoor",
+    "district_id": "190",
+    "blocks": [
+     {
+      "label": "Chowdepalle",
+      "block_id": "1600",
+      "tehsil_id": "1600"
+     },
+     {
+      "label": "Madanapalle",
+      "block_id": "1877",
+      "tehsil_id": "1877"
+     },
+     {
+      "label": "Ramakuppam",
+      "block_id": "2009",
+      "tehsil_id": "2009"
+     },
+     {
+      "label": "Somala",
+      "block_id": "1688",
+      "tehsil_id": "1688"
+     },
+     {
+      "label": "Thamballapalle",
+      "block_id": "2038",
+      "tehsil_id": "2038"
+     },
+     {
+      "label": "Vayalpad",
+      "block_id": "2050",
+      "tehsil_id": "2050"
+     }
+    ]
+   },
+   {
+    "label": "Kurnool",
+    "district_id": "180",
+    "blocks": [
+     {
+      "label": "Chippagiri",
+      "block_id": "1594",
+      "tehsil_id": "1594"
+     },
+     {
+      "label": "Maddikera",
+      "block_id": "1878",
+      "tehsil_id": "1878"
+     },
+     {
+      "label": "Orvakal",
+      "block_id": "1794",
+      "tehsil_id": "1794"
+     },
+     {
+      "label": "Pattikonda",
+      "block_id": "1952",
+      "tehsil_id": "1952"
+     }
+    ]
+   },
+   {
+    "label": "Prakasam",
+    "district_id": "186",
+    "blocks": [
+     {
+      "label": "Dornala",
+      "block_id": "1637",
+      "tehsil_id": "1637"
+     },
+     {
+      "label": "Kottapatnam",
+      "block_id": "1482",
+      "tehsil_id": "1482"
+     },
+     {
+      "label": "Markapur",
+      "block_id": "1899",
+      "tehsil_id": "1899"
+     }
+    ]
+   },
+   {
+    "label": "Srikakulam",
+    "district_id": "189",
+    "blocks": [
+     {
+      "label": "Bhamini",
+      "block_id": "1479",
+      "tehsil_id": "1479"
+     },
+     {
+      "label": "Burja",
+      "block_id": "1557",
+      "tehsil_id": "1557"
+     },
+     {
+      "label": "Echcherla",
+      "block_id": "1445",
+      "tehsil_id": "1445"
+     },
+     {
+      "label": "Hiramandalam",
+      "block_id": "1745",
+      "tehsil_id": "1745"
+     },
+     {
+      "label": "Kaviti",
+      "block_id": "1633",
+      "tehsil_id": "1633"
+     },
+     {
+      "label": "Kotabommali",
+      "block_id": "1820",
+      "tehsil_id": "1820"
+     },
+     {
+      "label": "Meliyaputti",
+      "block_id": "1620",
+      "tehsil_id": "1620"
+     },
+     {
+      "label": "Palkonda",
+      "block_id": "1841",
+      "tehsil_id": "1841"
+     },
+     {
+      "label": "Patapatnam",
+      "block_id": "1833",
+      "tehsil_id": "1833"
+     },
+     {
+      "label": "Santbommali",
+      "block_id": "1981",
+      "tehsil_id": "1981"
+     },
+     {
+      "label": "Saravakota",
+      "block_id": "2020",
+      "tehsil_id": "2020"
+     },
+     {
+      "label": "Sarubujjili",
+      "block_id": "2021",
+      "tehsil_id": "2021"
+     },
+     {
+      "label": "Sitampeta",
+      "block_id": "1487",
+      "tehsil_id": "1487"
+     },
+     {
+      "label": "Vajrapukotturu",
+      "block_id": "1563",
+      "tehsil_id": "1563"
+     },
+     {
+      "label": "Vangara",
+      "block_id": "1485",
+      "tehsil_id": "1485"
+     },
+     {
+      "label": "Viragattam",
+      "block_id": "2070",
+      "tehsil_id": "2070"
+     }
+    ]
+   },
+   {
+    "label": "Vishakhapatnam",
+    "district_id": "183",
+    "blocks": [
+     {
+      "label": "Buchchayyapeta",
+      "block_id": "1554",
+      "tehsil_id": "1554"
+     },
+     {
+      "label": "Dumbriguda",
+      "block_id": "1647",
+      "tehsil_id": "1647"
+     }
+    ]
+   },
+   {
+    "label": "Vizianagaram",
+    "district_id": "182",
+    "blocks": [
+     {
+      "label": "Kurupam",
+      "block_id": "1865",
+      "tehsil_id": "1865"
+     },
+     {
+      "label": "Pachipenta",
+      "block_id": "1569",
+      "tehsil_id": "1569"
+     },
+     {
+      "label": "Parvatipuram",
+      "block_id": "1951",
+      "tehsil_id": "1951"
+     }
+    ]
+   },
+   {
+    "label": "Y S R Kadapa",
+    "district_id": "184",
+    "blocks": [
+     {
+      "label": "Duvvur",
+      "block_id": "1586",
+      "tehsil_id": "1586"
+     },
+     {
+      "label": "Vempalli",
+      "block_id": "2059",
+      "tehsil_id": "2059"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Arunachal Pradesh",
+  "state_id": "26",
+  "district": [
+   {
+    "label": "Lower Subansiri",
+    "district_id": "522",
+    "blocks": [
+     {
+      "label": "Lower Subansiri",
+      "block_id": "11",
+      "tehsil_id": "11"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Assam",
+  "state_id": "38",
+  "district": [
+   {
+    "label": "Cachar",
+    "district_id": "835",
+    "blocks": [
+     {
+      "label": "Lakhipur",
+      "block_id": "5644",
+      "tehsil_id": "5644"
+     }
+    ]
+   },
+   {
+    "label": "Golaghat",
+    "district_id": "825",
+    "blocks": [
+     {
+      "label": "Morangi Circle",
+      "block_id": "5658",
+      "tehsil_id": "5658"
+     }
+    ]
+   },
+   {
+    "label": "Kamrup Metro",
+    "district_id": "813",
+    "blocks": [
+     {
+      "label": "Guwahati Circle",
+      "block_id": "5624",
+      "tehsil_id": "5624"
+     }
+    ]
+   },
+   {
+    "label": "Karbi Anaglong",
+    "district_id": "824",
+    "blocks": [
+     {
+      "label": "Bokajan",
+      "block_id": "5583",
+      "tehsil_id": "5583"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Bihar",
+  "state_id": "30",
+  "district": [
+   {
+    "label": "Banka",
+    "district_id": "604",
+    "blocks": [
+     {
+      "label": "Banka",
+      "block_id": "4524",
+      "tehsil_id": "4524"
+     }
+    ]
+   },
+   {
+    "label": "Jamui",
+    "district_id": "625",
+    "blocks": [
+     {
+      "label": "Jamui",
+      "block_id": "4562",
+      "tehsil_id": "4562"
+     }
+    ]
+   },
+   {
+    "label": "Nalanda",
+    "district_id": "614",
+    "blocks": [
+     {
+      "label": "Hilsa",
+      "block_id": "4558",
+      "tehsil_id": "4558"
+     }
+    ]
+   },
+   {
+    "label": "Nawada",
+    "district_id": "632",
+    "blocks": [
+     {
+      "label": "Rajauli",
+      "block_id": "4599",
+      "tehsil_id": "4599"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Chhattisgarh",
+  "state_id": "18",
+  "district": [
+   {
+    "label": "Baloda Bazar",
+    "district_id": "386",
+    "blocks": [
+     {
+      "label": "Kasdol",
+      "block_id": "3559",
+      "tehsil_id": "3559"
+     }
+    ]
+   },
+   {
+    "label": "Dakshin Bastar Dantewada",
+    "district_id": "396",
+    "blocks": [
+     {
+      "label": "Dantewada",
+      "block_id": "3535",
+      "tehsil_id": "3535"
+     }
+    ]
+   },
+   {
+    "label": "Gariyaband",
+    "district_id": "393",
+    "blocks": [
+     {
+      "label": "Mainpur",
+      "block_id": "3587",
+      "tehsil_id": "3587"
+     }
+    ]
+   },
+   {
+    "label": "Kondagaon",
+    "district_id": "389",
+    "blocks": [
+     {
+      "label": "Kondagaon",
+      "block_id": "3569",
+      "tehsil_id": "3569"
+     }
+    ]
+   },
+   {
+    "label": "Uttar Bastar Kanker",
+    "district_id": "380",
+    "blocks": [
+     {
+      "label": "Bhanupratappur",
+      "block_id": "3518",
+      "tehsil_id": "3518"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Delhi",
+  "state_id": "4",
+  "district": [
+   {
+    "label": "South",
+    "district_id": "151",
+    "blocks": [
+     {
+      "label": "Mehrauli",
+      "block_id": "1308",
+      "tehsil_id": "1308"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Goa",
+  "state_id": "3",
+  "district": [
+   {
+    "label": "North Goa",
+    "district_id": "143",
+    "blocks": [
+     {
+      "label": "Bardez",
+      "block_id": "1281",
+      "tehsil_id": "1281"
+     },
+     {
+      "label": "Pernem",
+      "block_id": "1285",
+      "tehsil_id": "1285"
+     }
+    ]
+   },
+   {
+    "label": "South Goa",
+    "district_id": "144",
+    "blocks": [
+     {
+      "label": "Sanguem",
+      "block_id": "1288",
+      "tehsil_id": "1288"
+     },
+     {
+      "label": "Sasashti",
+      "block_id": "1289",
+      "tehsil_id": "1289"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Gujarat",
+  "state_id": "31",
+  "district": [
+   {
+    "label": "Ahmadabad",
+    "district_id": "640",
+    "blocks": [
+     {
+      "label": "Ahmadabad",
+      "block_id": "4623",
+      "tehsil_id": "4623"
+     }
+    ]
+   },
+   {
+    "label": "Amreli",
+    "district_id": "642",
+    "blocks": [
+     {
+      "label": "Amreli",
+      "block_id": "4625",
+      "tehsil_id": "4625"
+     },
+     {
+      "label": "Rajula",
+      "block_id": "4799",
+      "tehsil_id": "4799"
+     }
+    ]
+   },
+   {
+    "label": "Banas Kantha",
+    "district_id": "643",
+    "blocks": [
+     {
+      "label": "Amrirgadh",
+      "block_id": "4626",
+      "tehsil_id": "4626"
+     },
+     {
+      "label": "Danta",
+      "block_id": "4656",
+      "tehsil_id": "4656"
+     },
+     {
+      "label": "Palanpur",
+      "block_id": "4789",
+      "tehsil_id": "4789"
+     },
+     {
+      "label": "Vadgam",
+      "block_id": "4847",
+      "tehsil_id": "4847"
+     }
+    ]
+   },
+   {
+    "label": "Bhavnagar",
+    "district_id": "650",
+    "blocks": [
+     {
+      "label": "Bhavnagar",
+      "block_id": "4639",
+      "tehsil_id": "4639"
+     },
+     {
+      "label": "Ghogha Mahal",
+      "block_id": "4691",
+      "tehsil_id": "4691"
+     },
+     {
+      "label": "Mahuva",
+      "block_id": "4757",
+      "tehsil_id": "4757"
+     }
+    ]
+   },
+   {
+    "label": "Chhota Udepur",
+    "district_id": "653",
+    "blocks": [
+     {
+      "label": "Chhota Udepur",
+      "block_id": "4651",
+      "tehsil_id": "4651"
+     },
+     {
+      "label": "Kawant",
+      "block_id": "4730",
+      "tehsil_id": "4730"
+     },
+     {
+      "label": "Naswadi",
+      "block_id": "4780",
+      "tehsil_id": "4780"
+     }
+    ]
+   },
+   {
+    "label": "Dahod",
+    "district_id": "656",
+    "blocks": [
+     {
+      "label": "Dhanpur",
+      "block_id": "4670",
+      "tehsil_id": "4670"
+     }
+    ]
+   },
+   {
+    "label": "Dangs",
+    "district_id": "638",
+    "blocks": [
+     {
+      "label": "Aahva",
+      "block_id": "4621",
+      "tehsil_id": "4621"
+     }
+    ]
+   },
+   {
+    "label": "Mahisagar",
+    "district_id": "644",
+    "blocks": [
+     {
+      "label": "Kadana",
+      "block_id": "4718",
+      "tehsil_id": "4718"
+     },
+     {
+      "label": "Khanpur",
+      "block_id": "4735",
+      "tehsil_id": "4735"
+     },
+     {
+      "label": "Santrampur",
+      "block_id": "4811",
+      "tehsil_id": "4811"
+     },
+     {
+      "label": "Virpur",
+      "block_id": "4865",
+      "tehsil_id": "4865"
+     }
+    ]
+   },
+   {
+    "label": "Narmada",
+    "district_id": "658",
+    "blocks": [
+     {
+      "label": "Dediyapada",
+      "block_id": "4662",
+      "tehsil_id": "4662"
+     },
+     {
+      "label": "Garudeshwar",
+      "block_id": "4690",
+      "tehsil_id": "4690"
+     },
+     {
+      "label": "Nandod",
+      "block_id": "4779",
+      "tehsil_id": "4779"
+     },
+     {
+      "label": "Sagbara",
+      "block_id": "4806",
+      "tehsil_id": "4806"
+     }
+    ]
+   },
+   {
+    "label": "Panch Mahals",
+    "district_id": "665",
+    "blocks": [
+     {
+      "label": "Morwa Hadaf",
+      "block_id": "4774",
+      "tehsil_id": "4774"
+     }
+    ]
+   },
+   {
+    "label": "Rajkot",
+    "district_id": "661",
+    "blocks": [
+     {
+      "label": "Vinchhiya",
+      "block_id": "4863",
+      "tehsil_id": "4863"
+     }
+    ]
+   },
+   {
+    "label": "Sabar Kantha",
+    "district_id": "668",
+    "blocks": [
+     {
+      "label": "Idar",
+      "block_id": "4701",
+      "tehsil_id": "4701"
+     },
+     {
+      "label": "Khedbrahma",
+      "block_id": "4737",
+      "tehsil_id": "4737"
+     },
+     {
+      "label": "Poshina",
+      "block_id": "4795",
+      "tehsil_id": "4795"
+     },
+     {
+      "label": "Vadali",
+      "block_id": "4846",
+      "tehsil_id": "4846"
+     }
+    ]
+   },
+   {
+    "label": "Surendranagar",
+    "district_id": "655",
+    "blocks": [
+     {
+      "label": "Chotila",
+      "block_id": "4654",
+      "tehsil_id": "4654"
+     }
+    ]
+   },
+   {
+    "label": "Valsad",
+    "district_id": "660",
+    "blocks": [
+     {
+      "label": "Kaprada",
+      "block_id": "4728",
+      "tehsil_id": "4728"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Haryana",
+  "state_id": "33",
+  "district": [
+   {
+    "label": "Ambala",
+    "district_id": "697",
+    "blocks": [
+     {
+      "label": "Ambala",
+      "block_id": "4957",
+      "tehsil_id": "4957"
+     }
+    ]
+   },
+   {
+    "label": "Mewat",
+    "district_id": "706",
+    "blocks": [
+     {
+      "label": "Firozpur Jhirka",
+      "block_id": "4972",
+      "tehsil_id": "4972"
+     }
+    ]
+   },
+   {
+    "label": "Panchkula",
+    "district_id": "712",
+    "blocks": [
+     {
+      "label": "Panchkula",
+      "block_id": "5010",
+      "tehsil_id": "5010"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Himachal Pradesh",
+  "state_id": "1",
+  "district": [
+   {
+    "label": "Chamba",
+    "district_id": "102",
+    "blocks": [
+     {
+      "label": "Pangi",
+      "block_id": "1012",
+      "tehsil_id": "1012"
+     }
+    ]
+   },
+   {
+    "label": "Kangra",
+    "district_id": "104",
+    "blocks": [
+     {
+      "label": "Palampur",
+      "block_id": "1041",
+      "tehsil_id": "1041"
+     }
+    ]
+   },
+   {
+    "label": "Kullu",
+    "district_id": "106",
+    "blocks": [
+     {
+      "label": "Ani",
+      "block_id": "1047",
+      "tehsil_id": "1047"
+     },
+     {
+      "label": "Banjar",
+      "block_id": "1048",
+      "tehsil_id": "1048"
+     },
+     {
+      "label": "Bhuntar",
+      "block_id": "1049",
+      "tehsil_id": "1049"
+     },
+     {
+      "label": "Kullu",
+      "block_id": "1050",
+      "tehsil_id": "1050"
+     },
+     {
+      "label": "Manali",
+      "block_id": "1051",
+      "tehsil_id": "1051"
+     },
+     {
+      "label": "Nermand",
+      "block_id": "1052",
+      "tehsil_id": "1052"
+     },
+     {
+      "label": "Sainj",
+      "block_id": "1053",
+      "tehsil_id": "1053"
+     }
+    ]
+   },
+   {
+    "label": "Sirmaur",
+    "district_id": "110",
+    "blocks": [
+     {
+      "label": "Paonta Sahib",
+      "block_id": "3641",
+      "tehsil_id": "3641"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Jharkhand",
+  "state_id": "17",
+  "district": [
+   {
+    "label": "Bokaro",
+    "district_id": "365",
+    "blocks": [
+     {
+      "label": "Jaridih",
+      "block_id": "3342",
+      "tehsil_id": "3342"
+     },
+     {
+      "label": "Kasmar",
+      "block_id": "3354",
+      "tehsil_id": "3354"
+     },
+     {
+      "label": "Nawadih",
+      "block_id": "3417",
+      "tehsil_id": "3417"
+     },
+     {
+      "label": "Peterbar",
+      "block_id": "3438",
+      "tehsil_id": "3438"
+     }
+    ]
+   },
+   {
+    "label": "Deoghar",
+    "district_id": "371",
+    "blocks": [
+     {
+      "label": "Devipur",
+      "block_id": "3293",
+      "tehsil_id": "3293"
+     },
+     {
+      "label": "Mohanpur",
+      "block_id": "3408",
+      "tehsil_id": "3408"
+     }
+    ]
+   },
+   {
+    "label": "Dumka",
+    "district_id": "372",
+    "blocks": [
+     {
+      "label": "Dumka",
+      "block_id": "3301",
+      "tehsil_id": "3301"
+     },
+     {
+      "label": "Gopikandar",
+      "block_id": "3320",
+      "tehsil_id": "3320"
+     },
+     {
+      "label": "Jama",
+      "block_id": "3339",
+      "tehsil_id": "3339"
+     },
+     {
+      "label": "Jarmundi",
+      "block_id": "3343",
+      "tehsil_id": "3343"
+     },
+     {
+      "label": "Kathikund",
+      "block_id": "3355",
+      "tehsil_id": "3355"
+     },
+     {
+      "label": "Masalia",
+      "block_id": "3403",
+      "tehsil_id": "3403"
+     },
+     {
+      "label": "Ramgarh",
+      "block_id": "3448",
+      "tehsil_id": "3448"
+     },
+     {
+      "label": "Ranishwar",
+      "block_id": "3454",
+      "tehsil_id": "3454"
+     },
+     {
+      "label": "Saraiyahat",
+      "block_id": "3461",
+      "tehsil_id": "3461"
+     },
+     {
+      "label": "Shikaripara",
+      "block_id": "3468",
+      "tehsil_id": "3468"
+     }
+    ]
+   },
+   {
+    "label": "East Singhbhum",
+    "district_id": "358",
+    "blocks": [
+     {
+      "label": "Baharagaon",
+      "block_id": "3227",
+      "tehsil_id": "3227"
+     },
+     {
+      "label": "Boram",
+      "block_id": "3258",
+      "tehsil_id": "3258"
+     },
+     {
+      "label": "Chakulia",
+      "block_id": "3267",
+      "tehsil_id": "3267"
+     },
+     {
+      "label": "Dalbhumgarh",
+      "block_id": "3286",
+      "tehsil_id": "3286"
+     },
+     {
+      "label": "Dumaria",
+      "block_id": "3300",
+      "tehsil_id": "3300"
+     },
+     {
+      "label": "Ghatsila",
+      "block_id": "3311",
+      "tehsil_id": "3311"
+     },
+     {
+      "label": "Musabani",
+      "block_id": "3410",
+      "tehsil_id": "3410"
+     },
+     {
+      "label": "Patamda",
+      "block_id": "3431",
+      "tehsil_id": "3431"
+     }
+    ]
+   },
+   {
+    "label": "Garhwa",
+    "district_id": "361",
+    "blocks": [
+     {
+      "label": "Bhandaria",
+      "block_id": "3248",
+      "tehsil_id": "3248"
+     }
+    ]
+   },
+   {
+    "label": "Giridih",
+    "district_id": "357",
+    "blocks": [
+     {
+      "label": "Bagodar",
+      "block_id": "3226",
+      "tehsil_id": "3226"
+     },
+     {
+      "label": "Bengabad",
+      "block_id": "3245",
+      "tehsil_id": "3245"
+     },
+     {
+      "label": "Birni",
+      "block_id": "3251",
+      "tehsil_id": "3251"
+     },
+     {
+      "label": "Deori",
+      "block_id": "3292",
+      "tehsil_id": "3292"
+     },
+     {
+      "label": "Dhanwar",
+      "block_id": "3295",
+      "tehsil_id": "3295"
+     },
+     {
+      "label": "Gande",
+      "block_id": "3306",
+      "tehsil_id": "3306"
+     },
+     {
+      "label": "Gawan",
+      "block_id": "3309",
+      "tehsil_id": "3309"
+     },
+     {
+      "label": "Giridih",
+      "block_id": "3313",
+      "tehsil_id": "3313"
+     },
+     {
+      "label": "Jamua",
+      "block_id": "3341",
+      "tehsil_id": "3341"
+     },
+     {
+      "label": "Pirtanar",
+      "block_id": "3440",
+      "tehsil_id": "3440"
+     },
+     {
+      "label": "Sariya",
+      "block_id": "3463",
+      "tehsil_id": "3463"
+     },
+     {
+      "label": "Tisri",
+      "block_id": "3486",
+      "tehsil_id": "3486"
+     }
+    ]
+   },
+   {
+    "label": "Godda",
+    "district_id": "364",
+    "blocks": [
+     {
+      "label": "Basantrai",
+      "block_id": "3243",
+      "tehsil_id": "3243"
+     },
+     {
+      "label": "Boarijor",
+      "block_id": "3256",
+      "tehsil_id": "3256"
+     },
+     {
+      "label": "Godda",
+      "block_id": "3316",
+      "tehsil_id": "3316"
+     },
+     {
+      "label": "Mahagama",
+      "block_id": "3389",
+      "tehsil_id": "3389"
+     },
+     {
+      "label": "Meherma",
+      "block_id": "3405",
+      "tehsil_id": "3405"
+     },
+     {
+      "label": "Pathargama",
+      "block_id": "3434",
+      "tehsil_id": "3434"
+     },
+     {
+      "label": "Poreyahat",
+      "block_id": "3441",
+      "tehsil_id": "3441"
+     },
+     {
+      "label": "Sundarpahari",
+      "block_id": "3476",
+      "tehsil_id": "3476"
+     },
+     {
+      "label": "Thakur Gangti",
+      "block_id": "3484",
+      "tehsil_id": "3484"
+     }
+    ]
+   },
+   {
+    "label": "Gumla",
+    "district_id": "352",
+    "blocks": [
+     {
+      "label": "Albert Ekka (Jari)",
+      "block_id": "3221",
+      "tehsil_id": "3221"
+     },
+     {
+      "label": "Basia",
+      "block_id": "3244",
+      "tehsil_id": "3244"
+     },
+     {
+      "label": "Bishnpuri",
+      "block_id": "3252",
+      "tehsil_id": "3252"
+     },
+     {
+      "label": "Chainpur",
+      "block_id": "3264",
+      "tehsil_id": "3264"
+     },
+     {
+      "label": "Dumri",
+      "block_id": "3303",
+      "tehsil_id": "3303"
+     },
+     {
+      "label": "Ghaghra",
+      "block_id": "3310",
+      "tehsil_id": "3310"
+     },
+     {
+      "label": "Gumla",
+      "block_id": "3323",
+      "tehsil_id": "3323"
+     },
+     {
+      "label": "Kamdara",
+      "block_id": "3347",
+      "tehsil_id": "3347"
+     },
+     {
+      "label": "Palkot",
+      "block_id": "3427",
+      "tehsil_id": "3427"
+     },
+     {
+      "label": "Raidih",
+      "block_id": "3446",
+      "tehsil_id": "3446"
+     },
+     {
+      "label": "Verno",
+      "block_id": "3493",
+      "tehsil_id": "3493"
+     }
+    ]
+   },
+   {
+    "label": "Hazaribagh",
+    "district_id": "363",
+    "blocks": [
+     {
+      "label": "Barkatha",
+      "block_id": "3241",
+      "tehsil_id": "3241"
+     },
+     {
+      "label": "Churchu",
+      "block_id": "3284",
+      "tehsil_id": "3284"
+     },
+     {
+      "label": "Dadi",
+      "block_id": "3285",
+      "tehsil_id": "3285"
+     },
+     {
+      "label": "Daru",
+      "block_id": "3290",
+      "tehsil_id": "3290"
+     },
+     {
+      "label": "Katkamcandi",
+      "block_id": "3356",
+      "tehsil_id": "3356"
+     },
+     {
+      "label": "Padma",
+      "block_id": "3422",
+      "tehsil_id": "3422"
+     },
+     {
+      "label": "Tatijharia",
+      "block_id": "3483",
+      "tehsil_id": "3483"
+     }
+    ]
+   },
+   {
+    "label": "Jamtara",
+    "district_id": "374",
+    "blocks": [
+     {
+      "label": "Jamtara",
+      "block_id": "3340",
+      "tehsil_id": "3340"
+     },
+     {
+      "label": "Nala",
+      "block_id": "3413",
+      "tehsil_id": "3413"
+     }
+    ]
+   },
+   {
+    "label": "Khunti",
+    "district_id": "373",
+    "blocks": [
+     {
+      "label": "Torpa",
+      "block_id": "3489",
+      "tehsil_id": "3489"
+     }
+    ]
+   },
+   {
+    "label": "Latehar",
+    "district_id": "359",
+    "blocks": [
+     {
+      "label": "Barwadih",
+      "block_id": "3242",
+      "tehsil_id": "3242"
+     },
+     {
+      "label": "Mahuadanr",
+      "block_id": "3391",
+      "tehsil_id": "3391"
+     }
+    ]
+   },
+   {
+    "label": "Lohardaga",
+    "district_id": "366",
+    "blocks": [
+     {
+      "label": "Kisko",
+      "block_id": "3366",
+      "tehsil_id": "3366"
+     },
+     {
+      "label": "Kuru",
+      "block_id": "3375",
+      "tehsil_id": "3375"
+     },
+     {
+      "label": "Senha",
+      "block_id": "3467",
+      "tehsil_id": "3467"
+     }
+    ]
+   },
+   {
+    "label": "Pakur",
+    "district_id": "353",
+    "blocks": [
+     {
+      "label": "Amarapara",
+      "block_id": "3222",
+      "tehsil_id": "3222"
+     },
+     {
+      "label": "Hiranpur",
+      "block_id": "3329",
+      "tehsil_id": "3329"
+     },
+     {
+      "label": "Litipara",
+      "block_id": "3386",
+      "tehsil_id": "3386"
+     },
+     {
+      "label": "Maheshpur",
+      "block_id": "3390",
+      "tehsil_id": "3390"
+     },
+     {
+      "label": "Pakuria",
+      "block_id": "3426",
+      "tehsil_id": "3426"
+     }
+    ]
+   },
+   {
+    "label": "Ramgarh",
+    "district_id": "370",
+    "blocks": [
+     {
+      "label": "Chitarpur",
+      "block_id": "3281",
+      "tehsil_id": "3281"
+     },
+     {
+      "label": "Dulmi",
+      "block_id": "3299",
+      "tehsil_id": "3299"
+     },
+     {
+      "label": "Gola",
+      "block_id": "3318",
+      "tehsil_id": "3318"
+     },
+     {
+      "label": "Mandu",
+      "block_id": "3397",
+      "tehsil_id": "3397"
+     },
+     {
+      "label": "Patratu",
+      "block_id": "3436",
+      "tehsil_id": "3436"
+     },
+     {
+      "label": "Ramgarh",
+      "block_id": "3449",
+      "tehsil_id": "3449"
+     }
+    ]
+   },
+   {
+    "label": "Ranchi",
+    "district_id": "355",
+    "blocks": [
+     {
+      "label": "Angara",
+      "block_id": "3224",
+      "tehsil_id": "3224"
+     },
+     {
+      "label": "Bero",
+      "block_id": "3247",
+      "tehsil_id": "3247"
+     },
+     {
+      "label": "Bundu",
+      "block_id": "3260",
+      "tehsil_id": "3260"
+     },
+     {
+      "label": "Chanho",
+      "block_id": "3274",
+      "tehsil_id": "3274"
+     },
+     {
+      "label": "Khelari",
+      "block_id": "3363",
+      "tehsil_id": "3363"
+     },
+     {
+      "label": "Lapung",
+      "block_id": "3376",
+      "tehsil_id": "3376"
+     },
+     {
+      "label": "Mandar",
+      "block_id": "3395",
+      "tehsil_id": "3395"
+     },
+     {
+      "label": "Nagri",
+      "block_id": "3412",
+      "tehsil_id": "3412"
+     },
+     {
+      "label": "Namkom",
+      "block_id": "3414",
+      "tehsil_id": "3414"
+     },
+     {
+      "label": "Ormanjhi",
+      "block_id": "3421",
+      "tehsil_id": "3421"
+     },
+     {
+      "label": "Rahe",
+      "block_id": "3445",
+      "tehsil_id": "3445"
+     },
+     {
+      "label": "Ratu",
+      "block_id": "3456",
+      "tehsil_id": "3456"
+     },
+     {
+      "label": "Silli",
+      "block_id": "3469",
+      "tehsil_id": "3469"
+     },
+     {
+      "label": "Tamar",
+      "block_id": "3479",
+      "tehsil_id": "3479"
+     }
+    ]
+   },
+   {
+    "label": "Sahibganj",
+    "district_id": "362",
+    "blocks": [
+     {
+      "label": "Barihat",
+      "block_id": "3239",
+      "tehsil_id": "3239"
+     },
+     {
+      "label": "Rajmahal",
+      "block_id": "3447",
+      "tehsil_id": "3447"
+     },
+     {
+      "label": "Taljhari",
+      "block_id": "3477",
+      "tehsil_id": "3477"
+     },
+     {
+      "label": "Udhua",
+      "block_id": "3491",
+      "tehsil_id": "3491"
+     }
+    ]
+   },
+   {
+    "label": "Saraikela-Kharsawan",
+    "district_id": "351",
+    "blocks": [
+     {
+      "label": "Adityapur",
+      "block_id": "3220",
+      "tehsil_id": "3220"
+     },
+     {
+      "label": "Gobindpur",
+      "block_id": "3315",
+      "tehsil_id": "3315"
+     },
+     {
+      "label": "Kharsawan",
+      "block_id": "3362",
+      "tehsil_id": "3362"
+     },
+     {
+      "label": "Kuchai",
+      "block_id": "3369",
+      "tehsil_id": "3369"
+     }
+    ]
+   },
+   {
+    "label": "Simdega",
+    "district_id": "360",
+    "blocks": [
+     {
+      "label": "Bano",
+      "block_id": "3232",
+      "tehsil_id": "3232"
+     },
+     {
+      "label": "Bansjor",
+      "block_id": "3233",
+      "tehsil_id": "3233"
+     },
+     {
+      "label": "Bolba",
+      "block_id": "3257",
+      "tehsil_id": "3257"
+     },
+     {
+      "label": "Jaldega",
+      "block_id": "3338",
+      "tehsil_id": "3338"
+     },
+     {
+      "label": "Kersai",
+      "block_id": "3359",
+      "tehsil_id": "3359"
+     },
+     {
+      "label": "Kolebira",
+      "block_id": "3368",
+      "tehsil_id": "3368"
+     },
+     {
+      "label": "Kurdeg",
+      "block_id": "3374",
+      "tehsil_id": "3374"
+     },
+     {
+      "label": "Pakardanr",
+      "block_id": "3424",
+      "tehsil_id": "3424"
+     },
+     {
+      "label": "Simdega",
+      "block_id": "3471",
+      "tehsil_id": "3471"
+     },
+     {
+      "label": "Thftaitangar",
+      "block_id": "3485",
+      "tehsil_id": "3485"
+     }
+    ]
+   },
+   {
+    "label": "West Singhbhum",
+    "district_id": "354",
+    "blocks": [
+     {
+      "label": "Anandpur",
+      "block_id": "3223",
+      "tehsil_id": "3223"
+     },
+     {
+      "label": "Bandgaon",
+      "block_id": "3231",
+      "tehsil_id": "3231"
+     },
+     {
+      "label": "Chaibasa",
+      "block_id": "3263",
+      "tehsil_id": "3263"
+     },
+     {
+      "label": "Chakradharpur",
+      "block_id": "3266",
+      "tehsil_id": "3266"
+     },
+     {
+      "label": "Goelkera",
+      "block_id": "3317",
+      "tehsil_id": "3317"
+     },
+     {
+      "label": "Hatgamhariya",
+      "block_id": "3326",
+      "tehsil_id": "3326"
+     },
+     {
+      "label": "Jagannathpur",
+      "block_id": "3336",
+      "tehsil_id": "3336"
+     },
+     {
+      "label": "Jhinkpani",
+      "block_id": "3345",
+      "tehsil_id": "3345"
+     },
+     {
+      "label": "Khuntpani",
+      "block_id": "3365",
+      "tehsil_id": "3365"
+     },
+     {
+      "label": "Manoharpur",
+      "block_id": "3400",
+      "tehsil_id": "3400"
+     },
+     {
+      "label": "Noamundi",
+      "block_id": "3420",
+      "tehsil_id": "3420"
+     },
+     {
+      "label": "Sonua",
+      "block_id": "3475",
+      "tehsil_id": "3475"
+     },
+     {
+      "label": "Tantnagar",
+      "block_id": "3481",
+      "tehsil_id": "3481"
+     },
+     {
+      "label": "Tonto",
+      "block_id": "3487",
+      "tehsil_id": "3487"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Karnataka",
+  "state_id": "2",
+  "district": [
+   {
+    "label": "Bagalkot",
+    "district_id": "118",
+    "blocks": [
+     {
+      "label": "Hungund",
+      "block_id": "1181",
+      "tehsil_id": "1181"
+     }
+    ]
+   },
+   {
+    "label": "Bengaluru Urban",
+    "district_id": "115",
+    "blocks": [
+     {
+      "label": "Anekal",
+      "block_id": "1110",
+      "tehsil_id": "1110"
+     },
+     {
+      "label": "Bengaluru South",
+      "block_id": "1120",
+      "tehsil_id": "1120"
+     }
+    ]
+   },
+   {
+    "label": "Chik Ballapur",
+    "district_id": "119",
+    "blocks": [
+     {
+      "label": "Chintamani",
+      "block_id": "1144",
+      "tehsil_id": "1144"
+     }
+    ]
+   },
+   {
+    "label": "Chikkamagaluru",
+    "district_id": "131",
+    "blocks": [
+     {
+      "label": "Mudigere",
+      "block_id": "1222",
+      "tehsil_id": "1222"
+     }
+    ]
+   },
+   {
+    "label": "Chitradurga",
+    "district_id": "127",
+    "blocks": [
+     {
+      "label": "Challakere",
+      "block_id": "1134",
+      "tehsil_id": "1134"
+     }
+    ]
+   },
+   {
+    "label": "Dakshina Kannada",
+    "district_id": "124",
+    "blocks": [
+     {
+      "label": "Sulya",
+      "block_id": "1267",
+      "tehsil_id": "1267"
+     }
+    ]
+   },
+   {
+    "label": "Davangere",
+    "district_id": "129",
+    "blocks": [
+     {
+      "label": "Harihar",
+      "block_id": "1162",
+      "tehsil_id": "1162"
+     }
+    ]
+   },
+   {
+    "label": "Dharwad",
+    "district_id": "135",
+    "blocks": [
+     {
+      "label": "Kundgol",
+      "block_id": "1206",
+      "tehsil_id": "1206"
+     },
+     {
+      "label": "Navalgund",
+      "block_id": "1231",
+      "tehsil_id": "1231"
+     }
+    ]
+   },
+   {
+    "label": "Kolar",
+    "district_id": "121",
+    "blocks": [
+     {
+      "label": "Kolar",
+      "block_id": "1196",
+      "tehsil_id": "1196"
+     },
+     {
+      "label": "Mulbagal",
+      "block_id": "1223",
+      "tehsil_id": "1223"
+     }
+    ]
+   },
+   {
+    "label": "Koppal",
+    "district_id": "137",
+    "blocks": [
+     {
+      "label": "Koppal",
+      "block_id": "1199",
+      "tehsil_id": "1199"
+     },
+     {
+      "label": "Yalburga",
+      "block_id": "1279",
+      "tehsil_id": "1279"
+     }
+    ]
+   },
+   {
+    "label": "Mandya",
+    "district_id": "140",
+    "blocks": [
+     {
+      "label": "Maddur",
+      "block_id": "1209",
+      "tehsil_id": "1209"
+     },
+     {
+      "label": "Pundavapura",
+      "block_id": "1235",
+      "tehsil_id": "1235"
+     }
+    ]
+   },
+   {
+    "label": "Raichur",
+    "district_id": "133",
+    "blocks": [
+     {
+      "label": "Devadurga",
+      "block_id": "1148",
+      "tehsil_id": "1148"
+     },
+     {
+      "label": "Mudgal",
+      "block_id": "1220",
+      "tehsil_id": "1220"
+     },
+     {
+      "label": "Sindhnur",
+      "block_id": "1259",
+      "tehsil_id": "1259"
+     }
+    ]
+   },
+   {
+    "label": "Tumakuru",
+    "district_id": "132",
+    "blocks": [
+     {
+      "label": "Pavagada",
+      "block_id": "1233",
+      "tehsil_id": "1233"
+     }
+    ]
+   },
+   {
+    "label": "Uttara Kannada",
+    "district_id": "116",
+    "blocks": [
+     {
+      "label": "Joida",
+      "block_id": "1188",
+      "tehsil_id": "1188"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Kerala",
+  "state_id": "7",
+  "district": [
+   {
+    "label": "Alappuzha",
+    "district_id": "166",
+    "blocks": [
+     {
+      "label": "Ambalapuzha",
+      "block_id": "1347",
+      "tehsil_id": "1347"
+     },
+     {
+      "label": "Kuttanad",
+      "block_id": "1379",
+      "tehsil_id": "1379"
+     }
+    ]
+   },
+   {
+    "label": "Ernakulam",
+    "district_id": "164",
+    "blocks": [
+     {
+      "label": "Kochchi",
+      "block_id": "1366",
+      "tehsil_id": "1366"
+     },
+     {
+      "label": "Kunnattunad",
+      "block_id": "1378",
+      "tehsil_id": "1378"
+     }
+    ]
+   },
+   {
+    "label": "Kozhikode",
+    "district_id": "175",
+    "blocks": [
+     {
+      "label": "Tamarasserry",
+      "block_id": "1403",
+      "tehsil_id": "1403"
+     }
+    ]
+   },
+   {
+    "label": "Palakkad",
+    "district_id": "163",
+    "blocks": [
+     {
+      "label": "Alattur",
+      "block_id": "1344",
+      "tehsil_id": "1344"
+     },
+     {
+      "label": "Chittur",
+      "block_id": "1353",
+      "tehsil_id": "1353"
+     },
+     {
+      "label": "Palakkad",
+      "block_id": "1393",
+      "tehsil_id": "1393"
+     }
+    ]
+   },
+   {
+    "label": "Thiruvananthapuram",
+    "district_id": "169",
+    "blocks": [
+     {
+      "label": "Nedumangad",
+      "block_id": "1388",
+      "tehsil_id": "1388"
+     },
+     {
+      "label": "Thiruvananthapuram",
+      "block_id": "1410",
+      "tehsil_id": "1410"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Madhya Pradesh",
+  "state_id": "19",
+  "district": [
+   {
+    "label": "Barwani",
+    "district_id": "431",
+    "blocks": [
+     {
+      "label": "Barwani",
+      "block_id": "3676",
+      "tehsil_id": "3676"
+     },
+     {
+      "label": "Rajpur",
+      "block_id": "3865",
+      "tehsil_id": "3865"
+     }
+    ]
+   },
+   {
+    "label": "Chhatarpur",
+    "district_id": "427",
+    "blocks": [
+     {
+      "label": "Baramalehara",
+      "block_id": "3671",
+      "tehsil_id": "3671"
+     },
+     {
+      "label": "Bijawar",
+      "block_id": "3694",
+      "tehsil_id": "3694"
+     },
+     {
+      "label": "Gaurihar",
+      "block_id": "3724",
+      "tehsil_id": "3724"
+     },
+     {
+      "label": "Loundi",
+      "block_id": "3795",
+      "tehsil_id": "3795"
+     },
+     {
+      "label": "Nowgong",
+      "block_id": "3833",
+      "tehsil_id": "3833"
+     },
+     {
+      "label": "Rajnagar",
+      "block_id": "3857",
+      "tehsil_id": "3857"
+     }
+    ]
+   },
+   {
+    "label": "Chhindwara",
+    "district_id": "410",
+    "blocks": [
+     {
+      "label": "Chhindwara",
+      "block_id": "3703",
+      "tehsil_id": "3703"
+     },
+     {
+      "label": "Pandhurna",
+      "block_id": "3835",
+      "tehsil_id": "3835"
+     },
+     {
+      "label": "Sausar",
+      "block_id": "3875",
+      "tehsil_id": "3875"
+     }
+    ]
+   },
+   {
+    "label": "Dhar",
+    "district_id": "423",
+    "blocks": [
+     {
+      "label": "Kukshi",
+      "block_id": "3785",
+      "tehsil_id": "3785"
+     }
+    ]
+   },
+   {
+    "label": "East Nimar",
+    "district_id": "452",
+    "blocks": [
+     {
+      "label": "Khandwa",
+      "block_id": "3775",
+      "tehsil_id": "3775"
+     }
+    ]
+   },
+   {
+    "label": "Jabalpur",
+    "district_id": "454",
+    "blocks": [
+     {
+      "label": "Sihora",
+      "block_id": "3891",
+      "tehsil_id": "3891"
+     }
+    ]
+   },
+   {
+    "label": "Mandla",
+    "district_id": "439",
+    "blocks": [
+     {
+      "label": "Bichhiya",
+      "block_id": "3692",
+      "tehsil_id": "3692"
+     },
+     {
+      "label": "Mandla",
+      "block_id": "3806",
+      "tehsil_id": "3806"
+     },
+     {
+      "label": "Nainpur",
+      "block_id": "3822",
+      "tehsil_id": "3822"
+     },
+     {
+      "label": "Niwas",
+      "block_id": "3832",
+      "tehsil_id": "3832"
+     }
+    ]
+   },
+   {
+    "label": "Nivari",
+    "district_id": "459",
+    "blocks": []
+   },
+   {
+    "label": "Sagar",
+    "district_id": "417",
+    "blocks": [
+     {
+      "label": "Sagar",
+      "block_id": "3869",
+      "tehsil_id": "3869"
+     }
+    ]
+   },
+   {
+    "label": "Sehore",
+    "district_id": "415",
+    "blocks": [
+     {
+      "label": "Ashta",
+      "block_id": "3654",
+      "tehsil_id": "3654"
+     },
+     {
+      "label": "Budhni",
+      "block_id": "3697",
+      "tehsil_id": "3697"
+     },
+     {
+      "label": "Ichhawar",
+      "block_id": "3744",
+      "tehsil_id": "3744"
+     },
+     {
+      "label": "Nasrullahganj",
+      "block_id": "3827",
+      "tehsil_id": "3827"
+     },
+     {
+      "label": "Sehore",
+      "block_id": "3877",
+      "tehsil_id": "3877"
+     }
+    ]
+   },
+   {
+    "label": "Seoni",
+    "district_id": "429",
+    "blocks": [
+     {
+      "label": "Ghansaur",
+      "block_id": "3725",
+      "tehsil_id": "3725"
+     },
+     {
+      "label": "Lakhnadon",
+      "block_id": "3792",
+      "tehsil_id": "3792"
+     }
+    ]
+   },
+   {
+    "label": "Shivpuri",
+    "district_id": "457",
+    "blocks": [
+     {
+      "label": "Karera",
+      "block_id": "3766",
+      "tehsil_id": "3766"
+     }
+    ]
+   },
+   {
+    "label": "Tikamgarh",
+    "district_id": "426",
+    "blocks": [
+     {
+      "label": "Jatara",
+      "block_id": "3754",
+      "tehsil_id": "3754"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Maharashtra",
+  "state_id": "29",
+  "district": [
+   {
+    "label": "Ahamadnagar",
+    "district_id": "572",
+    "blocks": [
+     {
+      "label": "Parner",
+      "block_id": "4405",
+      "tehsil_id": "4405"
+     }
+    ]
+   },
+   {
+    "label": "Amaravati",
+    "district_id": "563",
+    "blocks": [
+     {
+      "label": "Achalpur",
+      "block_id": "4164",
+      "tehsil_id": "4164"
+     },
+     {
+      "label": "Amaravati",
+      "block_id": "4175",
+      "tehsil_id": "4175"
+     },
+     {
+      "label": "Anjangaon-Surji",
+      "block_id": "4181",
+      "tehsil_id": "4181"
+     },
+     {
+      "label": "Bhatkuli",
+      "block_id": "4207",
+      "tehsil_id": "4207"
+     },
+     {
+      "label": "Chandur-Railway",
+      "block_id": "4225",
+      "tehsil_id": "4225"
+     },
+     {
+      "label": "Chandurbazar",
+      "block_id": "4226",
+      "tehsil_id": "4226"
+     },
+     {
+      "label": "Chikhaldar",
+      "block_id": "4228",
+      "tehsil_id": "4228"
+     },
+     {
+      "label": "Daryapur",
+      "block_id": "4235",
+      "tehsil_id": "4235"
+     },
+     {
+      "label": "Dhamangaon",
+      "block_id": "4245",
+      "tehsil_id": "4245"
+     },
+     {
+      "label": "Dharni",
+      "block_id": "4250",
+      "tehsil_id": "4250"
+     },
+     {
+      "label": "Morshi",
+      "block_id": "4366",
+      "tehsil_id": "4366"
+     },
+     {
+      "label": "Nandgaon",
+      "block_id": "4384",
+      "tehsil_id": "4384"
+     },
+     {
+      "label": "Teosa",
+      "block_id": "4484",
+      "tehsil_id": "4484"
+     },
+     {
+      "label": "Warud",
+      "block_id": "4513",
+      "tehsil_id": "4513"
+     }
+    ]
+   },
+   {
+    "label": "Aurangabad",
+    "district_id": "585",
+    "blocks": [
+     {
+      "label": "Fulambri",
+      "block_id": "4258",
+      "tehsil_id": "4258"
+     },
+     {
+      "label": "Paithan",
+      "block_id": "4396",
+      "tehsil_id": "4396"
+     },
+     {
+      "label": "Sillod",
+      "block_id": "4468",
+      "tehsil_id": "4468"
+     }
+    ]
+   },
+   {
+    "label": "Bid",
+    "district_id": "578",
+    "blocks": [
+     {
+      "label": "Ambejogai",
+      "block_id": "4179",
+      "tehsil_id": "4179"
+     },
+     {
+      "label": "Ashti",
+      "block_id": "4188",
+      "tehsil_id": "4188"
+     },
+     {
+      "label": "Bid",
+      "block_id": "4193",
+      "tehsil_id": "4193"
+     },
+     {
+      "label": "Dharur",
+      "block_id": "4251",
+      "tehsil_id": "4251"
+     },
+     {
+      "label": "Georai",
+      "block_id": "4264",
+      "tehsil_id": "4264"
+     },
+     {
+      "label": "Kej",
+      "block_id": "4313",
+      "tehsil_id": "4313"
+     },
+     {
+      "label": "Majalgaon",
+      "block_id": "4344",
+      "tehsil_id": "4344"
+     },
+     {
+      "label": "Parli-Vai",
+      "block_id": "4404",
+      "tehsil_id": "4404"
+     },
+     {
+      "label": "Patoda",
+      "block_id": "4412",
+      "tehsil_id": "4412"
+     },
+     {
+      "label": "Shirur",
+      "block_id": "4462",
+      "tehsil_id": "4462"
+     },
+     {
+      "label": "Wadwani",
+      "block_id": "4507",
+      "tehsil_id": "4507"
+     }
+    ]
+   },
+   {
+    "label": "Chandrapur",
+    "district_id": "587",
+    "blocks": [
+     {
+      "label": "Gondpipri",
+      "block_id": "4268",
+      "tehsil_id": "4268"
+     },
+     {
+      "label": "Mul",
+      "block_id": "4371",
+      "tehsil_id": "4371"
+     },
+     {
+      "label": "Nagbhir",
+      "block_id": "4382",
+      "tehsil_id": "4382"
+     },
+     {
+      "label": "Sawali",
+      "block_id": "4449",
+      "tehsil_id": "4449"
+     }
+    ]
+   },
+   {
+    "label": "Gondia",
+    "district_id": "579",
+    "blocks": [
+     {
+      "label": "Goregaon",
+      "block_id": "4269",
+      "tehsil_id": "4269"
+     }
+    ]
+   },
+   {
+    "label": "Hingoli",
+    "district_id": "580",
+    "blocks": [
+     {
+      "label": "Anudha",
+      "block_id": "4182",
+      "tehsil_id": "4182"
+     },
+     {
+      "label": "Basmat",
+      "block_id": "4202",
+      "tehsil_id": "4202"
+     },
+     {
+      "label": "Hingoli",
+      "block_id": "4277",
+      "tehsil_id": "4277"
+     },
+     {
+      "label": "Kalamnuri",
+      "block_id": "4297",
+      "tehsil_id": "4297"
+     },
+     {
+      "label": "Sengaon",
+      "block_id": "4451",
+      "tehsil_id": "4451"
+     }
+    ]
+   },
+   {
+    "label": "Jalgaon",
+    "district_id": "574",
+    "blocks": [
+     {
+      "label": "Amalner",
+      "block_id": "4174",
+      "tehsil_id": "4174"
+     },
+     {
+      "label": "Bhadgaon",
+      "block_id": "4203",
+      "tehsil_id": "4203"
+     },
+     {
+      "label": "Bhusawal",
+      "block_id": "4214",
+      "tehsil_id": "4214"
+     },
+     {
+      "label": "Bodwad",
+      "block_id": "4216",
+      "tehsil_id": "4216"
+     },
+     {
+      "label": "Chalisgao",
+      "block_id": "4221",
+      "tehsil_id": "4221"
+     },
+     {
+      "label": "Chopda",
+      "block_id": "4232",
+      "tehsil_id": "4232"
+     },
+     {
+      "label": "Dharangao",
+      "block_id": "4248",
+      "tehsil_id": "4248"
+     },
+     {
+      "label": "Erandol",
+      "block_id": "4256",
+      "tehsil_id": "4256"
+     },
+     {
+      "label": "Jalgaon",
+      "block_id": "4283",
+      "tehsil_id": "4283"
+     },
+     {
+      "label": "Jamner",
+      "block_id": "4286",
+      "tehsil_id": "4286"
+     },
+     {
+      "label": "Muktainag",
+      "block_id": "4370",
+      "tehsil_id": "4370"
+     },
+     {
+      "label": "Pachora",
+      "block_id": "4395",
+      "tehsil_id": "4395"
+     },
+     {
+      "label": "Parola",
+      "block_id": "4406",
+      "tehsil_id": "4406"
+     },
+     {
+      "label": "Raver",
+      "block_id": "4430",
+      "tehsil_id": "4430"
+     },
+     {
+      "label": "Yaval",
+      "block_id": "4515",
+      "tehsil_id": "4515"
+     }
+    ]
+   },
+   {
+    "label": "Jalna",
+    "district_id": "575",
+    "blocks": [
+     {
+      "label": "Ambad",
+      "block_id": "4176",
+      "tehsil_id": "4176"
+     },
+     {
+      "label": "Badnapur",
+      "block_id": "4195",
+      "tehsil_id": "4195"
+     },
+     {
+      "label": "Bokardan",
+      "block_id": "4217",
+      "tehsil_id": "4217"
+     },
+     {
+      "label": "Ghan",
+      "block_id": "4265",
+      "tehsil_id": "4265"
+     },
+     {
+      "label": "Jafra",
+      "block_id": "4281",
+      "tehsil_id": "4281"
+     },
+     {
+      "label": "Jalna",
+      "block_id": "4280",
+      "tehsil_id": "4280"
+     },
+     {
+      "label": "Mantha",
+      "block_id": "4356",
+      "tehsil_id": "4356"
+     },
+     {
+      "label": "Partur",
+      "block_id": "4408",
+      "tehsil_id": "4408"
+     }
+    ]
+   },
+   {
+    "label": "Nanded",
+    "district_id": "581",
+    "blocks": [
+     {
+      "label": "Ardhapur",
+      "block_id": "4183",
+      "tehsil_id": "4183"
+     },
+     {
+      "label": "Bhokar",
+      "block_id": "4210",
+      "tehsil_id": "4210"
+     },
+     {
+      "label": "Bioli",
+      "block_id": "4215",
+      "tehsil_id": "4215"
+     },
+     {
+      "label": "Deglur",
+      "block_id": "4237",
+      "tehsil_id": "4237"
+     },
+     {
+      "label": "Dharmabad",
+      "block_id": "4249",
+      "tehsil_id": "4249"
+     },
+     {
+      "label": "Hadgaon",
+      "block_id": "4271",
+      "tehsil_id": "4271"
+     },
+     {
+      "label": "Himayatn",
+      "block_id": "4274",
+      "tehsil_id": "4274"
+     },
+     {
+      "label": "Kandhar",
+      "block_id": "4302",
+      "tehsil_id": "4302"
+     },
+     {
+      "label": "Kinwat",
+      "block_id": "4323",
+      "tehsil_id": "4323"
+     },
+     {
+      "label": "Loha",
+      "block_id": "4335",
+      "tehsil_id": "4335"
+     },
+     {
+      "label": "Mahur",
+      "block_id": "4343",
+      "tehsil_id": "4343"
+     },
+     {
+      "label": "Mudkhed",
+      "block_id": "4368",
+      "tehsil_id": "4368"
+     },
+     {
+      "label": "Mukhed",
+      "block_id": "4369",
+      "tehsil_id": "4369"
+     },
+     {
+      "label": "Naigaon",
+      "block_id": "4383",
+      "tehsil_id": "4383"
+     },
+     {
+      "label": "Nanded",
+      "block_id": "4379",
+      "tehsil_id": "4379"
+     },
+     {
+      "label": "Umri",
+      "block_id": "4495",
+      "tehsil_id": "4495"
+     }
+    ]
+   },
+   {
+    "label": "Nandurbar",
+    "district_id": "570",
+    "blocks": [
+     {
+      "label": "Akkalkuwa",
+      "block_id": "4169",
+      "tehsil_id": "4169"
+     },
+     {
+      "label": "Dhadgaon",
+      "block_id": "4244",
+      "tehsil_id": "4244"
+     },
+     {
+      "label": "Nandurbar",
+      "block_id": "4387",
+      "tehsil_id": "4387"
+     },
+     {
+      "label": "Navapur",
+      "block_id": "4389",
+      "tehsil_id": "4389"
+     },
+     {
+      "label": "Shahada",
+      "block_id": "4452",
+      "tehsil_id": "4452"
+     },
+     {
+      "label": "Taloda",
+      "block_id": "4481",
+      "tehsil_id": "4481"
+     }
+    ]
+   },
+   {
+    "label": "Nashik",
+    "district_id": "586",
+    "blocks": [
+     {
+      "label": "Baglan",
+      "block_id": "4196",
+      "tehsil_id": "4196"
+     },
+     {
+      "label": "Chandwad",
+      "block_id": "4227",
+      "tehsil_id": "4227"
+     },
+     {
+      "label": "Deola",
+      "block_id": "4238",
+      "tehsil_id": "4238"
+     },
+     {
+      "label": "Dindori",
+      "block_id": "4254",
+      "tehsil_id": "4254"
+     },
+     {
+      "label": "Igatpuri",
+      "block_id": "4278",
+      "tehsil_id": "4278"
+     },
+     {
+      "label": "Kalwan",
+      "block_id": "4299",
+      "tehsil_id": "4299"
+     },
+     {
+      "label": "Malegaon",
+      "block_id": "4345",
+      "tehsil_id": "4345"
+     },
+     {
+      "label": "Nandgaon",
+      "block_id": "4385",
+      "tehsil_id": "4385"
+     },
+     {
+      "label": "Nashik",
+      "block_id": "4380",
+      "tehsil_id": "4380"
+     },
+     {
+      "label": "Niphad",
+      "block_id": "4393",
+      "tehsil_id": "4393"
+     },
+     {
+      "label": "Peint",
+      "block_id": "4415",
+      "tehsil_id": "4415"
+     },
+     {
+      "label": "Sinnar",
+      "block_id": "4471",
+      "tehsil_id": "4471"
+     },
+     {
+      "label": "Surgana",
+      "block_id": "4478",
+      "tehsil_id": "4478"
+     },
+     {
+      "label": "Trimbakeshwar",
+      "block_id": "4487",
+      "tehsil_id": "4487"
+     },
+     {
+      "label": "Yeola",
+      "block_id": "4517",
+      "tehsil_id": "4517"
+     }
+    ]
+   },
+   {
+    "label": "Palghar",
+    "district_id": "594",
+    "blocks": [
+     {
+      "label": "Jawhar",
+      "block_id": "4289",
+      "tehsil_id": "4289"
+     },
+     {
+      "label": "Mokhada",
+      "block_id": "4365",
+      "tehsil_id": "4365"
+     }
+    ]
+   },
+   {
+    "label": "Parbhani",
+    "district_id": "596",
+    "blocks": [
+     {
+      "label": "Gangakhed",
+      "block_id": "4262",
+      "tehsil_id": "4262"
+     },
+     {
+      "label": "Jintur",
+      "block_id": "4290",
+      "tehsil_id": "4290"
+     },
+     {
+      "label": "Manwat",
+      "block_id": "4357",
+      "tehsil_id": "4357"
+     },
+     {
+      "label": "Palam",
+      "block_id": "4397",
+      "tehsil_id": "4397"
+     },
+     {
+      "label": "Parbhani",
+      "block_id": "4403",
+      "tehsil_id": "4403"
+     },
+     {
+      "label": "Pathari",
+      "block_id": "4411",
+      "tehsil_id": "4411"
+     },
+     {
+      "label": "Purna",
+      "block_id": "4420",
+      "tehsil_id": "4420"
+     },
+     {
+      "label": "Sailu",
+      "block_id": "4436",
+      "tehsil_id": "4436"
+     },
+     {
+      "label": "Sonpeth",
+      "block_id": "4476",
+      "tehsil_id": "4476"
+     }
+    ]
+   },
+   {
+    "label": "Pune",
+    "district_id": "577",
+    "blocks": [
+     {
+      "label": "Ambegaon",
+      "block_id": "4178",
+      "tehsil_id": "4178"
+     },
+     {
+      "label": "Baramati",
+      "block_id": "4199",
+      "tehsil_id": "4199"
+     },
+     {
+      "label": "Bhor",
+      "block_id": "4211",
+      "tehsil_id": "4211"
+     },
+     {
+      "label": "Daund",
+      "block_id": "4236",
+      "tehsil_id": "4236"
+     },
+     {
+      "label": "Haveli",
+      "block_id": "4273",
+      "tehsil_id": "4273"
+     },
+     {
+      "label": "Indapur",
+      "block_id": "4279",
+      "tehsil_id": "4279"
+     },
+     {
+      "label": "Junnar",
+      "block_id": "4291",
+      "tehsil_id": "4291"
+     },
+     {
+      "label": "Khed",
+      "block_id": "4320",
+      "tehsil_id": "4320"
+     },
+     {
+      "label": "Mawal",
+      "block_id": "4360",
+      "tehsil_id": "4360"
+     },
+     {
+      "label": "Mulshi-Paud",
+      "block_id": "4373",
+      "tehsil_id": "4373"
+     },
+     {
+      "label": "Velhe",
+      "block_id": "4501",
+      "tehsil_id": "4501"
+     }
+    ]
+   },
+   {
+    "label": "Ratnagiri",
+    "district_id": "592",
+    "blocks": [
+     {
+      "label": "Mandangad",
+      "block_id": "4351",
+      "tehsil_id": "4351"
+     },
+     {
+      "label": "Ratnagiri",
+      "block_id": "4429",
+      "tehsil_id": "4429"
+     },
+     {
+      "label": "Sangmeshwar",
+      "block_id": "4443",
+      "tehsil_id": "4443"
+     }
+    ]
+   },
+   {
+    "label": "Sangli",
+    "district_id": "584",
+    "blocks": [
+     {
+      "label": "Atpadi",
+      "block_id": "4190",
+      "tehsil_id": "4190"
+     },
+     {
+      "label": "Kawthe-Mahankal",
+      "block_id": "4312",
+      "tehsil_id": "4312"
+     },
+     {
+      "label": "Khanapur",
+      "block_id": "4316",
+      "tehsil_id": "4316"
+     },
+     {
+      "label": "Miraj",
+      "block_id": "4362",
+      "tehsil_id": "4362"
+     },
+     {
+      "label": "Palus",
+      "block_id": "4398",
+      "tehsil_id": "4398"
+     },
+     {
+      "label": "Shirala",
+      "block_id": "4459",
+      "tehsil_id": "4459"
+     },
+     {
+      "label": "Tasgaon",
+      "block_id": "4482",
+      "tehsil_id": "4482"
+     },
+     {
+      "label": "Walwa",
+      "block_id": "4509",
+      "tehsil_id": "4509"
+     }
+    ]
+   },
+   {
+    "label": "Satara",
+    "district_id": "597",
+    "blocks": [
+     {
+      "label": "Koregaon",
+      "block_id": "4327",
+      "tehsil_id": "4327"
+     },
+     {
+      "label": "Mahabaleshwar",
+      "block_id": "4339",
+      "tehsil_id": "4339"
+     },
+     {
+      "label": "Satara",
+      "block_id": "4434",
+      "tehsil_id": "4434"
+     }
+    ]
+   },
+   {
+    "label": "Sindhudurg",
+    "district_id": "593",
+    "blocks": [
+     {
+      "label": "Kudal",
+      "block_id": "4328",
+      "tehsil_id": "4328"
+     }
+    ]
+   },
+   {
+    "label": "Solapur",
+    "district_id": "569",
+    "blocks": [
+     {
+      "label": "Akkalkot",
+      "block_id": "4168",
+      "tehsil_id": "4168"
+     },
+     {
+      "label": "Barshi",
+      "block_id": "4201",
+      "tehsil_id": "4201"
+     },
+     {
+      "label": "Karmala",
+      "block_id": "4309",
+      "tehsil_id": "4309"
+     },
+     {
+      "label": "Madha",
+      "block_id": "4338",
+      "tehsil_id": "4338"
+     },
+     {
+      "label": "Malshiras",
+      "block_id": "4348",
+      "tehsil_id": "4348"
+     }
+    ]
+   },
+   {
+    "label": "Thane",
+    "district_id": "576",
+    "blocks": [
+     {
+      "label": "Shahapur",
+      "block_id": "4453",
+      "tehsil_id": "4453"
+     }
+    ]
+   },
+   {
+    "label": "Usmanabad",
+    "district_id": "590",
+    "blocks": [
+     {
+      "label": "Bhum",
+      "block_id": "4213",
+      "tehsil_id": "4213"
+     },
+     {
+      "label": "Kalamb",
+      "block_id": "4295",
+      "tehsil_id": "4295"
+     },
+     {
+      "label": "Lohara",
+      "block_id": "4336",
+      "tehsil_id": "4336"
+     },
+     {
+      "label": "Paranda",
+      "block_id": "4402",
+      "tehsil_id": "4402"
+     },
+     {
+      "label": "Tuljapur",
+      "block_id": "4489",
+      "tehsil_id": "4489"
+     },
+     {
+      "label": "Umarga",
+      "block_id": "4492",
+      "tehsil_id": "4492"
+     },
+     {
+      "label": "Usmanabad",
+      "block_id": "4497",
+      "tehsil_id": "4497"
+     },
+     {
+      "label": "Washi",
+      "block_id": "4514",
+      "tehsil_id": "4514"
+     }
+    ]
+   },
+   {
+    "label": "Washim",
+    "district_id": "598",
+    "blocks": [
+     {
+      "label": "Karanja-Lad",
+      "block_id": "4307",
+      "tehsil_id": "4307"
+     },
+     {
+      "label": "Mangurlpir",
+      "block_id": "4354",
+      "tehsil_id": "4354"
+     },
+     {
+      "label": "Manora",
+      "block_id": "4355",
+      "tehsil_id": "4355"
+     },
+     {
+      "label": "Washim",
+      "block_id": "4504",
+      "tehsil_id": "4504"
+     }
+    ]
+   },
+   {
+    "label": "Yavatmal",
+    "district_id": "582",
+    "blocks": [
+     {
+      "label": "Arni",
+      "block_id": "4186",
+      "tehsil_id": "4186"
+     },
+     {
+      "label": "Darwha",
+      "block_id": "4234",
+      "tehsil_id": "4234"
+     },
+     {
+      "label": "Digras",
+      "block_id": "4253",
+      "tehsil_id": "4253"
+     },
+     {
+      "label": "Ghatanji",
+      "block_id": "4266",
+      "tehsil_id": "4266"
+     },
+     {
+      "label": "Kelapur",
+      "block_id": "4314",
+      "tehsil_id": "4314"
+     },
+     {
+      "label": "Ner",
+      "block_id": "4390",
+      "tehsil_id": "4390"
+     },
+     {
+      "label": "Yavatmal",
+      "block_id": "4516",
+      "tehsil_id": "4516"
+     },
+     {
+      "label": "Zarijaman",
+      "block_id": "4518",
+      "tehsil_id": "4518"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Manipur",
+  "state_id": "24",
+  "district": [
+   {
+    "label": "Senapati",
+    "district_id": "491",
+    "blocks": [
+     {
+      "label": "Tadubi",
+      "block_id": "3979",
+      "tehsil_id": "3979"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Meghalaya",
+  "state_id": "21",
+  "district": [
+   {
+    "label": "East Khasi Hills",
+    "district_id": "462",
+    "blocks": [
+     {
+      "label": "East Khasi Hills",
+      "block_id": "3922",
+      "tehsil_id": "3922"
+     }
+    ]
+   },
+   {
+    "label": "Ri-Bhoi",
+    "district_id": "464",
+    "blocks": [
+     {
+      "label": "Ribhoi",
+      "block_id": "3924",
+      "tehsil_id": "3924"
+     }
+    ]
+   },
+   {
+    "label": "South West Khasi Hills",
+    "district_id": "467",
+    "blocks": [
+     {
+      "label": "South West Khasi Hills",
+      "block_id": "3927",
+      "tehsil_id": "3927"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Nagaland",
+  "state_id": "22",
+  "district": [
+   {
+    "label": "Dimapur",
+    "district_id": "474",
+    "blocks": [
+     {
+      "label": "Dimapur",
+      "block_id": "3934",
+      "tehsil_id": "3934"
+     }
+    ]
+   },
+   {
+    "label": "Mokokchung",
+    "district_id": "478",
+    "blocks": [
+     {
+      "label": "Mokokchung",
+      "block_id": "3938",
+      "tehsil_id": "3938"
+     }
+    ]
+   },
+   {
+    "label": "Mon",
+    "district_id": "479",
+    "blocks": [
+     {
+      "label": "Tobu",
+      "block_id": "3942",
+      "tehsil_id": "3942"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Odisha",
+  "state_id": "34",
+  "district": [
+   {
+    "label": "Anugul",
+    "district_id": "718",
+    "blocks": [
+     {
+      "label": "Anugul",
+      "block_id": "5038",
+      "tehsil_id": "5038"
+     },
+     {
+      "label": "Athamallik",
+      "block_id": "5040",
+      "tehsil_id": "5040"
+     },
+     {
+      "label": "Pala Laharha",
+      "block_id": "5170",
+      "tehsil_id": "5170"
+     }
+    ]
+   },
+   {
+    "label": "Baragarh",
+    "district_id": "720",
+    "blocks": [
+     {
+      "label": "Pikmal",
+      "block_id": "5176",
+      "tehsil_id": "5176"
+     }
+    ]
+   },
+   {
+    "label": "Bhadrak",
+    "district_id": "729",
+    "blocks": [
+     {
+      "label": "Chandabali",
+      "block_id": "5091",
+      "tehsil_id": "5091"
+     }
+    ]
+   },
+   {
+    "label": "Bolangir (Balangir)",
+    "district_id": "724",
+    "blocks": [
+     {
+      "label": "Balangir",
+      "block_id": "5049",
+      "tehsil_id": "5049"
+     },
+     {
+      "label": "Titlagarh",
+      "block_id": "5214",
+      "tehsil_id": "5214"
+     }
+    ]
+   },
+   {
+    "label": "Cuttack",
+    "district_id": "715",
+    "blocks": [
+     {
+      "label": "Cuttack",
+      "block_id": "5094",
+      "tehsil_id": "5094"
+     }
+    ]
+   },
+   {
+    "label": "Deogarh",
+    "district_id": "731",
+    "blocks": [
+     {
+      "label": "Barkot",
+      "block_id": "5063",
+      "tehsil_id": "5063"
+     },
+     {
+      "label": "Deogarh",
+      "block_id": "5100",
+      "tehsil_id": "5100"
+     }
+    ]
+   },
+   {
+    "label": "Dhenkanal",
+    "district_id": "739",
+    "blocks": [
+     {
+      "label": "Dhenkanal",
+      "block_id": "5105",
+      "tehsil_id": "5105"
+     },
+     {
+      "label": "Hindool",
+      "block_id": "5117",
+      "tehsil_id": "5117"
+     },
+     {
+      "label": "Kamakhyanagar",
+      "block_id": "5128",
+      "tehsil_id": "5128"
+     }
+    ]
+   },
+   {
+    "label": "Jharsuguda",
+    "district_id": "740",
+    "blocks": [
+     {
+      "label": "Jharsuguda",
+      "block_id": "5126",
+      "tehsil_id": "5126"
+     }
+    ]
+   },
+   {
+    "label": "Kalahandi",
+    "district_id": "735",
+    "blocks": [
+     {
+      "label": "Bhawanipatna",
+      "block_id": "5075",
+      "tehsil_id": "5075"
+     },
+     {
+      "label": "Dharamgarh",
+      "block_id": "5103",
+      "tehsil_id": "5103"
+     }
+    ]
+   },
+   {
+    "label": "Kandhamal",
+    "district_id": "726",
+    "blocks": [
+     {
+      "label": "Baliguda",
+      "block_id": "5052",
+      "tehsil_id": "5052"
+     },
+     {
+      "label": "Daringibadi",
+      "block_id": "5096",
+      "tehsil_id": "5096"
+     },
+     {
+      "label": "G. Udayagiri",
+      "block_id": "5108",
+      "tehsil_id": "5108"
+     },
+     {
+      "label": "Kandhamal",
+      "block_id": "5130",
+      "tehsil_id": "5130"
+     }
+    ]
+   },
+   {
+    "label": "Kendraparha",
+    "district_id": "716",
+    "blocks": [
+     {
+      "label": "Rajnagar",
+      "block_id": "5185",
+      "tehsil_id": "5185"
+     }
+    ]
+   },
+   {
+    "label": "Keonjhar (Kendujhar)",
+    "district_id": "717",
+    "blocks": [
+     {
+      "label": "Anandapur",
+      "block_id": "5037",
+      "tehsil_id": "5037"
+     },
+     {
+      "label": "Badbil",
+      "block_id": "5046",
+      "tehsil_id": "5046"
+     },
+     {
+      "label": "Champua",
+      "block_id": "5090",
+      "tehsil_id": "5090"
+     },
+     {
+      "label": "Ghatagaon",
+      "block_id": "5111",
+      "tehsil_id": "5111"
+     },
+     {
+      "label": "Keonjhar (Kendujhar)",
+      "block_id": "5136",
+      "tehsil_id": "5136"
+     },
+     {
+      "label": "Telkoi",
+      "block_id": "5209",
+      "tehsil_id": "5209"
+     }
+    ]
+   },
+   {
+    "label": "Koraput",
+    "district_id": "730",
+    "blocks": [
+     {
+      "label": "Bariguma",
+      "block_id": "5061",
+      "tehsil_id": "5061"
+     },
+     {
+      "label": "Jaypur",
+      "block_id": "5125",
+      "tehsil_id": "5125"
+     },
+     {
+      "label": "Koraput",
+      "block_id": "5145",
+      "tehsil_id": "5145"
+     },
+     {
+      "label": "Machhakunda",
+      "block_id": "5154",
+      "tehsil_id": "5154"
+     },
+     {
+      "label": "Nandapur",
+      "block_id": "5162",
+      "tehsil_id": "5162"
+     },
+     {
+      "label": "Narayanpatana",
+      "block_id": "5163",
+      "tehsil_id": "5163"
+     }
+    ]
+   },
+   {
+    "label": "Malkangiri",
+    "district_id": "743",
+    "blocks": []
+   },
+   {
+    "label": "Mayurbhanj",
+    "district_id": "723",
+    "blocks": [
+     {
+      "label": "Thakurmunda",
+      "block_id": "5210",
+      "tehsil_id": "5210"
+     }
+    ]
+   },
+   {
+    "label": "Nayagarh",
+    "district_id": "734",
+    "blocks": [
+     {
+      "label": "Dashapalla",
+      "block_id": "5098",
+      "tehsil_id": "5098"
+     },
+     {
+      "label": "Nayagarh",
+      "block_id": "5164",
+      "tehsil_id": "5164"
+     },
+     {
+      "label": "Ranapur",
+      "block_id": "5186",
+      "tehsil_id": "5186"
+     }
+    ]
+   },
+   {
+    "label": "Puri",
+    "district_id": "719",
+    "blocks": [
+     {
+      "label": "Astarang",
+      "block_id": "5039",
+      "tehsil_id": "5039"
+     }
+    ]
+   },
+   {
+    "label": "Rayagarha",
+    "district_id": "736",
+    "blocks": [
+     {
+      "label": "Bishamakatak",
+      "block_id": "5083",
+      "tehsil_id": "5083"
+     },
+     {
+      "label": "Gunupur",
+      "block_id": "5114",
+      "tehsil_id": "5114"
+     },
+     {
+      "label": "Kashipur",
+      "block_id": "5134",
+      "tehsil_id": "5134"
+     },
+     {
+      "label": "Rayagarha",
+      "block_id": "5180",
+      "tehsil_id": "5180"
+     }
+    ]
+   },
+   {
+    "label": "Sambalpur",
+    "district_id": "742",
+    "blocks": [
+     {
+      "label": "Kuchinda",
+      "block_id": "5149",
+      "tehsil_id": "5149"
+     },
+     {
+      "label": "Redhakhol",
+      "block_id": "5190",
+      "tehsil_id": "5190"
+     },
+     {
+      "label": "Rengali",
+      "block_id": "5192",
+      "tehsil_id": "5192"
+     },
+     {
+      "label": "Sambalpur",
+      "block_id": "5195",
+      "tehsil_id": "5195"
+     }
+    ]
+   },
+   {
+    "label": "Sundargarh",
+    "district_id": "728",
+    "blocks": [
+     {
+      "label": "Banai",
+      "block_id": "5055",
+      "tehsil_id": "5055"
+     },
+     {
+      "label": "Hemagiri",
+      "block_id": "5116",
+      "tehsil_id": "5116"
+     },
+     {
+      "label": "Lephriparha",
+      "block_id": "5153",
+      "tehsil_id": "5153"
+     },
+     {
+      "label": "Rajagangapur",
+      "block_id": "5183",
+      "tehsil_id": "5183"
+     },
+     {
+      "label": "Sundargarh",
+      "block_id": "5206",
+      "tehsil_id": "5206"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Rajasthan",
+  "state_id": "15",
+  "district": [
+   {
+    "label": "Ajmer",
+    "district_id": "318",
+    "blocks": [
+     {
+      "label": "Bhinay",
+      "block_id": "3049",
+      "tehsil_id": "3049"
+     },
+     {
+      "label": "Kishangarh",
+      "block_id": "2990",
+      "tehsil_id": "2990"
+     },
+     {
+      "label": "Peesangan",
+      "block_id": "3180",
+      "tehsil_id": "3180"
+     }
+    ]
+   },
+   {
+    "label": "Alwar",
+    "district_id": "317",
+    "blocks": [
+     {
+      "label": "Alwar",
+      "block_id": "3034",
+      "tehsil_id": "3034"
+     }
+    ]
+   },
+   {
+    "label": "Banswara",
+    "district_id": "321",
+    "blocks": [
+     {
+      "label": "Banswara",
+      "block_id": "2971",
+      "tehsil_id": "2971"
+     },
+     {
+      "label": "Garhi",
+      "block_id": "3029",
+      "tehsil_id": "3029"
+     },
+     {
+      "label": "Ghatol",
+      "block_id": "2967",
+      "tehsil_id": "2967"
+     },
+     {
+      "label": "Sajjangarh",
+      "block_id": "2943",
+      "tehsil_id": "2943"
+     }
+    ]
+   },
+   {
+    "label": "Baran",
+    "district_id": "331",
+    "blocks": [
+     {
+      "label": "Kishanganj",
+      "block_id": "3117",
+      "tehsil_id": "3117"
+     },
+     {
+      "label": "Shahbad",
+      "block_id": "3119",
+      "tehsil_id": "3119"
+     }
+    ]
+   },
+   {
+    "label": "Barmer",
+    "district_id": "344",
+    "blocks": [
+     {
+      "label": "Baytoo",
+      "block_id": "3163",
+      "tehsil_id": "3163"
+     }
+    ]
+   },
+   {
+    "label": "Bhilwara",
+    "district_id": "323",
+    "blocks": [
+     {
+      "label": "Karera",
+      "block_id": "2988",
+      "tehsil_id": "2988"
+     },
+     {
+      "label": "Mandal",
+      "block_id": "3152",
+      "tehsil_id": "3152"
+     },
+     {
+      "label": "Mandalgarh",
+      "block_id": "3067",
+      "tehsil_id": "3067"
+     }
+    ]
+   },
+   {
+    "label": "Bikaner",
+    "district_id": "346",
+    "blocks": [
+     {
+      "label": "Kolayat",
+      "block_id": "3211",
+      "tehsil_id": "3211"
+     }
+    ]
+   },
+   {
+    "label": "Bundi",
+    "district_id": "338",
+    "blocks": [
+     {
+      "label": "Hindoli",
+      "block_id": "3108",
+      "tehsil_id": "3108"
+     },
+     {
+      "label": "Keshoraipatan",
+      "block_id": "3025",
+      "tehsil_id": "3025"
+     },
+     {
+      "label": "Nainwa",
+      "block_id": "3098",
+      "tehsil_id": "3098"
+     }
+    ]
+   },
+   {
+    "label": "Chittaurgarh",
+    "district_id": "322",
+    "blocks": [
+     {
+      "label": "Bari Sadri",
+      "block_id": "2963",
+      "tehsil_id": "2963"
+     },
+     {
+      "label": "Begun",
+      "block_id": "3065",
+      "tehsil_id": "3065"
+     },
+     {
+      "label": "Bhadesar",
+      "block_id": "2978",
+      "tehsil_id": "2978"
+     },
+     {
+      "label": "Bhupalsagar",
+      "block_id": "2945",
+      "tehsil_id": "2945"
+     },
+     {
+      "label": "Kapasan",
+      "block_id": "2965",
+      "tehsil_id": "2965"
+     }
+    ]
+   },
+   {
+    "label": "Dhaulpur",
+    "district_id": "329",
+    "blocks": [
+     {
+      "label": "Sarmathura",
+      "block_id": "3013",
+      "tehsil_id": "3013"
+     }
+    ]
+   },
+   {
+    "label": "Jaipur",
+    "district_id": "326",
+    "blocks": [
+     {
+      "label": "Jaipur",
+      "block_id": "3203",
+      "tehsil_id": "3203"
+     }
+    ]
+   },
+   {
+    "label": "Jaisalmer",
+    "district_id": "347",
+    "blocks": [
+     {
+      "label": "Jaisalmer",
+      "block_id": "3204",
+      "tehsil_id": "3204"
+     }
+    ]
+   },
+   {
+    "label": "Jhalawar",
+    "district_id": "327",
+    "blocks": [
+     {
+      "label": "Asnawar",
+      "block_id": "2924",
+      "tehsil_id": "2924"
+     }
+    ]
+   },
+   {
+    "label": "Karauli",
+    "district_id": "334",
+    "blocks": [
+     {
+      "label": "Karauli",
+      "block_id": "3017",
+      "tehsil_id": "3017"
+     },
+     {
+      "label": "Mandrail",
+      "block_id": "2992",
+      "tehsil_id": "2992"
+     },
+     {
+      "label": "Sapotra",
+      "block_id": "3162",
+      "tehsil_id": "3162"
+     }
+    ]
+   },
+   {
+    "label": "Pratapgarh",
+    "district_id": "339",
+    "blocks": [
+     {
+      "label": "Arnod",
+      "block_id": "3015",
+      "tehsil_id": "3015"
+     },
+     {
+      "label": "Pipalkhunt",
+      "block_id": "3054",
+      "tehsil_id": "3054"
+     },
+     {
+      "label": "Pratapgarh",
+      "block_id": "3107",
+      "tehsil_id": "3107"
+     }
+    ]
+   },
+   {
+    "label": "Raj Samand",
+    "district_id": "324",
+    "blocks": [
+     {
+      "label": "Bhim",
+      "block_id": "2964",
+      "tehsil_id": "2964"
+     },
+     {
+      "label": "Devgarh",
+      "block_id": "2991",
+      "tehsil_id": "2991"
+     },
+     {
+      "label": "Relmagra",
+      "block_id": "3179",
+      "tehsil_id": "3179"
+     }
+    ]
+   },
+   {
+    "label": "Sirohi",
+    "district_id": "345",
+    "blocks": [
+     {
+      "label": "Abu Road",
+      "block_id": "3058",
+      "tehsil_id": "3058"
+     },
+     {
+      "label": "Pindwara",
+      "block_id": "3091",
+      "tehsil_id": "3091"
+     }
+    ]
+   },
+   {
+    "label": "Udaipur",
+    "district_id": "314",
+    "blocks": [
+     {
+      "label": "Girwa",
+      "block_id": "3114",
+      "tehsil_id": "3114"
+     },
+     {
+      "label": "Gogunda",
+      "block_id": "3195",
+      "tehsil_id": "3195"
+     },
+     {
+      "label": "Kotra",
+      "block_id": "3196",
+      "tehsil_id": "3196"
+     },
+     {
+      "label": "Lasadiya",
+      "block_id": "3193",
+      "tehsil_id": "3193"
+     },
+     {
+      "label": "Salumber",
+      "block_id": "3075",
+      "tehsil_id": "3075"
+     },
+     {
+      "label": "Sarara",
+      "block_id": "3046",
+      "tehsil_id": "3046"
+     },
+     {
+      "label": "Semari",
+      "block_id": "2921",
+      "tehsil_id": "2921"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Tamil Nadu",
+  "state_id": "35",
+  "district": [
+   {
+    "label": "Madurai",
+    "district_id": "777",
+    "blocks": [
+     {
+      "label": "Peraiyur",
+      "block_id": "5392",
+      "tehsil_id": "5392"
+     },
+     {
+      "label": "Tirumangalam",
+      "block_id": "5460",
+      "tehsil_id": "5460"
+     },
+     {
+      "label": "Vadipatti",
+      "block_id": "5497",
+      "tehsil_id": "5497"
+     }
+    ]
+   },
+   {
+    "label": "Nagapattinam",
+    "district_id": "778",
+    "blocks": [
+     {
+      "label": "Nagapattinam",
+      "block_id": "5361",
+      "tehsil_id": "5361"
+     }
+    ]
+   },
+   {
+    "label": "Ramanathapuram",
+    "district_id": "776",
+    "blocks": [
+     {
+      "label": "Kamudi",
+      "block_id": "5295",
+      "tehsil_id": "5295"
+     },
+     {
+      "label": "Paramakkudi",
+      "block_id": "5387",
+      "tehsil_id": "5387"
+     },
+     {
+      "label": "Tiruvadanai",
+      "block_id": "5472",
+      "tehsil_id": "5472"
+     }
+    ]
+   },
+   {
+    "label": "Theni",
+    "district_id": "757",
+    "blocks": [
+     {
+      "label": "Periyakulam",
+      "block_id": "5396",
+      "tehsil_id": "5396"
+     }
+    ]
+   },
+   {
+    "label": "Tiruppur",
+    "district_id": "765",
+    "blocks": [
+     {
+      "label": "Udumalaippettai",
+      "block_id": "5488",
+      "tehsil_id": "5488"
+     }
+    ]
+   },
+   {
+    "label": "Tuticorin",
+    "district_id": "774",
+    "blocks": [
+     {
+      "label": "Ettaiyapuram",
+      "block_id": "5270",
+      "tehsil_id": "5270"
+     },
+     {
+      "label": "Vilattikulam",
+      "block_id": "5515",
+      "tehsil_id": "5515"
+     }
+    ]
+   },
+   {
+    "label": "Villupuram",
+    "district_id": "775",
+    "blocks": [
+     {
+      "label": "Vikravandi",
+      "block_id": "5514",
+      "tehsil_id": "5514"
+     }
+    ]
+   },
+   {
+    "label": "Virudhunagar",
+    "district_id": "762",
+    "blocks": [
+     {
+      "label": "Aruppukkottai",
+      "block_id": "5239",
+      "tehsil_id": "5239"
+     },
+     {
+      "label": "Kariyapatti",
+      "block_id": "5303",
+      "tehsil_id": "5303"
+     },
+     {
+      "label": "Rajapalaiyam",
+      "block_id": "5411",
+      "tehsil_id": "5411"
+     },
+     {
+      "label": "Thiruchuli",
+      "block_id": "5449",
+      "tehsil_id": "5449"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Telangana",
+  "state_id": "12",
+  "district": [
+   {
+    "label": "Hyderabad",
+    "district_id": "225",
+    "blocks": [
+     {
+      "label": "Hyderabad",
+      "block_id": "2513",
+      "tehsil_id": "2513"
+     }
+    ]
+   },
+   {
+    "label": "Kumuram Bheem",
+    "district_id": "219",
+    "blocks": [
+     {
+      "label": "Asifabad",
+      "block_id": "2145",
+      "tehsil_id": "2145"
+     }
+    ]
+   },
+   {
+    "label": "Medak",
+    "district_id": "217",
+    "blocks": [
+     {
+      "label": "Tupran",
+      "block_id": "2261",
+      "tehsil_id": "2261"
+     }
+    ]
+   },
+   {
+    "label": "Nagarkurnool",
+    "district_id": "207",
+    "blocks": [
+     {
+      "label": "Amrabad",
+      "block_id": "2131",
+      "tehsil_id": "2131"
+     }
+    ]
+   },
+   {
+    "label": "Sangareddy",
+    "district_id": "218",
+    "blocks": [
+     {
+      "label": "Jharasangam",
+      "block_id": "2295",
+      "tehsil_id": "2295"
+     },
+     {
+      "label": "Nyalkal",
+      "block_id": "2224",
+      "tehsil_id": "2224"
+     },
+     {
+      "label": "Zaheerabad",
+      "block_id": "2483",
+      "tehsil_id": "2483"
+     }
+    ]
+   },
+   {
+    "label": "Vikarabad",
+    "district_id": "195",
+    "blocks": [
+     {
+      "label": "Bomraspet",
+      "block_id": "2103",
+      "tehsil_id": "2103"
+     },
+     {
+      "label": "Doma",
+      "block_id": "2200",
+      "tehsil_id": "2200"
+     },
+     {
+      "label": "Doulatabad",
+      "block_id": "2234",
+      "tehsil_id": "2234"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Uttar Pradesh",
+  "state_id": "13",
+  "district": [
+   {
+    "label": "Bahraich",
+    "district_id": "246",
+    "blocks": [
+     {
+      "label": "Bahraich",
+      "block_id": "2540",
+      "tehsil_id": "2540"
+     },
+     {
+      "label": "Nanpara",
+      "block_id": "2739",
+      "tehsil_id": "2739"
+     }
+    ]
+   },
+   {
+    "label": "Ballia",
+    "district_id": "247",
+    "blocks": [
+     {
+      "label": "Bairia",
+      "block_id": "2541",
+      "tehsil_id": "2541"
+     },
+     {
+      "label": "Ballia",
+      "block_id": "2543",
+      "tehsil_id": "2543"
+     },
+     {
+      "label": "Bansdih",
+      "block_id": "2546",
+      "tehsil_id": "2546"
+     },
+     {
+      "label": "Belthara Road",
+      "block_id": "2556",
+      "tehsil_id": "2556"
+     },
+     {
+      "label": "Rasra",
+      "block_id": "2765",
+      "tehsil_id": "2765"
+     },
+     {
+      "label": "Sikandarpur",
+      "block_id": "2797",
+      "tehsil_id": "2797"
+     }
+    ]
+   },
+   {
+    "label": "Balrampur",
+    "district_id": "249",
+    "blocks": [
+     {
+      "label": "Balrampur",
+      "block_id": "2544",
+      "tehsil_id": "2544"
+     },
+     {
+      "label": "Tulsipur",
+      "block_id": "2820",
+      "tehsil_id": "2820"
+     }
+    ]
+   },
+   {
+    "label": "Bara banki",
+    "district_id": "279",
+    "blocks": [
+     {
+      "label": "Fatehpur",
+      "block_id": "2611",
+      "tehsil_id": "2611"
+     }
+    ]
+   },
+   {
+    "label": "Basti",
+    "district_id": "254",
+    "blocks": [
+     {
+      "label": "Basti",
+      "block_id": "2554",
+      "tehsil_id": "2554"
+     },
+     {
+      "label": "Bhanpur",
+      "block_id": "2558",
+      "tehsil_id": "2558"
+     },
+     {
+      "label": "Harraiya",
+      "block_id": "2637",
+      "tehsil_id": "2637"
+     },
+     {
+      "label": "Rudhauli",
+      "block_id": "2770",
+      "tehsil_id": "2770"
+     }
+    ]
+   },
+   {
+    "label": "Bhadohi",
+    "district_id": "240",
+    "blocks": [
+     {
+      "label": "Aurai",
+      "block_id": "2531",
+      "tehsil_id": "2531"
+     },
+     {
+      "label": "Gyanpur",
+      "block_id": "2631",
+      "tehsil_id": "2631"
+     }
+    ]
+   },
+   {
+    "label": "Chitrakoot",
+    "district_id": "294",
+    "blocks": [
+     {
+      "label": "Karwi",
+      "block_id": "2667",
+      "tehsil_id": "2667"
+     },
+     {
+      "label": "Mau",
+      "block_id": "2712",
+      "tehsil_id": "2712"
+     }
+    ]
+   },
+   {
+    "label": "Deoria",
+    "district_id": "253",
+    "blocks": [
+     {
+      "label": "Deoria",
+      "block_id": "2597",
+      "tehsil_id": "2597"
+     }
+    ]
+   },
+   {
+    "label": "Fatehpur",
+    "district_id": "265",
+    "blocks": [
+     {
+      "label": "Binki",
+      "block_id": "2573",
+      "tehsil_id": "2573"
+     },
+     {
+      "label": "Fatehpur",
+      "block_id": "2612",
+      "tehsil_id": "2612"
+     },
+     {
+      "label": "Khaga",
+      "block_id": "2670",
+      "tehsil_id": "2670"
+     }
+    ]
+   },
+   {
+    "label": "Hamirpur",
+    "district_id": "287",
+    "blocks": [
+     {
+      "label": "Maudaha",
+      "block_id": "2714",
+      "tehsil_id": "2714"
+     }
+    ]
+   },
+   {
+    "label": "Jaunpur",
+    "district_id": "244",
+    "blocks": [
+     {
+      "label": "Badlapur",
+      "block_id": "2536",
+      "tehsil_id": "2536"
+     }
+    ]
+   },
+   {
+    "label": "Jhansi",
+    "district_id": "281",
+    "blocks": [
+     {
+      "label": "Jhansi",
+      "block_id": "2656",
+      "tehsil_id": "2656"
+     }
+    ]
+   },
+   {
+    "label": "Kaushambi",
+    "district_id": "268",
+    "blocks": [
+     {
+      "label": "Chail",
+      "block_id": "2581",
+      "tehsil_id": "2581"
+     }
+    ]
+   },
+   {
+    "label": "Lucknow",
+    "district_id": "248",
+    "blocks": [
+     {
+      "label": "Lucknow",
+      "block_id": "2693",
+      "tehsil_id": "2693"
+     }
+    ]
+   },
+   {
+    "label": "Mahoba",
+    "district_id": "270",
+    "blocks": [
+     {
+      "label": "Kulpahar",
+      "block_id": "2682",
+      "tehsil_id": "2682"
+     }
+    ]
+   },
+   {
+    "label": "Mau",
+    "district_id": "286",
+    "blocks": [
+     {
+      "label": "Ghosi",
+      "block_id": "2624",
+      "tehsil_id": "2624"
+     },
+     {
+      "label": "Madhuban",
+      "block_id": "2696",
+      "tehsil_id": "2696"
+     },
+     {
+      "label": "Mau",
+      "block_id": "2713",
+      "tehsil_id": "2713"
+     },
+     {
+      "label": "Muhammadabad",
+      "block_id": "2731",
+      "tehsil_id": "2731"
+     }
+    ]
+   },
+   {
+    "label": "Mirzapur",
+    "district_id": "273",
+    "blocks": [
+     {
+      "label": "Marihan",
+      "block_id": "2709",
+      "tehsil_id": "2709"
+     },
+     {
+      "label": "Mirzapur",
+      "block_id": "2724",
+      "tehsil_id": "2724"
+     }
+    ]
+   },
+   {
+    "label": "Shrawasti",
+    "district_id": "257",
+    "blocks": [
+     {
+      "label": "Bhinga",
+      "block_id": "2561",
+      "tehsil_id": "2561"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "label": "Uttarakhand",
+  "state_id": "14",
+  "district": []
+ },
+ {
+  "label": "West Bengal",
+  "state_id": "27",
+  "district": [
+   {
+    "label": "Alipur Duar",
+    "district_id": "540",
+    "blocks": [
+     {
+      "label": "Alipur Duar",
+      "block_id": "4067",
+      "tehsil_id": "4067"
+     }
+    ]
+   },
+   {
+    "label": "Bankura",
+    "district_id": "544",
+    "blocks": [
+     {
+      "label": "Bankura",
+      "block_id": "4071",
+      "tehsil_id": "4071"
+     },
+     {
+      "label": "Khatra",
+      "block_id": "4132",
+      "tehsil_id": "4132"
+     }
+    ]
+   },
+   {
+    "label": "Birbhum",
+    "district_id": "549",
+    "blocks": []
+   },
+   {
+    "label": "Darjiling",
+    "district_id": "552",
+    "blocks": [
+     {
+      "label": "Karsiyang",
+      "block_id": "4128",
+      "tehsil_id": "4128"
+     },
+     {
+      "label": "Siliguri",
+      "block_id": "4150",
+      "tehsil_id": "4150"
+     }
+    ]
+   },
+   {
+    "label": "Jhargram",
+    "district_id": "548",
+    "blocks": [
+     {
+      "label": "Binpur",
+      "block_id": "4083",
+      "tehsil_id": "4083"
+     },
+     {
+      "label": "Jhargram",
+      "block_id": "4120",
+      "tehsil_id": "4120"
+     }
+    ]
+   },
+   {
+    "label": "North Twenty-Four Parganas",
+    "district_id": "547",
+    "blocks": [
+     {
+      "label": "Basirhat",
+      "block_id": "4081",
+      "tehsil_id": "4081"
+     }
+    ]
+   },
+   {
+    "label": "Purba Medinipur",
+    "district_id": "555",
+    "blocks": [
+     {
+      "label": "Tamluk",
+      "block_id": "4155",
+      "tehsil_id": "4155"
+     }
+    ]
+   },
+   {
+    "label": "Puruliya",
+    "district_id": "561",
+    "blocks": [
+     {
+      "label": "Raghunathpur",
+      "block_id": "4146",
+      "tehsil_id": "4146"
+     }
+    ]
+   },
+   {
+    "label": "South Twenty-Four Parganas",
+    "district_id": "541",
+    "blocks": [
+     {
+      "label": "Canning",
+      "block_id": "4088",
+      "tehsil_id": "4088"
+     },
+     {
+      "label": "Kakdwip",
+      "block_id": "4121",
+      "tehsil_id": "4121"
+     }
+    ]
+   }
+  ]
+ }
+]
