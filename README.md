@@ -160,6 +160,19 @@ Steps:
 3. **Score both rule sets.** Atlas rules use the pooled thresholds from `web/data/index.json` so they match the live atlas (`--pools run` pools over the ground-truth MWS instead). Sheet rules (`knowledge/sheet_rules.json`, built by `tools/build_sheet_rules.py`, evaluated by `seft/sheet.py`) treat signals as 0/1, `or` as a sum and `and` as a product. An atlas pathway is present when any of its rules is triggered; unknown predictions are left out of accuracy.
 4. **Report.** Metrics (balanced accuracy, F1), sample firing rates, atlas OR/AND sheet combinations, and a confidence-tier table (how often the label is positive when both, one or neither rule set fires). `python tools/groundtruth_whatif.py` scores candidate rule changes without applying them.
 
+### `wb-layers` (waterbody atlas, in progress)
+
+Downloads the two GeoServer waterbody layers for every tehsil and keeps a compact copy. This is the first step of the waterbody atlas.
+
+* **Reads:** `config/waterbody/locations.json` (or `--locations`): by default the 73 tehsils of the eight original atlas districts. Layers come from `swb:surface_waterbodies_{district}_{tehsil}` (polygons, attributes, yearly `area`, `k`, `kr`, `krz`) and `swb:waterbodies_zoi_{district}_{tehsil}` (zone-of-influence circles with yearly cropping) on `CORE_STACK_GEOSERVER`.
+* **Writes:** `data/raw/<state>/<district>/<tehsil>/swb_layers.json.gz`, with waterbodies (attributes, yearly series as lists, centroid, bounding box, polygon simplified to about 5 m) and zones of influence (attributes, yearly cropping, centre, bounding box, radius `zoi` in metres). Cached tehsils are skipped unless `--force`. `--bundle FILE.zip` also packs all the layer files into one zip.
+* **Network:** GeoServer is on port 8443, so run this where that port is reachable.
+* **Caveat:** most tehsils' zone-of-influence layers carry no `wb_id` (WB-02 in `docs/core_stack_waterbody_api_issues.md`), so zones are matched to waterbodies by location.
+
+```bash
+python -m seft.cli wb-layers --bundle wb_layers.zip
+```
+
 ## How the frontend works
 
 `web/index.html` is a single-page atlas. It does not read `knowledge/` or `data/raw/` itself. Everything it needs is written into `web/data/` by `run` (via `seft/webdata.py`).

@@ -3,7 +3,8 @@
 Issues found while using the CoRE Stack public API through the MCP server (`lcl-core-stack-public-api`), organised by the user query that exposed them so each can be reproduced.
 
 - Session dates: 10 October to 16 November 2026
-- Bug IDs: `CS-01` to `CS-88`, numbered in order of first appearance. Each ID is one unique issue.
+- Bug IDs: `CS-01` to `CS-91`, numbered in order of first appearance. Each ID is one unique issue.
+- Waterbody issues (the waterbody routes, the `swb` GeoServer layers and the surface-water datasets) are kept in `docs/core_stack_waterbody_api_issues.md`. CS-12, CS-43, CS-44, CS-48, CS-49 and CS-65 were moved there on 22 Nov 2026; their numbers are kept.
 - Each issue is described in full once, under the query where it first appeared. Later queries list it under "Also seen" with only the new evidence.
 - All calls went through the MCP tool `call_public_api(api_id, params)`. From Query 9 the same server was reached through the linked computer; behaviour was the same except where noted. The API key was sent as a header and is not shown.
 
@@ -27,7 +28,7 @@ Severity:
 | CS-09 | Medium | Unit given as "value" for about 20 fields | `get_mws_kyl_indicators` | 2, 3 |
 | CS-10 | Medium | Zero cannot be told apart from "no data" | `get_mws_kyl_indicators` | 2, 3 |
 | CS-11 | Low | `-9999` sentinel in a text field | `get_mws_kyl_indicators` | 2, 3, 4 |
-| CS-12 | Low | Waterbody list bloats the response, little usable content | `get_mws_kyl_indicators` | 2, 3, 4 |
+| CS-12 | Low | Waterbody list bloats the response, little usable content **(moved to the waterbody log)** | `get_mws_kyl_indicators` | 2, 3, 4 |
 | CS-13 | Low | Mixed data types for the same kind of value | Several | 2, 3 |
 | CS-14 | Low | Misspelt field name and unexplained acronyms | `get_mws_kyl_indicators` | 2 |
 | CS-15 | High | Large responses cut off, no pagination or filter | `get_village_geometries`, `get_mws_geometries`, `get_tehsil_data` | 3, 4, 9, 14 |
@@ -58,13 +59,13 @@ Severity:
 | CS-40 | Low | Layer list metadata: empty `style_url`, a raster-named layer typed as vector, no year or period fields | `get_generated_layer_urls` | 9 |
 | CS-41 | Medium | `welldepth` and `g` undefined; `welldepth` is labelled "m" but is a scaled copy of `delta_g` | `get_tehsil_data` | 10 |
 | CS-42 | Low | Metadata differs between datasets of the same tehsil (no `area` in the hydrology dataset) | `get_tehsil_data` | 10 |
-| CS-43 | High | Kharif and rabi surface water areas are near-identical; seasonal fields appear nested and are undefined | `get_tehsil_data` | 11 |
-| CS-44 | Medium | Three undefined "total" water areas that disagree (`total_area`, `total_swb_area`, kharif) | `get_tehsil_data` | 11 |
+| CS-43 | High | Kharif and rabi surface water areas are near-identical; seasonal fields appear nested and are undefined **(moved to the waterbody log)** | `get_tehsil_data` | 11 |
+| CS-44 | Medium | Three undefined "total" water areas that disagree (`total_area`, `total_swb_area`, kharif) **(moved to the waterbody log)** | `get_tehsil_data` | 11 |
 | CS-45 | High | Yearly tree and shrub areas swing by a factor of two and mirror each other | `get_tehsil_data` | 12, 15, 16 |
 | CS-46 | Medium | Land cover classes sum to about 94.5% of area; water class names undefined | `get_tehsil_data` | 12 |
 | CS-47 | Low | `cropland_area` is zero in every row | `get_tehsil_data` | 12 |
-| CS-48 | High | Waterbody routes return 502 `Merged dataset not available for given area` for Chintamani | `get_waterbodies_data_by_admin`, `get_waterbody_data` | 13, 14 |
-| CS-49 | Medium | Waterbody layer: a third of features lie outside the tehsil; duplicate and empty attribute columns | GeoServer `swb` layer | 13 |
+| CS-48 | High | Waterbody routes return 502 `Merged dataset not available for given area` for Chintamani **(moved to the waterbody log)** | `get_waterbodies_data_by_admin`, `get_waterbody_data` | 13, 14 |
+| CS-49 | Medium | Waterbody layer: a third of features lie outside the tehsil; duplicate and empty attribute columns **(moved to the waterbody log)** | GeoServer `swb` layer | 13 |
 | CS-50 | Low | Data-entry errors in village names and attribute names | GeoServer layers | 13 |
 | CS-51 | Medium | Micro-watershed-to-village mapping is incomplete in three ways | `get_tehsil_data` | 14 |
 | CS-52 | Medium | `drought` and `green_credit` datasets return an empty object with status 200 | `get_tehsil_data` | 15, 16 |
@@ -80,7 +81,7 @@ Severity:
 | CS-62 | Unrated | `green_credit` exposes presigned S3 URLs | `get_tehsil_data` | 17 |
 | CS-63 | Unrated | Same MWS returns different values from different tehsils | `get_tehsil_data` | 17 |
 | CS-64 | Unrated | `mws_intersect_villages` lists only villages inside the requested tehsil | `get_tehsil_data` | 17 |
-| CS-65 | Unrated | `surfacewaterbodies_annual` omits MWS with no water body and can exceed MWS area | `get_tehsil_data` | 17 |
+| CS-65 | Unrated | `surfacewaterbodies_annual` omits MWS with no water body and can exceed MWS area **(moved to the waterbody log)** | `get_tehsil_data` | 17 |
 | CS-66 | Unrated | Livestock and social rows do not match village polygons | `get_tehsil_data` | 17 |
 | CS-67 | Unrated | Modelled groundwater change is biased negative | `get_tehsil_data` | 17 |
 | CS-68 | Unrated | Precipitation is spatially over-smoothed and departs from district normals | `get_tehsil_data` | 17 |
@@ -219,9 +220,7 @@ Totals: 15 High, 36 Medium, 21 Low, 15 not yet rated (87 issues; CS-59 to CS-73 
 - Suggested fix: use `null`; keep the field one type.
 
 **CS-12. Waterbody list bloats the response, little usable content**
-- Observed (call 2.1): `mws_intersect_swb` has 25 entries, all with empty `swbName`. Coordinates are rounded to two decimals (about 1 km), so most entries share one of a few points.
-- Query 4 responses carry up to about 100 entries; the few names present are generic ("KERE", "POND", "HALLI").
-- Suggested fix: return a count by default and the list on request; give coordinates to at least four decimals.
+- Moved to `docs/core_stack_waterbody_api_issues.md` on 22 Nov 2026, with the other waterbody issues.
 
 **CS-13. Mixed data types for the same kind of value**
 - Observed (call 2.1): trend codes are strings (`"1"`, `"0"`), other codes are integers.
@@ -614,24 +613,12 @@ Micro-watershed areas were taken from call 9.3 and boundaries from call 9.7.
 **High**
 
 **CS-43. Kharif and rabi surface water areas are near-identical; seasonal fields appear nested and are undefined**
-- Observed (call 11.1):
-  - `rabi_area` equals `kharif_area` to two decimals in 604 of 912 unit-years.
-  - Summed over the tehsil, rabi is 99.3% of kharif (98.4% to 99.9% by year). Zaid is 78% of kharif.
-  - `rabi_area` never exceeds `kharif_area`, and `zaid_area` never exceeds `rabi_area`, in any unit-year.
-- The strict ordering suggests the fields are nested: rabi is water that was present in kharif and is still present in rabi, and zaid is the subset still present in summer. Under that reading, water that first appears in rabi (north-east monsoon rain in October to December, which matters in this region) cannot be counted.
-- A loss of under 1% of water area between the monsoon and winter seasons, in small tanks in a semi-arid tehsil, is implausible as a physical result. It may reflect how seasons are classified (for example, a pixel counted as rabi water if wet at any time in a window that overlaps kharif).
-- Impact: a kharif-versus-rabi comparison, which is what the user asked for, shows almost no difference anywhere. Without a definition the user cannot tell whether that is real.
-- The KYL route shows the same pattern (`avg_kharif_surface_water_mws` 38.81 and `avg_rabi_surface_water_mws` 38.81 for 18_50168, call 2.1).
-- Suggested fix: document how each season's water area is derived (dates, threshold of wet observations, whether nested); if nested, rename to say so and add independent per-season areas.
+- Moved to `docs/core_stack_waterbody_api_issues.md` on 22 Nov 2026, with the other waterbody issues.
 
 **Medium**
 
 **CS-44. Three undefined "total" water areas that disagree**
-- Observed (call 11.1), 2_28284 in 2017: `kharif_area` 23.34, `total_area` 36.20, `metadata.total_swb_area` 85.58, all "ha".
-- Over the tehsil, kharif is 41% to 93% of `total_area` depending on the year, and `total_area` never reaches `total_swb_area`.
-- Likely meanings: `total_area` is anything detected as water at any time in the year, and `total_swb_area` is the mapped footprint of the waterbodies. Neither is stated.
-- Impact: "share of tank area holding water" could be computed against either, with very different answers.
-- Suggested fix: define both; rename `total_area` (for example `any_water_area`) and `total_swb_area` (for example `waterbody_footprint_area`).
+- Moved to `docs/core_stack_waterbody_api_issues.md` on 22 Nov 2026, with the other waterbody issues.
 
 **Also seen**
 - CS-09 (new evidence, unit now identified): the KYL fields `avg_kharif_surface_water_mws`, `avg_rabi_surface_water_mws` and `avg_zaid_surface_water_mws` are labelled "mm" but are percentages. For all four units checked they equal this dataset's 2017 to 2024 mean seasonal area divided by `total_swb_area`, times 100, to two decimals: 3_5386 gives 21.06, 20.83, 17.44 (means 18.20, 18.00, 15.07 ha on a footprint of 86.44 ha); 2_31566 gives 22.73, 22.60, 9.02; 3_3784 gives 47.61, 47.56, 44.38; 2_29834 gives 27.06, 26.77, 21.82. Suggested fix: change the unit to "% of waterbody footprint" and say so in the field name.
@@ -713,22 +700,12 @@ Direct GeoServer requests:
 **High**
 
 **CS-48. Waterbody route returns 502 for Chintamani**
-- Observed (call 13.1): `Merged dataset not available for given area.` The underlying layer exists and is complete on GeoServer (call 13.3), and `get_generated_layer_urls` lists it.
-- A 502 is a gateway error code; the condition is "data not prepared", for which 404 or 409 would be clearer.
-- `get_waterbody_data` (single waterbody) was not tried; it reads the same merged dataset.
-- Impact: the only API route with per-waterbody seasonal water is unusable for this tehsil.
-- Suggested fix: build the merged dataset for all active tehsils, or have `get_active_locations` say which routes work for each tehsil.
+- Moved to `docs/core_stack_waterbody_api_issues.md` on 22 Nov 2026, with the other waterbody issues.
 
 **Medium**
 
 **CS-49. Waterbody layer: a third of features lie outside the tehsil; duplicate and empty attribute columns**
-- Observed (call 13.3):
-  - 1,055 of 3,263 waterbodies have their centre outside every Chintamani village polygon. Their `village_name` values belong to neighbouring tehsils and states (for example "t.sadum", 79 waterbodies). The layer covers whole micro-watersheds, which extend beyond the tehsil, but it is named and listed as the tehsil's.
-  - `State Name`, `District Name`, `Block/Tehsil Name` and `Village Name` are null, while lower-case `village_name` and `covering_village_names` are filled. Two columns for the same thing, one empty.
-  - About 60 census-style columns (`construction_cost`, `storage_capacity_water_body_original`, `no_people_benefited_by_water_body`, ...) are null on every feature checked.
-  - `k_`, `kr_`, `krz_` are percentages of `area_ored`, and `area_YY-YY` is hectares; none of this is documented. `area_ored` is unexplained (it appears to be the union of water extent over all years).
-- Impact: summing the layer gives totals for an area about one and a half times the tehsil; a user filtering by the null admin columns gets nothing.
-- Suggested fix: add a flag or filter for "inside tehsil"; drop empty columns; document the seasonal fields.
+- Moved to `docs/core_stack_waterbody_api_issues.md` on 22 Nov 2026, with the other waterbody issues.
 
 **Low**
 
@@ -947,8 +924,7 @@ For a boundary MWS, village intersections sum to far less than the MWS area. Med
 **Fix:** return all villages that intersect the MWS, with a tehsil column, and check village polygon overlaps.
 
 ### CS-65 · `surfacewaterbodies_annual` omits MWS with no water body and can exceed MWS area
-MWS with no water body are absent rather than zero. The pipeline imputes zero. In a few MWS, `total_area` is up to 5.9× the MWS area. This suggests water-body polygons are not clipped to the MWS. Separately, `kharif_area` and `rabi_area` are nearly equal in many rows, which makes it unclear what `rabi_area` measures.
-**Fix:** return zero rows, clip to the MWS, and document the seasonal columns.
+- Moved to `docs/core_stack_waterbody_api_issues.md` on 22 Nov 2026, with the other waterbody issues.
 
 ### CS-66 · Livestock and social rows do not match village polygons
 Haveli returns 113 social/livestock rows, but GeoServer has 549 village polygons. Villages with `data_availability_status` "no data available for this village" are included with zeros, which reads as zero livestock.
