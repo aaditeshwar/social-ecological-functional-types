@@ -1,5 +1,5 @@
 {
- "note": "Stress and opportunity rules for waterbodies. 'applies_to' lists the waterbody types a rule is checked for; 'gate' is an extra condition (for example a known zone of influence). Triggers use signal grades (true when above 0). Intensity runs from 0 to 100 and is scaled by the roles named in 'roles' (the highest of them), so a problem counts more where the water matters more. Rules are checked only for waterbodies that hold water in 3 or more of the 8 years and are not new (ctx_regular), except where noted.",
+ "note": "Stress and opportunity rules for waterbodies. 'applies_to' lists the waterbody types a rule is checked for; 'gate' is an extra condition (for example a known zone of influence). Triggers use signal grades (true when above 0). Intensity runs from 0 to 100 and is scaled by the roles named in 'roles' (the highest of them), so a problem counts more where the water matters more. Rule questions are in questions.json (stress_questions, listed by rule). Rules are checked only for waterbodies that hold water in 3 or more of the 8 years and are not new (ctx_regular), except where noted.",
  "rules": [
   {
    "id": "wb.inflow_shortfall",
@@ -34,11 +34,14 @@
     "Desilting where storage has been lost to silt",
     "Catchment treatment where runoff is diverted or the catchment is eroding"
    ],
-   "questions": [
-    "Are the inlet channels of this waterbody blocked or broken?",
-    "Has runoff that used to reach it been diverted (roads, fields, other structures)?",
-    "How much silt has built up in the waterbody over the years?"
-   ]
+   "confidence": "medium",
+   "sources": [
+    "mosse2003",
+    "palanisami_tanks",
+    "wb_census_check"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.poor_retention",
@@ -70,11 +73,13 @@
     "Repair sluice gates and bund",
     "Rules for sharing and timing water draws"
    ],
-   "questions": [
-    "Is the sluice gate or outlet damaged, so that water leaks out?",
-    "Does the bund leak or has it breached?",
-    "How many months after the monsoon does it hold water?"
-   ]
+   "confidence": "medium",
+   "sources": [
+    "palanisami_tanks",
+    "mosse2003"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.siltation",
@@ -107,10 +112,14 @@
     "Catchment treatment against erosion",
     "Remove encroachment of the bed"
    ],
-   "questions": [
-    "How much silt has built up in the waterbody?",
-    "Is part of the bed being cultivated or built on?"
-   ]
+   "confidence": "medium",
+   "sources": [
+    "palanisami_tanks",
+    "rrr_guidelines2022",
+    "wb_census_check"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.sudden_loss",
@@ -142,10 +151,13 @@
     "Clear the inlet",
     "Remove encroachment"
    ],
-   "questions": [
-    "Has the bund breached or the waterbody been drained?",
-    "Has the inlet been blocked or the bed encroached in recent years?"
-   ]
+   "confidence": "medium",
+   "sources": [
+    "rrr_guidelines2022",
+    "wb_census_check"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.drought_failure",
@@ -173,10 +185,13 @@
     "Deepening and desilting for more carry-over storage",
     "Water sharing rules for protective irrigation in dry spells"
    ],
-   "questions": [
-    "In drought years, could farmers get water from this waterbody for a protective irrigation?",
-    "How was the water shared in the last dry year?"
-   ]
+   "confidence": "medium",
+   "sources": [
+    "drought_manual",
+    "palanisami_tanks"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.irrigation_underuse",
@@ -202,11 +217,13 @@
     "Repair field channels and outlets",
     "Form or revive a water user association with sharing rules"
    ],
-   "questions": [
-    "Who uses water from this waterbody, and how is it shared?",
-    "Is there a water user association for this waterbody?",
-    "Are the field channels from the waterbody working?"
-   ]
+   "confidence": "low",
+   "sources": [
+    "mosse2003",
+    "wb_census_check"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.livestock_summer_water",
@@ -231,10 +248,13 @@
     "Deepen a section for dry-season storage",
     "Cattle troughs"
    ],
-   "questions": [
-    "Where do animals drink in summer?",
-    "Does this waterbody dry up before the summer months?"
-   ]
+   "confidence": "low",
+   "sources": [
+    "igfri_vision",
+    "expert_judgement"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.fishery_opportunity",
@@ -260,9 +280,14 @@
     "Fish seed stocking by a group or cooperative",
     "Panchayat fishing lease"
    ],
-   "questions": [
-    "Is this waterbody used for fishing, and who holds the rights?"
-   ]
+   "confidence": "low",
+   "sources": [
+    "pmmsy_guidelines",
+    "mission_antyodaya",
+    "wb_census_check"
+   ],
+   "severe_at": 70,
+   "type": "opportunity"
   },
   {
    "id": "wb.fishery_constraint",
@@ -286,9 +311,13 @@
    "interventions": [
     "Improve retention (sluice and bund repair, deepening)"
    ],
-   "questions": [
-    "Is fishing in this waterbody limited because it dries early?"
-   ]
+   "confidence": "low",
+   "sources": [
+    "pmmsy_guidelines",
+    "expert_judgement"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.canal_tail_shortfall",
@@ -310,9 +339,13 @@
     "Rotation schedule agreed with the irrigation department",
     "Water user association at the outlet"
    ],
-   "questions": [
-    "When and how often does canal water reach this waterbody?"
-   ]
+   "confidence": "low",
+   "sources": [
+    "mowr_waterlogging",
+    "expert_judgement"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   },
   {
    "id": "wb.river_dry_season_loss",
@@ -338,10 +371,26 @@
     "Regulate pumping from the river in summer",
     "Recharge in the catchment"
    ],
-   "questions": [
-    "Has the river here started drying earlier in summer?",
-    "Is sand being mined from this stretch?"
-   ]
+   "confidence": "low",
+   "sources": [
+    "cgwb_gec2015",
+    "expert_judgement"
+   ],
+   "severe_at": 70,
+   "type": "stress"
   }
+ ],
+ "confidence_scale": {
+  "high": "the data measure the problem directly and the rule has been checked against field records",
+  "medium": "the data point to the problem through a close proxy, and the census check supports the direction",
+  "low": "the data give an indirect sign; community answers should decide"
+ },
+ "evaluation": [
+  "The rule applies only to the waterbody types in applies_to.",
+  "Its gate must hold (for example, the waterbody holds water regularly, or its zone of influence is known); otherwise it is not applicable.",
+  "Signals are graded from the waterbody's variables and its home MWS; roles are computed from the same.",
+  "The trigger combines signal grades (a grade above 0 counts as true) and roles. If it is false and a signal it names has no value, the result is insufficient data.",
+  "If triggered, intensity (0-100) is computed from the grades and scaled by the roles the rule names: a problem counts more where the water matters more. A triggered rule is severe at severe_at or more.",
+  "Community answers then turn the result into a probability (questions.json assessment)."
  ]
 }

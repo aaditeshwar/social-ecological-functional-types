@@ -130,14 +130,29 @@ def match_zoi(bodies, Z, has_wb_id):
         b['zoi'] = z[1] if z else None; b['zoi_match'] = 'location' if z else 'none'; stats[b['zoi_match']] += 1
     return stats
 
-def assign_type(b, types):
-    env = {k: b[k] for k in ('area_ha', 'wb_type', 'on_drainage', 'stream_order', 'n_mws', 'has_drainage_fields')}
-    env['catchment_ratio'] = (b['catchment_ha'] / b['area_ha']) if b['area_ha'] else 0
-    env['on_stream'] = bool(b['on_drainage'] or (env['catchment_ratio'] >= 20 and b['area_ha'] >= 0.5))
-    b['on_stream'] = env['on_stream']
-    env['true'] = True
+TYPE_FIELDS = ('area_ha', 'wb_type', 'on_drainage', 'stream_order', 'n_mws', 'has_drainage_fields')
+
+def type_env(b, answers_set=None):
+    """Fields the type rules read (variables.json type_fields). inflow and ownership come only from community answers."""
+    env = {k: b.get(k) for k in TYPE_FIELDS}
+    env['catchment_ratio'] = (b['catchment_ha'] / b['area_ha']) if b.get('area_ha') and b.get('catchment_ha') is not None else 0
+    env.update(inflow=None, ownership=None, true=True, false=False)
+    env.update(answers_set or {})
+    return env
+
+def _truthy(expr, env):
+    try: v = evaluate(expr, env)
+    except Exception: return False
+    return bool(v) and not (isinstance(v, float) and math.isnan(v))
+
+def assign_type(b, types, answers_set=None):
+    """First type whose 'when' holds, after the 'derived' fields (on_stream, fed_by_stream) are evaluated in order."""
+    env = type_env(b, answers_set)
+    for d in types.get('derived', []):
+        env[d['id']] = _truthy(d['expr'], env)
+    if answers_set is None: b['on_stream'] = env.get('on_stream')
     for t in types['types']:
-        if evaluate(t['when'], env): return t['id']
+        if _truthy(t['when'], env): return t['id']
     return None
 
 def build_tehsil(state, district, tehsil, types, log=print):

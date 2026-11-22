@@ -9,7 +9,7 @@ watershed pipeline (seft.wb.context), score signals, roles and rules (seft.wb.sc
 then copy the web bundles and the CSV tables to web/data/waterbody/ (with --merge, districts not in this run
 are kept), as `run` does with out/web and out/csv for watersheds.
 """
-import collections, csv, json, shutil
+import collections, csv, json, math, re, shutil
 from pathlib import Path
 from ..util import ROOT, load_json, slug, iter_locations, raw_dir
 from .build import build_all
@@ -45,6 +45,31 @@ def recent_ponds(bodies, scope):
         if b['type'] in scope and b.get('status') == 'new' and b['home_mws']:
             out[b['home_mws']][0] += 1; out[b['home_mws']][1] += b['area_ha']
     return {k: [n, round(a, 2)] for k, (n, a) in out.items()}
+
+_NAME = re.compile(r"'[^']*'|\"[^\"]*\"|([A-Za-z_][A-Za-z0-9_]*)")
+_FUNCS = {'nz', 'min', 'max', 'ramp', 'clip', 'ifelse', 'div', 'abs', 'isnan', 'known', 'ntrue', 'nknown', 'avg', 'and', 'or', 'not',
+          'in', 'if', 'else', 'True', 'False', 'None', 'true', 'false', 'type', 'wb_type'}
+
+def env_names(K):
+    """Names the signals, roles and rules read, split into waterbody variables and home-MWS values, so the page can
+    score a waterbody again (after a type answer) exactly as seft/wb/score.py does."""
+    exprs = []
+    for x in K['signals']['signals']: exprs += [x.get('expr'), x.get('gate'), x.get('var')]
+    exprs += [r['expr'] for r in K['roles']['roles']]
+    for r in K['rules']['rules']: exprs += [r.get('gate'), r.get('trigger'), r.get('intensity')]
+    skip = _FUNCS | {x['id'] for x in K['signals']['signals']} | {r['id'] for r in K['roles']['roles']}
+    names = {m.group(1) for e in exprs if e for m in _NAME.finditer(e) if m.group(1)} - skip
+    mws = sorted(n for n in names if n.startswith(('mws_', 'share_', 'ctx_')))
+    wb = [v['id'] for v in K['variables']['variables']]
+    wb += sorted(n for n in names - set(mws) if n not in wb)
+    return wb, mws
+
+def _num(x, n=6):
+    if isinstance(x, bool): return int(x)
+    if isinstance(x, float):
+        if math.isnan(x) or math.isinf(x): return None
+        return float(f'{x:.{n}g}')
+    return x
 
 def _r(x, n=3):
     return round(x, n) if isinstance(x, float) else x
@@ -95,18 +120,21 @@ def csv_row(b, K, rp=None):
 def _i(xs):
     return [None if not isinstance(x, (int, float)) else round(x) for x in (xs or [])]
 
-def web_record(b, K):
+def web_record(b, K, env_ids=None):
     """Compact record for the frontend. Keys: id, t (type), teh, mws (home MWS; its context is in the bundle's
     'mws' table), a (area ha), xy (lon, lat), n (name), so (stream order), st (status code, see index 'status'), z (ZoI match: w=wb_id, l=location,
-    -=none), k/kr/krz (yearly %, rounded), v (WEB_VARS in order), ro (roles in index order),
+    -=none), k/kr/krz (yearly %, rounded), tf (type fields, index 'type_fields'), e (variables, index 'env_ids'),
+    ro (roles in index order),
     ru ([rule index, status s/n/i (triggered, not triggered, insufficient), intensity] for applicable rules)."""
     rids = [r['id'] for r in K['rules']['rules']]; roles = [r['id'] for r in K['roles']['roles']]
     rec = {'id': b['wb_id'], 't': b['type'], 'teh': b['tehsil'], 'mws': b['home_mws'], 'a': round(b['area_ha'], 2),
            'xy': [round(b['centroid'][0], 5), round(b['centroid'][1], 5)], 'so': b['stream_order'],
            'st': STATUS[b['status']]['code'], 'z': {'wb_id': 'w', 'location': 'l'}.get(b['zoi_match'], '-'), 'k': _i(b.get('k')), 'kr': _i(b.get('kr')), 'krz': _i(b.get('krz'))}
     if b.get('wb_name'): rec['n'] = b['wb_name']
+    rec['tf'] = [b.get('wb_type'), int(bool(b.get('on_drainage'))), b.get('n_mws'), int(bool(b.get('has_drainage_fields'))),
+                 _num((b['catchment_ha'] / b['area_ha']) if b.get('area_ha') and b.get('catchment_ha') is not None else 0)]
+    rec['e'] = [_num((b.get('vars') or {}).get(c)) for c in (env_ids or [])]
     if b.get('roles'):
-        rec['v'] = [_r(b['vars'].get(c), 2) for c in WEB_VARS]
         rec['ro'] = [round(b['roles'].get(r, 0), 2) for r in roles]
         rec['ru'] = [[i, {'triggered': 's', 'not triggered': 'n', 'insufficient data': 'i'}[b['rules'][rid]['status']], b['rules'][rid]['intensity']]
                      for i, rid in enumerate(rids) if b['rules'][rid]['status'] != 'not applicable']
@@ -125,7 +153,7 @@ def write_outputs(B, stats, types, K, pools, cfg, out=None, log=print):
     scope = {t['id'] for t in types['types'] if t['in_scope']}
     by = collections.defaultdict(list)
     for b in B: by[b['district']].append(b)
-    districts = []
+    districts = []; env_ids, mws_ids = env_names(K)
     for d in cfg['districts']:
         bs = by.get(d['district'], []); s = slug(d['district'])
         if not bs: continue
@@ -133,19 +161,20 @@ def write_outputs(B, stats, types, K, pools, cfg, out=None, log=print):
         rows = [csv_row(b, K, rp) for b in bs]
         with open(out / 'csv' / f'wb_{s}.csv', 'w', newline='', encoding='utf-8') as f:
             w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
-        mws = {b['home_mws']: {c: b['mws'].get(c) for c in CTX_OUT} for b in bs if b['mws']}
+        mws = {b['home_mws']: {c: _num(b['mws'].get(c)) for c in CTX_OUT + mws_ids} for b in bs if b['mws']}
         for u, (n, a) in rp.items():
             if u in mws: mws[u]['recent_ponds'] = n; mws[u]['recent_ponds_ha'] = a
         (out / 'web' / f'w_{s}.json').write_text(json.dumps({'district': d['district'], 'state': d['state'], 'mws': mws,
-            'waterbodies': [web_record(b, K) for b in bs]}, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')
+            'waterbodies': [web_record(b, K, env_ids) for b in bs]}, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')
         districts.append({'district': d['district'], 'state': d['state'], 'slug': s, 'tehsils': d['tehsils'], 'n': len(bs),
                           'by_type': dict(collections.Counter(b['type'] for b in bs)),
                           'by_status': dict(collections.Counter(b['status'] for b in bs if b['type'] in scope)),
                           'recent_ponds': sum(n for n, _ in rp.values()), 'recent_pond_mws': len(rp),
                           'rules': rates(bs, K, scope)})
         log(f"  {d['district']}: {len(bs)} waterbodies -> csv/wb_{s}.csv, web/w_{s}.json")
-    index = {'knowledge': K, 'types': types, 'web_vars': WEB_VARS, 'status': STATUS, 'districts': districts, 'tehsil_stats': stats,
-             'pools': {k: {t: [round(a, 3), round(c, 3)] for t, (a, c) in v.items()} for k, v in pools.items()},
+    index = {'knowledge': K, 'types': types, 'web_vars': WEB_VARS, 'env_ids': env_ids, 'mws_ids': mws_ids,
+             'type_fields': ['wb_type', 'on_drainage', 'n_mws', 'has_drainage_fields', 'catchment_ratio'], 'status': STATUS, 'districts': districts, 'tehsil_stats': stats,
+             'pools': {k: {t: [_num(a), _num(c)] for t, (a, c) in v.items()} for k, v in pools.items()},
              'rules': rates(B, K, scope)}
     (out / 'web' / 'index.json').write_text(json.dumps(index, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')
     return index

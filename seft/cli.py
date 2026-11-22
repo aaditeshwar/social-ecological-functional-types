@@ -19,6 +19,7 @@ Waterbody atlas (same operations, on config/waterbody/locations.json):
     python -m seft.cli wb-run          # -> out/waterbody/csv/wb_<district>.csv, out/waterbody/web, web/data/waterbody
     python -m seft.cli wb-all          # wb-fetch, wb-validate and wb-run
     python -m seft.cli wb-census       # compare with the Water Body Census fields -> out/waterbody/census/
+    python -m seft.cli wb-assess --answers community_answers.json   # re-assess with answers saved from the page
 
 Common options: --locations FILE (default config/locations.json). For run: --answers FILE (community
 answers saved from the atlas), --merge (keep districts already in the atlas that this run does not cover).
@@ -102,6 +103,10 @@ def cmd_wb_census(a):
     from .wb.census import main as wb_census
     wb_census(a.locations, a.out)
 
+def cmd_wb_assess(a):
+    from .wb.assess import main as wb_assess
+    wb_assess(a.answers, a.locations, a.out)
+
 def cmd_groundtruth(a):
     from .groundtruth import main as gt
     gt(a.truth, refresh_locations=a.refresh_locations, force=a.force, fetch=not a.no_fetch, pools_from=a.pools,
@@ -143,6 +148,9 @@ def main(argv=None):
         if name == 'wb-all': p.add_argument('--force', action='store_true')
     p = sub.add_parser('wb-census', help='compare waterbody patterns with the Water Body Census fields -> out/waterbody/census'); wloc(p)
     p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'census'))
+    p = sub.add_parser('wb-assess', help='re-assess waterbodies with community answers saved from the page -> out/waterbody/answers'); wloc(p)
+    p.add_argument('--answers', required=True, help='community answers JSON saved from the waterbody atlas')
+    p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'answers'))
     p = sub.add_parser('groundtruth', help='score atlas and sheet rules against ground-truth MWS')
     p.add_argument('--truth', default=str(ROOT / 'config' / 'groundtruth' / 'final_ground_truth.json'))
     p.add_argument('--refresh-locations', action='store_true', help='re-download get_active_locations')
@@ -165,6 +173,7 @@ def main(argv=None):
     elif a.cmd == 'wb-validate': sys.exit(0 if cmd_wb_validate(a) else 1)
     elif a.cmd == 'wb-run': cmd_wb_run(a)
     elif a.cmd == 'wb-census': cmd_wb_census(a)
+    elif a.cmd == 'wb-assess': cmd_wb_assess(a)
     elif a.cmd == 'wb-all':
         cmd_wb_fetch(a)
         if not cmd_wb_validate(a): sys.exit(1)

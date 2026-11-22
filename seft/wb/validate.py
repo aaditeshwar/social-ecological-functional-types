@@ -6,6 +6,14 @@ from .score import load_knowledge
 
 _ID = re.compile(r'\b((?:s|ctx|role)_[a-z_]+)\b')
 
+def _walk(o):
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if k == 'sources' and isinstance(v, list): yield k, v
+            else: yield from _walk(v)
+    elif isinstance(o, list):
+        for x in o: yield from _walk(x)
+
 def validate(kdir=None, log=print):
     K = load_knowledge(kdir); problems = []
     types = {t['id'] for t in K['types']['types']}
@@ -45,6 +53,35 @@ def validate(kdir=None, log=print):
             if bad: problems.append(f"schemes: {key}/{l['scheme']} unknown types {bad}")
     for r in K['rules']['rules']:
         if r['id'] not in K['schemes']['links']: problems.append(f"schemes: no schemes linked to rule {r['id']}")
+    # questions
+    rids = {r['id'] for r in K['rules']['rules']}; Q = K['questions']
+    qids = [q['id'] for q in Q['type_questions'] + Q['stress_questions']]
+    if len(set(qids)) != len(qids): problems.append('duplicate question ids')
+    setf = {f['id'] for f in K['variables'].get('type_fields', [])}
+    for q in Q['type_questions'] + Q['stress_questions']:
+        for r in q.get('rules', []):
+            if r not in rids: problems.append(f"question {q['id']}: unknown rule {r}")
+        for t in q.get('applies_to', []):
+            if t not in types: problems.append(f"question {q['id']}: unknown type {t}")
+        for o in q['options']:
+            for e in o.get('stress', []):
+                if e['id'] not in rids: problems.append(f"question {q['id']}/{o['id']}: unknown rule {e['id']}")
+                if not e.get('lr', 0) > 0: problems.append(f"question {q['id']}/{o['id']}: lr must be > 0")
+            for f in (o.get('set') or {}):
+                if f not in setf: problems.append(f"question {q['id']}/{o['id']}: sets unknown field {f}")
+    asked = {r for q in Q['stress_questions'] for r in q.get('rules', [])}
+    for r in rids - asked: problems.append(f'rule {r}: no community question')
+    for r in K['rules']['rules']:
+        if r.get('confidence') not in ('high', 'medium', 'low'): problems.append(f"rule {r['id']}: confidence must be high, medium or low")
+    # sources
+    known_src = {x['id'] for x in K['sources']['sources']}
+    for name in ('types', 'variables', 'signals', 'roles', 'rules', 'questions'):
+        for k, v in _walk(K[name]):
+            if k == 'sources':
+                for sid in v:
+                    if sid not in known_src: problems.append(f'{name}: unknown source {sid}')
+    for x in K['signals']['signals'] + K['roles']['roles'] + K['rules']['rules'] + K['types']['types']:
+        if not x.get('sources'): problems.append(f"{x['id']}: no sources")
     for p in problems: log('  ' + p)
-    log(f"{len(problems)} problems; {len(K['types']['types'])} types, {len(sig)} signals, {len(roles)} roles, {len(K['rules']['rules'])} rules, {len(sch)} schemes")
+    log(f"{len(problems)} problems; {len(K['types']['types'])} types, {len(sig)} signals, {len(roles)} roles, {len(K['rules']['rules'])} rules, {len(sch)} schemes, {len(qids)} questions, {len(known_src)} sources")
     return not problems

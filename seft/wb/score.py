@@ -13,8 +13,24 @@ KDIR = ROOT / 'knowledge' / 'waterbody'
 def load_knowledge(kdir=None):
     kdir = kdir or KDIR
     K = {n: load_json(kdir / f'{n}.json') for n in ('types', 'signals', 'roles', 'rules')}
-    K['schemes'] = load_json(kdir / 'schemes.json') if (kdir / 'schemes.json').exists() else {'schemes': [], 'links': {}}
+    opt = {'schemes': {'schemes': [], 'links': {}}, 'variables': {'variables': [], 'type_fields': []},
+           'questions': {'type_questions': [], 'stress_questions': []}, 'sources': {'sources': []}}
+    for n, empty in opt.items():
+        K[n] = load_json(kdir / f'{n}.json') if (kdir / f'{n}.json').exists() else empty
+    # sources: the waterbody bibliography plus the watershed entries it cites (knowledge/sources.json)
+    own = {x['id'] for x in K['sources']['sources']}
+    cited = set(_cited(K))
+    ws = load_json(ROOT / 'knowledge' / 'sources.json')['sources']
+    K['sources'] = dict(K['sources'], sources=K['sources']['sources'] + [x for x in ws if x['id'] in cited and x['id'] not in own])
     return K
+
+def _cited(o):
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if k == 'sources' and isinstance(v, list) and all(isinstance(x, str) for x in v): yield from v
+            else: yield from _cited(v)
+    elif isinstance(o, list):
+        for x in o: yield from _cited(x)
 
 def scheme_links(key, b, K):
     """Schemes linked to a rule id (or 'recent_ponds') that apply to this waterbody's state and type."""

@@ -280,6 +280,7 @@ const PyEval=(()=>{
     div:(a,b,d=null)=>(unk(a)||unk(b)||b===0)?d:a/b,
     clip:(x,lo=0,hi=1)=>unk(x)?null:Math.min(Math.max(x,lo),hi),
     abs:x=>unk(x)?null:Math.abs(x), isnan:x=>unk(x), known:x=>!unk(x),
+    ifelse:(c,a,b)=>{const t=truth(c);return t===null?null:(t?a:b)},
     ntrue:(...a)=>a.flat().filter(x=>!unk(x)&&!!x).length,
     nknown:(...a)=>a.flat().filter(x=>!unk(x)).length,
     avg:(...a)=>{const v=a.flat().filter(x=>!unk(x)).map(Number);return v.length?v.reduce((t,x)=>t+x,0)/v.length:null}
@@ -778,6 +779,7 @@ const FN={
 /* ---------- variable references and hover tips ---------- */
 const DS_LABEL={soil_health:"soil nutrients",nrega_annual:"NREGA works",river:"rivers",mws_connectivity:"watershed connectivity",forest_fringes:"forest edges",forest_fire:"forest fires",tree_in_grassland:"trees in grassland",ndvi:"vegetation greenness",lulc_vector:"land use / land cover",croppingintensity_annual:"cropping intensity",croppingdrought_kharif:"kharif drought",hydrological_annual:"water balance",surfacewaterbodies_annual:"surface water bodies",aquifer_vector:"aquifer",terrain:"terrain",soge_vector:"groundwater assessment (CGWB)",restoration_vector:"restoration opportunity",change_detection_degradation:"farmland degradation",change_detection_tree_cover_decrease:"tree cover loss",change_detection_tree_cover_increase:"tree cover gain",change_detection_urbanization:"urbanisation",canal:"canals",green_credit:"Green Credit projects"};
 function refKind(n){
+  if(/^w:/.test(n)) return (WK&&wRefKind(n.slice(2)))?"w":null;
   if(/^fn:/.test(n)) return FN[n.slice(3)]?"fn":null;
   if(VAR[n]) return "var"; if(HLP[n]) return "hlp";
   if(SIG[n]||(/_g$/.test(n)&&SIG[n.slice(0,-2)])) return "sig";
@@ -826,6 +828,7 @@ function directRefs(expr){
   return out;}
 function tipHtml(n){
   const k=refKind(n);
+  if(k==="w") return wTipHtml(n.slice(2));
   if(k==="fn"){const [sig,desc,ex]=FN[n.slice(3)];
     return `<b class="mono">${esc(sig)}</b><p>${esc(desc)}</p><div class="tipx"><span class="muted">Example:</span> <code>${esc(ex)}</code></div><div class="muted">Function of the expression language (seft/expr.py)</div>`;}
   if(k==="var"){const v=VAR[n]; const ds=[...varSources(n)];
@@ -1343,28 +1346,33 @@ function renderMethod(m){
 
 /* ================= Waterbody atlas =================
    Data: data/waterbody/index.json and w_<district>.json (wb_index / wb_w_<district>.js from file://), built by
-   `python -m seft.cli wb-run`. MWS outlines and tehsils come from the watershed bundles (d_<district>). */
+   `python -m seft.cli wb-run`. MWS outlines and tehsils come from the watershed bundles (d_<district>).
+   The scoring below mirrors seft/wb/build.py (types), seft/wb/score.py (signals, roles, rules) and
+   seft/wb/assess.py (community answers), so a type answer can re-score a waterbody in the browser. */
 let WIDX=null, WK=null; const WBB={};
 const W={tab:"explore", district:null, tehsil:null, wb:null, mws:null, mode:"type", arg:null, show:"all"};
 try{const t=localStorage.getItem("wba_tab"); if(t) W.tab=t;}catch(e){}
-const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["signals","Signals and roles"],["rules","Observed stresses"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
+const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["rules","Observed stresses"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
+if(!WTABS.some(t=>t[0]===W.tab)) W.tab="explore";
 const WYEARS=[2017,2018,2019,2020,2021,2022,2023,2024];
 const WTYPE_COL={river_reach:"#3b6fb6",canal_fed:"#7b6aa8",onstream_tank:"#1f7a74",small_onstream_pond:"#5fae9e",headwater_pond:"#a5803a",village_pond:"#c8642f",farm_pond:"#d6a51f",reservoir:"#8a958f",large_river:"#8a958f",unclassified:"#8a958f"};
 const WST_COL={r:"#2c6a9e",x:"#a9b3ae",n:"#e0751c",d:"#d4d9d6"};
-const WVAR_L={years_wet:["Years with water","of 8"],k_fill:["Kharif fill (normal years)","%"],kr_mean:["Rabi water (mean)","%"],krz_mean:["Summer water (mean)","%"],
-  rel_slope:["Fill trend relative to the tehsil","per year"],drought_fill_ratio:["Fill in drought ÷ normal years",""],zoi_ci_mean:["Cropping intensity in zone of influence",""],catchment_ratio:["Catchment ÷ waterbody area",""]};
-const WSIG={}, WROLE={}, WRULE={}, WTYPE={}, WSCH={}; let WRIDS=[], WROIDS=[], WSTC={};
+const WSIG={}, WROLE={}, WRULE={}, WTYPE={}, WSCH={}, WVAR={}, WTF={}, WDER={}, WQ={}, WSRC={}; let WSTC={}, WEIDX={}, WALLQ=[];
+const WCTX_DIM={ctx_rainfall:"rainfall",ctx_aquifer:"aquifer",ctx_terrain:"terrain",ctx_gw_category:"gw_category",ctx_canal:"canal",ctx_cropping:"cropping"};
 function wIndex(){
   WK.signals.signals.forEach(s=>WSIG[s.id]=s); WK.roles.roles.forEach(r=>WROLE[r.id]=r);
   WK.rules.rules.forEach(r=>WRULE[r.id]=r); WK.types.types.forEach(t=>WTYPE[t.id]=t);
-  WK.schemes.schemes.forEach(s=>WSCH[s.id]=s);
-  WRIDS=WK.rules.rules.map(r=>r.id); WROIDS=WK.roles.roles.map(r=>r.id);
+  WK.schemes.schemes.forEach(s=>WSCH[s.id]=s); WK.variables.variables.forEach(v=>WVAR[v.id]=v);
+  (WK.variables.type_fields||[]).forEach(v=>WTF[v.id]=v); (WK.types.derived||[]).forEach(v=>WDER[v.id]=v);
+  WALLQ=[...WK.questions.type_questions,...WK.questions.stress_questions]; WALLQ.forEach(q=>WQ[q.id]=q);
+  WK.sources.sources.forEach(s=>WSRC[s.id]=s);
   Object.entries(WIDX.status).forEach(([k,v])=>WSTC[v.code]={id:k,...v});
+  WIDX.env_ids.forEach((k,i)=>WEIDX[k]=i);
 }
 async function loadWbData(name){
   const key="wb_"+name; if(window.SEFT_DATA[key]) return window.SEFT_DATA[key];
   if(location.protocol!=="file:"){
-    for(const base of ["data/waterbody/","waterbody/","data/",""]){try{const r=await fetch(base+name+".json"); if(r.ok) return (window.SEFT_DATA[key]=await r.json());}catch(e){}}
+    for(const base of ["data/waterbody/","waterbody/"]){try{const r=await fetch(base+name+".json"); if(r.ok) return (window.SEFT_DATA[key]=await r.json());}catch(e){}}
   }
   for(const base of ["data/waterbody/","waterbody/"]){try{await loadScript(base+key+".js"); if(window.SEFT_DATA[key]) return window.SEFT_DATA[key];}catch(e){}}
   throw new Error("data/waterbody/"+key+".js did not load");
@@ -1372,28 +1380,159 @@ async function loadWbData(name){
 function wDist(){return WIDX.districts.find(d=>d.district===W.district)}
 async function wBundle(slug){
   if(WBB[slug]) return WBB[slug];
-  const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={};
+  const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={}; b.slug=slug;
   b.waterbodies.forEach(w=>{b.byId[w.id]=w; (b.byMws[w.mws]=b.byMws[w.mws]||[]).push(w); w.rmap={}; (w.ru||[]).forEach(([i,s,v])=>w.rmap[i]=[s,v]);});
   b.maxPonds=Math.max(1,...Object.values(b.mws).map(m=>m.recent_ponds||0));
   WBB[slug]=b; return b;
 }
 const wsBundleOk=d=>IDX&&IDX.districts.some(x=>x.slug===d.slug);
-function wScope(w){return WTYPE[w.t]&&WTYPE[w.t].in_scope}
+function wScope(t){return WTYPE[t]&&WTYPE[t].in_scope}
 function wInView(w){return (!W.tehsil||w.teh===W.tehsil)&&(W.show==="all"||w.st===W.show)}
 function wName(w){return w.n?`${esc(w.n)} <span class="muted mono">#${w.id}</span>`:`Waterbody <span class="mono">#${w.id}</span>`}
 function stPill(code){const s=WSTC[code]; if(!s) return ""; return `<span class="pill" style="background:${WST_COL[code]};${code==="x"||code==="d"?"color:var(--ink)":""}">${esc(s.label)}</span>`}
 function ctxText(v){return v==null?"–":esc(String(v).replace(/_/g," "))}
-function sigRefs(txt){return esc(txt).replace(/\(((?:s|ctx|role)_[a-z_]+)\)/g,(m,id)=>{const x=WSIG[id]||WROLE[id]; return x?`<span class="vref" tabindex="0" title="${esc(x.label+(x.note?": "+x.note:""))}">(${esc(x.label.toLowerCase())})</span>`:m;});}
-function schemesFor(key,w,state){
+function wOpp(rid){return (WRULE[rid]||{}).type==="opportunity"}
+function wSrc(ids){return srcLinksW(ids)}
+function srcLinksW(ids){return (ids||[]).filter(Boolean).map(id=>{const s=WSRC[id]; if(!s) return esc(id);
+  const label=esc(s.citation.split(/\. |\(|: /)[0].slice(0,70)); return s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" title="${esc(s.citation)}">${label}</a>`:`<span title="${esc(s.citation)}">${label}</span>`}).join("; ")}
+function schemesFor(key,t,state){
   return (WK.schemes.links[key]||[]).filter(l=>{const s=WSCH[l.scheme]; if(!s) return false;
-    if(s.states&&!s.states.includes(state)) return false; if(l.types&&w&&!l.types.includes(w.t)) return false; return true;});
+    if(s.states&&!s.states.includes(state)) return false; if(l.types&&t&&!l.types.includes(t)) return false; return true;});
 }
-function schemeList(links){
+function wSchemeList(links){
   if(!links.length) return '<p class="note">No linked scheme in this state.</p>';
   return `<ul class="wsch">${links.map(l=>{const s=WSCH[l.scheme]; return `<li><b>${esc(s.name)}</b> <span class="muted">· ${esc(l.for)}</span><br><span class="note">${esc(s.status)}</span></li>`}).join("")}</ul>`;
 }
 
+/* ---------- names, hover tips and expressions (waterbody) ---------- */
+function wRefKind(n){
+  if(WVAR[n]) return "var"; if(WTF[n]) return "tf"; if(WDER[n]) return "der"; if(WSIG[n]) return "sig"; if(WROLE[n]) return "role";
+  if(n==="catchment_ratio"||n==="area_ha") return "var";
+  if(/^mws_/.test(n)&&VAR[n.slice(4)]) return "mws"; if(/^share_/.test(n)&&ARCH[n.slice(6)]) return "share";
+  if(WCTX_DIM[n]) return "ctx"; if(n==="type") return "type"; return null;}
+function wLabel(n){const k=wRefKind(n);
+  return k==="var"?WVAR[n].label:k==="tf"?WTF[n].label:k==="der"?n.replace(/_/g," "):k==="sig"?WSIG[n].label:k==="role"?WROLE[n].label+" role":k==="mws"?"MWS: "+VAR[n.slice(4)].label:k==="share"?"Share: "+ARCH[n.slice(6)].label:k==="ctx"?(K.contexts.dimensions.find(d=>d.id===WCTX_DIM[n])||{}).label||n:n;}
+function wvref(n,text){if(!wRefKind(n)) return esc(text??n); return `<span class="vref" tabindex="0" data-ref="w:${esc(n)}">${esc(text??wLabel(n))}</span>`;}
+function wExprHtml(src){
+  if(src==null) return "";
+  const parts=String(src).split(/('[^']*'|[A-Za-z_][A-Za-z0-9_]*)/);
+  return parts.map((part,i)=>{
+    if(i%2===0||part[0]==="'") return esc(part);
+    if(FN[part]&&/^\s*\(/.test(parts[i+1]||"")) return `<span class="vref fref" tabindex="0" data-ref="fn:${esc(part)}">${esc(part)}</span>`;
+    return wRefKind(part)?`<span class="vref" tabindex="0" data-ref="w:${esc(part)}">${esc(part)}</span>`:esc(part);}).join("");}
+function wNames(src){return src?PyEval.names(src).filter(n=>wRefKind(n)):[]}
+function rulesUsingW(id){return WK.rules.rules.filter(r=>[r.gate,r.trigger,r.intensity].some(e=>e&&wNames(e).includes(id))||(r.contexts||[]).includes(id)||(r.roles||[]).includes(id));}
+function signalsUsingW(id){return WK.signals.signals.filter(s=>s.var===id||wNames(s.expr).includes(id)||wNames(s.gate).includes(id));}
+function rolesUsingW(id){return WK.roles.roles.filter(r=>wNames(r.expr).includes(id));}
+function wThrText(s){
+  const u=WVAR[s.var]?.unit||"", d=s.direction==="low"?"≤":"≥", uu=/^(ratio|share|yes\/no)$/.test(u)?"":" "+u;
+  if(s.pool){const P=(WIDX.pools||{})[s.id]||{};
+    return `Lowest ${s.pool.pct}% (severe ${s.pool.severe_pct}%) of waterbodies of the same ${esc(s.pool.by)}${s.pool.over?` that ${esc(wLabel(s.pool.over).toLowerCase())}`:""}: ${Object.entries(P).map(([t,[a,c]])=>`${esc(WTYPE[t]?.label||t)} ${d} ${fmtVal(a)} / ${fmtVal(c)}`).join("; ")}.`;}
+  return `On at ${d} ${fmtVal(s.value)}${esc(uu)}, severe at ${d} ${fmtVal(s.severe)}${esc(uu)}.${s.gate?` Only where <code>${wExprHtml(s.gate)}</code>.`:""}`;}
+const WKIND={stress:"Evidence signal",opportunity:"Opportunity signal",context:"Context signal"};
+function wTipHtml(n){
+  const k=wRefKind(n), us=(xs,l)=>xs.length?`<div class="muted">${l}: ${esc(xs.map(x=>x.label).join(", "))}</div>`:"";
+  if(k==="var"){const v=WVAR[n]||{label:n,description:""};
+    return `<b>${esc(v.label)}</b> <span class="muted">${esc(v.unit||"")}</span><div class="mono">${esc(n)}</div><p>${esc(v.description||"")}</p><div class="muted">Waterbody variable (variables.json, ${esc(WK.variables.groups[v.group]||"")}) · computed in seft/wb/indicators.py${v.sources?" · sources: "+esc(v.sources.map(s=>WSRC[s]?.citation.split(/[.(]/)[0]||s).join("; ")):""}</div>${us(signalsUsingW(n),"Signals using it")}${us(rolesUsingW(n),"Roles using it")}`;}
+  if(k==="tf"){const v=WTF[n]; return `<b>${esc(v.label)}</b> <span class="muted">${esc(v.unit||"")}</span><div class="mono">${esc(n)}</div><p>${esc(v.description)}</p><div class="muted">Type field (variables.json type_fields), read by the type rules in types.json</div>`;}
+  if(k==="der"){const v=WDER[n]; return `<b class="mono">${esc(n)}</b><p>${esc(v.note||"")}</p><div class="tipx"><code>${wExprHtml(v.expr)}</code></div><div class="muted">Derived type field (types.json derived), evaluated before the types</div>`;}
+  if(k==="sig"){const s=WSIG[n];
+    return `<b>${esc(s.label)}</b><div class="mono">${esc(n)}</div>${s.expr?`<p>Yes/no condition:</p><div class="tipx"><code>${wExprHtml(s.expr)}</code></div>`:`<p><b>Variable:</b> ${wvref(s.var)} (${s.direction==="low"?"low":"high"} values count)</p><p>${wThrText(s)}</p>`}${s.note?`<p>${esc(s.note)}</p>`:""}<div class="muted">${esc(WKIND[s.kind]||s.kind)} (signals.json) · graded 0, 0.5 at the threshold to 1 at the severe threshold${s.sources?" · sources: "+esc(s.sources.map(x=>WSRC[x]?.citation.split(/[.(]/)[0]||x).join("; ")):""}</div>${us(rulesUsingW(n),"Used by")}`;}
+  if(k==="role"){const r=WROLE[n]; return `<b>${esc(r.label)} role</b><div class="mono">${esc(n)}</div><p>${esc(r.note)}</p><div class="tipx"><code>${wExprHtml(r.expr)}</code></div><div class="muted">Role, 0 to 1 (roles.json)</div>${us(rulesUsingW(n),"Scales")}`;}
+  if(k==="mws"){const v=VAR[n.slice(4)]; return `<b>${esc(v.label)}</b> <span class="muted">${esc(v.unit||"")}</span><div class="mono">${esc(n)}</div>${v.description?`<p>${esc(v.description)}</p>`:""}<p>Value for the home micro-watershed, from the watershed atlas (variables.json there):</p><div class="tipx"><code>${esc(v.expr)}</code></div>`;}
+  if(k==="share"){const a=ARCH[n.slice(6)]; return `<b>Share of ${esc(a.label)}</b><p>Fraction of the home micro-watershed's area in this system, from the watershed atlas.</p>`;}
+  if(k==="ctx"){const dim=K.contexts.dimensions.find(d=>d.id===WCTX_DIM[n]); return dim?`<b>${esc(dim.label)}</b><p>Context class of the home MWS (watershed atlas): ${dim.classes.map(c=>`<span class="mono">'${esc(c.id)}'</span> = ${esc(c.label)}`).join("; ")}.</p>`:esc(n);}
+  if(k==="type") return `<b>Waterbody type</b><p>Type id from types.json: ${WK.types.types.map(t=>`<span class="mono">'${t.id}'</span>`).join(", ")}. After a type answer it is the reassigned type.</p>`;
+  return esc(n);}
+function wPub(t){return esc(t).replace(/\((?:s|ctx|role)_[a-z_]+\)|\b(?:s|ctx|role)_[a-z_]+\b/g,m=>{const id=m.replace(/[()]/g,""); return wRefKind(id)?(m[0]==="("?"("+wvref(id)+")":wvref(id)):m;});}
+
+/* ---------- scoring: mirror of seft/wb/build.py assign_type, seft/wb/score.py and seft/wb/assess.py ---------- */
+function wGrade(v,thr,sev,dir){const hi=dir==="high"; if(hi?v<thr:v>thr) return 0; if(sev===thr) return 1;
+  const f=(v-thr)/(sev-thr); return Math.round((0.5+0.5*Math.max(0,Math.min(1,f)))*1e4)/1e4;}
+const wNum=x=>typeof x==="number"&&isFinite(x);
+/* as seft/expr.py: a name that is not defined at all (an MWS outside the watershed atlas has no context) makes the
+   whole expression unknown, while a defined name with no value is handled by nz() and the and/or rules */
+const WFN=new Set(["nz","min","max","ramp","clip","ifelse","div","abs","isnan","known","ntrue","nknown","avg"]);
+function wEv(src,env){if(!src) return null; for(const n of PyEval.names(src)) if(!(n in env)&&!WFN.has(n)) return null; return PyEval.safe(src,env);}
+function wTypeEnv(w,sets){const tf=WIDX.type_fields;const e={area_ha:w.a,stream_order:w.so,inflow:null,ownership:null,true:true,false:false};
+  tf.forEach((k,i)=>e[k]=k==="on_drainage"||k==="has_drainage_fields"?!!w.tf[i]:w.tf[i]); Object.assign(e,sets||{}); return e;}
+function wAssignType(w,sets){
+  const e=wTypeEnv(w,sets), steps=[]; (WK.types.derived||[]).forEach(d=>{const v=PyEval.safe(d.expr,e); e[d.id]=v!==null&&!!v; steps.push([d.id,e[d.id]]);});
+  for(const t of WK.types.types){const v=PyEval.safe(t.when,e); if(v!==null&&!!v) return {type:t.id,env:e,derived:steps};}
+  return {type:null,env:e,derived:steps};}
+function wEnv(w,b,type){
+  const e={}; WIDX.env_ids.forEach((k,i)=>{const v=w.e[i]; e[k]=v;});
+  ["is_new","regular","zoi_matched"].forEach(k=>{if(e[k]!=null) e[k]=!!e[k];});
+  const m=b.mws[w.mws]; if(m){WIDX.mws_ids.forEach(k=>e[k]=m[k]??null); ["ctx_rainfall","ctx_aquifer","ctx_terrain","ctx_gw_category","ctx_canal","ctx_cropping"].forEach(k=>{if(!(k in e)) e[k]=m[k]??null});}
+  e.type=type; e.wb_type=w.tf[0]; e.true=true; e.false=false; return e;}
+function wSignals(env){
+  const out={};
+  WK.signals.signals.forEach(s=>{
+    if(s.expr){const r=wEv(s.expr,env); out[s.id]=r===null?null:(r?1:0); return;}
+    if(s.gate){const g=wEv(s.gate,env); if(!(g!==null&&!!g)){out[s.id]=0; return;}}
+    const x=env[s.var];
+    if(s.pool){const th=((WIDX.pools||{})[s.id]||{})[env[s.pool.by]]; out[s.id]=(wNum(x)&&th)?wGrade(x,th[0],th[1],s.direction):null;}
+    else out[s.id]=wNum(x)?wGrade(x,s.value,s.severe,s.direction):null;});
+  return out;}
+function wRoles(env){const out={}; WK.roles.roles.forEach(r=>{const x=wEv(r.expr,env); out[r.id]=wNum(x)?Math.round(x*1000)/1000:0;}); return out;}
+function wRules(env,sig){
+  const out={};
+  WK.rules.rules.forEach(r=>{
+    if(!r.applies_to.includes(env.type)){out[r.id]={status:"not applicable",intensity:null};return;}
+    if(r.gate){const g=wEv(r.gate,env); if(!(g!==null&&!!g)){out[r.id]={status:"not applicable",intensity:null};return;}}
+    const used=[...new Set((r.trigger.match(/\b(s_[a-z_]+|ctx_[a-z_]+)\b/g)||[]))]; const unknown=used.filter(u=>sig[u]==null);
+    const e={...env}; Object.entries(sig).forEach(([k,v])=>e[k]=v==null?0:v);
+    const t=wEv(r.trigger,e);
+    if(t!==null&&!!t){const i=wEv(r.intensity,e); out[r.id]={status:"triggered",intensity:wNum(i)?Math.round(Math.max(0,Math.min(100,i))*10)/10:null};}
+    else out[r.id]={status:unknown.length?"insufficient data":"not triggered",intensity:unknown.length?null:0};});
+  return out;}
+function wScore(w,b,type){const env=wEnv(w,b,type); const sig=wSignals(env); Object.assign(env,sig); const ro=wRoles(env); Object.assign(env,ro);
+  return {env,sig,roles:ro,rules:wScope(type)?wRules(env,sig):{}};}
+function wDataRules(w){const out={}; const st={s:"triggered",n:"not triggered",i:"insufficient data"};
+  WK.rules.rules.forEach((r,i)=>{const x=w.rmap[i]; out[r.id]=x?{status:st[x[0]],intensity:x[1]}:{status:"not applicable",intensity:null};}); return out;}
+function wPrior(status,inten,conf){const A=WK.questions.assessment,bp=A.base_prior,I=(inten||0)/100;let base;
+  if(status==="triggered") base=bp.triggered_min+(bp.triggered_max-bp.triggered_min)*I;
+  else if(status==="not triggered") base=bp.not_triggered+(bp.partial_max-bp.not_triggered)*I;
+  else if(status==="not applicable") return null; else base=bp.unknown;
+  return 0.5+(base-0.5)*(A.confidence_shrink[conf]??0.8);}
+function wBand(p){for(const b of WK.questions.assessment.bands) if(p>=b.min) return b.label; return "unlikely"}
+function wCollect(ans){const sets={},lrs={},sev=new Set(),used={};
+  for(const [qid,oid] of Object.entries(ans||{})){const q=WQ[qid]; const o=q&&q.options.find(o=>o.id===oid); if(!o) continue;
+    Object.assign(sets,o.set||{}); (o.stress||[]).forEach(e=>{lrs[e.id]=(lrs[e.id]||1)*e.lr;(used[e.id]=used[e.id]||[]).push([qid,e.lr]); if(e.severe) sev.add(e.id);});}
+  return {sets,lrs,sev,used};}
+function wAssess(w,b,ans){
+  const A=WK.questions.assessment, C=wCollect(ans), typeData=w.t;
+  const T=Object.keys(C.sets).length?wAssignType(w,C.sets):wAssignType(w,{});
+  const type=Object.keys(C.sets).length?T.type:typeData;
+  const S=wScore(w,b,type);
+  const rules=type===typeData?wDataRules(w):S.rules;            // data results exactly as in Python unless the type changed
+  const st={};
+  WK.rules.rules.forEach(r=>{const x=rules[r.id]||{status:"not applicable",intensity:null};
+    const p0=wPrior(x.status,x.intensity,r.confidence);
+    if(p0===null){st[r.id]={...x,prior:null,post:null,band:null,positive:false,severe:false,used:[]};return;}
+    const o=p0/(1-p0)*(C.lrs[r.id]||1), p=o/(1+o), pos=p>=A.positive_at;
+    const dataSev=x.status==="triggered"&&(x.intensity||0)>=(r.severe_at||70);
+    st[r.id]={...x,prior:p0,post:p,band:wBand(p),positive:pos,severe:pos&&((dataSev&&p>=p0-1e-9)||(C.sev.has(r.id)&&p>=A.severe_at)),used:C.used[r.id]||[]};});
+  return {type,typeData,typeSteps:T,sig:S.sig,roles:type===typeData&&w.ro?Object.fromEntries(WK.roles.roles.map((r,i)=>[r.id,w.ro[i]])):S.roles,env:S.env,st,C};}
+
+/* ---------- community answers (per viewer, kept in this browser) ---------- */
+let WANS={},WAPPLIED={};
+try{WANS=JSON.parse(localStorage.getItem("wba_answers")||"{}")||{}}catch(e){WANS={}}
+WAPPLIED=JSON.parse(JSON.stringify(WANS));
+function wSaveAns(){try{localStorage.setItem("wba_answers",JSON.stringify(WANS))}catch(e){}}
+const wKey=(b,w)=>b.slug+":"+w.id;
+const WACACHE=new Map();
+function wAssessC(w,b){const k=wKey(b,w), a=WAPPLIED[k]||{}, ck=k+"|"+JSON.stringify(a);
+  if(!WACACHE.has(ck)){if(WACACHE.size>300) WACACHE.clear(); WACACHE.set(ck,wAssess(w,b,a));} return WACACHE.get(ck);}
+function wHasApplied(b,w){const a=WAPPLIED[wKey(b,w)]; return a&&Object.keys(a).length>0}
+function wSaveAnswers(){if(!Object.keys(WANS).length){toast("No answers to save yet");return}
+  saveFile("waterbody_answers.json",JSON.stringify({about:"Community answers by waterbody (<district>:<waterbody id>). Use with: python -m seft.cli wb-assess --answers waterbody_answers.json",saved:new Date().toISOString(),answers:WANS},null,1));}
+function wLoadAnswers(file){const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);const a=j.answers||j;let n=0;
+  for(const [u,qs] of Object.entries(a)){if(typeof qs!=="object")continue;WANS[u]={...(WANS[u]||{}),...qs};WAPPLIED[u]={...WANS[u]};n++}
+  wSaveAns();WACACHE.clear();toast(`Loaded answers for ${n} waterbodies`);render();}catch(e){toast("That file is not an answers JSON")}};r.readAsText(file);}
+
 /* ---------- waterbody map ---------- */
+const WB_RMAX=7, WB_RMIN=1.6;
 class WbMap{
   constructor(cv,box){this.cv=cv;this.box=box;this.ctx=cv.getContext("2d");this.view={x:0,y:0,s:1};this.feats=[];this.pts=[];this.bind();
     new ResizeObserver(()=>{this.resize();this.draw();}).observe(box); this.resize();}
@@ -1420,6 +1559,8 @@ class WbMap{
     }
     this.feats.forEach(f=>{f.p2=new Path2D(); f.paths.forEach(r=>{r.forEach(([x,y],i)=>{const [X,Y]=this.proj(x,y); i?f.p2.lineTo(X,Y):f.p2.moveTo(X,Y);}); f.p2.closePath();});});
   }
+  /* bubble radius in screen pixels: true size, at least WB_RMIN and at most WB_RMAX so large rivers and reservoirs do not cover small ponds */
+  rpx(p){return Math.max(WB_RMIN,Math.min(WB_RMAX,p.r*this.view.s));}
   fit(){const [a,b,c,d]=this.bounds; const [x0,y0]=this.proj(a,d),[x1,y1]=this.proj(c,b); const pad=18;
     const s=Math.min((this.w-2*pad)/(x1-x0),(this.h-2*pad)/(y1-y0)); this.view={s,x:(this.w-(x1-x0)*s)/2-x0*s,y:(this.h-(y1-y0)*s)/2-y0*s}; this.draw();}
   zoomBy(f,cx=this.w/2,cy=this.h/2){const v=this.view; v.x=cx-(cx-v.x)*f; v.y=cy-(cy-v.y)*f; v.s*=f; this.draw();}
@@ -1442,12 +1583,13 @@ class WbMap{
     c.globalAlpha=1;
     for(const f of this.feats){ if(f.kind!=="teh") continue; c.strokeStyle=ink; c.lineWidth=(f.t.name===W.tehsil?2.2:1)*lw; c.stroke(f.p2);}
     for(const f of this.feats){ if(f.kind==="mws"&&(f.m.u===W.mws||f===this.hover)){c.strokeStyle=sel; c.lineWidth=(f.m.u===W.mws?3:2)*lw; c.stroke(f.p2);} }
-    const minR=1.6*lw;
-    for(const p of this.pts){const w=p.w; const col=wColor(w); if(!col) continue;
-      const inV=wInView(w); c.globalAlpha=inV?1:0.12; c.fillStyle=col; c.beginPath(); c.arc(p.X,p.Y,Math.max(p.r,minR),0,7); c.fill();}
+    const halo=this.css("--surface");
+    for(const p of this.pts){const w=p.w; const col=wColor(w,wb); if(!col) continue;
+      const inV=wInView(w), r=this.rpx(p)*lw; c.globalAlpha=inV?(WTYPE[w.t].in_scope?0.95:0.55):0.12; c.fillStyle=col; c.beginPath(); c.arc(p.X,p.Y,r,0,7); c.fill();
+      if(inV&&r>3*lw){c.strokeStyle=halo; c.lineWidth=0.8*lw; c.stroke();}}
     c.globalAlpha=1;
     const hp=this.hoverPt, sp=W.wb&&this.pts.find(p=>p.w.id===W.wb);
-    [hp,sp].forEach(p=>{if(!p) return; c.strokeStyle=sel; c.lineWidth=2.5*lw; c.beginPath(); c.arc(p.X,p.Y,Math.max(p.r,minR)+3*lw,0,7); c.stroke();});
+    [hp,sp].forEach(p=>{if(!p) return; c.strokeStyle=sel; c.lineWidth=2.5*lw; c.beginPath(); c.arc(p.X,p.Y,(this.rpx(p)+3)*lw,0,7); c.stroke();});
     c.setTransform(this.dpr,0,0,this.dpr,0,0);
     const kmPerPx=111.32/v.s, nice=[0.5,1,2,5,10,20,50,100].find(n=>n>=90*kmPerPx*0.6)||100, px=nice/kmPerPx;
     c.fillStyle=ink; c.fillRect(12,this.h-16,px,3); c.font="11px "+getComputedStyle(document.body).fontFamily; c.fillText(nice+" km",12,this.h-21);
@@ -1455,8 +1597,9 @@ class WbMap{
   hit(px,py){
     const [X,Y]=this.toWorld(px,py); const c=this.ctx; c.setTransform(1,0,0,1,0,0);
     if(!W.district){for(const f of this.feats) if(f.kind==="district"&&c.isPointInPath(f.p2,X,Y)) return {f}; return null;}
-    let best=null,bd=Infinity; const tol=7/this.view.s;
-    for(const p of this.pts){ if(!wInView(p.w)||!wColor(p.w)) continue; const d=Math.hypot(p.X-X,p.Y-Y)-Math.max(p.r,1.6/this.view.s); if(d<tol&&d<bd){bd=d;best=p;} }
+    /* nearest centre within its bubble plus a few pixels; distance to the centre, not the edge, so a small pond next to a large one stays clickable */
+    let best=null,bd=Infinity; const s=this.view.s;
+    for(const p of this.pts){ if(!wInView(p.w)||!wColor(p.w,this.wb)) continue; const d=Math.hypot(p.X-X,p.Y-Y)*s; if(d<=this.rpx(p)+4&&d<bd){bd=d;best=p;} }
     if(best) return {p:best};
     for(const f of this.feats) if(f.kind==="mws"&&(!W.tehsil||f.m.ts.includes(W.tehsil))&&c.isPointInPath(f.p2,X,Y)) return {f};
     return null;
@@ -1480,19 +1623,26 @@ class WbMap{
   tip(h,x,y){const t=$("#wtip"); if(!h){t.hidden=true;return;} let s="";
     if(h.f&&h.f.kind==="district"){const d=h.f.wd; s=`<b>${esc(d.district)}</b>, ${esc(d.state)}<br>${d.n.toLocaleString("en-IN")} waterbodies · ${d.recent_ponds} recent ponds<br>click to open`;}
     else if(h.f){const m=this.wb.mws[h.f.m.u]||{}; s=`<b>MWS ${esc(h.f.m.u)}</b><br>${(this.wb.byMws[h.f.m.u]||[]).length} waterbodies · ${m.recent_ponds||0} recent ponds`;}
-    else {const w=h.p.w; s=`<b>${w.n?esc(w.n):"#"+w.id}</b><br>${esc(WTYPE[w.t].label)} · ${w.a} ha<br>${esc(WSTC[w.st]?.label||"")}`;
-      if(W.mode==="rule"){const r=w.rmap[W.arg]; s+=`<br>${esc(WK.rules.rules[W.arg].label)}: ${r?(r[0]==="s"?"triggered, "+Math.round(r[1]):r[0]==="n"?"not triggered":"insufficient data"):"not applicable"}`;}
+    else {const w=h.p.w, t0=wTypeOf(w,this.wb); s=`<b>${w.n?esc(w.n):"#"+w.id}</b><br>${esc(WTYPE[t0].label)} · ${w.a} ha<br>${esc(WSTC[w.st]?.label||"")}`;
+      if(W.mode==="rule"){const r=wRuleOf(w,this.wb,W.arg); s+=`<br>${esc(WK.rules.rules[W.arg].label)}: ${r.label}`;}
       if(W.mode==="role") s+=`<br>${esc(WK.roles.roles[W.arg].label)}: ${w.ro?w.ro[W.arg].toFixed(2):"–"}`;}
     t.innerHTML=s; t.hidden=false; t.style.left=Math.min(x+12,this.w-250)+"px"; t.style.top=(y+12)+"px";}
 }
-function wColor(w){
+function wTypeOf(w,b){return wHasApplied(b,w)?wAssessC(w,b).type:w.t}
+/* result of rule i for the map: from the bundle, or from the assessment when answers were applied */
+function wRuleOf(w,b,i){
+  const opp=wOpp(WK.rules.rules[i].id);
+  if(wHasApplied(b,w)){const x=wAssessC(w,b).st[WK.rules.rules[i].id]; if(x.status==="not applicable") return {code:null,label:"not applicable"};
+    return {code:x.positive?"s":x.status==="insufficient data"?"i":"n",v:x.intensity??60,label:`${x.band} (${pct(x.post)}) after answers`,opp};}
+  const r=w.rmap[i]; if(!r) return {code:null,label:"not applicable"};
+  return {code:r[0],v:r[1],label:r[0]==="s"?"triggered, intensity "+Math.round(r[1]):r[0]==="n"?"not triggered":"insufficient data",opp};}
+function wColor(w,b){
   const m=W.mode;
-  if(m==="type") return WTYPE_COL[w.t]||"#999";
+  if(m==="type") return WTYPE_COL[wTypeOf(w,b)]||"#999";
   if(m==="status") return WST_COL[w.st];
   if(m==="ponds") return w.st==="n"?WST_COL.n:null;
-  if(!wScope(w)) return null;
-  if(m==="rule"){const r=w.rmap[W.arg]; if(!r) return null; const opp=WK.rules.rules[W.arg].group==="Opportunity"||/opportunity/.test(WK.rules.rules[W.arg].id);
-    if(r[0]==="s") return intColor(r[1],opp); if(r[0]==="n") return WBMAP.css("--line"); return WBMAP.css("--na");}
+  if(!wScope(wTypeOf(w,b))) return null;
+  if(m==="rule"){const r=wRuleOf(w,b,W.arg); if(!r.code) return null; if(r.code==="s") return intColor(r.v,r.opp); if(r.code==="n") return WBMAP.css("--line"); return WBMAP.css("--na");}
   if(m==="role"){if(!w.ro) return null; return seqColor(w.ro[W.arg]);}
   return "#999";
 }
@@ -1521,7 +1671,7 @@ function renderWbExplore(m){
         <div class="zoom"><button id="wzin" aria-label="Zoom in">+</button><button id="wzout" aria-label="Zoom out">−</button><button id="wzfit" aria-label="Fit to area" style="font-size:12px">⤢</button></div>
         <div class="tip" id="wtip" hidden></div></div>
       <div class="mapctl" id="wmapctl"></div><div class="legend" id="wlegend"></div>
-      <p class="note">Drag to pan, scroll or pinch to zoom. Click a waterbody for its record, or the land around it for its micro-watershed. Dots are drawn to scale, with a small minimum size.</p>
+      <p class="note">Drag to pan, scroll or pinch to zoom. Click a waterbody for its record, or the land around it for its micro-watershed. Dots grow with size up to a cap, so large rivers and reservoirs do not hide small ponds.</p>
     </section><section class="pane" id="wpane"></section></div>`;
   WBMAP=new WbMap($("#wcv"),$("#wcw"));
   $("#wzin").onclick=()=>WBMAP.zoomBy(1.5); $("#wzout").onclick=()=>WBMAP.zoomBy(1/1.5); $("#wzfit").onclick=()=>WBMAP.fit();
@@ -1560,12 +1710,12 @@ function wLegend(){
     L.innerHTML=WK.types.types.filter(t=>c[t.id]).map(t=>`<span><i style="background:${WTYPE_COL[t.id]}"></i>${esc(t.label)}</span>`).join(""); return;}
   if(m==="status"){L.innerHTML=["r","x","n"].map(k=>`<span><i style="background:${WST_COL[k]}"></i>${esc(WSTC[k].label)}</span>`).join(""); return;}
   if(m==="ponds"){L.innerHTML=`<span>Recent ponds (new since 2022) per micro-watershed</span> <span class="ramp" style="background:linear-gradient(90deg,${SEQ.join(",")})"></span> <span class="num">1 → ${WBB[wDist().slug].maxPonds}</span><span><i style="background:${WST_COL.n}"></i>Recent pond</span>`; return;}
-  if(m==="rule"){const r=WK.rules.rules[W.arg]; const o=/opportunity/.test(r.id);
-    L.innerHTML=`<span>${esc(r.label)}: triggered, by intensity</span> <span class="ramp" style="background:linear-gradient(90deg,${intColor(40,o)},${intColor(70,o)},${intColor(100,o)})"></span> <span class="num">40 → 100</span><span><i style="background:var(--line)"></i>Not triggered</span><span><i style="background:var(--na)"></i>Insufficient data</span><span>Waterbodies where it does not apply are hidden.</span>`; return;}
+  if(m==="rule"){const r=WK.rules.rules[W.arg]; const o=wOpp(r.id);
+    L.innerHTML=`<span>${esc(r.label)}: ${o?"present":"triggered"}, by intensity</span> <span class="ramp" style="background:linear-gradient(90deg,${intColor(40,o)},${intColor(70,o)},${intColor(100,o)})"></span> <span class="num">40 → 100</span><span><i style="background:var(--line)"></i>Not triggered</span><span><i style="background:var(--na)"></i>Insufficient data</span><span>Waterbodies where it does not apply are hidden. Community answers you applied are included.</span>`; return;}
   if(m==="role"){L.innerHTML=`<span>${esc(WK.roles.roles[W.arg].label)} role</span> <span class="ramp" style="background:linear-gradient(90deg,${SEQ.join(",")})"></span> <span class="num">0 → 1</span>`; return;}
 }
 function wCounts(ws){
-  const st={}, ty={}; let rp=0, rpha=0; ws.forEach(w=>{ty[w.t]=(ty[w.t]||0)+1; if(wScope(w)){st[w.st]=(st[w.st]||0)+1; if(w.st==="n"){rp++; rpha+=w.a;}}});
+  const st={}, ty={}; let rp=0, rpha=0; ws.forEach(w=>{ty[w.t]=(ty[w.t]||0)+1; if(wScope(w.t)){st[w.st]=(st[w.st]||0)+1; if(w.st==="n"){rp++; rpha+=w.a;}}});
   const rules=WK.rules.rules.map((r,i)=>{let app=0,trig=0,ins=0; ws.forEach(w=>{const x=w.rmap[i]; if(!x) return; app++; if(x[0]==="s") trig++; else if(x[0]==="i") ins++;}); return {r,i,app,trig,ins};});
   return {st,ty,rp,rpha,rules,n:ws.length};
 }
@@ -1576,15 +1726,15 @@ function typeBar(ty){const ids=WK.types.types.map(t=>t.id).filter(t=>ty[t]); con
   return `<div class="mixbar">${ids.map(t=>`<span style="width:${(ty[t]/tot*100).toFixed(2)}%;background:${WTYPE_COL[t]}" title="${esc(WTYPE[t].label)} ${ty[t]}"></span>`).join("")}</div>
   <div class="mixlist">${ids.map(t=>`<div><span><i style="background:${WTYPE_COL[t]}"></i>${esc(WTYPE[t].label)}</span><span class="num">${ty[t].toLocaleString("en-IN")}</span></div>`).join("")}</div>`;}
 function ruleBars(rules){
-  return `<div class="bars">${rules.map(x=>{const p=x.app?x.trig/x.app:0; const o=/opportunity/.test(x.r.id);
+  return `<div class="bars">${rules.map(x=>{const p=x.app?x.trig/x.app:0; const o=wOpp(x.r.id);
     return `<div class="bar" data-ri="${x.i}" title="${x.trig} of ${x.app} waterbodies where it applies${x.ins?"; "+x.ins+" with insufficient data":""}"><span>${esc(x.r.label)}</span><span class="t"><span style="width:${(p*100).toFixed(1)}%;background:${o?"var(--ok)":"var(--warn)"}"></span></span><span class="num">${x.app?Math.round(p*100)+"%":"–"}</span></div>`}).join("")}</div>
-    <p class="note">Share of the waterbodies where each rule applies (by type and gate) that trigger it. Click a row to colour the map by it.</p>`;}
+    <p class="note">Share of the waterbodies where each rule applies (by type and gate) that trigger it, from data alone. Click a row to colour the map by it.</p>`;}
 function wPane(){
   const P=$("#wpane"); if(!P) return;
   if(!W.district){
     const tot=WIDX.districts.reduce((s,d)=>s+d.n,0), rp=WIDX.districts.reduce((s,d)=>s+d.recent_ponds,0);
     P.innerHTML=`<div class="block"><div class="eyebrow">Waterbody atlas</div><h2>${tot.toLocaleString("en-IN")} waterbodies in ${WIDX.districts.length} districts</h2>
-      <p>Each waterbody of 0.05 ha or more is typed from its size, drainage position and catchment, read through eight years (2017–2024) of the water it held in kharif, rabi and summer, and checked against ${WK.rules.rules.length} rules for observed stresses and opportunities: filling, retention, silt, sudden loss, drought, irrigation use, livestock water, fishery, canal tails and river flow. Each rule carries interventions, questions to ask the community and the schemes that can fund the work.</p>
+      <p>Each waterbody of ${WK.types.min_area_ha} ha or more is typed from its size, drainage position and catchment, read through eight years (2017–2024) of the water it held in kharif, rabi and summer, and checked against ${WK.rules.rules.length} rules for observed stresses and opportunities. Each rule carries interventions, questions to ask the community and the schemes that can fund the work. Community answers can change a waterbody's type and the probability of each stress.</p>
       <p>${rp.toLocaleString("en-IN")} waterbodies first held water in 2022 or later and have held water every year since: mostly farm ponds dug recently. They are shown as <b>recent ponds</b>, a sign of where pond-building schemes have reached.</p></div>
       <div class="cards">${WIDX.districts.map(d=>{const st={r:d.by_status.regular||0,x:d.by_status.rarely_wet||0,n:d.by_status.new||0};
         return `<button class="dcard" data-d="${esc(d.district)}"><b>${esc(d.district)}</b><span class="muted">${esc(d.state)} · ${d.tehsils.length} tehsils</span><span>${d.n.toLocaleString("en-IN")} waterbodies · <b>${d.recent_ponds}</b> recent ponds in ${d.recent_pond_mws} MWS</span>${statusBar(st).split("<div class=\"mixlist\">")[0]}</button>`}).join("")}</div>`;
@@ -1595,13 +1745,12 @@ function wPane(){
   if(W.mws) return wPaneMws(P,W.mws,d,b);
   const ws=b.waterbodies.filter(wInView), C=wCounts(ws);
   let top="";
-  if(W.mode==="rule"){const xs=ws.filter(w=>w.rmap[W.arg]&&w.rmap[W.arg][0]==="s").sort((a,b)=>b.rmap[W.arg][1]-a.rmap[W.arg][1]).slice(0,15);
-    top=`<div class="block"><h3>Highest intensity: ${esc(WK.rules.rules[W.arg].label)}</h3>${xs.length?`<div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Tehsil</th><th class="r">ha</th><th class="r">Intensity</th></tr></thead><tbody>${xs.map(w=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t].label)}</td><td>${esc(w.teh)}</td><td class="r num">${w.a}</td><td class="r">${ibar(w.rmap[W.arg][1],/opportunity/.test(WK.rules.rules[W.arg].id))}</td></tr>`).join("")}</tbody></table></div>`:'<p class="note">None triggered here.</p>'}</div>`;}
+  if(W.mode==="rule"){const xs=ws.filter(w=>w.rmap[W.arg]&&w.rmap[W.arg][0]==="s").sort((a,c)=>c.rmap[W.arg][1]-a.rmap[W.arg][1]).slice(0,15);
+    top=`<div class="block"><h3>Highest intensity: ${esc(WK.rules.rules[W.arg].label)}</h3>${xs.length?`<div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Tehsil</th><th class="r">ha</th><th class="r">Intensity</th></tr></thead><tbody>${xs.map(w=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t].label)}</td><td>${esc(w.teh)}</td><td class="r num">${w.a}</td><td class="r">${ibar(w.rmap[W.arg][1],wOpp(WK.rules.rules[W.arg].id))}</td></tr>`).join("")}</tbody></table></div>`:'<p class="note">None triggered here.</p>'}</div>`;}
   if(W.mode==="ponds"){const ms=Object.entries(b.mws).filter(([u,m])=>m.recent_ponds&&(!W.tehsil||(b.byMws[u]||[]).some(w=>w.teh===W.tehsil))).sort((a,c)=>c[1].recent_ponds-a[1].recent_ponds).slice(0,12);
-    const links=schemesFor("recent_ponds",null,d.state);
     top=`<div class="block"><h3>Where recent ponds are</h3><p>Micro-watersheds with the most waterbodies first wet in 2022 or later and wet every year since. Most are farm ponds; the count shows where pond-building has reached, and where it has not.</p>
       <div class="tbl"><table><thead><tr><th>MWS</th><th class="r">Recent ponds</th><th class="r">ha</th><th>Main system</th></tr></thead><tbody>${ms.map(([u,m])=>`<tr class="mrow" data-u="${u}" style="cursor:pointer"><td class="mono">${u}</td><td class="r num">${m.recent_ponds}</td><td class="r num">${m.recent_ponds_ha}</td><td>${esc(ARCH[m.dominant_system]?.label||ctxText(m.dominant_system))}</td></tr>`).join("")}</tbody></table></div>
-      <h3>Schemes behind farm ponds in ${esc(d.state)}</h3>${schemeList(links)}</div>`;}
+      <h3>Schemes behind farm ponds in ${esc(d.state)}</h3>${wSchemeList(schemesFor("recent_ponds",null,d.state))}</div>`;}
   P.innerHTML=`<div class="block"><div class="eyebrow">${esc(W.tehsil?W.tehsil+" tehsil, ":"")}${esc(d.district)}, ${esc(d.state)}</div>
       <h2>${C.n.toLocaleString("en-IN")} waterbodies${W.show!=="all"?" · "+esc(WSTC[W.show].label.toLowerCase()):""}</h2>
       <p><b>${C.rp}</b> recent ponds (${C.rpha.toFixed(1)} ha) first held water in 2022 or later.</p>
@@ -1615,8 +1764,8 @@ function wPane(){
 }
 function ctxBlock(m){
   if(!m) return '<p class="note">This micro-watershed is outside the watershed atlas, so its landscape context is not available.</p>';
-  const rows=[["Rainfall",m.ctx_rainfall],["Aquifer",m.ctx_aquifer],["Terrain",m.ctx_terrain],["Groundwater category",m.ctx_gw_category],["Canal",m.ctx_canal],["Cropping",m.ctx_cropping]];
-  return `<div class="tbl"><table><tbody>${rows.map(([l,v])=>`<tr><th>${l}</th><td>${ctxText(v)}</td></tr>`).join("")}<tr><th>Main system</th><td>${esc(ARCH[m.dominant_system]?.label||ctxText(m.dominant_system))}</td></tr></tbody></table></div>`;
+  const rows=["ctx_rainfall","ctx_aquifer","ctx_terrain","ctx_gw_category","ctx_canal","ctx_cropping"];
+  return `<div class="tbl"><table><tbody>${rows.map(k=>`<tr><th>${wvref(k)}</th><td>${ctxText(m[k])}</td></tr>`).join("")}<tr><th>Main system</th><td>${esc(ARCH[m.dominant_system]?.label||ctxText(m.dominant_system))}</td></tr></tbody></table></div>`;
 }
 function openInWatershed(u){
   const d=wDist(); if(!wsBundleOk(d)) return;
@@ -1631,7 +1780,7 @@ function wPaneMws(P,u,d,b){
     ${ctxBlock(m)}${m&&wsBundleOk(d)?`<button class="btn ghost" id="wopenws">Open this MWS in the watershed atlas</button>`:""}</div>
     <div class="block"><div class="eyebrow">How often they hold water</div>${statusBar(C.st)}</div>
     <div class="block"><h3>Waterbodies</h3><div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Status</th><th class="r">ha</th><th class="r">Triggered</th></tr></thead><tbody>
-    ${sorted.map(w=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t].label)}</td><td><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${WST_COL[w.st]}"></i> ${esc(WSTC[w.st].label.split(" (")[0])}</td><td class="r num">${w.a}</td><td class="r num">${(w.ru||[]).filter(x=>x[1]==="s").length}</td></tr>`).join("")}</tbody></table></div></div>
+    ${sorted.map(w=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[wTypeOf(w,b)].label)}</td><td><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${WST_COL[w.st]}"></i> ${esc(WSTC[w.st].label.split(" (")[0])}</td><td class="r num">${w.a}</td><td class="r num">${(w.ru||[]).filter(x=>x[1]==="s").length}</td></tr>`).join("")}</tbody></table></div></div>
     <div class="block"><h3>Observed stresses and opportunities here</h3>${ruleBars(C.rules)}</div>`;
   P.querySelectorAll(".wrow").forEach(e=>e.onclick=()=>wGo("wb",+e.dataset.id));
   P.querySelectorAll(".bar[data-ri]").forEach(e=>e.onclick=()=>{W.mode="rule";W.arg=+e.dataset.ri; wMapCtl(); WBMAP.draw();});
@@ -1646,44 +1795,107 @@ function fillChart(w){
       const h=Math.max(v/100*H,v>0?1:0); s+=`<rect x="${x0+j*bw}" y="${H-h+2}" width="${bw-1}" height="${h}" fill="${c}"><title>${yr} ${l}: ${v}%</title></rect>`;});
     s+=`<text x="${x0+gw/2-gap/2}" y="${H+14}" font-size="7.5" text-anchor="middle" fill="var(--muted)">${yr}</text>`;});
   s+="</svg>";
-  return s+`<div class="legend">${ser.map(([k,l,c])=>`<span><i style="background:${c}"></i>${l}</span>`).join("")}<span>Share of the waterbody's mapped extent holding water in each season, per hydrological year (July–June).</span></div>`;
+  return s+`<div class="legend">${ser.map(([k,l,c])=>`<span><i style="background:${c}"></i>${l}</span>`).join("")}<span>Share of the waterbody's mapped extent holding water in each season, per hydrological year (July–June). A year with no bars held no water in kharif.</span></div>`;
 }
+function wVal(n,v){const u=(WVAR[n]||{}).unit; if(v==null) return "–"; if(u==="yes/no") return v?"yes":"no"; if(u==="of 8"||u==="years"||u==="year") return String(v); return fmtVal(v,u==="share"?"share":"")+(u&&!["share","ratio"].includes(u)?" "+esc(u):"");}
+/* the signals a rule reads, by role */
+function ruleSignals(r){const ns=new Set([r.trigger,r.gate,r.intensity].flatMap(e=>e?PyEval.names(e):[]));
+  const sig=[...ns].filter(n=>WSIG[n]); return {evidence:sig.filter(n=>WSIG[n].kind!=="context"),context:[...new Set([...sig.filter(n=>WSIG[n].kind==="context"),...(r.contexts||[])])],roles:[...new Set([...[...ns].filter(n=>WROLE[n]),...(r.roles||[])])]};}
+function wSigRow(id,role,R){
+  const s=WSIG[id], g=R.sig[id], on=g==null?null:g>0;
+  let val="–",thr="";
+  if(s.var){val=wVal(s.var,R.env[s.var]);
+    if(s.pool){const th=((WIDX.pools||{})[s.id]||{})[R.type]; thr=th?`on at ${s.direction==="low"?"≤":"≥"} ${fmtVal(th[0])}, severe at ${s.direction==="low"?"≤":"≥"} ${fmtVal(th[1])} <span class="muted">(lowest ${s.pool.pct}% / ${s.pool.severe_pct}% of ${esc(WTYPE[R.type]?.label||R.type)})</span>`:'<span class="muted">no pool for this type</span>';}
+    else thr=`on at ${s.direction==="low"?"≤":"≥"} ${fmtVal(s.value)}, severe at ${s.direction==="low"?"≤":"≥"} ${fmtVal(s.severe)}${s.gate?` <span class="muted">where <code>${wExprHtml(s.gate)}</code></span>`:""}`;}
+  else thr=`<code>${wExprHtml(s.expr)}</code>`;
+  return `<tr><td><span class="role">${role}</span><br>${wvref(id)}</td><td class="r num">${val}</td><td>${thr}</td><td class="r num">${g==null?"–":g.toFixed(2)}</td><td>${on===null?'<span class="muted">unknown</span>':on?`<span class="on ${s.kind==="context"||s.kind==="opportunity"?"opp":""}">on</span>`:"off"}</td></tr>`;}
+function wStressCard(r,x,R,b,d,muted){
+  const o=wOpp(r.id), links=schemesFor(r.id,R.type,d.state), sg=ruleSignals(r);
+  const pill=x.positive?(o?'<span class="pill opp">present</span>':`<span class="pill ${x.severe?"severe":"moderate"}">${x.severe?"severe":"moderate"}</span>`):"";
+  const band=x.band?`<span class="pill ${x.band==="confirmed"?(o?"opp":"severe"):x.band==="likely"?(o?"opp":"moderate"):"conf"}">${esc(x.band)}</span>`:"";
+  const ans=x.used.length?` → <b>${pct(x.post)}</b> after ${x.used.length} answer${x.used.length>1?"s":""} <span class="muted">(${x.used.map(([q,lr])=>`${esc(WQ[q].text.slice(0,44))}… ×${lr}`).join("; ")})</span>`:"";
+  const dl=x.status==="triggered"?`triggered${x.intensity>=(r.severe_at||70)?" (severe)":""} · intensity ${Math.round(x.intensity)}`:x.status;
+  return `<div class="stress ${o?"opportunity":(x.severe?"severe":"")}" ${muted?'style="border-left-color:var(--na)"':""}><div class="hd"><b>${esc(r.label)}</b><span>${ibar(x.intensity,o)} ${band} ${pill} <span class="pill conf">${esc(r.confidence)} confidence rule</span></span></div>
+    <p>${wPub(r.public_note)}</p>
+    <p class="note">Data: ${esc(dl)} · probability before answers ${pct(x.prior)}${ans}</p>
+    <details><summary>Signals behind this result</summary><div class="tbl"><table><thead><tr><th>Signal</th><th class="r">Value</th><th>Threshold</th><th class="r">Grade</th><th>State</th></tr></thead><tbody>
+      ${sg.evidence.map(id=>wSigRow(id,"evidence",R)).join("")}${sg.context.map(id=>wSigRow(id,"context",R)).join("")}
+      ${sg.roles.map(id=>`<tr><td><span class="role">role</span><br>${wvref(id)}</td><td class="r num">${fmtVal(R.roles[id])}</td><td><code>${wExprHtml(WROLE[id].expr)}</code></td><td></td><td></td></tr>`).join("")}</tbody></table></div>
+      <p class="note">${r.gate?`<b>Checked where:</b> <code>${wExprHtml(r.gate)}</code><br>`:""}<b>Trigger:</b> <code>${wExprHtml(r.trigger)}</code><br><b>Intensity:</b> <code>${wExprHtml(r.intensity)}</code> · severe at ${r.severe_at}</p></details>
+    <details><summary>Interventions and schemes</summary><div class="walk"><div><div class="eyebrow">Interventions</div><ul>${r.interventions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
+      <div><div class="eyebrow">Schemes in ${esc(d.state)}</div>${wSchemeList(links)}</div></div></details></div>`;}
+function wQuestionHtml(q,key){
+  const cur=(WANS[key]||{})[q.id]; const inf=q.rules||[];
+  return `<fieldset class="q" data-q="${q.id}"><legend>${esc(q.text)}</legend>
+    <div class="opts">${q.options.map(o=>`<label><input type="radio" name="wq_${q.id}" value="${o.id}" ${cur===o.id?"checked":""}> ${esc(o.label)}</label>`).join("")}
+      <label class="muted"><input type="radio" name="wq_${q.id}" value="" ${!cur?"checked":""}> Not asked or don't know</label></div>
+    <p class="note">${inf.length?"Informs: "+inf.map(x=>esc(WRULE[x].label)).join(", "):"Can change the waterbody type (sets "+[...new Set(q.options.flatMap(o=>Object.keys(o.set||{})))].map(k=>wvref(k)).join(", ")+")"}</p></fieldset>`;}
+function typeWalk(R){
+  const e=R.typeSteps.env; let found=false;
+  const fields=[...WIDX.type_fields,"area_ha","stream_order","inflow","ownership"];
+  return `<div class="walk"><div class="tbl"><table><tbody>${fields.map(f=>`<tr><td>${wvref(f)}</td><td class="r num">${e[f]==null?"–":typeof e[f]==="boolean"?(e[f]?"yes":"no"):esc(typeof e[f]==="number"?fmtVal(e[f]):e[f])}</td></tr>`).join("")}
+    ${R.typeSteps.derived.map(([k,v])=>`<tr><td>${wvref(k)} = <code>${wExprHtml(WDER[k].expr)}</code></td><td class="r num">${v?"yes":"no"}</td></tr>`).join("")}</tbody></table></div>
+    <div class="tbl"><table><thead><tr><th>Type, in order</th><th>Assigned when</th><th>Holds?</th></tr></thead><tbody>${WK.types.types.map(t=>{const v=PyEval.safe(t.when,e); const hit=!found&&v!==null&&!!v; if(hit) found=true;
+      return `<tr${hit?' style="font-weight:600"':""}><td>${esc(t.label)}</td><td><code>${wExprHtml(t.when)}</code></td><td>${hit?"yes: assigned":v===null?"unknown":(v?"yes (an earlier type matched)":"no")}</td></tr>`;}).join("")}</tbody></table></div></div>`;}
 function wPaneWb(P,w,d,b){
-  const m=b.mws[w.mws], T=WTYPE[w.t], inS=T.in_scope;
-  const facts=[["Type",esc(T.label)],["Area",w.a+" ha"],["Tehsil",esc(w.teh)],["Stream order",w.so??"–"],["Zone of influence",{w:"matched by waterbody id",l:"matched by location",["-"]:"not found"}[w.z]],["Location",`<span class="mono">${w.xy[1].toFixed(4)}, ${w.xy[0].toFixed(4)}</span>`]];
-  const vars=w.v?WIDX.web_vars.map((k,i)=>[WVAR_L[k]?WVAR_L[k][0]:k,w.v[i],WVAR_L[k]?WVAR_L[k][1]:""]).filter(x=>x[1]!=null):[];
+  const key=wKey(b,w), R=wAssessC(w,b), T=WTYPE[R.type], inS=T.in_scope, m=b.mws[w.mws];
+  const changed=R.type!==R.typeData;
+  const facts=[["Type",esc(T.label)+(changed?` <span class="muted">(from data: ${esc(WTYPE[R.typeData].label)})</span>`:"")],["Area",w.a+" ha"],["Tehsil",esc(w.teh)],["Stream order",w.so??"–"],["Zone of influence",{w:"matched by waterbody id",l:"matched by location",["-"]:"not found"}[w.z]],["Location",`<span class="mono">${w.xy[1].toFixed(4)}, ${w.xy[0].toFixed(4)}</span>`]];
   let stNote="";
   if(w.st==="x") stNote=`<p class="pubnote">${esc(WSTC.x.about)}</p>`;
   if(w.st==="n") stNote=`<p class="pubnote">A <b>recent pond</b>: ${esc(WSTC.n.about)} Rules that look at change over the years do not apply yet.</p>`;
-  const rr=(w.ru||[]).map(([i,s,v])=>({i,s,v,r:WK.rules.rules[i]}));
-  const trig=rr.filter(x=>x.s==="s").sort((a,c)=>c.v-a.v), nt=rr.filter(x=>x.s==="n"), ins=rr.filter(x=>x.s==="i");
-  const ruleCard=x=>{const r=x.r, o=/opportunity/.test(r.id), links=schemesFor(r.id,w,d.state);
-    return `<div class="stress ${o?"opportunity":(x.v>=70?"severe":"")}"><div class="hd"><b>${esc(r.label)}</b>${ibar(x.v,o)}</div>
-      <p>${sigRefs(r.public_note)}</p>
-      <details><summary>Interventions, questions and schemes</summary><div class="walk">
-        <div><div class="eyebrow">Interventions</div><ul>${r.interventions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-        <div><div class="eyebrow">Ask the community</div><ul>${r.questions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-        <div><div class="eyebrow">Schemes</div>${schemeList(links)}</div></div></details></div>`;};
-  P.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.district)}, ${esc(d.state)}</div><h2>${wName(w)}</h2><div class="chips">${stPill(w.st)}<span class="chip">${esc(T.label)}</span></div>
+  const all=WK.rules.rules, st=R.st;
+  const pos=all.filter(r=>st[r.id].positive).sort((a,c)=>(c.type==="stress")-(a.type==="stress")||(st[c.id].post-st[a.id].post));
+  const evald=all.filter(r=>!st[r.id].positive&&st[r.id].status!=="not applicable");
+  const na=all.filter(r=>st[r.id].status==="not applicable");
+  const relevant=new Set([...pos,...evald].map(r=>r.id));
+  const typeQ=WK.questions.type_questions.filter(q=>!q.applies_to||q.applies_to.includes(R.typeData)||q.applies_to.includes(R.type));
+  const strQ=WK.questions.stress_questions.filter(q=>q.rules.some(r=>relevant.has(r)));
+  strQ.sort((a,c)=>Math.max(...c.rules.map(r=>st[r].positive?2:relevant.has(r)?1:0))-Math.max(...a.rules.map(r=>st[r].positive?2:relevant.has(r)?1:0)));
+  const pending=JSON.stringify(WANS[key]||{})!==JSON.stringify(WAPPLIED[key]||{}), nAns=Object.keys(WANS[key]||{}).length;
+  const status=`<p class="note" id="wansStatus">${pending?`<b>${nAns} answer${nAns===1?"":"s"} not yet applied.</b> `:""}${wHasApplied(b,w)?`${Object.keys(WAPPLIED[key]).length} community answer(s) applied to this waterbody.`:"No community answers applied yet; results are from data alone."}</p>`;
+  const sch=new Map(); pos.forEach(r=>schemesFor(r.id,R.type,d.state).forEach(l=>{if(!sch.has(l.scheme)) sch.set(l.scheme,[]); sch.get(l.scheme).push(r.label);}));
+  const varRows=Object.entries(WK.variables.groups).map(([g,gl])=>{const vs=WK.variables.variables.filter(v=>v.group===g);return `<tr><th colspan="2">${esc(gl)}</th></tr>`+vs.map(v=>`<tr><td>${wvref(v.id)}</td><td class="r num">${wVal(v.id,R.env[v.id])}</td></tr>`).join("")}).join("");
+  const kv=WIDX.web_vars.filter(k=>R.env[k]!=null);
+  P.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.district)}, ${esc(d.state)}</div><h2>${wName(w)}</h2><div class="chips">${stPill(w.st)}<span class="chip">${esc(T.label)}</span>${changed?'<span class="chip">type from community answers</span>':""}</div>
     ${stNote}<div class="tbl"><table><tbody>${facts.map(([l,v])=>`<tr><th>${l}</th><td>${v}</td></tr>`).join("")}
     <tr><th>Micro-watershed</th><td><button class="btn ghost" id="wgomws" style="padding:1px 8px">MWS ${esc(w.mws||"–")}</button> ${m&&m.recent_ponds?`· ${m.recent_ponds} recent ponds`:""}</td></tr></tbody></table></div></div>
     <div class="block"><h3>Water held, 2017–2024</h3>${fillChart(w)}
-      ${vars.length?`<div class="tbl"><table><tbody>${vars.map(([l,v,u])=>`<tr><th>${esc(l)}</th><td class="num">${u==="of 8"?v:fmtVal(v)}${u?" "+esc(u):""}</td></tr>`).join("")}</tbody></table></div>`:""}</div>
-    ${inS?`<div class="block"><h3>Roles it plays</h3><div class="bars">${WK.roles.roles.map((r,i)=>`<div class="bar" style="cursor:default" title="${esc(r.note)}"><span>${esc(r.label)}</span><span class="t"><span style="width:${((w.ro||[])[i]||0)*100}%;background:var(--accent)"></span></span><span class="num">${w.ro?w.ro[i].toFixed(2):"–"}</span></div>`).join("")}</div>
-      <p class="note">0 to 1, from cropping in its zone of influence, village fishery and irrigation sources, livestock and the home MWS. A rule's intensity rises with the roles that matter for it.</p></div>
-    <div class="block"><h3>Observed stresses and opportunities</h3>
-      ${trig.length?trig.map(ruleCard).join(""):'<p>No rule is triggered for this waterbody.</p>'}
-      ${nt.length?`<p class="note">Checked, not triggered: ${nt.map(x=>esc(x.r.label)).join(", ")}.</p>`:""}
-      ${ins.length?`<p class="note">Insufficient data: ${ins.map(x=>esc(x.r.label)).join(", ")}.</p>`:""}
-      ${rr.length<WK.rules.rules.length?`<p class="note">Not applicable to this type or status: ${WK.rules.rules.filter((r,i)=>!w.rmap[i]).map(r=>esc(r.label)).join(", ")}.</p>`:""}</div>`
+      ${kv.length?`<div class="tbl"><table><tbody>${kv.map(k=>`<tr><th>${wvref(k)}</th><td class="num">${wVal(k,R.env[k])}</td></tr>`).join("")}</tbody></table></div>`:""}</div>
+    <div class="block" id="wtypeq"><div class="eyebrow">Waterbody type</div><h3>${esc(T.label)}</h3><p>${esc(T.description)}</p>
+      <details><summary>How this type was assigned</summary>${typeWalk(R)}</details>
+      ${typeQ.length?`<p class="note">The data cannot see who owns a pond or whether a small stream feeds it. Answers set those fields, the type rules are evaluated again, and every rule is re-scored for the new type.</p>${typeQ.map(q=>wQuestionHtml(q,key)).join("")}<div class="filters"><button class="btn" data-wapply>Re-compute type</button></div>`:""}</div>
+    ${inS?`<div class="block"><h3>Roles it plays</h3><div class="bars">${WK.roles.roles.map(r=>`<div class="bar" style="cursor:default"><span>${wvref(r.id,r.label)}</span><span class="t"><span style="width:${(R.roles[r.id]||0)*100}%;background:var(--accent)"></span></span><span class="num">${(R.roles[r.id]||0).toFixed(2)}</span></div>`).join("")}</div>
+      <p class="note">0 to 1, from cropping in its zone of influence, village fishery and irrigation sources, livestock and the home MWS. A rule's intensity rises with the roles that matter for it. Hover a role for its formula.</p></div>
+    <div class="block"><div class="eyebrow">Observed stresses and opportunities (${pos.length} present)</div>
+      <p class="note">Each rule's data result gives a probability; community answers raise or lower it. A rule is present at ${pct(WK.questions.assessment.positive_at)} or more.</p>
+      ${pos.length?pos.map(r=>wStressCard(r,st[r.id],R,b,d)).join(""):'<p class="muted">No stress or opportunity is likely present.</p>'}
+      ${evald.length?`<details><summary>Evaluated, not present (${evald.length})</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">${evald.map(r=>wStressCard(r,st[r.id],R,b,d,true)).join("")}</div></details>`:""}
+      <p class="note">Not applicable to this type or status: ${na.map(r=>esc(r.label)).join(", ")||"none"}.</p></div>
+    <div class="block" id="wstrq"><div class="eyebrow">Ask the community (${strQ.length} questions)</div>
+      <p class="note">Questions for the rules evaluated here, those already present first. Each answer is evidence for or against a rule and multiplies its odds by a likelihood ratio (Observed stresses tab). Answers are kept in this browser; save them to use with the Python pipeline.</p>
+      ${status}${strQ.map(q=>wQuestionHtml(q,key)).join("")||'<p class="muted">No rule is evaluated here, so there are no stress questions.</p>'}
+      <div class="filters"><button class="btn" data-wapply>Re-assess stresses</button><button class="btn ghost" id="wclr">Clear answers for this waterbody</button><button class="btn ghost" id="wsva">Save all answers (JSON)</button></div></div>
+    <div class="block"><div class="eyebrow">Suggested schemes (${sch.size})</div>${sch.size?`<div class="tbl"><table><thead><tr><th>Scheme</th><th>Because of</th></tr></thead><tbody>${[...sch].map(([id,bc])=>{const s=WSCH[id];return `<tr><td><b>${esc(s.name)}</b><br><span class="note">${s.level==="state"?esc(s.states.join(", ")):"Central"} · ${esc(s.status)}</span></td><td>${bc.map(esc).join(", ")}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">No scheme matched.</p>'}
+      <p class="note">Schemes follow the rules that are present${wHasApplied(b,w)?" after the community answers":""}, filtered by state and waterbody type.</p></div>`
     :`<div class="block"><p>${esc(T.description)} Rules are not evaluated for this type.</p></div>`}
-    <div class="block"><h3>Landscape around it</h3>${ctxBlock(m)}</div>`;
+    <div class="block"><h3>Landscape around it</h3>${ctxBlock(m)}<details><summary>All variables of this waterbody</summary><div class="tbl"><table><tbody>${varRows}</tbody></table></div></details></div>`;
   $("#wgomws").onclick=()=>wGo("mws",w.mws);
+  P.querySelectorAll("fieldset.q").forEach(fs=>fs.addEventListener("change",e=>{
+    const q=fs.dataset.q,v=e.target.value; WANS[key]=WANS[key]||{};
+    if(v) WANS[key][q]=v; else delete WANS[key][q];
+    if(!Object.keys(WANS[key]).length) delete WANS[key];
+    wSaveAns(); const n=Object.keys(WANS[key]||{}).length, pend=JSON.stringify(WANS[key]||{})!==JSON.stringify(WAPPLIED[key]||{});
+    const s=$("#wansStatus"); if(s) s.innerHTML=pend?`<b>${n} answer${n===1?"":"s"} not yet applied.</b> Click Re-compute type or Re-assess stresses.`:"All answers applied.";}));
+  P.querySelectorAll("[data-wapply]").forEach(bt=>bt.onclick=()=>{
+    if(WANS[key]) WAPPLIED[key]=JSON.parse(JSON.stringify(WANS[key])); else delete WAPPLIED[key];
+    const y=window.scrollY; wPane(); WBMAP.draw(); window.scrollTo(0,y); toast(wHasApplied(b,w)?"Re-assessed with "+Object.keys(WAPPLIED[key]).length+" answers":"Showing results from data alone");});
+  if($("#wclr")) $("#wclr").onclick=()=>{delete WANS[key]; delete WAPPLIED[key]; wSaveAns(); wPane(); WBMAP.draw(); toast("Answers cleared for this waterbody")};
+  if($("#wsva")) $("#wsva").onclick=wSaveAnswers;
 }
 
-/* ---------- waterbody knowledge tabs ---------- */
-function exprNames(e){return e?PyEval.names(e):[]}
-function ruleInputs(r){return [...new Set([r.trigger,r.gate,r.intensity].flatMap(exprNames))]}
+/* ---------- knowledge graph ---------- */
+function ruleInputs(r){return [...new Set([r.trigger,r.gate,r.intensity].flatMap(e=>e?PyEval.names(e):[]))]}
 function renderWbGraph(m){
   const cols=[["Signals: evidence",WK.signals.signals.filter(s=>s.kind!=="context").map(s=>["sig",s.id,s.label])],
     ["Signals: context",WK.signals.signals.filter(s=>s.kind==="context").map(s=>["sig",s.id,s.label])],
@@ -1692,109 +1904,205 @@ function renderWbGraph(m){
   const edges=[]; WK.rules.rules.forEach(r=>{ruleInputs(r).concat(r.roles||[],r.contexts||[]).forEach(n=>{if(WSIG[n]||WROLE[n]) edges.push([n,r.id]);});
     (WK.schemes.links[r.id]||[]).forEach(l=>edges.push([r.id,l.scheme]));});
   const E=[...new Set(edges.map(e=>e.join("|")))].map(e=>e.split("|"));
-  const colW=190, rowH=22, top=30, P={}; const H=top+Math.max(...cols.map(c=>c[1].length))*rowH+10, Wd=cols.length*colW+20;
+  const colW=200, rowH=22, top=30, P={}; const H=top+Math.max(...cols.map(c=>c[1].length))*rowH+10, Wd=cols.length*colW+20;
   cols.forEach(([t,ns],ci)=>ns.forEach(([k,id,l],ri)=>P[id]={x:10+ci*colW,y:top+ri*rowH+(H-top-ns.length*rowH)/2,k,l}));
   const col={sig:"#c7861c",role:"#2c6a6e",rule:"#b8402f",sch:"#3f8a5a"};
-  const svg=()=>`<svg width="${Wd}" height="${H}" font-size="11">
+  const svg=`<svg width="${Wd}" height="${H}" font-size="11">
     ${cols.map(([t],ci)=>`<text x="${10+ci*colW}" y="16" font-weight="600" fill="var(--muted)">${esc(t)}</text>`).join("")}
-    <g id="gedges">${E.map(([a,b])=>{const A=P[a],B=P[b]; if(!A||!B) return ""; const x1=A.x+colW-30,y1=A.y+6,x2=B.x-2,y2=B.y+6;
+    <g id="gedges">${E.map(([a,b])=>{const A=P[a],B=P[b]; if(!A||!B) return ""; const x1=A.x+colW-22,y1=A.y+6,x2=B.x-6,y2=B.y+6;
       return `<path data-a="${a}" data-b="${b}" d="M${x1},${y1} C${(x1+x2)/2},${y1} ${(x1+x2)/2},${y2} ${x2},${y2}" fill="none" stroke="var(--line)" stroke-width="1"/>`}).join("")}</g>
-    ${Object.entries(P).map(([id,p])=>`<g class="gnode" data-id="${id}" transform="translate(${p.x},${p.y})"><circle cx="-0" cy="6" r="4" fill="${col[p.k]}"/><text x="8" y="10" fill="var(--ink)">${esc(p.l.length>26?p.l.slice(0,25)+"…":p.l)}</text></g>`).join("")}</svg>`;
-  m.innerHTML=`<div class="doc" style="max-width:none"><div class="block"><h2>Knowledge graph</h2><p>How evidence becomes advice. Signals (from the water each waterbody held, its catchment, its zone of influence and its micro-watershed) and the roles a waterbody plays feed the rules for observed stresses and opportunities; each rule links to the schemes that can fund its interventions. Click a node to see its links and definition.</p></div>
-    <div class="graphwrap">${svg()}</div><div class="block gdetail" id="wgd"><p class="muted">Select a node.</p></div></div>`;
+    ${Object.entries(P).map(([id,p])=>`<g class="gnode" data-id="${id}" transform="translate(${p.x},${p.y})"><rect x="-6" y="-3" width="${colW-24}" height="18" rx="3" fill="var(--surface)" opacity=".85"/><circle cx="0" cy="6" r="4" fill="${col[p.k]}"/><text x="8" y="10" fill="var(--ink)">${esc(p.l.length>27?p.l.slice(0,26)+"…":p.l)}</text></g>`).join("")}</svg>`;
+  m.innerHTML=`<div class="doc" style="max-width:none"><div class="block"><h2>Knowledge graph</h2><p>How evidence becomes advice. Signals (from the water each waterbody held, its catchment, its zone of influence and its micro-watershed) and the roles a waterbody plays feed the rules for observed stresses and opportunities; each rule links to the schemes that can fund its interventions. Community questions (not drawn) inform the rules. Click a node to see its links and definition.</p></div>
+    <div class="graphwrap">${svg}</div><div class="block gdetail" id="wgd"><p class="muted">Select a node.</p></div></div>`;
   m.querySelectorAll(".gnode").forEach(g=>g.onclick=()=>{const id=g.dataset.id; const nb=new Set([id]);
     m.querySelectorAll("#gedges path").forEach(p=>{const on=p.dataset.a===id||p.dataset.b===id; p.setAttribute("stroke",on?"var(--select)":"var(--line)"); p.setAttribute("stroke-width",on?2:1); if(on){nb.add(p.dataset.a);nb.add(p.dataset.b);}});
     m.querySelectorAll(".gnode").forEach(n=>n.style.opacity=nb.has(n.dataset.id)?1:0.3);
-    $("#wgd").innerHTML=nodeDetail(id);});
+    $("#wgd").innerHTML=WSIG[id]||WROLE[id]?wTipHtml(id):WRULE[id]?wRuleBlock(WRULE[id],true):WSCH[id]?wSchemeDoc(WSCH[id]):"";});
 }
-function nodeDetail(id){
-  if(WSIG[id]){const s=WSIG[id]; const used=WK.rules.rules.filter(r=>ruleInputs(r).concat(r.contexts||[]).includes(id));
-    return `<h3>${esc(s.label)} <span class="mono muted">${id}</span></h3><p>${esc(s.note||"")}</p>${s.expr?`<p><code>${esc(s.expr)}</code></p>`:`<p class="note">Variable <code>${esc(s.var||"")}</code>${s.pool?`, pooled by ${esc(s.pool.by)}: lowest ${s.pool.pct}% (severe ${s.pool.severe_pct}%)`:` · threshold ${s.value}, severe ${s.severe}`}</p>`}<p class="note">Used by: ${used.map(r=>esc(r.label)).join(", ")||"–"}</p>`;}
-  if(WROLE[id]){const r=WROLE[id]; return `<h3>${esc(r.label)} role</h3><p>${esc(r.note)}</p><p><code>${esc(r.expr)}</code></p>`;}
-  if(WRULE[id]) return ruleDoc(WRULE[id],true);
-  if(WSCH[id]) return schemeDoc(WSCH[id]);
-  return "";
+
+/* ---------- waterbody types ---------- */
+function typeQuestionsFor(t){const fields=new Set(PyEval.names(t.when)); (WK.types.derived||[]).forEach(d=>{if(fields.has(d.id)) PyEval.names(d.expr).forEach(n=>fields.add(n));});
+  return WK.questions.type_questions.filter(q=>q.options.some(o=>Object.keys(o.set||{}).some(k=>fields.has(k))));}
+function renderWbTypes(m){
+  const ds=WIDX.districts, T=WK.types;
+  m.innerHTML=`<div class="doc"><h2>Waterbody types</h2>
+    <p>${esc(T.note)} Hover a field (dotted underline) for its definition.</p>
+    <div class="block"><h3>How a type is assigned</h3>
+      <ol><li>Fragments of one waterbody (same area and yearly series, within about 30 m) are merged and counted once, and waterbodies under ${T.min_area_ha} ha are dropped.</li>
+      <li>The type fields are read from the CoRE Stack layer: ${WIDX.type_fields.concat(["area_ha","stream_order"]).map(f=>wvref(f)).join(", ")}. Two more, ${wvref("inflow")} and ${wvref("ownership")}, are unknown from data and come only from community answers.</li>
+      <li>Derived fields are evaluated: ${(T.derived||[]).map(d=>`${wvref(d.id)} = <code>${wExprHtml(d.expr)}</code>`).join("; ")}.</li>
+      <li>The types below are checked in order; the first whose rule holds is assigned.</li></ol>
+      <p class="note">Community answers about ownership and inflow re-run these steps in Explore, and the rules are scored again for the new type (Community questions tab). Sources: ${srcLinksW(["core_stack_swb","wbc2023"])}.</p></div>
+    ${T.types.map((t,i)=>{const qs=typeQuestionsFor(t), rules=WK.rules.rules.filter(r=>r.applies_to.includes(t.id));
+      return `<div class="block" id="t_${t.id}"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${WTYPE_COL[t.id]}"></i><h3>${i+1}. ${esc(t.label)}</h3><span class="pill ${t.in_scope?"opp":"conf"}">${t.in_scope?"in scope":"out of scope"}</span><span class="mono muted">${t.id}</span></div>
+        <p>${esc(t.description)}</p>${t.why?`<p><b>Why these choices.</b> ${esc(t.why)}</p>`:""}
+        <p><b>Assigned when</b> <code>${wExprHtml(t.when)}</code>${i?` <span class="note">(and none of the types above holds)</span>`:""}</p>
+        <p class="note">Waterbodies: ${ds.map(d=>`${esc(d.district)} ${(d.by_type[t.id]||0).toLocaleString("en-IN")}`).join(" · ")}</p>
+        ${t.in_scope?`<p class="note"><b>Rules checked:</b> ${rules.map(r=>`<a href="#" data-wr="${r.id}">${esc(r.label)}</a>`).join(", ")||"none"}</p>`:`<p class="note">No rules are checked for this type.</p>`}
+        ${qs.length?`<p class="note"><b>Community answers that can move a waterbody into or out of this type:</b> ${qs.map(q=>esc(q.text)).join(" · ")}</p>`:""}
+        <p class="note"><b>Sources:</b> ${srcLinksW(t.sources)}</p></div>`;}).join("")}
+    <h2 style="margin-top:8px">Status: how often a waterbody holds water</h2>
+    ${Object.entries(WIDX.status).filter(([k])=>k!=="dry").map(([k,s])=>`<div class="block"><div style="display:flex;gap:8px;align-items:center">${stPill(s.code)}</div><p>${esc(s.about)}</p>
+      <p class="note">Built from ${wvref("years_wet")}, ${wvref("is_new")} and ${wvref("regular")}. In-scope waterbodies: ${ds.map(d=>`${esc(d.district)} ${(d.by_status[k]||0).toLocaleString("en-IN")}`).join(" · ")}</p></div>`).join("")}
+    <p class="note">Ballia, on the Ganga and Ghaghara floodplain, has many waterbodies that hold water only in wet years.</p></div>`;
+  m.querySelectorAll("[data-wr]").forEach(a=>a.onclick=e=>{e.preventDefault(); W.tab="rules"; render(); setTimeout(()=>document.getElementById("wr_"+a.dataset.wr)?.scrollIntoView(),50);});
 }
-function ruleDoc(r,short){
-  const tot=WIDX.rules[r.id]; const links=WK.schemes.links[r.id]||[];
-  return `<div class="hd" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h3>${esc(r.label)}</h3><span class="note">${esc(r.group||"")} · triggered for ${tot.triggered.toLocaleString("en-IN")} of ${tot.applicable.toLocaleString("en-IN")} (${tot.applicable?Math.round(tot.triggered/tot.applicable*100):0}%)</span></div>
-    <p>${sigRefs(r.rationale)}</p>
-    <div class="tbl"><table><tbody><tr><th>Applies to</th><td>${r.applies_to.map(t=>esc(WTYPE[t]?.label||t)).join(", ")}</td></tr>
-      ${r.gate?`<tr><th>Gate</th><td><code>${esc(r.gate)}</code></td></tr>`:""}<tr><th>Trigger</th><td><code>${esc(r.trigger)}</code></td></tr><tr><th>Intensity</th><td><code>${esc(r.intensity)}</code></td></tr></tbody></table></div>
-    ${short?"":`<p class="pubnote">${sigRefs(r.public_note)}</p>`}
-    <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))"><div><div class="eyebrow">Interventions</div><ul>${r.interventions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-    <div><div class="eyebrow">Ask the community</div><ul>${r.questions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-    <div><div class="eyebrow">Schemes</div><ul>${links.map(l=>`<li>${esc(WSCH[l.scheme].name.split(" (")[0])}${WSCH[l.scheme].states?` <span class="muted">(${esc(WSCH[l.scheme].states.join(", "))})</span>`:""}: <span class="muted">${esc(l.for)}</span></li>`).join("")}</ul></div></div>`;
+
+/* ---------- observed stresses (rules, signals, roles, questions) ---------- */
+function wEffect(o){const parts=(o.stress||[]).map(e=>`×${e.lr} ${esc(WRULE[e.id].label)}${e.severe?" (can make severe)":""}`);
+  Object.entries(o.set||{}).forEach(([k,v])=>parts.push(`sets ${wvref(k)} = '${esc(v)}', then the type is re-assigned`)); return parts.join("; ")||"no change";}
+function wWorked(){const A=WK.questions.assessment,bp=A.base_prior,I=60,p0=0.5+(bp.triggered_min+(bp.triggered_max-bp.triggered_min)*I/100-0.5)*A.confidence_shrink.medium,lr=0.4,o=p0/(1-p0)*lr,p=o/(1+o);
+  const q0=0.5+(bp.not_triggered-0.5)*A.confidence_shrink.low,o2=q0/(1-q0)*2.5*2,p2=o2/(1+o2);
+  return `A medium-confidence rule such as inflow shortfall that triggered with intensity ${I} starts at ${pct(p0)}. If the community says the inlet channels work freely (likelihood ratio ${lr}), the odds become ${(p0/(1-p0)).toFixed(2)} × ${lr} = ${o.toFixed(2)}, so ${pct(p)}: "${wBand(p)}", and it no longer counts as present. A low-confidence rule that did not trigger starts at ${pct(q0)}; two supporting answers (×2.5 and ×2) take it to ${pct(p2)}: "${wBand(p2)}".`;}
+function wSigLibrary(){
+  const kinds=[["stress","Evidence signals","Signs of a problem: a waterbody variable compared with a threshold (or with the lowest percentiles of its type) and a severe threshold."],["opportunity","Opportunity signals","Signs that the water could do more."],["context","Context signals","Settings a rule requires or that raise its intensity: catchment size, aquifer, climate, eroding catchment, groundwater stress, a known zone of influence, a regular water series."]];
+  return kinds.map(([k,l,a])=>{const xs=WK.signals.signals.filter(s=>s.kind===k);
+    return `<details><summary><b>${l}</b> (${xs.length})</summary><p class="note">${a}</p><div class="tbl"><table><thead><tr><th>Signal</th><th>Variable or condition</th><th>Threshold (on / severe)</th><th>Sources</th><th>Used by</th></tr></thead><tbody>${xs.map(s=>`<tr id="wg_${s.id}"><td>${wvref(s.id)}<br><span class="mono muted">${esc(s.id)}</span></td><td>${s.var?`${wvref(s.var)} <span class="muted">(${esc(WVAR[s.var]?.unit||"")})</span><br><span class="muted">${s.direction==="low"?"low":"high"} values count</span>`:`<code>${wExprHtml(s.expr)}</code>`}${s.note?`<br><span class="note">${esc(s.note)}</span>`:""}</td><td>${s.var?wThrText(s):"yes / no"}</td><td class="note">${srcLinksW(s.sources)}</td><td class="note">${rulesUsingW(s.id).map(r=>esc(r.label)).join("; ")||"–"}</td></tr>`).join("")}</tbody></table></div></details>`;}).join("");}
+function wRuleBlock(r,short){
+  const tot=WIDX.rules[r.id], links=WK.schemes.links[r.id]||[], sg=ruleSignals(r), qs=WK.questions.stress_questions.filter(q=>q.rules.includes(r.id));
+  const row=(l,ids)=>ids.length?`<tr><td><span class="role">${l}</span></td><td>${ids.map(id=>wvref(id)).join(", ")}</td></tr>`:"";
+  return `<div class="block" id="wr_${r.id}"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><h3>${esc(r.label)}</h3><span class="pill ${r.type==="opportunity"?"opp":"moderate"}">${r.type}</span><span class="pill conf">${esc(r.confidence)} confidence</span><span class="mono muted">${esc(r.id)}</span></div>
+    <p class="note">Group: <b>${esc(r.group||"")}</b> · applies to ${r.applies_to.map(t=>esc(WTYPE[t]?.label||t)).join(", ")} · triggered from data for ${tot.triggered.toLocaleString("en-IN")} of ${tot.applicable.toLocaleString("en-IN")} (${tot.applicable?Math.round(tot.triggered/tot.applicable*100):0}%)</p>
+    <p class="pubnote">${wPub(r.public_note)}</p>
+    ${short?"":`<p><b>Why these choices.</b> ${wPub(r.rationale)}</p>`}
+    <div class="tbl"><table><tbody>${row("Evidence signals",sg.evidence)}${row("Context signals",sg.context)}${row("Roles that scale it",sg.roles)}
+      ${r.gate?`<tr><td><span class="role">Checked where</span></td><td><code>${wExprHtml(r.gate)}</code></td></tr>`:""}
+      <tr><td><span class="role">Trigger</span></td><td><code>${wExprHtml(r.trigger)}</code></td></tr>
+      <tr><td><span class="role">Intensity (0–100)</span></td><td><code>${wExprHtml(r.intensity)}</code> · severe at ${r.severe_at}</td></tr></tbody></table></div>
+    ${short?"":`<p class="note">By district: ${WIDX.districts.map(d=>{const x=d.rules[r.id]; return `${esc(d.district)} ${x.applicable?Math.round(x.triggered/x.applicable*100)+"%":"–"}`}).join(" · ")}</p>`}
+    <div class="eyebrow">Community questions for this rule (${qs.length})</div>
+    <p class="note">The data result sets the starting probability (${r.confidence} confidence: ${esc(WK.rules.confidence_scale[r.confidence]||"")}). Each answer below multiplies the odds that this ${r.type} is present by its likelihood ratio; ×1 means the answer says nothing about it.${qs.some(q=>q.options.some(o=>o.stress.some(e=>e.id===r.id&&e.severe)))?" Answers marked severe can make a present stress severe.":""}</p>
+    <div class="tbl"><table><thead><tr><th>Question</th><th>Answer → likelihood ratio</th></tr></thead><tbody>${qs.map(q=>`<tr><td>${esc(q.text)}<br><span class="note">${esc(q.rationale)}</span></td><td>${q.options.map(o=>{const e=o.stress.find(e=>e.id===r.id);return `${esc(o.label)}: <b>${e?"×"+e.lr+(e.severe?" (severe)":""):"×1"}</b>`}).join("<br>")}</td></tr>`).join("")}</tbody></table></div>
+    <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))"><div><div class="eyebrow">Interventions</div><ul>${r.interventions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
+    <div><div class="eyebrow">Schemes</div><ul>${links.map(l=>`<li>${esc(WSCH[l.scheme].name.split(" (")[0])}${WSCH[l.scheme].states?` <span class="muted">(${esc(WSCH[l.scheme].states.join(", "))})</span>`:""}: <span class="muted">${esc(l.for)}</span></li>`).join("")}</ul></div></div>
+    <p class="note"><b>Sources:</b> ${srcLinksW(r.sources)}</p></div>`;}
+function renderWbRules(m){
+  const A=WK.questions.assessment,bp=A.base_prior, groups=[...new Set(WK.rules.rules.map(r=>r.group||"Other"))];
+  m.innerHTML=`<div class="doc"><h2>Observed stresses and opportunities</h2>
+    <p>${WK.rules.rules.length} rules read each waterbody's water series, its zone of influence and its home micro-watershed. A rule applies to some waterbody types, may need a gate to hold (for example a regular water series), is triggered by a combination of signals, and gets an intensity from 0 to 100 scaled by the roles the water plays there. Community answers then turn the data result into a probability. Hover a name (dotted underline) for its definition, or a function such as <i>ramp</i> or <i>nz</i> (italic) for what it computes.</p>
+    <div class="block"><h3>How a rule is evaluated</h3><ol>${WK.rules.evaluation.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
+      <div class="chips">${Object.entries(WK.rules.confidence_scale).map(([k,v])=>`<span class="chip"><b>${k}</b>: ${esc(v)}</span>`).join("")}</div></div>
+    <div class="block"><h3>How community answers change the result</h3>
+      <p>The data result is turned into a probability that the stress or opportunity is present. A triggered rule starts between ${pct(bp.triggered_min)} and ${pct(bp.triggered_max)}, rising with its intensity; a rule that did not trigger starts at ${pct(bp.not_triggered)}; missing data starts at ${pct(bp.unknown)}. The rule's confidence then pulls this toward 50% (${Object.entries(A.confidence_shrink).map(([k,v])=>`${k} ×${v}`).join(", ")}), so answers move a low-confidence rule further.</p>
+      <p>Each answer has a likelihood ratio for every rule it informs: how much more likely that answer is if the stress is present than if it is not. The odds are multiplied by each ratio (Bayes' rule, treating answers as independent). The result is placed in a band: ${A.bands.map(b=>`${esc(b.label)} ≥ ${pct(b.min)}`).join(", ")}. A rule counts as present, and drives scheme suggestions, at ${pct(A.positive_at)} or more. ${esc(A.severity_rule)}</p>
+      <p><b>Type answers</b> work differently: they set the inflow or ownership of the waterbody, the type rules run again, and every rule is re-scored for the new type (a pond found to be private becomes a farm pond, and rules for village ponds stop applying).</p>
+      <p class="note">${wWorked()}</p>
+      <p class="note">Likelihood-ratio scale used when writing the questions: ${Object.entries(WK.questions.lr_scale).map(([k,v])=>`${k} = ${esc(v)}`).join("; ")}. The ratios are expert judgement, with their direction checked against the census comparison where it covers the rule; they should be calibrated as field answers accumulate.</p></div>
+    <div class="block"><h3>Roles</h3><p class="note">${esc(WK.roles.note)}</p>
+      <details><summary>The ${WK.roles.roles.length} roles and their formulas</summary>${WK.roles.roles.map(r=>`<div class="pwblock"><b>${wvref(r.id,r.label)}</b><p>${esc(r.note)}</p><code>${wExprHtml(r.expr)}</code><p class="note">Scales: ${rulesUsingW(r.id).map(x=>esc(x.label)).join(", ")||"–"} · Sources: ${srcLinksW(r.sources)}</p></div>`).join("")}</details></div>
+    <div class="block" id="wsiglib"><h3>Signal library</h3><p class="note">${esc(WK.signals.grading||WK.signals.note||"")}</p>${wSigLibrary()}</div>
+    ${groups.map(g=>`<div style="margin-top:14px"><div class="eyebrow">Group</div><h3>${esc(g)}</h3></div>${WK.rules.rules.filter(r=>(r.group||"Other")===g).map(r=>wRuleBlock(r)).join("")}`).join("")}</div>`;
 }
-function schemeDoc(s){
+function renderWbQuestions(m){
+  const Q=WK.questions;
+  const qBlock=q=>`<div class="block"><h3 style="max-width:70ch">${esc(q.text)}</h3><p class="note">${esc(q.rationale)}</p>
+     ${q.rules?`<p class="note">Informs: ${q.rules.map(r=>`<a href="#" data-wr="${r}">${esc(WRULE[r].label)}</a>`).join(", ")}</p>`:`<p class="note">Asked for: ${q.applies_to.map(t=>esc(WTYPE[t].label)).join(", ")}</p>`}
+     <div class="tbl"><table><thead><tr><th>Answer</th><th>Effect</th></tr></thead><tbody>${q.options.map(o=>`<tr><td>${esc(o.label)}</td><td>${wEffect(o)}</td></tr>`).join("")}</tbody></table></div>
+     <p class="note">Origin: ${esc(q.origin)} · Sources: ${srcLinksW(q.sources)} · id <span class="mono">${q.id}</span></p></div>`;
+  m.innerHTML=`<div class="doc"><h2>Community questions</h2>
+    <p>Multiple-choice questions a field team can ask the users of a waterbody, or a village meeting, to confirm or correct what the data suggest. In Explore, open a waterbody, answer the questions shown for it, and click Re-compute type or Re-assess stresses. The same questions appear with their likelihood ratios under each rule on the Observed stresses tab.</p>
+    <div class="block"><h3>How answers are used</h3><ul>
+      <li><b>Type.</b> ${Q.type_questions.length} questions set fields the data cannot see (who owns the pond, where its water comes from). The type rules run again and every rule is re-scored for the new type.</li>
+      <li><b>Stresses and opportunities.</b> ${esc(Q.assessment.about)}</li>
+      <li><b>Schemes</b> follow the rules that are present after the answers.</li>
+      <li><b>Saving.</b> Answers stay in your browser. Save them as JSON and run <code>python -m seft.cli wb-assess --answers waterbody_answers.json</code> to get the same results as a table.</li></ul>
+      <div class="filters"><button class="btn ghost" id="wqsave">Save all answers (JSON)</button><label class="btn ghost" for="wqload" style="cursor:pointer">Load answers…</label><input type="file" id="wqload" accept=".json,application/json" hidden></div></div>
+    <h3>About the waterbody type (${Q.type_questions.length})</h3>${Q.type_questions.map(qBlock).join("")}
+    <h3>About stresses and opportunities (${Q.stress_questions.length})</h3>${Q.stress_questions.map(qBlock).join("")}</div>`;
+  $("#wqsave").onclick=wSaveAnswers; $("#wqload").onchange=e=>{if(e.target.files[0]) wLoadAnswers(e.target.files[0])};
+  m.querySelectorAll("[data-wr]").forEach(a=>a.onclick=e=>{e.preventDefault(); W.tab="rules"; render(); setTimeout(()=>document.getElementById("wr_"+a.dataset.wr)?.scrollIntoView(),50);});
+}
+function wSchemeDoc(s){
   const used=Object.entries(WK.schemes.links).filter(([k,ls])=>ls.some(l=>l.scheme===s.id)).map(([k])=>k==="recent_ponds"?"Recent ponds":WRULE[k].label);
   return `<h3>${esc(s.name)}</h3><p class="note">${esc(s.level)}${s.states?" · "+esc(s.states.join(", ")):""} · ${esc(s.department)}</p>
     <p><b>${esc(s.status)}.</b> ${esc(s.status_note||"")}</p><p class="note">Components: ${s.components.map(esc).join("; ")}</p>
     <p class="note">Linked to: ${used.map(esc).join(", ")}</p>
-    <p class="note">${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">Scheme site</a>`:""}${s.sources.length?" · Sources: "+s.sources.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${i+1}</a>`).join(", "):""}</p>`;
-}
-function renderWbTypes(m){
-  const ds=WIDX.districts;
-  m.innerHTML=`<div class="doc" style="max-width:1100px"><div class="block"><h2>Waterbody types</h2><p>${esc(WK.types.note)}</p><p class="note">Size floor ${WK.types.min_area_ha} ha. Rules are evaluated for in-scope types only.</p></div>
-   <div class="block tbl"><table><thead><tr><th>Type</th><th>Rule</th><th>What it is</th>${ds.map(d=>`<th class="r">${esc(d.district)}</th>`).join("")}</tr></thead><tbody>
-   ${WK.types.types.map(t=>`<tr><td><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${WTYPE_COL[t.id]};margin-right:5px"></i><b>${esc(t.label)}</b>${t.in_scope?"":' <span class="muted">(out of scope)</span>'}</td><td><code>${esc(t.when)}</code></td><td>${esc(t.description)}</td>${ds.map(d=>`<td class="r num">${(d.by_type[t.id]||0).toLocaleString("en-IN")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-   <div class="block"><h3>Status: how often a waterbody holds water</h3><div class="tbl"><table><thead><tr><th>Status</th><th>Definition</th>${ds.map(d=>`<th class="r">${esc(d.district)}</th>`).join("")}</tr></thead><tbody>
-   ${Object.entries(WIDX.status).filter(([k])=>k!=="dry").map(([k,s])=>`<tr><td>${stPill(s.code)}</td><td>${esc(s.about)}</td>${ds.map(d=>`<td class="r num">${(d.by_status[k]||0).toLocaleString("en-IN")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-   <p class="note">Counts are of in-scope waterbodies. Ballia, on the Ganga and Ghaghara floodplain, has many waterbodies that hold water only in wet years.</p></div></div>`;
-}
-function renderWbSignals(m){
-  const row=s=>`<tr><td><b>${esc(s.label)}</b><br><span class="mono muted">${s.id}</span></td><td>${s.expr?`<code>${esc(s.expr)}</code>`:`<code>${esc(s.var)}</code> ${s.pool?`lowest ${s.pool.pct}% by ${esc(s.pool.by)} (severe ${s.pool.severe_pct}%)`:`${esc(s.direction||"")} · ${s.value} / severe ${s.severe}`}${s.gate?`<br>gate <code>${esc(s.gate)}</code>`:""}`}</td><td>${esc(s.note||"")}</td></tr>`;
-  const pools=WIDX.pools;
-  m.innerHTML=`<div class="doc" style="max-width:1100px"><div class="block"><h2>Signals and roles</h2><p>${esc(WK.signals.note)}</p></div>
-   <div class="block tbl"><h3>Evidence signals</h3><table><thead><tr><th>Signal</th><th>Test</th><th>Note</th></tr></thead><tbody>${WK.signals.signals.filter(s=>s.kind!=="context").map(row).join("")}</tbody></table></div>
-   <div class="block tbl"><h3>Context signals</h3><table><thead><tr><th>Signal</th><th>Test</th><th>Note</th></tr></thead><tbody>${WK.signals.signals.filter(s=>s.kind==="context").map(row).join("")}</tbody></table></div>
-   <div class="block tbl"><h3>Pooled thresholds</h3><table><thead><tr><th>Signal</th><th>Type</th><th class="r">Threshold</th><th class="r">Severe</th></tr></thead><tbody>${Object.entries(pools).flatMap(([s,t])=>Object.entries(t).map(([ty,[a,c]])=>`<tr><td>${esc(WSIG[s]?.label||s)}</td><td>${esc(WTYPE[ty]?.label||ty)}</td><td class="r num">${a}</td><td class="r num">${c}</td></tr>`)).join("")}</tbody></table></div>
-   <div class="block"><h3>Roles</h3><p>${esc(WK.roles.note)}</p>${WK.roles.roles.map(r=>`<div class="pwblock"><b>${esc(r.label)}</b><p>${esc(r.note)}</p><code>${esc(r.expr)}</code></div>`).join("")}</div></div>`;
-}
-function renderWbRules(m){
-  const groups=[...new Set(WK.rules.rules.map(r=>r.group||"Other"))];
-  m.innerHTML=`<div class="doc" style="max-width:1000px"><div class="block"><h2>Observed stresses and opportunities</h2><p>${esc(WK.rules.note)}</p>
-    <div class="tbl"><table><thead><tr><th>Rule</th>${WIDX.districts.map(d=>`<th class="r">${esc(d.district)}</th>`).join("")}<th class="r">All</th></tr></thead><tbody>
-    ${WK.rules.rules.map(r=>`<tr><td>${esc(r.label)}</td>${WIDX.districts.map(d=>{const x=d.rules[r.id]; return `<td class="r num">${x.applicable?Math.round(x.triggered/x.applicable*100)+"%":"–"}</td>`}).join("")}<td class="r num"><b>${WIDX.rules[r.id].applicable?Math.round(WIDX.rules[r.id].triggered/WIDX.rules[r.id].applicable*100)+"%":"–"}</b></td></tr>`).join("")}</tbody></table></div>
-    <p class="note">Share triggered among waterbodies where the rule applies.</p></div>
-    ${groups.map(g=>`<h2>${esc(g)}</h2>${WK.rules.rules.filter(r=>(r.group||"Other")===g).map(r=>`<div class="block">${ruleDoc(r)}</div>`).join("")}`).join("")}</div>`;
-}
-function renderWbQuestions(m){
-  m.innerHTML=`<div class="doc"><div class="block"><h2>Community questions</h2><p>Questions to take to the village or the waterbody's users when a rule is triggered. The data show where a waterbody's water falls short; the answers say why, and so which intervention fits. Ask the questions of the rules triggered for a waterbody (on its record in Explore) first.</p>
-    <button class="btn ghost" onclick="window.print()">Print</button></div>
-    ${WK.rules.rules.map(r=>`<div class="block"><h3>${esc(r.label)}</h3><p class="note">${esc(r.applies_to.map(t=>WTYPE[t]?.label||t).join(", "))}</p><ol>${r.questions.map(q=>`<li>${esc(q)}</li>`).join("")}</ol><p class="note">If confirmed: ${r.interventions.map(esc).join("; ")}.</p></div>`).join("")}</div>`;
-}
+    <p class="note">${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">Scheme site</a>`:""}${s.sources.length?" · Sources: "+s.sources.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${i+1}</a>`).join(", "):""}</p>`;}
 function renderWbSchemes(m){
   const st=[...new Set(WIDX.districts.map(d=>d.state))];
-  m.innerHTML=`<div class="doc"><div class="block"><h2>Schemes</h2><p>${esc(WK.schemes._about)}</p><p class="note">Checked on ${esc(WK.schemes.verified)}. MGNREGS, the main funder of village waterbody works, was replaced by VB-G RAM G on 1 July 2026; schemes that ran on MGNREGS funds (Amrit Sarovar, several state farm-pond schemes) should be checked against the new Act's works list.</p></div>
-    <h3>Central schemes</h3>${WK.schemes.schemes.filter(s=>s.level==="central").map(s=>`<div class="block">${schemeDoc(s)}</div>`).join("")}
-    ${st.map(x=>{const ss=WK.schemes.schemes.filter(s=>s.level==="state"&&s.states&&s.states.includes(x)); return ss.length?`<h3>${esc(x)}</h3>${ss.map(s=>`<div class="block">${schemeDoc(s)}</div>`).join("")}`:"";}).join("")}</div>`;
+  m.innerHTML=`<div class="doc"><h2>Schemes</h2><p>${esc(WK.schemes._about)}</p><p class="note">Checked on ${esc(WK.schemes.verified)}. MGNREGS, the main funder of village waterbody works, was replaced by VB-G RAM G on 1 July 2026; schemes that ran on MGNREGS funds (Amrit Sarovar, several state farm-pond schemes) should be checked against the new Act's works list.</p>
+    <h3>Central schemes</h3>${WK.schemes.schemes.filter(s=>s.level==="central").map(s=>`<div class="block">${wSchemeDoc(s)}</div>`).join("")}
+    ${st.map(x=>{const ss=WK.schemes.schemes.filter(s=>s.level==="state"&&s.states&&s.states.includes(x)); return ss.length?`<h3>${esc(x)}</h3>${ss.map(s=>`<div class="block">${wSchemeDoc(s)}</div>`).join("")}`:"";}).join("")}</div>`;
 }
+
+/* ---------- methodology ---------- */
+const WKSCHEMA=[
+ {file:"types.json",k:"types",role:"Size floor, derived fields and the type rules, checked in order.",top:[["min_area_ha","size floor in ha"],["derived","{id, expr, note}: fields evaluated before the types (on_stream, fed_by_stream)"],["types","list of types (below)"]],list:"types",fields:[["id, label","type id used by rules, questions and schemes"],["in_scope","false for types left out of the analysis (reservoirs, large rivers, untyped)"],["when","expression over the type fields; the first type whose 'when' holds is assigned"],["description, why, sources","what the type is, why its thresholds, and source ids"]]},
+ {file:"variables.json",k:"variables",role:"Definitions of the waterbody variables and the type fields.",top:[["groups","id → label of the variable groups"],["variables","list (below), computed in seft/wb/indicators.py"],["type_fields","fields the type rules read, including inflow and ownership, which only answers set"]],list:"variables",fields:[["id, label, unit, group","name used in signals and roles, display text, unit, group"],["description","how it is computed"],["sources","source ids"]]},
+ {file:"signals.json",k:"signals",role:"The signal library that rules are written in.",top:[["grading","how a threshold signal is graded"],["signals","list (below)"]],list:"signals",fields:[["id, kind, label","kind is stress (evidence), opportunity or context"],["var, direction, value, severe","threshold signals: the variable, which direction counts, the threshold and the severe threshold"],["pool","{by, over, pct, severe_pct}: thresholds from percentiles of waterbodies of the same type"],["gate","optional condition; the signal is 0 where it does not hold"],["expr","yes/no signals: an expression over variables and the home MWS"],["note, sources","justification and source ids"]]},
+ {file:"roles.json",k:"roles",role:"What the water is likely used for, from 0 to 1.",top:[["roles","list (below)"]],list:"roles",fields:[["id, label","role name, used in rule intensities and gates"],["expr","expression over waterbody variables and the home MWS (mws_*, share_*, ctx_*)"],["note, sources","explanation and source ids"]]},
+ {file:"rules.json",k:"rules",role:"Rules for observed stresses and opportunities.",top:[["evaluation","the steps, in words"],["confidence_scale","meaning of high / medium / low"],["rules","list (below)"]],list:"rules",fields:[["id, label, group, type","rule id, name, group (Filling, Retention, Storage, Use) and stress / opportunity"],["applies_to, gate","types it is checked for and an extra condition"],["trigger, intensity, severe_at","expressions over signals and roles; intensity 0–100, severe at severe_at"],["roles, contexts","roles that scale it and context signals it reads"],["rationale, public_note, interventions","why, a plain-language note, and what can be done"],["confidence, sources","rating and source ids"]]},
+ {file:"questions.json",k:"questions",role:"Community questions and how answers change the type and the rules.",top:[["assessment","priors, confidence shrink, bands, positive_at, severe_at"],["lr_scale","the likelihood-ratio scale"],["type_questions","questions whose options set type fields ('set')"],["stress_questions","questions whose options carry likelihood ratios ('stress')"]],list:"stress_questions",fields:[["id, text, rationale, origin, sources","the question, why it is asked, and its basis"],["rules / applies_to","rules a stress question informs; types a type question is asked for"],["options","{id, label, stress [{id, lr, severe}], set {field: value}}"]]},
+ {file:"schemes.json",k:"schemes",role:"Schemes that fund the interventions, and the links from rules to schemes.",top:[["verified","date the status notes were checked"],["schemes","list (below)"],["links","rule id (or recent_ponds) → [{scheme, for, types}]"]],list:"schemes",fields:[["id, name, level, states, department","identity; states null for all states"],["components, status, status_note, sources, url","what it funds and its current status"]]},
+ {file:"sources.json",k:"sources",role:"Bibliography; the watershed sources.json is read too.",top:[["sources","list (below)"]],list:"sources",fields:[["id","cited from other files"],["citation, url","reference"],["used_for","what it supports"]]}];
+const WDRAWS={"Data":["config/waterbody/locations.json","variables.json"],"Types":["types.json","variables.json"],"Variables":["variables.json"],"Signals and thresholds":["signals.json","sources.json"],"Roles":["roles.json"],"Rules":["rules.json","signals.json","roles.json"],"Community questions and re-assessment":["questions.json","types.json","rules.json"],"Schemes":["schemes.json"],"Sources":["sources.json"]};
+function wDrawsOn(t){const f=WDRAWS[t];return f?`<p class="note">Draws on: ${f.map(x=>`<a href="#wkfiles" class="mono" data-wkf>${x}</a>`).join(", ")}</p>`:"";}
+const WKEX={"types.json":[["A type rule, and the derived field it uses.",()=>[WK.types.derived[1],only(WTYPE.village_pond,["id","label","in_scope","when","sources"])]]],
+ "variables.json":[["A variable.",()=>WVAR.rel_slope],["A type field set only by answers.",()=>WTF.ownership]],
+ "signals.json":[["A pooled signal.",()=>WSIG.s_poor_fill],["A threshold signal with a gate.",()=>WSIG.s_sudden_loss],["A context signal.",()=>WSIG.ctx_eroding_catchment]],
+ "roles.json":[["A role.",()=>WROLE.role_fishery]],
+ "rules.json":[["A rule.",()=>only(WRULE["wb.inflow_shortfall"],["id","label","group","type","applies_to","gate","trigger","intensity","severe_at","roles","contexts","confidence","sources"])]],
+ "questions.json":[["A type question.",()=>WQ.wbt_ownership],["A stress question.",()=>WQ.wbq_inlet],["Assessment settings.",()=>only(WK.questions.assessment,["base_prior","confidence_shrink","positive_at","severe_at","bands"])]],
+ "schemes.json":[["A scheme and the links of one rule.",()=>[WSCH.amrit_sarovar,{"wb.siltation":WK.schemes.links["wb.siltation"].slice(0,3)}]]],
+ "sources.json":[["A source.",()=>WSRC.wbc2023]]};
+function wKschemaHtml(){
+  return `<div class="block" id="wkfiles"><h3>Knowledge files and their structure</h3>
+   <p>All waterbody logic sits in eight JSON files in <span class="mono">knowledge/waterbody/</span>, with the tehsils in <span class="mono">config/waterbody/locations.json</span>. Formulas and conditions use the same safe expression language as the watershed atlas: arithmetic, comparisons, <span class="mono">and / or / not</span>, text in quotes, variable ids, the home MWS's values as <span class="mono">mws_&lt;id&gt;</span>, <span class="mono">share_&lt;system&gt;</span> and <span class="mono">ctx_&lt;dimension&gt;</span>, and functions such as <span class="mono">nz</span>, <span class="mono">ramp</span>, <span class="mono">clip</span> and <span class="mono">ifelse</span>. Fields that cite evidence hold ids from <span class="mono">sources.json</span>. <span class="mono">python -m seft.cli wb-validate</span> checks that every id, expression, question and source resolves; <span class="mono">knowledge/waterbody/README.md</span> explains how to edit them.</p>
+   ${fnTableHtml()}
+   ${WKSCHEMA.map(S=>{const l=(WK[S.k]||{})[S.list];return `<details><summary><b class="mono">${S.file}</b> — ${esc(S.role)}${Array.isArray(l)?` · ${l.length} ${S.list.replace(/_/g," ")}`:""}</summary>
+     <div class="tbl"><table><thead><tr><th>Top-level key</th><th>Holds</th></tr></thead><tbody>${S.top.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>
+     <div class="tbl"><table><thead><tr><th>Fields of each entry in <span class="mono">${esc(S.list)}</span></th><th>Meaning</th></tr></thead><tbody>${S.fields.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>
+     ${(WKEX[S.file]||[]).map(([cap,get])=>{let o=null;try{o=get()}catch(e){} return o?`<p class="note"><b>Example.</b> ${esc(cap)}</p><pre class="kex">${esc(JSON.stringify(trimJ(o),null,1))}</pre>`:""}).join("")}</details>`;}).join("")}
+   <p class="note">How the files connect: variables (and the home MWS) feed signals and roles; types decide which rules apply; rules combine signals and roles; questions point at rules (likelihood ratios) and at type fields; links in schemes point at rules; every sources list points at sources.json.</p></div>`;}
 function renderWbMethod(m){
-  const n=WIDX.districts.reduce((s,d)=>s+d.n,0);
-  m.innerHTML=`<div class="doc">
-  <div class="block"><h2>Methodology</h2><p>The waterbody atlas uses the same knowledge-base pattern as the watershed atlas: data → signals → rules, with interventions, community questions and schemes on each rule. It covers ${n.toLocaleString("en-IN")} waterbodies in the tehsils of the eight watershed-atlas districts that have a zone-of-influence layer.</p></div>
-  <div class="block"><h3>Data</h3><p>CoRE Stack surface waterbody layers give, for each waterbody and hydrological year 2017–2024, the share of its mapped extent holding water in kharif (k), kharif and rabi (kr), and kharif, rabi and summer (krz), with its drainage position, stream order and catchment. Zone-of-influence layers give the cropping intensity of the land the waterbody irrigates. Mission Antyodaya village data (fish ponds, main irrigation source) are reached through the villages of the home micro-watershed. The landscape context (rainfall, aquifer, terrain, groundwater category, canals, cropping) is the watershed atlas's context for the home MWS. The Water Body Census (2017-18) is used only to check the patterns, not as an input.</p></div>
-  <div class="block"><h3>Cleaning and typing</h3><p>Fragments of one waterbody (same area and series, within about 30 m) are merged and counted once. Waterbodies under 0.05 ha are dropped. Very large waterbodies (50 ha or more, or spanning three or more MWS) are reservoirs or large rivers and are out of scope. The rest are typed in order: river reach, canal-fed, onstream tank, small onstream pond, headwater pond, village pond and farm pond, from type, size, drainage position and catchment-to-area ratio. Zones of influence are joined by waterbody id where the layer has one and otherwise by location: the zone's centre within 10 m or 10% of the waterbody's size, and its radius within 25% of the expected radius for that size.</p></div>
-  <div class="block"><h3>Status and recent ponds</h3><p>A waterbody <b>holds water regularly</b> if it was wet in 3 or more of the 8 years and is not new. It <b>rarely holds water</b> if wet in only 1 or 2 years: rules that need several wet years do not apply. It is <b>new</b> if it was first wet in 2022 or later and wet every year since; these are mostly farm ponds dug recently and are counted per micro-watershed as <b>recent ponds</b>, a positive sign of where pond-building schemes have reached. Single-year detections are kept rather than dropped as misdetections.</p></div>
-  <div class="block"><h3>Signals, roles and rules</h3><p>Fill is read relative to the tehsil and year: a waterbody's kharif fill divided by the median of waterbodies in its tehsil that year, so a drought year such as 2023 does not read as decline. Poor filling is pooled by type (lowest 20% of regular waterbodies of the same type, severe 10%). Retention compares rabi and summer water with kharif. Drought failure compares fill in the home MWS's drought years with normal years. Each waterbody gets five roles from 0 to 1 (irrigation, drought protection, fishery, livestock, recharge and domestic use); a triggered rule's intensity rises with the roles that matter for it. Rules apply by type and gate and are triggered, not triggered, or lack data.</p></div>
-  <div class="block"><h3>Check against the Water Body Census</h3><p>Rule patterns were compared with census fields for the matched waterbodies (how full, how often it fills, use, encroachment, repair, storage loss, water user associations, pisciculture) and six tuning changes were made. After them, waterbodies the census records as rarely full trigger inflow shortfall more often (6% → 20% across the census fill classes); those under repair trigger sudden loss more (19% vs 8%); those with a water user association trigger irrigation underuse less (19% vs 40%); encroached ones trigger siltation more (32% vs 21%). The census describes 2017-18 and the match is approximate, so it supports the direction rather than the exact rates.</p></div>
+  const n=WIDX.districts.reduce((s,d)=>s+d.n,0), nt=Object.keys(WIDX.tehsil_stats).length;
+  const zl=Object.values(WIDX.tehsil_stats).reduce((a,s)=>[a[0]+(s.zoi_location||0)+(s.zoi_wb_id||0),a[1]+s.kept],[0,0]);
+  m.innerHTML=`<div class="doc"><h2>Methodology</h2>
+  <div class="block"><h3>Purpose and framing</h3><p>The waterbody atlas applies the approach of the watershed atlas to single waterbodies. Each waterbody is typed, read through its own water series, placed in the landscape of its home micro-watershed, and checked against transparent rules for observed stresses and opportunities. Every threshold, rule and question sits in editable JSON files with its sources; the page and the Python pipeline evaluate the same files.</p></div>
+  <div class="block"><h3>Data</h3>${wDrawsOn("Data")}<ul>
+   <li>${n.toLocaleString("en-IN")} waterbodies in ${nt} tehsils of the eight watershed-atlas districts that have a zone-of-influence layer.</li>
+   <li><b>Surface water bodies</b> (CoRE Stack GeoServer layer <span class="mono">swb:surface_waterbodies_&lt;district&gt;_&lt;tehsil&gt;</span>): for each waterbody and hydrological year 2017–2024, the share of its mapped extent holding water in kharif (k), through rabi (kr) and through zaid (krz), with its drainage position, stream order, catchment and CoRE Stack's own type. Fragments of one waterbody with the same area and series, within about 30 m, are merged.</li>
+   <li><b>Zones of influence</b> (<span class="mono">swb:waterbodies_zoi_…</span>): the land around a waterbody that it irrigates, with yearly cropping intensity and double- and triple-cropped area. Joined by waterbody id where the layer has one and otherwise by location; ${zl[1]?Math.round(zl[0]/zl[1]*100):0}% of waterbodies have a zone.</li>
+   <li><b>Home micro-watershed</b>: the MWS holding most of the waterbody. Its context (rainfall, aquifer, terrain, groundwater category, canals, cropping), system shares and variables come from the watershed atlas pipeline run for the same tehsils.</li>
+   <li><b>Villages</b> of the home MWS (Mission Antyodaya): fish ponds and fish farming, and the main irrigation source. <b>Drought years</b>: years with 4 or more moderate or severe drought weeks in kharif in the home MWS.</li>
+   <li>The Water Body Census (2017-18) fields that CoRE Stack matched are used only to check the patterns, never as inputs (${srcLinksW(["wbc2023"])}).</li></ul></div>
+  <div class="block"><h3>Variables</h3>${wDrawsOn("Variables")}<p>Variables are computed in <span class="mono">seft/wb/indicators.py</span>. Fill is read relative to the tehsil and year: a waterbody's kharif fill divided by the median of the tehsil's waterbodies that hold water in 3 or more years that year, so that a drought year such as 2023 does not read as decline. Trends are Theil–Sen slopes (${srcLinksW(["sen1968"])}).</p>
+   <details><summary>All ${WK.variables.variables.length} variables and ${(WK.variables.type_fields||[]).length} type fields</summary><div class="tbl"><table><thead><tr><th>Variable</th><th>Unit</th><th>How it is computed</th><th>Sources</th></tr></thead><tbody>${[...WK.variables.variables,...(WK.variables.type_fields||[])].map(v=>`<tr><td>${wvref(v.id)}<br><span class="mono muted">${v.id}</span></td><td>${esc(v.unit||"")}</td><td>${esc(v.description)}</td><td class="note">${srcLinksW(v.sources)}</td></tr>`).join("")}</tbody></table></div></details></div>
+  <div class="block"><h3>Types</h3>${wDrawsOn("Types")}<p>Waterbodies under ${WK.types.min_area_ha} ha are dropped. The rest are typed in order from size, drainage position, stream order, catchment and CoRE Stack's own class: reservoirs and large rivers (50 ha or more, or spanning three or more MWS) are left out of scope; the rest are river reaches, canal-fed waterbodies, on-stream tanks, small on-stream ponds, headwater ponds, village ponds and farm ponds. Two fields the data cannot see, ownership and inflow, can be set by community answers. Each type is described on the Waterbody types tab.</p></div>
+  <div class="block"><h3>Status and recent ponds</h3><p>A waterbody holds water regularly when wet in 3 or more of the 8 years and not new; most rules need this. It rarely holds water when wet in only 1 or 2 years. It is new when first wet in 2022 or later and wet every year since; these are mostly farm ponds dug recently and are counted per micro-watershed as recent ponds, a positive sign of where pond-building schemes have reached. Single-year detections are kept rather than dropped as misdetections.</p></div>
+  <div class="block"><h3>Signals and thresholds</h3>${wDrawsOn("Signals and thresholds")}<p>Rules are written over ${WK.signals.signals.length} signals: evidence and opportunity signals compare a variable with a threshold and a severe threshold, and are graded 0, then 0.5 at the threshold rising to 1 at the severe threshold; context signals are yes/no settings. Poor filling is pooled by type (the lowest 20% of regular waterbodies of the same type, severe 10%), because a waterbody's extent counts every year's water, so typical fill differs by type. Thresholds come from published norms where they exist (CGWB stage-of-extraction categories for groundwater stress, the Drought Manual's drought weeks for drought years). No published norm exists for most waterbody behaviour, such as how much of a tank should remain in rabi, so those thresholds are expert judgement, calibrated against the 2017–2024 distributions and checked against the Water Body Census, and labelled so in the signal library. Each signal lists its sources.</p></div>
+  <div class="block"><h3>Roles</h3>${wDrawsOn("Roles")}<p>Each waterbody gets five roles from 0 to 1: irrigation (cropping in its zone of influence and village irrigation sources), kharif drought protection (rainfed farming and climate of the home MWS), fishery (villages that fish), livestock water (pastoral land and livestock density) and recharge and domestic water (groundwater stress and households without piped water). A triggered rule's intensity rises with the roles that matter for it, so the same problem counts more where the water matters more.</p></div>
+  <div class="block"><h3>Rules</h3>${wDrawsOn("Rules")}<p>${WK.rules.rules.length} rules in four groups (filling, retention, storage, use) apply by type and gate and are triggered, not triggered, or lack data. Each carries a confidence (how directly the data show the problem), a rationale, a public note, interventions, linked schemes and sources. Their firing rates by district are on the Observed stresses tab.</p></div>
+  <div class="block"><h3>Community questions and re-assessment</h3>${wDrawsOn("Community questions and re-assessment")}<p>The data leave some things unknown, so the atlas carries ${WALLQ.length} multiple-choice questions. ${WK.questions.type_questions.length} type questions set ownership or inflow; the type rules run again and every rule is re-scored for the new type, in the page as in <span class="mono">seft/wb/assess.py</span>. ${WK.questions.stress_questions.length} stress questions carry likelihood ratios: the data result sets a prior (by status, intensity and the rule's confidence) and each answer multiplies the odds. The ratios are expert judgement on a fixed scale, with their direction checked against the census comparison where it covers the rule; they should be calibrated as answers from the field accumulate. Save answers from the page and run <code>python -m seft.cli wb-assess --answers file.json</code> to get the same results as a table.</p></div>
+  <div class="block"><h3>Check against the Water Body Census</h3><p>Rule patterns were compared with census fields for the matched waterbodies (how full, how often it fills, use, encroachment, repair, storage loss, water user associations, pisciculture) and six tuning changes were made. After them, waterbodies the census records as rarely full trigger inflow shortfall more often (6% to 20% across the census fill classes); those under repair trigger sudden loss more (19% against 8%); those with a water user association trigger irrigation underuse less (19% against 40%); encroached ones trigger siltation more (32% against 21%). The census describes 2017-18 and the match is approximate, so it supports the direction rather than the exact rates (${srcLinksW(["wb_census_check"])}).</p></div>
+  <div class="block"><h3>Schemes</h3>${wDrawsOn("Schemes")}<p>Each rule links to the schemes that can fund its interventions, filtered by the waterbody's state and type; recent ponds link to the farm-pond schemes. A scheme is suggested for a waterbody when one of its linked rules is present after any answers. Status notes were checked on ${esc(WK.schemes.verified)}.</p></div>
+  ${wKschemaHtml()}
   <div class="block"><h3>Known limitations</h3><ul>
-   <li>Most zone-of-influence layers have no waterbody id, so about 1 in 10 waterbodies has no matched zone and its irrigation role relies on the home MWS.</li>
-   <li>Water extent is mapped from satellite imagery at 10–30 m; small ponds and narrow river reaches are noisy, and some single-year detections may be misdetections.</li>
+   <li>Most zone-of-influence layers have no waterbody id; about 1 in 10 waterbodies has no matched zone and its irrigation role relies on the home MWS.</li>
+   <li>Water extent is mapped from satellite imagery; small ponds and narrow river reaches are noisy, and some single-year detections may be misdetections.</li>
    <li>The extent of a waterbody is the union of all years' water, so a pond that was enlarged shows low fill in earlier years.</li>
-   <li>Old layers without drainage fields (some tehsils) cannot be typed (WB-10). Fragmented waterbodies are merged by a heuristic.</li>
-   <li>Scheme names and periods change; every scheme carries a status note and should be checked before use.</li></ul>
-   <p class="note">Issues found in the CoRE Stack data are logged in <code>docs/core_stack_waterbody_api_issues.md</code>; the census comparison is in <code>docs/waterbody_census_comparison.md</code>.</p></div></div>`;
+   <li>Old layers without drainage fields cannot be typed (WB-10). Fragmented waterbodies are merged by a heuristic.</li>
+   <li>Likelihood ratios and most waterbody thresholds are expert judgement. Scheme names and periods change; check each status note before use.</li></ul>
+   <p class="note">Issues found in the CoRE Stack data are logged in <span class="mono">docs/core_stack_waterbody_api_issues.md</span>.</p></div>
+  <div class="block"><h3>Sources</h3>${wDrawsOn("Sources")}<ol>${WK.sources.sources.map(s=>`<li>${esc(s.citation)} ${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">link</a>`:""}<br><span class="note">Used for: ${esc(s.used_for)}</span></li>`).join("")}</ol></div></div>`;
+  m.querySelectorAll("[data-wkf]").forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById("wkfiles")?.scrollIntoView();});
 }
 function renderWbData(m){
-  m.innerHTML=`<div class="doc"><div class="block"><h2>Data</h2><p>One table per district, one row per waterbody: identity, type, status, size, drainage, home MWS and its context, recent ponds in the MWS, indicators, roles, the intensity of each rule (blank: not applicable; 0: not triggered; NA: insufficient data) and the schemes linked to its triggered rules. Built by <code>python -m seft.cli wb-run</code>.</p></div>
-    <div class="block">${WIDX.districts.map(d=>`<div class="dl"><span><b>${esc(d.district)}</b>, ${esc(d.state)} · ${d.n.toLocaleString("en-IN")} waterbodies</span><button class="btn ghost" data-wf="wb_${d.slug}.csv">Save CSV</button></div>`).join("")}</div>
-    <div class="block"><h3>Rebuild locally</h3><pre class="kex">python -m seft.cli wb-add  --state ... --district ... --tehsil ...   # add a tehsil to config/waterbody/locations.json
+  const kf=["types","variables","signals","roles","rules","questions","schemes","sources"];
+  m.innerHTML=`<div class="doc"><h2>Data downloads</h2>
+    <p>The knowledge files that hold the logic, then one table per district with one row per waterbody: identity, type, status, size, drainage, home MWS and its context, recent ponds in the MWS, variables, roles, the intensity of each rule (blank: not applicable; 0: not triggered; NA: insufficient data) and the schemes linked to its triggered rules. Built by <code>python -m seft.cli wb-run</code>.</p>
+    <div><div class="eyebrow">Knowledge files (editable logic)</div>${kf.map(f=>`<div class="dl"><span><b class="mono">${f}.json</b><br><span class="note">${esc((WKSCHEMA.find(x=>x.file===f+".json")||{}).role||"")}</span></span><button class="btn ghost" data-wk="${f}">Save</button></div>`).join("")}</div>
+    <div><div class="eyebrow">Tables</div>${WIDX.districts.map(d=>`<div class="dl"><span><b class="mono">wb_${d.slug}.csv</b><br><span class="note">${esc(d.district)}, ${esc(d.state)} · ${d.n.toLocaleString("en-IN")} waterbodies</span></span><button class="btn ghost" data-wf="wb_${d.slug}.csv">Save</button></div>`).join("")}</div>
+    <div><div class="eyebrow">Community answers</div><p class="note">Answers you enter in Explore are kept in this browser. Save them to share with your team or to run <code>python -m seft.cli wb-assess --answers waterbody_answers.json</code>; load a saved file to restore them.</p><div class="filters"><button class="btn ghost" id="wdsave">Save all answers (JSON)</button><label class="btn ghost" for="wdload" style="cursor:pointer">Load answers…</label><input type="file" id="wdload" accept=".json,application/json" hidden></div></div>
+    <div class="block"><h3>Rebuild locally</h3><pre class="kex">python -m seft.cli wb-add  --state ... --district ... --tehsils ...   # add tehsils to config/waterbody/locations.json
 python -m seft.cli wb-fetch          # watershed data + waterbody and zone-of-influence layers
+python -m seft.cli wb-validate       # check knowledge/waterbody/*.json
 python -m seft.cli wb-run --merge    # build, score, write out/waterbody and web/data/waterbody
-python -m seft.cli wb-census         # compare with the Water Body Census</pre></div></div>`;
+python -m seft.cli wb-census         # compare with the Water Body Census
+python -m seft.cli wb-assess --answers waterbody_answers.json   # results with community answers</pre></div></div>`;
   m.querySelectorAll("[data-wf]").forEach(b=>b.onclick=()=>saveWbCsv(b.dataset.wf));
+  m.querySelectorAll("[data-wk]").forEach(b=>b.onclick=()=>saveFile(b.dataset.wk+".json",JSON.stringify(WK[b.dataset.wk],null,1)));
+  $("#wdsave").onclick=wSaveAnswers; $("#wdload").onchange=e=>{if(e.target.files[0]) wLoadAnswers(e.target.files[0])};
 }
 async function saveWbCsv(name){
   /* local: web/data/waterbody/csv/; published: waterbody/ beside the page */
@@ -1806,7 +2114,7 @@ async function saveWbCsv(name){
 function renderWb(){
   const m=$("#main");
   const go=()=>{const t=W.tab; if(t==="explore") return renderWbExplore(m); if(t==="graph") return renderWbGraph(m); if(t==="types") return renderWbTypes(m);
-    if(t==="signals") return renderWbSignals(m); if(t==="rules") return renderWbRules(m); if(t==="questions") return renderWbQuestions(m);
+    if(t==="rules") return renderWbRules(m); if(t==="questions") return renderWbQuestions(m);
     if(t==="schemes") return renderWbSchemes(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
   if(WIDX) return go();
   m.innerHTML=`<div class="loading">Loading the waterbody atlas…</div>`;

@@ -205,6 +205,9 @@ python -m seft.cli wb-census           # compare with the Water Body Census fiel
      ponds** (`mws_recent_ponds` in the CSV, `recent_ponds` in the bundle's MWS table), a positive sign of where
      pond-building schemes have reached. The `schemes` column lists the schemes linked to the triggered rules
      (`knowledge/waterbody/schemes.json`, filtered by state and type).
+* **`wb-assess --answers waterbody_answers.json`** (`seft/wb/assess.py`) applies community answers saved from the
+  page: type answers (ownership, inflow) reassign the type and re-score every rule; stress answers multiply each
+  rule's odds by their likelihood ratios. Writes `out/waterbody/answers/assessed.csv`.
 * **`wb-census`** (`seft/wb/census.py`) scores the same waterbodies and compares them with the Water Body Census
   fields that CoRE Stack matched to them, as `groundtruth` does for watersheds. It writes
   `out/waterbody/census/report.md`, `detail.csv` and `comparison.json`. The census fields are never inputs.
@@ -216,8 +219,12 @@ The page has two atlases, switched at the top: **Watersheds** (described below) 
 atlas loads `web/data/waterbody/index.json` and `w_<district>.json` (or `wb_index.js` / `wb_w_<district>.js` from
 disk) and draws each district's MWS and tehsil outlines from the watershed bundle `d_<district>`. Its tabs: Explore
 (map coloured by type, status, recent ponds, any rule or role; district, MWS and waterbody records with the fill
-series, roles, triggered rules, interventions, questions and schemes), Knowledge graph, Waterbody types, Signals
-and roles, Observed stresses, Community questions, Schemes, Methodology and Data. Add `?atlas=wb` to open it directly.
+series, how the type was assigned, roles, rules with their signals, community questions that re-compute the type and
+re-assess the stresses, and schemes), Knowledge graph, Waterbody types, Observed stresses (with the signal library,
+roles and each rule's questions and likelihood ratios), Community questions, Schemes, Methodology and Data. The page
+scores a waterbody again after a type answer with a JavaScript mirror of `seft/wb/build.py` and `seft/wb/score.py`;
+for that the bundles carry each waterbody's variables (`e`, index `env_ids`) and type fields (`tf`), and the MWS table
+the home-MWS values the rules read (`mws_ids`). Add `?atlas=wb` to open it directly.
 
 `web/index.html` is a single-page atlas. It does not read `knowledge/` or `data/raw/` itself. Everything it needs is written into `web/data/` by `run` (via `seft/webdata.py`).
 

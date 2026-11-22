@@ -13,7 +13,11 @@
     "over": "regular",
     "pct": 20,
     "severe_pct": 10
-   }
+   },
+   "sources": [
+    "expert_judgement",
+    "wb_census_check"
+   ]
   },
   {
    "id": "s_dries_by_rabi",
@@ -23,7 +27,11 @@
    "direction": "low",
    "value": 0.6,
    "severe": 0.3,
-   "note": "Water area in rabi at or below 60% of the kharif area (severe 30%)."
+   "note": "Water area in rabi at or below 60% of the kharif area (severe 30%).",
+   "sources": [
+    "palanisami_tanks",
+    "expert_judgement"
+   ]
   },
   {
    "id": "s_dries_by_summer",
@@ -33,7 +41,10 @@
    "direction": "low",
    "value": 0.3,
    "severe": 0.1,
-   "note": "Water area through zaid (summer) at or below 30% of the kharif area (severe 10%)."
+   "note": "Water area through zaid (summer) at or below 30% of the kharif area (severe 10%).",
+   "sources": [
+    "expert_judgement"
+   ]
   },
   {
    "id": "s_shrinking",
@@ -43,7 +54,12 @@
    "direction": "low",
    "value": -0.08,
    "severe": -0.16,
-   "note": "Theil-Sen trend of relative fill (kharif fill divided by the median fill of the tehsil's waterbodies that year) at or below -0.08 a year (severe -0.16): over 2017-24 the waterbody fills about half as well, relative to its neighbours, as it did at first. Dividing by the tehsil's median removes the effect of the year's rainfall (2023 was a drought year almost everywhere)."
+   "note": "Theil-Sen trend of relative fill (kharif fill divided by the median fill of the tehsil's waterbodies that year) at or below -0.08 a year (severe -0.16): over 2017-24 the waterbody fills about half as well, relative to its neighbours, as it did at first. Dividing by the tehsil's median removes the effect of the year's rainfall (2023 was a drought year almost everywhere).",
+   "sources": [
+    "sen1968",
+    "expert_judgement",
+    "wb_census_check"
+   ]
   },
   {
    "id": "s_sudden_loss",
@@ -54,7 +70,11 @@
    "value": 0.3,
    "severe": 0.1,
    "gate": "k_early >= 30 and k_late_max <= 15",
-   "note": "Relative fill (kharif fill divided by the tehsil's median that year) in the last two years at or below 30% (severe 10%) of the first three years, for waterbodies that filled to 30% or more at first. Each of the last two years must also be at 15% fill or less (changed 22 Nov 2026 from their average)."
+   "note": "Relative fill (kharif fill divided by the tehsil's median that year) in the last two years at or below 30% (severe 10%) of the first three years, for waterbodies that filled to 30% or more at first. Each of the last two years must also be at 15% fill or less (changed 22 Nov 2026 from their average).",
+   "sources": [
+    "expert_judgement",
+    "wb_census_check"
+   ]
   },
   {
    "id": "s_drought_failure",
@@ -64,7 +84,11 @@
    "direction": "low",
    "value": 0.5,
    "severe": 0.25,
-   "note": "Kharif fill in the home MWS's drought years (4 or more moderate or severe drought weeks) at or below half (severe a quarter) of the fill in other years."
+   "note": "Kharif fill in the home MWS's drought years (4 or more moderate or severe drought weeks) at or below half (severe a quarter) of the fill in other years.",
+   "sources": [
+    "drought_manual",
+    "expert_judgement"
+   ]
   },
   {
    "id": "s_no_summer_water",
@@ -74,7 +98,10 @@
    "direction": "low",
    "value": 5,
    "severe": 1,
-   "note": "Mean share of the extent holding water through zaid at or below 5% (severe 1%)."
+   "note": "Mean share of the extent holding water through zaid at or below 5% (severe 1%).",
+   "sources": [
+    "expert_judgement"
+   ]
   },
   {
    "id": "s_water_lasts",
@@ -84,7 +111,11 @@
    "direction": "high",
    "value": 40,
    "severe": 60,
-   "note": "Mean share of the extent holding water through rabi at or above 40% (severe 60%)."
+   "note": "Mean share of the extent holding water through rabi at or above 40% (severe 60%).",
+   "sources": [
+    "palanisami_tanks",
+    "expert_judgement"
+   ]
   },
   {
    "id": "s_zoi_low_ci",
@@ -94,7 +125,10 @@
    "direction": "low",
    "value": 1.2,
    "severe": 1.05,
-   "note": "Mean cropping intensity in the zone of influence at or below 1.2 (severe 1.05)."
+   "note": "Mean cropping intensity in the zone of influence at or below 1.2 (severe 1.05).",
+   "sources": [
+    "expert_judgement"
+   ]
   },
   {
    "id": "s_zoi_ci_decline",
@@ -104,7 +138,11 @@
    "direction": "low",
    "value": -0.02,
    "severe": -0.05,
-   "note": "Theil-Sen trend of cropping intensity in the zone of influence at or below -0.02 a year (severe -0.05)."
+   "note": "Theil-Sen trend of cropping intensity in the zone of influence at or below -0.02 a year (severe -0.05).",
+   "sources": [
+    "sen1968",
+    "expert_judgement"
+   ]
   },
   {
    "id": "s_dry_season_decline",
@@ -114,61 +152,104 @@
    "direction": "low",
    "value": -2,
    "severe": -5,
-   "note": "Theil-Sen trend of the zaid water share at or below -2 percentage points a year (severe -5)."
+   "note": "Theil-Sen trend of the zaid water share at or below -2 percentage points a year (severe -5).",
+   "sources": [
+    "sen1968",
+    "expert_judgement"
+   ]
   },
   {
    "id": "ctx_small_catchment",
    "kind": "context",
    "label": "Small catchment for its size",
-   "expr": "catchment_ratio <= 5"
+   "expr": "catchment_ratio <= 5",
+   "sources": [
+    "expert_judgement"
+   ],
+   "note": "Catchment no more than 5 times the waterbody's area: it may not produce enough runoff to fill it."
   },
   {
    "id": "ctx_large_catchment",
    "kind": "context",
    "label": "Large catchment for its size",
-   "expr": "catchment_ratio >= 20"
+   "expr": "catchment_ratio >= 20",
+   "sources": [
+    "expert_judgement",
+    "wb_census_check"
+   ],
+   "note": "Catchment 20 or more times the waterbody's area: runoff should be ample, so poor filling points to blocked or diverted inflow."
   },
   {
    "id": "ctx_hard_rock",
    "kind": "context",
    "label": "Hard rock aquifer",
-   "expr": "ctx_aquifer == 'hard_rock'"
+   "expr": "ctx_aquifer == 'hard_rock'",
+   "sources": [
+    "core_stack"
+   ],
+   "note": "Home MWS on a hard-rock aquifer (watershed context): little storage underground, so surface storage and recharge matter more."
   },
   {
    "id": "ctx_alluvium",
    "kind": "context",
    "label": "Alluvial aquifer",
-   "expr": "ctx_aquifer == 'alluvium'"
+   "expr": "ctx_aquifer == 'alluvium'",
+   "sources": [
+    "core_stack"
+   ],
+   "note": "Home MWS on an alluvial aquifer (watershed context)."
   },
   {
    "id": "ctx_dry_climate",
    "kind": "context",
    "label": "Semi-arid or dry sub-humid",
-   "expr": "ctx_rainfall == 'semi_arid' or ctx_rainfall == 'dry_subhumid'"
+   "expr": "ctx_rainfall == 'semi_arid' or ctx_rainfall == 'dry_subhumid'",
+   "sources": [
+    "mandal2016"
+   ],
+   "note": "Home MWS semi-arid or dry sub-humid (watershed rainfall context, from the district normal)."
   },
   {
    "id": "ctx_eroding_catchment",
    "kind": "context",
    "label": "Eroding catchment",
-   "expr": "nz(mws_f_sloping) >= 0.3 or nz(mws_runoff_ratio) >= 0.25 or nz(mws_degr_frac) >= 0.04"
+   "expr": "nz(mws_f_sloping) >= 0.3 or nz(mws_runoff_ratio) >= 0.25 or nz(mws_degr_frac) >= 0.04",
+   "sources": [
+    "wischmeier_slope",
+    "expert_judgement"
+   ],
+   "note": "Home MWS with 30% or more sloping land, a runoff ratio of 25% or more, or 4% or more farmland degradation: silt load is likely to be high."
   },
   {
    "id": "ctx_gw_stressed",
    "kind": "context",
    "label": "Groundwater stressed",
-   "expr": "nz(mws_soge_stage) >= 70"
+   "expr": "nz(mws_soge_stage) >= 70",
+   "sources": [
+    "cgwb_gec2015"
+   ],
+   "note": "Block stage of groundwater extraction 70% or more (CGWB semi-critical or worse)."
   },
   {
    "id": "ctx_zoi",
    "kind": "context",
    "label": "Zone of influence known",
-   "expr": "zoi_matched"
+   "expr": "zoi_matched",
+   "sources": [
+    "core_stack_swb"
+   ],
+   "note": "A zone of influence was joined to the waterbody, so the cropping it supports is known."
   },
   {
    "id": "ctx_regular",
    "kind": "context",
    "label": "Holds water in 3 or more years and not new",
-   "expr": "regular"
+   "expr": "regular",
+   "sources": [
+    "expert_judgement"
+   ],
+   "note": "Holds water in 3 or more of the 8 years and is not new; most rules need this series length."
   }
- ]
+ ],
+ "grading": "A threshold signal is graded 0 when its threshold is not crossed, 0.5 at the threshold, rising in proportion to 1 at the severe threshold (seft/signals.py grade). A yes/no signal is 1 or 0. Pooled signals take their thresholds from percentiles of waterbodies of the same type ('pool'). A signal with a 'gate' is 0 where the gate does not hold."
 }

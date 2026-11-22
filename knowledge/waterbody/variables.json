@@ -1,0 +1,426 @@
+{
+ "_about": "Variables of a waterbody, computed in seft/wb/indicators.py from its yearly water series, its zone of influence, the villages of its home micro-watershed and the MWS drought years; and the fields used to assign its type (seft/wb/build.py). Signals, roles and rules also read the home MWS's variables as mws_<id> (see the watershed variables.json), its system shares as share_<system> and its context classes as ctx_<dimension>. Series are per hydrological year 2017–2024 (July to June).",
+ "version": 1,
+ "groups": {
+  "fill": "Water held",
+  "trend": "Change over the years",
+  "drought": "Drought years",
+  "zoi": "Zone of influence",
+  "village": "Villages of the home MWS",
+  "shape": "Size, drainage and catchment",
+  "status": "How often it holds water"
+ },
+ "variables": [
+  {
+   "id": "area_ha",
+   "label": "Area",
+   "unit": "ha",
+   "group": "shape",
+   "description": "Area of the waterbody's mapped extent (area_ored: every pixel that held water in any season of any year), after merging fragments of one waterbody.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "catchment_ratio",
+   "label": "Catchment ÷ waterbody area",
+   "unit": "ratio",
+   "group": "shape",
+   "description": "Catchment area draining to the waterbody divided by its area. A large ratio means much runoff for its size; a small one, that the catchment may not fill it.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "years_wet",
+   "label": "Years with water",
+   "unit": "of 8",
+   "group": "status",
+   "description": "Number of hydrological years 2017–2024 in which any part of the extent held water in kharif.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "first_wet_year",
+   "label": "First year with water",
+   "unit": "year",
+   "group": "status",
+   "description": "First hydrological year in which it held water in kharif.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "is_new",
+   "label": "New since 2022",
+   "unit": "yes/no",
+   "group": "status",
+   "description": "First wet in 2022 or later and wet in every year since: mostly farm ponds dug recently.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "regular",
+   "label": "Holds water regularly",
+   "unit": "yes/no",
+   "group": "status",
+   "description": "Wet in 3 or more of the 8 years and not new. Most rules are checked only for these.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "k_mean",
+   "label": "Kharif fill (mean)",
+   "unit": "%",
+   "group": "fill",
+   "description": "Mean share of the extent holding water in kharif, over the years with data (k).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "kr_mean",
+   "label": "Rabi water (mean)",
+   "unit": "%",
+   "group": "fill",
+   "description": "Mean share of the extent holding water through kharif and rabi (kr).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "krz_mean",
+   "label": "Summer water (mean)",
+   "unit": "%",
+   "group": "fill",
+   "description": "Mean share of the extent holding water through kharif, rabi and zaid (krz).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "k_fill",
+   "label": "Kharif fill in normal years",
+   "unit": "%",
+   "group": "fill",
+   "description": "Mean kharif fill in years that were not drought years in the home MWS; the mean of all years if there was no drought year.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "retention_kr",
+   "label": "Water kept into rabi",
+   "unit": "ratio",
+   "group": "fill",
+   "description": "Mean rabi water divided by mean kharif fill: 1 means all the water seen in kharif is still there in rabi.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "retention_krz",
+   "label": "Water kept into summer",
+   "unit": "ratio",
+   "group": "fill",
+   "description": "Mean summer water divided by mean kharif fill.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "k_early",
+   "label": "Kharif fill, first three years",
+   "unit": "%",
+   "group": "trend",
+   "description": "Mean kharif fill in 2017–2019.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "k_late",
+   "label": "Kharif fill, last two years",
+   "unit": "%",
+   "group": "trend",
+   "description": "Mean kharif fill in 2023–2024.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "k_late_max",
+   "label": "Highest kharif fill, last two years",
+   "unit": "%",
+   "group": "trend",
+   "description": "The higher of the 2023 and 2024 kharif fill.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "k_slope",
+   "label": "Kharif fill trend",
+   "unit": "points/yr",
+   "group": "trend",
+   "description": "Theil–Sen slope of kharif fill, in percentage points a year.",
+   "sources": [
+    "core_stack_swb",
+    "sen1968"
+   ]
+  },
+  {
+   "id": "rel_fill_mean",
+   "label": "Fill relative to the tehsil",
+   "unit": "ratio",
+   "group": "trend",
+   "description": "Mean of relative fill: each year's kharif fill divided by the median fill that year of the tehsil's waterbodies that hold water in 3 or more years. 1 means as full as a typical neighbour.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "rel_early",
+   "label": "Relative fill, first three years",
+   "unit": "ratio",
+   "group": "trend",
+   "description": "Mean relative fill in 2017–2019.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "rel_late",
+   "label": "Relative fill, last two years",
+   "unit": "ratio",
+   "group": "trend",
+   "description": "Mean relative fill in 2023–2024.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "rel_late_to_early",
+   "label": "Recent ÷ early relative fill",
+   "unit": "ratio",
+   "group": "trend",
+   "description": "Relative fill in the last two years divided by that of the first three years. Low values mean it has stopped filling compared with its neighbours.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "rel_slope",
+   "label": "Fill trend relative to the tehsil",
+   "unit": "per year",
+   "group": "trend",
+   "description": "Theil–Sen slope of relative fill. Dividing by the tehsil median removes the year's rainfall, so a drought year does not read as decline.",
+   "sources": [
+    "core_stack_swb",
+    "sen1968"
+   ]
+  },
+  {
+   "id": "krz_slope",
+   "label": "Summer water trend",
+   "unit": "points/yr",
+   "group": "trend",
+   "description": "Theil–Sen slope of summer water (krz), in percentage points a year.",
+   "sources": [
+    "core_stack_swb",
+    "sen1968"
+   ]
+  },
+  {
+   "id": "late_to_early",
+   "label": "Recent ÷ early kharif fill",
+   "unit": "ratio",
+   "group": "trend",
+   "description": "Kharif fill in the last two years divided by that of the first three years (not adjusted for rainfall).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "k_normal",
+   "label": "Kharif fill, normal years",
+   "unit": "%",
+   "group": "drought",
+   "description": "Mean kharif fill in years that were not drought years in the home MWS.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "k_drought",
+   "label": "Kharif fill, drought years",
+   "unit": "%",
+   "group": "drought",
+   "description": "Mean kharif fill in the home MWS's drought years: 4 or more weeks of moderate or severe drought in kharif (CoRE Stack kharif drought data).",
+   "sources": [
+    "core_stack_swb",
+    "drought_manual"
+   ]
+  },
+  {
+   "id": "n_drought_years",
+   "label": "Drought years",
+   "unit": "years",
+   "group": "drought",
+   "description": "Number of years with 4 or more moderate or severe drought weeks in kharif in the home MWS.",
+   "sources": [
+    "core_stack_swb",
+    "drought_manual"
+   ]
+  },
+  {
+   "id": "n_normal_years",
+   "label": "Normal years",
+   "unit": "years",
+   "group": "drought",
+   "description": "Number of years that were not drought years and have drought data.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "drought_fill_ratio",
+   "label": "Fill in drought ÷ normal years",
+   "unit": "ratio",
+   "group": "drought",
+   "description": "Kharif fill in drought years divided by fill in normal years; needs at least 1 drought and 2 normal years.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "zoi_matched",
+   "label": "Zone of influence known",
+   "unit": "yes/no",
+   "group": "zoi",
+   "description": "A zone of influence was joined to the waterbody, by its id or by location (centre within 10 m or 10% of its size, radius within 25% of the expected radius).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "zoi_ci_mean",
+   "label": "Cropping intensity in zone of influence",
+   "unit": "ratio",
+   "group": "zoi",
+   "description": "Mean cropping intensity (cropped area over cultivable area) in the zone of influence, 2017–2024.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "zoi_ci_slope",
+   "label": "Cropping intensity trend in zone of influence",
+   "unit": "per year",
+   "group": "zoi",
+   "description": "Theil–Sen slope of cropping intensity in the zone of influence.",
+   "sources": [
+    "core_stack_swb",
+    "sen1968"
+   ]
+  },
+  {
+   "id": "zoi_multi_crop_share",
+   "label": "Double and triple cropped share of zone of influence",
+   "unit": "share",
+   "group": "zoi",
+   "description": "Mean double- plus triple-cropped area divided by the cultivable area of the zone of influence.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "fish_village_share",
+   "label": "Villages with fishery",
+   "unit": "share",
+   "group": "village",
+   "description": "Share of the home MWS's village area whose villages report community fish ponds or fish farming in Mission Antyodaya.",
+   "sources": [
+    "mission_antyodaya"
+   ]
+  },
+  {
+   "id": "surface_irrigation_share",
+   "label": "Villages irrigating from surface water",
+   "unit": "share",
+   "group": "village",
+   "description": "Share of the home MWS's village area whose villages name tanks, ponds, rivers or canals as the main irrigation source in Mission Antyodaya.",
+   "sources": [
+    "mission_antyodaya"
+   ]
+  }
+ ],
+ "type_fields": [
+  {
+   "id": "wb_type",
+   "label": "Layer type",
+   "unit": "text",
+   "description": "CoRE Stack's own class for the waterbody: 'individual', 'river' or 'canal' (blank in old layers).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "on_drainage",
+   "label": "On a drainage line",
+   "unit": "yes/no",
+   "description": "Any fragment of the waterbody lies on a mapped drainage line.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "stream_order",
+   "label": "Stream order",
+   "unit": "order",
+   "description": "Highest Strahler order of the drainage lines it lies on (1 = smallest headwater channels).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "n_mws",
+   "label": "Micro-watersheds spanned",
+   "unit": "count",
+   "description": "Number of micro-watersheds the waterbody overlaps.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "has_drainage_fields",
+   "label": "Layer has drainage fields",
+   "unit": "yes/no",
+   "description": "False for old layers without drainage, stream order and type fields (issue WB-10).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "inflow",
+   "label": "Main inflow (from answers)",
+   "unit": "text",
+   "description": "Set only by a community answer: 'stream', 'runoff' or 'canal'. Unknown from data.",
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "id": "ownership",
+   "label": "Ownership (from answers)",
+   "unit": "text",
+   "description": "Set only by a community answer: 'private' (one farmer or family) or 'common' (village, panchayat or government). Unknown from data.",
+   "sources": [
+    "wbc2023"
+   ]
+  }
+ ]
+}

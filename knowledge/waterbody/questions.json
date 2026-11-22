@@ -1,0 +1,1126 @@
+{
+ "_about": "Community questions for waterbodies. Type questions set the fields that the type rules read (inflow, ownership; types.json) so that the type, and every rule that depends on it, is recomputed. Stress questions carry likelihood ratios (lr) for the rules in rules.json, as in the watershed atlas: the data result sets a prior, each answer multiplies the odds. 'rules' lists the rules a stress question informs; 'applies_to' the types a type question is asked for.",
+ "version": 1,
+ "assessment": {
+  "about": "The data result for a rule sets a prior probability that the stress or opportunity is present: higher when it triggered and with higher intensity, pulled toward 50% for lower-confidence rules. Each answer multiplies the odds by its likelihood ratio for that rule. A rule counts as present at positive_at or more.",
+  "base_prior": {
+   "triggered_min": 0.6,
+   "triggered_max": 0.9,
+   "partial_max": 0.35,
+   "not_triggered": 0.15,
+   "unknown": 0.4
+  },
+  "partial_rule": "Triggered: prior = triggered_min + (triggered_max − triggered_min) × intensity/100. Not triggered: prior = not_triggered + (partial_max − not_triggered) × intensity/100, so partial evidence starts higher. Unknown: 0.4.",
+  "confidence_shrink": {
+   "high": 1.0,
+   "medium": 0.8,
+   "low": 0.6
+  },
+  "shrink_rule": "prior = 0.5 + (base_prior - 0.5) × shrink. A low-confidence rule's data result is held less firmly, so answers move it further.",
+  "positive_at": 0.5,
+  "severe_at": 0.85,
+  "severity_rule": "A positive rule is severe when the data say severe (intensity at or above the rule's severe_at) and the answers have not lowered its probability, or when an answer marked severe was given and the probability is at least severe_at.",
+  "bands": [
+   {
+    "min": 0.8,
+    "label": "confirmed"
+   },
+   {
+    "min": 0.5,
+    "label": "likely"
+   },
+   {
+    "min": 0.25,
+    "label": "uncertain"
+   },
+   {
+    "min": 0,
+    "label": "unlikely"
+   }
+  ],
+  "unknown_rule": "A rule with missing data starts just below the positive line (0.4), so it is not counted as present until an answer supports it."
+ },
+ "lr_scale": {
+  "4 to 6": "strong evidence for",
+  "2 to 3": "moderate evidence for",
+  "1.2 to 1.5": "weak evidence for",
+  "1": "no information",
+  "0.6 to 0.8": "weak evidence against",
+  "0.3 to 0.5": "moderate evidence against",
+  "0.2": "strong evidence against"
+ },
+ "type_questions": [
+  {
+   "id": "wbt_ownership",
+   "text": "Who owns this waterbody, and who uses its water?",
+   "rationale": "The data cannot tell a farm pond from a small village pond; the census records ownership (public or private) for every waterbody. A private pond is a farm pond whatever its size; a common pond is a village pond unless it is fed by a stream.",
+   "origin": "New; follows the Water Body Census ownership field",
+   "sources": [
+    "wbc2023"
+   ],
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond",
+    "farm_pond",
+    "canal_fed"
+   ],
+   "options": [
+    {
+     "id": "private",
+     "label": "One farmer or family, on their own land",
+     "set": {
+      "ownership": "private"
+     },
+     "stress": []
+    },
+    {
+     "id": "common",
+     "label": "The village, panchayat or a government department; several families use it",
+     "set": {
+      "ownership": "common"
+     },
+     "stress": []
+    }
+   ]
+  },
+  {
+   "id": "wbt_inflow",
+   "text": "In the monsoon, where does most of its water come from?",
+   "rationale": "Whether a stream or nala feeds the waterbody decides between an on-stream tank, a headwater pond and a pond filled by runoff from fields; the mapped drainage lines miss small channels and canal feeders.",
+   "origin": "New",
+   "sources": [
+    "core_stack_swb",
+    "expert_judgement"
+   ],
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond",
+    "farm_pond",
+    "canal_fed"
+   ],
+   "options": [
+    {
+     "id": "stream",
+     "label": "A stream or nala flows into it, or it is held by a bund or check dam across one",
+     "set": {
+      "inflow": "stream"
+     },
+     "stress": []
+    },
+    {
+     "id": "runoff",
+     "label": "Rain running off the surrounding fields and slopes; no stream",
+     "set": {
+      "inflow": "runoff"
+     },
+     "stress": []
+    },
+    {
+     "id": "canal",
+     "label": "A canal or a channel from a larger tank fills it",
+     "set": {
+      "inflow": "canal"
+     },
+     "stress": []
+    }
+   ]
+  }
+ ],
+ "stress_questions": [
+  {
+   "id": "wbq_inlet",
+   "rules": [
+    "wb.inflow_shortfall",
+    "wb.sudden_loss"
+   ],
+   "text": "Are the channels that bring water into this waterbody working, or are they blocked, broken or cut off?",
+   "rationale": "Poor filling with an ample catchment usually means the supply channels are silted, broken or cut by roads and fields; a sudden loss can follow a blocked inlet.",
+   "origin": "New; from the inflow shortfall rule",
+   "sources": [
+    "mosse2003",
+    "palanisami_tanks"
+   ],
+   "options": [
+    {
+     "id": "working",
+     "label": "They work; water flows in freely",
+     "stress": [
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 0.4
+      },
+      {
+       "id": "wb.sudden_loss",
+       "lr": 0.7
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "partly",
+     "label": "Partly silted or broken",
+     "stress": [
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 2.5
+      },
+      {
+       "id": "wb.sudden_loss",
+       "lr": 1.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "cut",
+     "label": "Blocked or cut off by a road, field, wall or another structure",
+     "stress": [
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "wb.sudden_loss",
+       "lr": 3
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_diverted",
+   "rules": [
+    "wb.inflow_shortfall"
+   ],
+   "text": "Has runoff that used to reach it been diverted upstream, by new fields, roads, check dams or other ponds?",
+   "rationale": "New structures upstream capture runoff that used to reach older tanks, a common cause of poor filling in intensively treated watersheds.",
+   "origin": "New; from the inflow shortfall rule",
+   "sources": [
+    "mosse2003",
+    "expert_judgement"
+   ],
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 0.6
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "some",
+     "label": "Some, by a few new structures or fields",
+     "stress": [
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 2
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "much",
+     "label": "A lot; little water reaches it now",
+     "stress": [
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 4,
+       "severe": true
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_silt",
+   "rules": [
+    "wb.siltation",
+    "wb.inflow_shortfall",
+    "wb.fishery_constraint"
+   ],
+   "text": "How much silt has built up since it was last desilted?",
+   "rationale": "Silt reduces storage both as a falling trend (siltation) and, where it built up before 2017, as poor filling. The census records storage lost to silt for many tanks.",
+   "origin": "New; from the siltation and inflow rules",
+   "sources": [
+    "palanisami_tanks",
+    "wbc2023",
+    "wb_census_check"
+   ],
+   "options": [
+    {
+     "id": "little",
+     "label": "Little; it was desilted in the last few years",
+     "stress": [
+      {
+       "id": "wb.siltation",
+       "lr": 0.3
+      },
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 0.7
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 0.8
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "some",
+     "label": "Noticeable; it is shallower than before",
+     "stress": [
+      {
+       "id": "wb.siltation",
+       "lr": 2.5
+      },
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 1.5
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 1.3
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "much",
+     "label": "A lot; much of the bed has filled up",
+     "stress": [
+      {
+       "id": "wb.siltation",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "wb.inflow_shortfall",
+       "lr": 2
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 2
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_encroach",
+   "rules": [
+    "wb.siltation",
+    "wb.sudden_loss"
+   ],
+   "text": "Is part of the bed or its edges being farmed or built on?",
+   "rationale": "Encroachment shrinks the water spread; in the census comparison, encroached waterbodies triggered siltation more often (32% against 21%).",
+   "origin": "New; from the siltation rule and the census comparison",
+   "sources": [
+    "wbc2023",
+    "wb_census_check"
+   ],
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "wb.siltation",
+       "lr": 0.7
+      },
+      {
+       "id": "wb.sudden_loss",
+       "lr": 0.8
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "small",
+     "label": "A small part",
+     "stress": [
+      {
+       "id": "wb.siltation",
+       "lr": 2
+      },
+      {
+       "id": "wb.sudden_loss",
+       "lr": 1.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "large",
+     "label": "A large part, or it has been drained for fields or building",
+     "stress": [
+      {
+       "id": "wb.siltation",
+       "lr": 3.5,
+       "severe": true
+      },
+      {
+       "id": "wb.sudden_loss",
+       "lr": 3,
+       "severe": true
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_leak",
+   "rules": [
+    "wb.poor_retention",
+    "wb.sudden_loss",
+    "wb.fishery_constraint"
+   ],
+   "text": "Does water leak out through the sluice, outlet or bund?",
+   "rationale": "Early drying with a full monsoon fill points to leaking sluices and bunds, or to heavy drawal; a breach shows as a sudden loss.",
+   "origin": "New; from the retention rule",
+   "sources": [
+    "palanisami_tanks",
+    "rrr_guidelines2022"
+   ],
+   "options": [
+    {
+     "id": "no",
+     "label": "No; the structures are sound",
+     "stress": [
+      {
+       "id": "wb.poor_retention",
+       "lr": 0.4
+      },
+      {
+       "id": "wb.sudden_loss",
+       "lr": 0.6
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 0.7
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "seep",
+     "label": "Some seepage",
+     "stress": [
+      {
+       "id": "wb.poor_retention",
+       "lr": 1.5
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 1.2
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "damaged",
+     "label": "The sluice or outlet is damaged",
+     "stress": [
+      {
+       "id": "wb.poor_retention",
+       "lr": 3
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 2
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "breach",
+     "label": "The bund has breached",
+     "stress": [
+      {
+       "id": "wb.poor_retention",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "wb.sudden_loss",
+       "lr": 4,
+       "severe": true
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 2.5
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_months",
+   "rules": [
+    "wb.poor_retention",
+    "wb.livestock_summer_water",
+    "wb.fishery_constraint",
+    "wb.fishery_opportunity"
+   ],
+   "text": "In a normal year, until when does it hold water?",
+   "rationale": "How long water lasts decides rabi irrigation, summer water for animals and whether a fish crop (4 to 6 months) is possible; satellite extent can miss shallow water or count wet mud.",
+   "origin": "New; from the retention, livestock and fishery rules",
+   "sources": [
+    "pmmsy_guidelines",
+    "expert_judgement"
+   ],
+   "options": [
+    {
+     "id": "dec",
+     "label": "Only until November or December",
+     "stress": [
+      {
+       "id": "wb.poor_retention",
+       "lr": 3
+      },
+      {
+       "id": "wb.livestock_summer_water",
+       "lr": 2
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 3
+      },
+      {
+       "id": "wb.fishery_opportunity",
+       "lr": 0.4
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "mar",
+     "label": "Until February or March",
+     "stress": [
+      {
+       "id": "wb.poor_retention",
+       "lr": 1
+      },
+      {
+       "id": "wb.livestock_summer_water",
+       "lr": 1.5
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 1
+      },
+      {
+       "id": "wb.fishery_opportunity",
+       "lr": 1.2
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "year",
+     "label": "Through the summer, or all year",
+     "stress": [
+      {
+       "id": "wb.poor_retention",
+       "lr": 0.3
+      },
+      {
+       "id": "wb.livestock_summer_water",
+       "lr": 0.3
+      },
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 0.3
+      },
+      {
+       "id": "wb.fishery_opportunity",
+       "lr": 2.5
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_drought",
+   "rules": [
+    "wb.drought_failure"
+   ],
+   "text": "In the last drought year, could farmers take water from it to save the kharif crop?",
+   "rationale": "A tank's main value in semi-arid areas is protective irrigation in dry spells; if it fails exactly then, deepening and catchment work are the remedy.",
+   "origin": "New; from the drought failure rule",
+   "sources": [
+    "drought_manual",
+    "palanisami_tanks"
+   ],
+   "options": [
+    {
+     "id": "enough",
+     "label": "Yes, enough for most fields that needed it",
+     "stress": [
+      {
+       "id": "wb.drought_failure",
+       "lr": 0.3
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "little",
+     "label": "A little, for a few fields",
+     "stress": [
+      {
+       "id": "wb.drought_failure",
+       "lr": 1.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "dry",
+     "label": "No; it was nearly dry",
+     "stress": [
+      {
+       "id": "wb.drought_failure",
+       "lr": 4,
+       "severe": true
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_sharing",
+   "rules": [
+    "wb.drought_failure",
+    "wb.irrigation_underuse"
+   ],
+   "text": "How was its water shared in the last dry season?",
+   "rationale": "Agreed sharing rules spread the benefit of stored water; their absence is a common reason why water stays unused or goes to a few.",
+   "origin": "New; from the drought and irrigation rules",
+   "sources": [
+    "mosse2003"
+   ],
+   "options": [
+    {
+     "id": "rules",
+     "label": "By agreed rules or turns",
+     "stress": [
+      {
+       "id": "wb.drought_failure",
+       "lr": 0.8
+      },
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 0.6
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "first",
+     "label": "First come, or by those with pumps or influence",
+     "stress": [
+      {
+       "id": "wb.drought_failure",
+       "lr": 1.3
+      },
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 1.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "none",
+     "label": "Nobody could use it",
+     "stress": [
+      {
+       "id": "wb.drought_failure",
+       "lr": 2.5
+      },
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 1
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_users",
+   "rules": [
+    "wb.irrigation_underuse"
+   ],
+   "text": "How many of the fields below or around it are irrigated from it in rabi?",
+   "rationale": "Water that lasts into rabi with little second-season cropping around it may be unused; the answer separates unused water from cropping limited by other factors.",
+   "origin": "New; from the irrigation underuse rule",
+   "sources": [
+    "expert_judgement"
+   ],
+   "options": [
+    {
+     "id": "few",
+     "label": "None or only a few",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 3
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "some",
+     "label": "Some",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 1.2
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "most",
+     "label": "Most of them",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 0.3
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_wua",
+   "rules": [
+    "wb.irrigation_underuse",
+    "wb.canal_tail_shortfall"
+   ],
+   "text": "Is there a water user association or committee for this waterbody?",
+   "rationale": "In the census comparison, waterbodies with a water user association triggered irrigation underuse half as often (19% against 40%).",
+   "origin": "New; from the census comparison",
+   "sources": [
+    "wb_census_check",
+    "mosse2003"
+   ],
+   "options": [
+    {
+     "id": "active",
+     "label": "Yes, and it meets and sets rules",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 0.5
+      },
+      {
+       "id": "wb.canal_tail_shortfall",
+       "lr": 0.6
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "inactive",
+     "label": "Yes, but it is inactive",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 2
+      },
+      {
+       "id": "wb.canal_tail_shortfall",
+       "lr": 1.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "none",
+     "label": "No",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 1.5
+      },
+      {
+       "id": "wb.canal_tail_shortfall",
+       "lr": 1.3
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_channels",
+   "rules": [
+    "wb.irrigation_underuse"
+   ],
+   "text": "Are the field channels and outlets from it working?",
+   "rationale": "Broken field channels are the most direct reason why stored water does not reach fields.",
+   "origin": "New; from the irrigation underuse rule",
+   "sources": [
+    "palanisami_tanks"
+   ],
+   "options": [
+    {
+     "id": "working",
+     "label": "Working",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 0.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "partly",
+     "label": "Partly working",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 2
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "broken",
+     "label": "Broken or silted up",
+     "stress": [
+      {
+       "id": "wb.irrigation_underuse",
+       "lr": 3.5,
+       "severe": true
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_animals",
+   "rules": [
+    "wb.livestock_summer_water"
+   ],
+   "text": "Where do animals drink in April to June?",
+   "rationale": "Where animals are walked far or water is carried, a pond that dries before summer is a real loss.",
+   "origin": "New; from the livestock rule",
+   "sources": [
+    "igfri_vision",
+    "expert_judgement"
+   ],
+   "options": [
+    {
+     "id": "here",
+     "label": "At this waterbody",
+     "stress": [
+      {
+       "id": "wb.livestock_summer_water",
+       "lr": 0.3
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "near",
+     "label": "Another pond or stream nearby",
+     "stress": [
+      {
+       "id": "wb.livestock_summer_water",
+       "lr": 0.8
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "trough",
+     "label": "Troughs filled from a borewell or tanker",
+     "stress": [
+      {
+       "id": "wb.livestock_summer_water",
+       "lr": 1.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "far",
+     "label": "They are taken far, or water is carried",
+     "stress": [
+      {
+       "id": "wb.livestock_summer_water",
+       "lr": 3.5,
+       "severe": true
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_fishing",
+   "rules": [
+    "wb.fishery_opportunity"
+   ],
+   "text": "Is it used for fishing now, and who holds the rights?",
+   "rationale": "A waterbody that lasts into rabi where villages fish is a candidate for stocking; unclear rights or pollution make it unsuitable.",
+   "origin": "New; from the fishery rule",
+   "sources": [
+    "pmmsy_guidelines",
+    "mission_antyodaya"
+   ],
+   "options": [
+    {
+     "id": "group",
+     "label": "Yes, by a group or cooperative under a lease",
+     "stress": [
+      {
+       "id": "wb.fishery_opportunity",
+       "lr": 1.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "interest",
+     "label": "Not now, but people want to",
+     "stress": [
+      {
+       "id": "wb.fishery_opportunity",
+       "lr": 2.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "unsuitable",
+     "label": "No: it dries early, is polluted, or the rights are disputed",
+     "stress": [
+      {
+       "id": "wb.fishery_opportunity",
+       "lr": 0.3
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_fish_dry",
+   "rules": [
+    "wb.fishery_constraint"
+   ],
+   "text": "Does fishing stop early because the water dries up?",
+   "rationale": "Carp need a culture period of several months; ponds that dry by rabi cut it short.",
+   "origin": "New; from the fishery constraint rule",
+   "sources": [
+    "pmmsy_guidelines",
+    "expert_judgement"
+   ],
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 0.4
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "some",
+     "label": "In some years",
+     "stress": [
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 2
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "every",
+     "label": "Every year",
+     "stress": [
+      {
+       "id": "wb.fishery_constraint",
+       "lr": 4,
+       "severe": true
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_canal",
+   "rules": [
+    "wb.canal_tail_shortfall"
+   ],
+   "text": "In the last rabi season, did canal water reach this waterbody when it was needed?",
+   "rationale": "Tail-end tanks of canal systems get water late or not at all; the answer separates canal supply from local losses.",
+   "origin": "New; from the canal tail rule",
+   "sources": [
+    "mowr_waterlogging",
+    "expert_judgement"
+   ],
+   "options": [
+    {
+     "id": "ontime",
+     "label": "Yes, on time",
+     "stress": [
+      {
+       "id": "wb.canal_tail_shortfall",
+       "lr": 0.3
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "late",
+     "label": "Late or too little",
+     "stress": [
+      {
+       "id": "wb.canal_tail_shortfall",
+       "lr": 2.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "none",
+     "label": "Not at all",
+     "stress": [
+      {
+       "id": "wb.canal_tail_shortfall",
+       "lr": 4,
+       "severe": true
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_river_dry",
+   "rules": [
+    "wb.river_dry_season_loss"
+   ],
+   "text": "Does the river here dry up earlier in summer than it did ten years ago?",
+   "rationale": "Earlier drying of a river reach follows falling base flow, from pumping near the river and catchment change.",
+   "origin": "New; from the river rule",
+   "sources": [
+    "cgwb_gec2015",
+    "expert_judgement"
+   ],
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "wb.river_dry_season_loss",
+       "lr": 0.4
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "weeks",
+     "label": "A few weeks earlier",
+     "stress": [
+      {
+       "id": "wb.river_dry_season_loss",
+       "lr": 2.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "much",
+     "label": "Much earlier; it is now dry by March or April",
+     "stress": [
+      {
+       "id": "wb.river_dry_season_loss",
+       "lr": 4,
+       "severe": true
+      }
+     ],
+     "set": {}
+    }
+   ]
+  },
+  {
+   "id": "wbq_sand",
+   "rules": [
+    "wb.river_dry_season_loss"
+   ],
+   "text": "Is sand mined from this stretch of the river?",
+   "rationale": "Sand mining lowers the bed and the water table beside it and speeds up drying.",
+   "origin": "New; from the river rule",
+   "sources": [
+    "expert_judgement"
+   ],
+   "options": [
+    {
+     "id": "no",
+     "label": "No",
+     "stress": [
+      {
+       "id": "wb.river_dry_season_loss",
+       "lr": 0.8
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "small",
+     "label": "Small-scale, by hand",
+     "stress": [
+      {
+       "id": "wb.river_dry_season_loss",
+       "lr": 1.5
+      }
+     ],
+     "set": {}
+    },
+    {
+     "id": "large",
+     "label": "With machines or on a large scale",
+     "stress": [
+      {
+       "id": "wb.river_dry_season_loss",
+       "lr": 3
+      }
+     ],
+     "set": {}
+    }
+   ]
+  }
+ ]
+}
