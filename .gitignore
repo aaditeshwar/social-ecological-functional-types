@@ -4,3 +4,4 @@ data/raw/
 data/responses/
 out/web/
 *.pyc
+out/waterbody/

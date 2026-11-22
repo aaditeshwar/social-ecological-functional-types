@@ -76,6 +76,10 @@ def cmd_wb_layers(a):
     from .wb.layers import fetch_all_layers
     fetch_all_layers(load_json(a.locations), force=a.force, bundle=a.bundle)
 
+def cmd_wb_run(a):
+    from .wb.run import main as wb_run
+    wb_run(a.locations, a.out)
+
 def cmd_groundtruth(a):
     from .groundtruth import main as gt
     gt(a.truth, refresh_locations=a.refresh_locations, force=a.force, fetch=not a.no_fetch, pools_from=a.pools,
@@ -105,6 +109,9 @@ def main(argv=None):
                    help='locations JSON (default config/waterbody/locations.json, the 73 tehsils of the original eight districts)')
     p.add_argument('--force', action='store_true', help='re-download tehsils already cached')
     p.add_argument('--bundle', help='also pack all downloaded layer files into this zip, for handing over')
+    p = sub.add_parser('wb-run', help='build the waterbody table: merge fragments, match zones of influence, type, add MWS context')
+    p.add_argument('--locations', default=str(ROOT / 'config' / 'waterbody' / 'locations.json'))
+    p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody'))
     p = sub.add_parser('groundtruth', help='score atlas and sheet rules against ground-truth MWS')
     p.add_argument('--truth', default=str(ROOT / 'config' / 'groundtruth' / 'final_ground_truth.json'))
     p.add_argument('--refresh-locations', action='store_true', help='re-download get_active_locations')
@@ -122,6 +129,7 @@ def main(argv=None):
     elif a.cmd == 'run': cmd_run(a)
     elif a.cmd == 'groundtruth': cmd_groundtruth(a)
     elif a.cmd == 'wb-layers': cmd_wb_layers(a)
+    elif a.cmd == 'wb-run': cmd_wb_run(a)
     elif a.cmd == 'all':
         cmd_fetch(a)
         if not cmd_validate(a): sys.exit(1)

@@ -173,6 +173,14 @@ Downloads the two GeoServer waterbody layers for every tehsil and keeps a compac
 python -m seft.cli wb-layers --bundle wb_layers.zip
 ```
 
+### `wb-run` (waterbody atlas, in progress)
+
+Builds one record per waterbody from the layers saved by `wb-layers`, and attaches its landscape context.
+
+* **Reads:** the `swb_layers.json.gz` files, `knowledge/waterbody/types.json` (size floor and type rules), and the watershed atlas tables `out/csv/mws_all.csv` and `out/csv/villages_all.csv` (written by `run`).
+* **Does:** merges fragments of one waterbody (same `area_ored` and yearly series, polygons within about 30 m; WB-01), drops waterbodies under `min_area_ha` (0.05 ha), attaches the zone of influence (on `wb_id` where the zone layer has it, otherwise by location with a radius check; WB-02), assigns the first matching type, and takes the home MWS's context dimensions and archetype shares from the watershed atlas. Villages are those intersecting the home MWS.
+* **Writes:** `out/waterbody/waterbodies.csv` (one row per waterbody) and `out/waterbody/summary.json` (counts by tehsil, type, zone match and setting).
+
 ## How the frontend works
 
 `web/index.html` is a single-page atlas. It does not read `knowledge/` or `data/raw/` itself. Everything it needs is written into `web/data/` by `run` (via `seft/webdata.py`).
