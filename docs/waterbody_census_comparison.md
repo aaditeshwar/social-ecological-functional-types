@@ -43,7 +43,7 @@ Rates are the share of waterbodies where the rule fires, among those it applies 
   and under 0.5 ha in CoRE. The CoRE polygon may cover only part of the tank, or tanks fed by channels may sit
   off the mapped drainage line.
 
-## Tuning ideas (not applied)
+## Tuning ideas (all applied 22 Nov 2026; see below)
 
 1. **Stopped holding water:** require 0.25 ha or more and both of the last two years at 15% fill or less (not
    their mean). Rate 15% to 11%; Srikakulam 26% to 20%, Udaipur 25% to 16%. The association with "under
@@ -61,3 +61,14 @@ Rates are the share of waterbodies where the rule fires, among those it applies 
 6. **Typing:** consider a large catchment for the waterbody's size (catchment 20 times its area or more) as
    evidence of an on-stream position, so that channel-fed tanks off the mapped drainage line are typed as
    tanks rather than farm or village ponds.
+
+## Applied (22 Nov 2026)
+
+| Idea | Change | Effect |
+|---|---|---|
+| 1. Stopped holding water | Gate `area_ha >= 0.25`; signal gate `k_early >= 30 and k_late_max <= 15` (each of the last two years, new variable `k_late_max`) | Fires for 10% (2,139 of 20,719), was 15%. Srikakulam 26% to 20%, Udaipur 23% to 15%, Koraput 21% to 11%. Under repair 19% vs 8% of others (was 22% vs 11%) |
+| 2. Inflow shortfall | Accumulated silt named as a cause where the catchment is eroding (`ctx_eroding_catchment` added to its contexts); desilting added to interventions; question on silt depth | Wording only; fires for 17% as before. Shortfall by census fill: Full 6%, ¾ 11%, ½ 14%, ¼ 20% |
+| 3. Shrinking or silting | Encroachment of the bed named as a cause, with the census contrast; removing encroachment in the note | Wording only; 21% |
+| 4. Water not reaching fields | Missing water user association named in the note; question on whether one exists | Wording only; 19% with an association vs 40% without |
+| 5. Fishery opportunity | Renamed "Fishery candidate"; gate `role_fishery >= 0.5` (was 0.3) | Applies to 3,135 waterbodies (was 4,106); fires for 60% |
+| 6. Typing | `on_stream`: on a drainage line, or, for waterbodies of 0.5 ha or more, a catchment 20 or more times the area | 785 village ponds become on-stream (105 tanks, 477 headwater ponds, 203 small on-stream ponds). Without the 0.5 ha limit, census "Ponds" typed as headwater ponds rose from 8% to 18%, so the limit was added. It does not help census "Tanks" typed as farm ponds (29%): CoRE maps them under 0.5 ha, likely as a part of the tank |

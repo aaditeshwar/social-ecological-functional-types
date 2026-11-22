@@ -48,7 +48,7 @@ def compute(b, prof, drought, ref=None):
     v = {
         'area_ha': b['area_ha'],
         'k_mean': _mean(k), 'kr_mean': _mean(kr), 'krz_mean': _mean(krz),
-        'k_early': _mean(k[:3]), 'k_late': _mean(k[-2:]),
+        'k_early': _mean(k[:3]), 'k_late': _mean(k[-2:]), 'k_late_max': max(_vals(k[-2:])) if _vals(k[-2:]) else None,
         'k_slope': theil_sen(k),                                  # percentage points per year
         'k_normal': _mean(kn), 'k_drought': _mean(kd), 'n_drought_years': len(kd), 'n_normal_years': len(kn),
         'catchment_ratio': _ratio(b.get('catchment_ha'), b['area_ha']),

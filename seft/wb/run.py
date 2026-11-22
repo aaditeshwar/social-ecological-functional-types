@@ -29,7 +29,7 @@ def row(b):
     return {
         'wb_id': b['wb_id'], 'state': b['state'], 'district': b['district'], 'tehsil': b['tehsil'], 'type': b['type'],
         'area_ha': b['area_ha'], 'n_fragments': b['n_fragments'], 'wb_type': b['wb_type'], 'wb_name': b['wb_name'],
-        'on_drainage': b['on_drainage'], 'stream_order': b['stream_order'], 'catchment_ha': b['catchment_ha'],
+        'on_drainage': b['on_drainage'], 'on_stream': b.get('on_stream'), 'stream_order': b['stream_order'], 'catchment_ha': b['catchment_ha'],
         'home_mws': b['home_mws'], 'n_mws': b['n_mws'], 'lon': b['centroid'][0], 'lat': b['centroid'][1],
         'k_mean': _mean(b.get('k') or []), 'kr_mean': _mean(b.get('kr') or []), 'krz_mean': _mean(b.get('krz') or []),
         'zoi_match': b['zoi_match'], 'zoi_radius_m': z.get('zoi'), 'zoi_area_ha': z.get('zoi_area'),

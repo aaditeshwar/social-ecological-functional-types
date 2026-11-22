@@ -11,7 +11,8 @@ Steps per tehsil:
    matched by location: its centre within max(10 m, 10% of the waterbody's side) of the merged waterbody's
    centroid, and its radius within 25% of the radius expected for the waterbody's area (ZOI_CURVE, fitted on
    96,280 unambiguous pairs). `zoi_match` records 'wb_id', 'location' or 'none'.
-4. Type: the first matching rule in knowledge/waterbody/types.json.
+4. Type: the first matching rule in knowledge/waterbody/types.json. `on_stream` is on a drainage line, or (for waterbodies of
+   0.5 ha or more) a catchment 20 or more times the waterbody's area: channel-fed tanks off the mapped drainage line.
 5. Home MWS: the MWS listed most often by the fragments (ties: the largest fragment's first MWS).
 """
 import collections, gzip, json, math
@@ -131,6 +132,9 @@ def match_zoi(bodies, Z, has_wb_id):
 
 def assign_type(b, types):
     env = {k: b[k] for k in ('area_ha', 'wb_type', 'on_drainage', 'stream_order', 'n_mws', 'has_drainage_fields')}
+    env['catchment_ratio'] = (b['catchment_ha'] / b['area_ha']) if b['area_ha'] else 0
+    env['on_stream'] = bool(b['on_drainage'] or (env['catchment_ratio'] >= 20 and b['area_ha'] >= 0.5))
+    b['on_stream'] = env['on_stream']
     env['true'] = True
     for t in types['types']:
         if evaluate(t['when'], env): return t['id']

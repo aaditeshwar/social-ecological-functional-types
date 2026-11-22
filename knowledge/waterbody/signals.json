@@ -53,8 +53,8 @@
    "direction": "low",
    "value": 0.3,
    "severe": 0.1,
-   "gate": "k_early >= 30 and k_late <= 15",
-   "note": "Relative fill (kharif fill divided by the tehsil's median that year) in the last two years at or below 30% (severe 10%) of the first three years, for waterbodies that filled to 30% or more at first. The last two years must also average 15% fill or less."
+   "gate": "k_early >= 30 and k_late_max <= 15",
+   "note": "Relative fill (kharif fill divided by the tehsil's median that year) in the last two years at or below 30% (severe 10%) of the first three years, for waterbodies that filled to 30% or more at first. Each of the last two years must also be at 15% fill or less (changed 22 Nov 2026 from their average)."
   },
   {
    "id": "s_drought_failure",

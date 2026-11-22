@@ -17,3 +17,6 @@ atlas (through its home MWS). Files, in the order they are used by `python -m se
 Status per rule and waterbody: not applicable, triggered, not triggered, or insufficient data. Rules are
 checked only for waterbodies that hold water in 3 or more of the 8 years and are not new (first wet in 2022
 or later), except the recent-loss and canal and river rules, which need 3 wet years.
+
+Changes after comparing with the Water Body Census fields (22 Nov 2026) are listed in
+`docs/waterbody_census_comparison.md`.
