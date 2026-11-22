@@ -121,6 +121,31 @@
     "Rasra",
     "Sikandarpur"
    ]
+  },
+  {
+   "state": "Andhra Pradesh",
+   "district": "Chittoor",
+   "tehsils": [
+    "Chowdepalle",
+    "Madanapalle",
+    "Ramakuppam",
+    "Somala",
+    "Thamballapalle",
+    "Vayalpad"
+   ]
+  },
+  {
+   "state": "Jharkhand",
+   "district": "Hazaribagh",
+   "tehsils": [
+    "Barkatha",
+    "Churchu",
+    "Dadi",
+    "Daru",
+    "Katkamcandi",
+    "Padma",
+    "Tatijharia"
+   ]
   }
  ]
 }
