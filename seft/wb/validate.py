@@ -35,6 +35,16 @@ def validate(kdir=None, log=print):
         if bad: problems.append(f"rule {r['id']}: unknown types {bad}")
         for k in ('label', 'rationale', 'public_note'):
             if not r.get(k): problems.append(f"rule {r['id']}: missing {k}")
+    sch = [x['id'] for x in K['schemes']['schemes']]; rids = {r['id'] for r in K['rules']['rules']} | {'recent_ponds'}
+    if len(set(sch)) != len(sch): problems.append('duplicate scheme ids')
+    for key, links in K['schemes']['links'].items():
+        if key not in rids: problems.append(f'schemes: links for unknown rule {key}')
+        for l in links:
+            if l['scheme'] not in sch: problems.append(f"schemes: {key} links unknown scheme {l['scheme']}")
+            bad = [t for t in l.get('types', []) if t not in types]
+            if bad: problems.append(f"schemes: {key}/{l['scheme']} unknown types {bad}")
+    for r in K['rules']['rules']:
+        if r['id'] not in K['schemes']['links']: problems.append(f"schemes: no schemes linked to rule {r['id']}")
     for p in problems: log('  ' + p)
-    log(f"{len(problems)} problems; {len(K['types']['types'])} types, {len(sig)} signals, {len(roles)} roles, {len(K['rules']['rules'])} rules")
+    log(f"{len(problems)} problems; {len(K['types']['types'])} types, {len(sig)} signals, {len(roles)} roles, {len(K['rules']['rules'])} rules, {len(sch)} schemes")
     return not problems

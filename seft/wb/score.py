@@ -12,7 +12,20 @@ KDIR = ROOT / 'knowledge' / 'waterbody'
 
 def load_knowledge(kdir=None):
     kdir = kdir or KDIR
-    return {n: load_json(kdir / f'{n}.json') for n in ('types', 'signals', 'roles', 'rules')}
+    K = {n: load_json(kdir / f'{n}.json') for n in ('types', 'signals', 'roles', 'rules')}
+    K['schemes'] = load_json(kdir / 'schemes.json') if (kdir / 'schemes.json').exists() else {'schemes': [], 'links': {}}
+    return K
+
+def scheme_links(key, b, K):
+    """Schemes linked to a rule id (or 'recent_ponds') that apply to this waterbody's state and type."""
+    S = {s['id']: s for s in K['schemes']['schemes']}
+    out = []
+    for l in K['schemes']['links'].get(key, []):
+        s = S.get(l['scheme'])
+        if not s or (s.get('states') and b.get('state') not in s['states']): continue
+        if l.get('types') and b.get('type') not in l['types']: continue
+        out.append(l['scheme'])
+    return out
 
 def _num(x):
     return isinstance(x, (int, float)) and not isinstance(x, bool) and not math.isnan(x)

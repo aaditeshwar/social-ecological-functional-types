@@ -13,6 +13,10 @@ atlas (through its home MWS). Files, in the order they are used by `python -m se
   protection, fishery, livestock, recharge and domestic. Rule intensities are scaled by the roles they harm.
 - `rules.json`: stress and opportunity rules with the types they apply to, a gate, a trigger, an intensity,
   a rationale, a public note, interventions and community questions.
+- `schemes.json`: the schemes that can fund each rule's interventions, and the farm-pond schemes behind recent
+  ponds. Ids match `knowledge/schemes.json` where the scheme is there; each scheme has a status note checked on
+  the date in `verified` (MGNREGS was replaced by VB-G RAM G on 1 July 2026). Links can be limited to states and
+  types. `wb-validate` checks that every rule has schemes and every link names a known scheme and type.
 
 Status per rule and waterbody: not applicable, triggered, not triggered, or insufficient data. Rules are
 checked only for waterbodies that hold water in 3 or more of the 8 years and are not new (first wet in 2022

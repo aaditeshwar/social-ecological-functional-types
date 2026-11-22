@@ -129,6 +129,12 @@ pre.kex{margin:0;background:var(--sunk);border-radius:4px;padding:8px 10px;font-
 #vtip p{margin:0}
 #vtip .tipx{overflow-x:auto}
 #vtip code{white-space:pre-wrap}
+.atlassw{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:6px 0 8px;background:var(--surface)}
+.atlassw button{border:0;background:none;padding:5px 14px;cursor:pointer;font-weight:600;color:var(--muted)}
+.atlassw button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+ul.wsch{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.85rem}
+.walk ul{margin:2px 0 0;padding-left:18px}
+@media print{header.top nav,.atlassw,.btn{display:none!important}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 
@@ -136,8 +142,9 @@ pre.kex{margin:0;background:var(--sunk);border-radius:4px;padding:8px 10px;font-
   <header class="top">
     <div>
       <div class="eyebrow">CoRE Stack · social-ecological functional types</div>
-      <h1>Watershed Systems Atlas</h1>
-      <p class="sub">Eight districts, 4,598 micro-watersheds. Each watershed is read as a mixture of farming and land-use systems; a causal knowledge graph turns its indicators into stresses, opportunities and matching government schemes.</p>
+      <div class="atlassw" role="tablist" aria-label="Atlas" id="atlassw"></div>
+      <h1 id="atitle">Watershed Systems Atlas</h1>
+      <p class="sub" id="asub">Eight districts, 4,598 micro-watersheds. Each watershed is read as a mixture of farming and land-use systems; a causal knowledge graph turns its indicators into stresses, opportunities and matching government schemes.</p>
     </div>
     <nav class="tabs" role="tablist" id="tabs"></nav>
   </header>
@@ -152,6 +159,9 @@ let IDX=null, K=null;
 const BUNDLES={};
 const S={tab:"explore", level:"india", district:null, tehsil:null, mws:null, mode:"dominant", modeArg:null, showVillages:true};
 try{const t=localStorage.getItem("wsa_tab"); if(t) S.tab=t;}catch(e){}
+S.atlas="ws"; try{const a=localStorage.getItem("atlas"); if(a==="wb"||a==="ws") S.atlas=a; if(/[?#&]atlas=wb/.test(location.href)) S.atlas="wb";}catch(e){}
+const ATLAS_HEAD={ws:["Watershed Systems Atlas","Eight districts, 4,598 micro-watersheds. Each watershed is read as a mixture of farming and land-use systems; a causal knowledge graph turns its indicators into stresses, opportunities and matching government schemes."],
+  wb:["Waterbody Atlas","Eight districts, 65,000 ponds, tanks and river reaches. Each waterbody is typed, read through eight years of the water it held, and checked for stresses and opportunities with interventions, community questions and schemes."]};
 
 const TABS=[["explore","Explore"],["graph","Knowledge graph"],["archetypes","System archetypes"],["rules","Observed stresses"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
 
@@ -418,11 +428,19 @@ function matchSchemes(m,shares,positive,env,d){
 
 /* ---------- tabs ---------- */
 function renderTabs(){
-  $("#tabs").innerHTML=TABS.map(([id,l])=>`<button role="tab" aria-selected="${S.tab===id}" data-tab="${id}">${l}</button>`).join("");
-  $("#tabs").onclick=e=>{const b=e.target.closest("button"); if(!b) return; S.tab=b.dataset.tab; try{localStorage.setItem("wsa_tab",S.tab)}catch(e){} render();};
+  const wb=S.atlas==="wb", tabs=wb?WTABS:TABS, cur=wb?W.tab:S.tab;
+  $("#atlassw").innerHTML=[["ws","Watersheds"],["wb","Waterbodies"]].map(([id,l])=>`<button role="tab" aria-selected="${S.atlas===id}" data-a="${id}">${l}</button>`).join("");
+  $("#atlassw").onclick=e=>{const b=e.target.closest("button"); if(!b||b.dataset.a===S.atlas) return; S.atlas=b.dataset.a; try{localStorage.setItem("atlas",S.atlas)}catch(e){} render();};
+  $("#atitle").textContent=ATLAS_HEAD[S.atlas][0]; $("#asub").textContent=ATLAS_HEAD[S.atlas][1]; document.title=ATLAS_HEAD[S.atlas][0];
+  $("#tabs").innerHTML=tabs.map(([id,l])=>`<button role="tab" aria-selected="${cur===id}" data-tab="${id}">${l}</button>`).join("");
+  $("#tabs").onclick=e=>{const b=e.target.closest("button"); if(!b) return;
+    if(S.atlas==="wb"){W.tab=b.dataset.tab; try{localStorage.setItem("wba_tab",W.tab)}catch(e){}}
+    else {S.tab=b.dataset.tab; try{localStorage.setItem("wsa_tab",S.tab)}catch(e){}}
+    render();};
 }
 function render(){
   renderTabs();
+  if(S.atlas==="wb") return renderWb();
   const m=$("#main");
   if(S.tab==="explore") return renderExplore(m);
   if(S.tab==="graph") return renderGraph(m);
@@ -1321,6 +1339,470 @@ function renderMethod(m){
    <li>In 18% of watersheds, mostly in hilly and cloudy tehsils, the CoRE land-cover classes cover only 80–90% of the area (CS-73). The remainder is shown as unclassified land in the residual class, so production systems there are slightly understated rather than inflated.</li>
    <li>The literacy rate in CoRE counts children aged 0–6 in the denominator and runs about 15% below the Census 7+ rate.</li></ul></div>
   <div class="block"><h3>Sources</h3>${drawsOn("Sources")}<ol>${K.sources.sources.map(s=>`<li>${esc(s.citation)} ${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">link</a>`:""}<br><span class="note">Used for: ${esc(s.used_for)}</span></li>`).join("")}</ol></div></div>`;
+}
+
+/* ================= Waterbody atlas =================
+   Data: data/waterbody/index.json and w_<district>.json (wb_index / wb_w_<district>.js from file://), built by
+   `python -m seft.cli wb-run`. MWS outlines and tehsils come from the watershed bundles (d_<district>). */
+let WIDX=null, WK=null; const WBB={};
+const W={tab:"explore", district:null, tehsil:null, wb:null, mws:null, mode:"type", arg:null, show:"all"};
+try{const t=localStorage.getItem("wba_tab"); if(t) W.tab=t;}catch(e){}
+const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["signals","Signals and roles"],["rules","Observed stresses"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
+const WYEARS=[2017,2018,2019,2020,2021,2022,2023,2024];
+const WTYPE_COL={river_reach:"#3b6fb6",canal_fed:"#7b6aa8",onstream_tank:"#1f7a74",small_onstream_pond:"#5fae9e",headwater_pond:"#a5803a",village_pond:"#c8642f",farm_pond:"#d6a51f",reservoir:"#8a958f",large_river:"#8a958f",unclassified:"#8a958f"};
+const WST_COL={r:"#2c6a9e",x:"#a9b3ae",n:"#e0751c",d:"#d4d9d6"};
+const WVAR_L={years_wet:["Years with water","of 8"],k_fill:["Kharif fill (normal years)","%"],kr_mean:["Rabi water (mean)","%"],krz_mean:["Summer water (mean)","%"],
+  rel_slope:["Fill trend relative to the tehsil","per year"],drought_fill_ratio:["Fill in drought ÷ normal years",""],zoi_ci_mean:["Cropping intensity in zone of influence",""],catchment_ratio:["Catchment ÷ waterbody area",""]};
+const WSIG={}, WROLE={}, WRULE={}, WTYPE={}, WSCH={}; let WRIDS=[], WROIDS=[], WSTC={};
+function wIndex(){
+  WK.signals.signals.forEach(s=>WSIG[s.id]=s); WK.roles.roles.forEach(r=>WROLE[r.id]=r);
+  WK.rules.rules.forEach(r=>WRULE[r.id]=r); WK.types.types.forEach(t=>WTYPE[t.id]=t);
+  WK.schemes.schemes.forEach(s=>WSCH[s.id]=s);
+  WRIDS=WK.rules.rules.map(r=>r.id); WROIDS=WK.roles.roles.map(r=>r.id);
+  Object.entries(WIDX.status).forEach(([k,v])=>WSTC[v.code]={id:k,...v});
+}
+async function loadWbData(name){
+  const key="wb_"+name; if(window.SEFT_DATA[key]) return window.SEFT_DATA[key];
+  if(location.protocol!=="file:"){
+    for(const base of ["data/waterbody/","waterbody/","data/",""]){try{const r=await fetch(base+name+".json"); if(r.ok) return (window.SEFT_DATA[key]=await r.json());}catch(e){}}
+  }
+  for(const base of ["data/waterbody/","waterbody/"]){try{await loadScript(base+key+".js"); if(window.SEFT_DATA[key]) return window.SEFT_DATA[key];}catch(e){}}
+  throw new Error("data/waterbody/"+key+".js did not load");
+}
+function wDist(){return WIDX.districts.find(d=>d.district===W.district)}
+async function wBundle(slug){
+  if(WBB[slug]) return WBB[slug];
+  const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={};
+  b.waterbodies.forEach(w=>{b.byId[w.id]=w; (b.byMws[w.mws]=b.byMws[w.mws]||[]).push(w); w.rmap={}; (w.ru||[]).forEach(([i,s,v])=>w.rmap[i]=[s,v]);});
+  b.maxPonds=Math.max(1,...Object.values(b.mws).map(m=>m.recent_ponds||0));
+  WBB[slug]=b; return b;
+}
+const wsBundleOk=d=>IDX&&IDX.districts.some(x=>x.slug===d.slug);
+function wScope(w){return WTYPE[w.t]&&WTYPE[w.t].in_scope}
+function wInView(w){return (!W.tehsil||w.teh===W.tehsil)&&(W.show==="all"||w.st===W.show)}
+function wName(w){return w.n?`${esc(w.n)} <span class="muted mono">#${w.id}</span>`:`Waterbody <span class="mono">#${w.id}</span>`}
+function stPill(code){const s=WSTC[code]; if(!s) return ""; return `<span class="pill" style="background:${WST_COL[code]};${code==="x"||code==="d"?"color:var(--ink)":""}">${esc(s.label)}</span>`}
+function ctxText(v){return v==null?"–":esc(String(v).replace(/_/g," "))}
+function sigRefs(txt){return esc(txt).replace(/\(((?:s|ctx|role)_[a-z_]+)\)/g,(m,id)=>{const x=WSIG[id]||WROLE[id]; return x?`<span class="vref" tabindex="0" title="${esc(x.label+(x.note?": "+x.note:""))}">(${esc(x.label.toLowerCase())})</span>`:m;});}
+function schemesFor(key,w,state){
+  return (WK.schemes.links[key]||[]).filter(l=>{const s=WSCH[l.scheme]; if(!s) return false;
+    if(s.states&&!s.states.includes(state)) return false; if(l.types&&w&&!l.types.includes(w.t)) return false; return true;});
+}
+function schemeList(links){
+  if(!links.length) return '<p class="note">No linked scheme in this state.</p>';
+  return `<ul class="wsch">${links.map(l=>{const s=WSCH[l.scheme]; return `<li><b>${esc(s.name)}</b> <span class="muted">· ${esc(l.for)}</span><br><span class="note">${esc(s.status)}</span></li>`}).join("")}</ul>`;
+}
+
+/* ---------- waterbody map ---------- */
+class WbMap{
+  constructor(cv,box){this.cv=cv;this.box=box;this.ctx=cv.getContext("2d");this.view={x:0,y:0,s:1};this.feats=[];this.pts=[];this.bind();
+    new ResizeObserver(()=>{this.resize();this.draw();}).observe(box); this.resize();}
+  resize(){const r=this.box.getBoundingClientRect(),d=window.devicePixelRatio||1; this.w=r.width;this.h=r.height; this.cv.width=r.width*d; this.cv.height=r.height*d; this.dpr=d;}
+  proj(lon,lat){return [lon*this.kx,-lat];}
+  css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+  setScene(){
+    this.feats=[]; this.pts=[];
+    const wd=new Set(WIDX.districts.map(d=>d.district));
+    if(!W.district){
+      this.kx=Math.cos(22*Math.PI/180);
+      (IDX.states||[]).forEach(([n,g])=>this.feats.push({kind:"state",paths:decode(g)}));
+      IDX.districts.filter(d=>wd.has(d.district)).forEach(d=>this.feats.push({kind:"district",d,wd:WIDX.districts.find(x=>x.district===d.district),paths:decode(d.outline)}));
+      this.bounds=[68,6.5,97.5,37.2];
+    } else {
+      const d=IDX.districts.find(x=>x.district===W.district), sb=BUNDLES[d.slug], wb=WBB[wDist().slug]; const bb=d.bounds;
+      this.kx=Math.cos((bb[1]+bb[3])/2*Math.PI/180); this.bounds=bb;
+      sb.mws.forEach(m=>this.feats.push({kind:"mws",m,paths:m.paths}));
+      sb.tehsils.forEach(t=>this.feats.push({kind:"teh",t,paths:t.paths}));
+      if(W.tehsil){const t=sb.tehsils.find(t=>t.name===W.tehsil); if(t){const xs=[],ys=[]; t.paths.forEach(r=>r.forEach(([x,y])=>{xs.push(x);ys.push(y);})); if(xs.length) this.bounds=[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)];}}
+      this.pts=wb.waterbodies.map(w=>{const [X,Y]=this.proj(w.xy[0],w.xy[1]); return {w,X,Y,r:Math.sqrt(w.a*1e4/Math.PI)/111320};});
+      this.pts.sort((a,b)=>b.r-a.r);
+      this.wb=wb;
+    }
+    this.feats.forEach(f=>{f.p2=new Path2D(); f.paths.forEach(r=>{r.forEach(([x,y],i)=>{const [X,Y]=this.proj(x,y); i?f.p2.lineTo(X,Y):f.p2.moveTo(X,Y);}); f.p2.closePath();});});
+  }
+  fit(){const [a,b,c,d]=this.bounds; const [x0,y0]=this.proj(a,d),[x1,y1]=this.proj(c,b); const pad=18;
+    const s=Math.min((this.w-2*pad)/(x1-x0),(this.h-2*pad)/(y1-y0)); this.view={s,x:(this.w-(x1-x0)*s)/2-x0*s,y:(this.h-(y1-y0)*s)/2-y0*s}; this.draw();}
+  zoomBy(f,cx=this.w/2,cy=this.h/2){const v=this.view; v.x=cx-(cx-v.x)*f; v.y=cy-(cy-v.y)*f; v.s*=f; this.draw();}
+  toWorld(px,py){return [(px-this.view.x)/this.view.s,(py-this.view.y)/this.view.s];}
+  draw(){
+    const c=this.ctx,v=this.view; if(!c) return; c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,this.cv.width,this.cv.height);
+    c.setTransform(this.dpr*v.s,0,0,this.dpr*v.s,this.dpr*v.x,this.dpr*v.y);
+    const lw=1/v.s, line=this.css("--line"), ink=this.css("--ink"), surf=this.css("--surface"), sel=this.css("--select"), acc=this.css("--accent");
+    if(!W.district){
+      for(const f of this.feats) if(f.kind==="state"){c.fillStyle=surf; c.fill(f.p2,"evenodd"); c.strokeStyle=line; c.lineWidth=lw; c.stroke(f.p2);}
+      for(const f of this.feats) if(f.kind==="district"){c.fillStyle=acc; c.globalAlpha=f===this.hover?0.9:0.6; c.fill(f.p2); c.globalAlpha=1; c.strokeStyle=f===this.hover?sel:ink; c.lineWidth=(f===this.hover?3:1.2)*lw; c.stroke(f.p2);}
+      c.setTransform(this.dpr,0,0,this.dpr,0,0); c.font="600 11px "+getComputedStyle(document.body).fontFamily; c.fillStyle=ink;
+      this.feats.filter(f=>f.kind==="district").forEach(f=>{const b=f.d.bounds; const [X,Y]=this.proj((b[0]+b[2])/2,b[3]); c.fillText(f.d.district, v.x+X*v.s+8, v.y+Y*v.s-2);});
+      return;
+    }
+    const wb=this.wb, ponds=W.mode==="ponds";
+    for(const f of this.feats){ if(f.kind!=="mws") continue; const inT=!W.tehsil||f.m.ts.includes(W.tehsil);
+      let col=surf; if(ponds){const n=(wb.mws[f.m.u]||{}).recent_ponds||0; col=n?seqColor(Math.sqrt(n/wb.maxPonds)):surf;}
+      c.globalAlpha=inT?1:0.35; c.fillStyle=col; c.fill(f.p2); c.strokeStyle=line; c.lineWidth=0.6*lw; c.stroke(f.p2);}
+    c.globalAlpha=1;
+    for(const f of this.feats){ if(f.kind!=="teh") continue; c.strokeStyle=ink; c.lineWidth=(f.t.name===W.tehsil?2.2:1)*lw; c.stroke(f.p2);}
+    for(const f of this.feats){ if(f.kind==="mws"&&(f.m.u===W.mws||f===this.hover)){c.strokeStyle=sel; c.lineWidth=(f.m.u===W.mws?3:2)*lw; c.stroke(f.p2);} }
+    const minR=1.6*lw;
+    for(const p of this.pts){const w=p.w; const col=wColor(w); if(!col) continue;
+      const inV=wInView(w); c.globalAlpha=inV?1:0.12; c.fillStyle=col; c.beginPath(); c.arc(p.X,p.Y,Math.max(p.r,minR),0,7); c.fill();}
+    c.globalAlpha=1;
+    const hp=this.hoverPt, sp=W.wb&&this.pts.find(p=>p.w.id===W.wb);
+    [hp,sp].forEach(p=>{if(!p) return; c.strokeStyle=sel; c.lineWidth=2.5*lw; c.beginPath(); c.arc(p.X,p.Y,Math.max(p.r,minR)+3*lw,0,7); c.stroke();});
+    c.setTransform(this.dpr,0,0,this.dpr,0,0);
+    const kmPerPx=111.32/v.s, nice=[0.5,1,2,5,10,20,50,100].find(n=>n>=90*kmPerPx*0.6)||100, px=nice/kmPerPx;
+    c.fillStyle=ink; c.fillRect(12,this.h-16,px,3); c.font="11px "+getComputedStyle(document.body).fontFamily; c.fillText(nice+" km",12,this.h-21);
+  }
+  hit(px,py){
+    const [X,Y]=this.toWorld(px,py); const c=this.ctx; c.setTransform(1,0,0,1,0,0);
+    if(!W.district){for(const f of this.feats) if(f.kind==="district"&&c.isPointInPath(f.p2,X,Y)) return {f}; return null;}
+    let best=null,bd=Infinity; const tol=7/this.view.s;
+    for(const p of this.pts){ if(!wInView(p.w)||!wColor(p.w)) continue; const d=Math.hypot(p.X-X,p.Y-Y)-Math.max(p.r,1.6/this.view.s); if(d<tol&&d<bd){bd=d;best=p;} }
+    if(best) return {p:best};
+    for(const f of this.feats) if(f.kind==="mws"&&(!W.tehsil||f.m.ts.includes(W.tehsil))&&c.isPointInPath(f.p2,X,Y)) return {f};
+    return null;
+  }
+  bind(){
+    const cv=this.cv; let drag=null, moved=false; const pts=new Map(); let pinch=null;
+    cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId); pts.set(e.pointerId,[e.offsetX,e.offsetY]); drag=[e.offsetX,e.offsetY,this.view.x,this.view.y]; moved=false;
+      if(pts.size===2){const [a,b]=[...pts.values()]; pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),s:this.view.s};}});
+    cv.addEventListener("pointermove",e=>{
+      if(pts.has(e.pointerId)) pts.set(e.pointerId,[e.offsetX,e.offsetY]);
+      if(pinch&&pts.size===2){const [a,b]=[...pts.values()]; const d=Math.hypot(a[0]-b[0],a[1]-b[1]); this.zoomBy((pinch.s*d/pinch.d)/this.view.s,(a[0]+b[0])/2,(a[1]+b[1])/2); moved=true; return;}
+      if(drag&&pts.size===1){const dx=e.offsetX-drag[0],dy=e.offsetY-drag[1]; if(Math.abs(dx)+Math.abs(dy)>3){moved=true; cv.classList.add("drag");} this.view.x=drag[2]+dx; this.view.y=drag[3]+dy; this.draw(); return;}
+      const h=this.hit(e.offsetX,e.offsetY); const hp=h&&h.p||null, hf=h&&h.f||null;
+      if(hp!==this.hoverPt||hf!==this.hover){this.hoverPt=hp; this.hover=hf; this.draw();} this.tip(h,e.offsetX,e.offsetY);});
+    const end=e=>{pts.delete(e.pointerId); if(pts.size<2) pinch=null; cv.classList.remove("drag");
+      if(drag&&!moved&&e.type==="pointerup"){const h=this.hit(e.offsetX,e.offsetY); if(h) wClick(h);} drag=null;};
+    cv.addEventListener("pointerup",end); cv.addEventListener("pointercancel",end);
+    cv.addEventListener("pointerleave",()=>{this.hover=this.hoverPt=null; $("#wtip").hidden=true; this.draw();});
+    cv.addEventListener("wheel",e=>{e.preventDefault(); this.zoomBy(Math.exp(-e.deltaY*(e.ctrlKey?0.01:0.0025)),e.offsetX,e.offsetY);},{passive:false});
+  }
+  tip(h,x,y){const t=$("#wtip"); if(!h){t.hidden=true;return;} let s="";
+    if(h.f&&h.f.kind==="district"){const d=h.f.wd; s=`<b>${esc(d.district)}</b>, ${esc(d.state)}<br>${d.n.toLocaleString("en-IN")} waterbodies · ${d.recent_ponds} recent ponds<br>click to open`;}
+    else if(h.f){const m=this.wb.mws[h.f.m.u]||{}; s=`<b>MWS ${esc(h.f.m.u)}</b><br>${(this.wb.byMws[h.f.m.u]||[]).length} waterbodies · ${m.recent_ponds||0} recent ponds`;}
+    else {const w=h.p.w; s=`<b>${w.n?esc(w.n):"#"+w.id}</b><br>${esc(WTYPE[w.t].label)} · ${w.a} ha<br>${esc(WSTC[w.st]?.label||"")}`;
+      if(W.mode==="rule"){const r=w.rmap[W.arg]; s+=`<br>${esc(WK.rules.rules[W.arg].label)}: ${r?(r[0]==="s"?"triggered, "+Math.round(r[1]):r[0]==="n"?"not triggered":"insufficient data"):"not applicable"}`;}
+      if(W.mode==="role") s+=`<br>${esc(WK.roles.roles[W.arg].label)}: ${w.ro?w.ro[W.arg].toFixed(2):"–"}`;}
+    t.innerHTML=s; t.hidden=false; t.style.left=Math.min(x+12,this.w-250)+"px"; t.style.top=(y+12)+"px";}
+}
+function wColor(w){
+  const m=W.mode;
+  if(m==="type") return WTYPE_COL[w.t]||"#999";
+  if(m==="status") return WST_COL[w.st];
+  if(m==="ponds") return w.st==="n"?WST_COL.n:null;
+  if(!wScope(w)) return null;
+  if(m==="rule"){const r=w.rmap[W.arg]; if(!r) return null; const opp=WK.rules.rules[W.arg].group==="Opportunity"||/opportunity/.test(WK.rules.rules[W.arg].id);
+    if(r[0]==="s") return intColor(r[1],opp); if(r[0]==="n") return WBMAP.css("--line"); return WBMAP.css("--na");}
+  if(m==="role"){if(!w.ro) return null; return seqColor(w.ro[W.arg]);}
+  return "#999";
+}
+let WBMAP=null;
+function wClick(h){
+  if(h.f&&h.f.kind==="district") return wGo("district",h.f.d.district);
+  if(h.p) return wGo("wb",h.p.w.id);
+  if(h.f&&h.f.kind==="mws") return wGo("mws",h.f.m.u);
+}
+async function wGo(level,arg){
+  if(level==="india"){W.district=W.tehsil=W.wb=W.mws=null;}
+  if(level==="district"){W.district=arg;W.tehsil=W.wb=W.mws=null;
+    $("#wpane").innerHTML=`<div class="loading">Loading ${esc(arg)}…</div>`;
+    const d=wDist(); await Promise.all([loadBundle(d.slug),wBundle(d.slug)]);}
+  if(level==="tehsil"){W.tehsil=arg||null;W.wb=W.mws=null;}
+  if(level==="mws"){W.mws=arg;W.wb=null;}
+  if(level==="wb"){W.wb=arg; const w=WBB[wDist().slug].byId[arg]; W.mws=w.mws; if(W.tehsil&&w.teh!==W.tehsil) W.tehsil=w.teh;}
+  wRefresh(level==="india"||level==="district"||level==="tehsil");
+}
+function wRefresh(refit){wCrumbs(); wPickers(); wMapCtl(); wPane(); WBMAP.setScene(); if(refit) WBMAP.fit(); else WBMAP.draw();}
+function renderWbExplore(m){
+  m.innerHTML=`<div class="explore">
+    <section class="mapbox" aria-label="Map">
+      <div class="crumbs" id="wcrumbs"></div><div class="pickers" id="wpickers"></div>
+      <div class="canvaswrap" id="wcw"><canvas id="wcv" aria-label="Map of waterbodies"></canvas>
+        <div class="zoom"><button id="wzin" aria-label="Zoom in">+</button><button id="wzout" aria-label="Zoom out">−</button><button id="wzfit" aria-label="Fit to area" style="font-size:12px">⤢</button></div>
+        <div class="tip" id="wtip" hidden></div></div>
+      <div class="mapctl" id="wmapctl"></div><div class="legend" id="wlegend"></div>
+      <p class="note">Drag to pan, scroll or pinch to zoom. Click a waterbody for its record, or the land around it for its micro-watershed. Dots are drawn to scale, with a small minimum size.</p>
+    </section><section class="pane" id="wpane"></section></div>`;
+  WBMAP=new WbMap($("#wcv"),$("#wcw"));
+  $("#wzin").onclick=()=>WBMAP.zoomBy(1.5); $("#wzout").onclick=()=>WBMAP.zoomBy(1/1.5); $("#wzfit").onclick=()=>WBMAP.fit();
+  if(W.district){const d=wDist(); Promise.all([loadBundle(d.slug),wBundle(d.slug)]).then(()=>wRefresh(true));} else wRefresh(true);
+}
+function wCrumbs(){
+  const parts=[["india","All districts"]]; if(W.district) parts.push(["district",W.district]); if(W.tehsil) parts.push(["tehsil",W.tehsil]);
+  if(W.mws) parts.push(["mws","MWS "+W.mws]); if(W.wb) parts.push(["wb","#"+W.wb]);
+  $("#wcrumbs").innerHTML=parts.map(([l,n],i)=>`<button data-l="${l}" ${i===parts.length-1?"disabled":""}>${esc(n)}</button>`).join('<span class="sep">›</span>');
+  $("#wcrumbs").onclick=e=>{const b=e.target.closest("button"); if(!b||b.disabled) return; const l=b.dataset.l;
+    if(l==="india") wGo("india"); else if(l==="district") wGo("district",W.district); else if(l==="tehsil") wGo("tehsil",W.tehsil); else if(l==="mws") wGo("mws",W.mws);};
+}
+function wPickers(){
+  const ds=WIDX.districts.slice().sort((a,b)=>a.state.localeCompare(b.state)||a.district.localeCompare(b.district));
+  let h=`<label for="wpd">District<select id="wpd"><option value="">Select district…</option>${ds.map(d=>`<option value="${esc(d.district)}" ${d.district===W.district?"selected":""}>${esc(d.district)}, ${esc(d.state)}</option>`).join("")}</select></label>`;
+  if(W.district) h+=`<label for="wpt">Tehsil<select id="wpt"><option value="">All tehsils</option>${wDist().tehsils.map(t=>`<option ${t===W.tehsil?"selected":""}>${esc(t)}</option>`).join("")}</select></label>`;
+  if(W.district) h+=`<label for="wps">Show<select id="wps">${[["all","All waterbodies"],["r","Holds water regularly"],["x","Rarely holds water"],["n","New (since 2022)"]].map(([v,l])=>`<option value="${v}" ${W.show===v?"selected":""}>${l}</option>`).join("")}</select></label>`;
+  $("#wpickers").innerHTML=h;
+  $("#wpd").onchange=e=>e.target.value?wGo("district",e.target.value):wGo("india");
+  if($("#wpt")) $("#wpt").onchange=e=>wGo("tehsil",e.target.value);
+  if($("#wps")) $("#wps").onchange=e=>{W.show=e.target.value; wPane(); WBMAP.draw();};
+}
+function wMapCtl(){
+  if(!W.district){$("#wmapctl").innerHTML=""; $("#wlegend").innerHTML='<span>Districts with a waterbody atlas. Select one to see its waterbodies.</span>'; return;}
+  const opt=(v,l)=>`<option value="${v}" ${(W.mode+(W.arg!=null?":"+W.arg:""))===v?"selected":""}>${esc(l)}</option>`;
+  $("#wmapctl").innerHTML=`<label class="pickers" for="wmm"><span class="eyebrow">Colour by</span><select id="wmm">
+    ${opt("type","Waterbody type")}${opt("status","Status (how often it holds water)")}${opt("ponds","Recent ponds per micro-watershed")}
+    <optgroup label="Observed stresses and opportunities">${WK.rules.rules.map((r,i)=>opt("rule:"+i,r.label)).join("")}</optgroup>
+    <optgroup label="Roles">${WK.roles.roles.map((r,i)=>opt("role:"+i,r.label)).join("")}</optgroup></select></label>`;
+  $("#wmm").onchange=e=>{const [a,b]=e.target.value.split(":"); W.mode=a; W.arg=b==null?null:+b; WBMAP.draw(); wLegend(); if(!W.wb&&!W.mws) wPane();};
+  wLegend();
+}
+function wLegend(){
+  const L=$("#wlegend"); const m=W.mode;
+  if(m==="type"){const b=WBB[wDist().slug]; const c={}; b.waterbodies.forEach(w=>c[w.t]=(c[w.t]||0)+1);
+    L.innerHTML=WK.types.types.filter(t=>c[t.id]).map(t=>`<span><i style="background:${WTYPE_COL[t.id]}"></i>${esc(t.label)}</span>`).join(""); return;}
+  if(m==="status"){L.innerHTML=["r","x","n"].map(k=>`<span><i style="background:${WST_COL[k]}"></i>${esc(WSTC[k].label)}</span>`).join(""); return;}
+  if(m==="ponds"){L.innerHTML=`<span>Recent ponds (new since 2022) per micro-watershed</span> <span class="ramp" style="background:linear-gradient(90deg,${SEQ.join(",")})"></span> <span class="num">1 → ${WBB[wDist().slug].maxPonds}</span><span><i style="background:${WST_COL.n}"></i>Recent pond</span>`; return;}
+  if(m==="rule"){const r=WK.rules.rules[W.arg]; const o=/opportunity/.test(r.id);
+    L.innerHTML=`<span>${esc(r.label)}: triggered, by intensity</span> <span class="ramp" style="background:linear-gradient(90deg,${intColor(40,o)},${intColor(70,o)},${intColor(100,o)})"></span> <span class="num">40 → 100</span><span><i style="background:var(--line)"></i>Not triggered</span><span><i style="background:var(--na)"></i>Insufficient data</span><span>Waterbodies where it does not apply are hidden.</span>`; return;}
+  if(m==="role"){L.innerHTML=`<span>${esc(WK.roles.roles[W.arg].label)} role</span> <span class="ramp" style="background:linear-gradient(90deg,${SEQ.join(",")})"></span> <span class="num">0 → 1</span>`; return;}
+}
+function wCounts(ws){
+  const st={}, ty={}; let rp=0, rpha=0; ws.forEach(w=>{ty[w.t]=(ty[w.t]||0)+1; if(wScope(w)){st[w.st]=(st[w.st]||0)+1; if(w.st==="n"){rp++; rpha+=w.a;}}});
+  const rules=WK.rules.rules.map((r,i)=>{let app=0,trig=0,ins=0; ws.forEach(w=>{const x=w.rmap[i]; if(!x) return; app++; if(x[0]==="s") trig++; else if(x[0]==="i") ins++;}); return {r,i,app,trig,ins};});
+  return {st,ty,rp,rpha,rules,n:ws.length};
+}
+function statusBar(st){const tot=["r","x","n"].reduce((t,k)=>t+(st[k]||0),0)||1;
+  return `<div class="mixbar" role="img" aria-label="Status mix">${["r","x","n"].map(k=>st[k]?`<span style="width:${(st[k]/tot*100).toFixed(2)}%;background:${WST_COL[k]}" title="${esc(WSTC[k].label)} ${st[k]}"></span>`:"").join("")}</div>
+  <div class="mixlist">${["r","x","n"].map(k=>`<div><span><i style="background:${WST_COL[k]}"></i>${esc(WSTC[k].label)}</span><span class="num">${(st[k]||0).toLocaleString("en-IN")}</span></div>`).join("")}</div>`;}
+function typeBar(ty){const ids=WK.types.types.map(t=>t.id).filter(t=>ty[t]); const tot=ids.reduce((s,t)=>s+ty[t],0)||1;
+  return `<div class="mixbar">${ids.map(t=>`<span style="width:${(ty[t]/tot*100).toFixed(2)}%;background:${WTYPE_COL[t]}" title="${esc(WTYPE[t].label)} ${ty[t]}"></span>`).join("")}</div>
+  <div class="mixlist">${ids.map(t=>`<div><span><i style="background:${WTYPE_COL[t]}"></i>${esc(WTYPE[t].label)}</span><span class="num">${ty[t].toLocaleString("en-IN")}</span></div>`).join("")}</div>`;}
+function ruleBars(rules){
+  return `<div class="bars">${rules.map(x=>{const p=x.app?x.trig/x.app:0; const o=/opportunity/.test(x.r.id);
+    return `<div class="bar" data-ri="${x.i}" title="${x.trig} of ${x.app} waterbodies where it applies${x.ins?"; "+x.ins+" with insufficient data":""}"><span>${esc(x.r.label)}</span><span class="t"><span style="width:${(p*100).toFixed(1)}%;background:${o?"var(--ok)":"var(--warn)"}"></span></span><span class="num">${x.app?Math.round(p*100)+"%":"–"}</span></div>`}).join("")}</div>
+    <p class="note">Share of the waterbodies where each rule applies (by type and gate) that trigger it. Click a row to colour the map by it.</p>`;}
+function wPane(){
+  const P=$("#wpane"); if(!P) return;
+  if(!W.district){
+    const tot=WIDX.districts.reduce((s,d)=>s+d.n,0), rp=WIDX.districts.reduce((s,d)=>s+d.recent_ponds,0);
+    P.innerHTML=`<div class="block"><div class="eyebrow">Waterbody atlas</div><h2>${tot.toLocaleString("en-IN")} waterbodies in ${WIDX.districts.length} districts</h2>
+      <p>Each waterbody of 0.05 ha or more is typed from its size, drainage position and catchment, read through eight years (2017–2024) of the water it held in kharif, rabi and summer, and checked against ${WK.rules.rules.length} rules for observed stresses and opportunities: filling, retention, silt, sudden loss, drought, irrigation use, livestock water, fishery, canal tails and river flow. Each rule carries interventions, questions to ask the community and the schemes that can fund the work.</p>
+      <p>${rp.toLocaleString("en-IN")} waterbodies first held water in 2022 or later and have held water every year since: mostly farm ponds dug recently. They are shown as <b>recent ponds</b>, a sign of where pond-building schemes have reached.</p></div>
+      <div class="cards">${WIDX.districts.map(d=>{const st={r:d.by_status.regular||0,x:d.by_status.rarely_wet||0,n:d.by_status.new||0};
+        return `<button class="dcard" data-d="${esc(d.district)}"><b>${esc(d.district)}</b><span class="muted">${esc(d.state)} · ${d.tehsils.length} tehsils</span><span>${d.n.toLocaleString("en-IN")} waterbodies · <b>${d.recent_ponds}</b> recent ponds in ${d.recent_pond_mws} MWS</span>${statusBar(st).split("<div class=\"mixlist\">")[0]}</button>`}).join("")}</div>`;
+    P.querySelectorAll(".dcard").forEach(b=>b.onclick=()=>wGo("district",b.dataset.d)); return;
+  }
+  const d=wDist(), b=WBB[d.slug];
+  if(W.wb) return wPaneWb(P,b.byId[W.wb],d,b);
+  if(W.mws) return wPaneMws(P,W.mws,d,b);
+  const ws=b.waterbodies.filter(wInView), C=wCounts(ws);
+  let top="";
+  if(W.mode==="rule"){const xs=ws.filter(w=>w.rmap[W.arg]&&w.rmap[W.arg][0]==="s").sort((a,b)=>b.rmap[W.arg][1]-a.rmap[W.arg][1]).slice(0,15);
+    top=`<div class="block"><h3>Highest intensity: ${esc(WK.rules.rules[W.arg].label)}</h3>${xs.length?`<div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Tehsil</th><th class="r">ha</th><th class="r">Intensity</th></tr></thead><tbody>${xs.map(w=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t].label)}</td><td>${esc(w.teh)}</td><td class="r num">${w.a}</td><td class="r">${ibar(w.rmap[W.arg][1],/opportunity/.test(WK.rules.rules[W.arg].id))}</td></tr>`).join("")}</tbody></table></div>`:'<p class="note">None triggered here.</p>'}</div>`;}
+  if(W.mode==="ponds"){const ms=Object.entries(b.mws).filter(([u,m])=>m.recent_ponds&&(!W.tehsil||(b.byMws[u]||[]).some(w=>w.teh===W.tehsil))).sort((a,c)=>c[1].recent_ponds-a[1].recent_ponds).slice(0,12);
+    const links=schemesFor("recent_ponds",null,d.state);
+    top=`<div class="block"><h3>Where recent ponds are</h3><p>Micro-watersheds with the most waterbodies first wet in 2022 or later and wet every year since. Most are farm ponds; the count shows where pond-building has reached, and where it has not.</p>
+      <div class="tbl"><table><thead><tr><th>MWS</th><th class="r">Recent ponds</th><th class="r">ha</th><th>Main system</th></tr></thead><tbody>${ms.map(([u,m])=>`<tr class="mrow" data-u="${u}" style="cursor:pointer"><td class="mono">${u}</td><td class="r num">${m.recent_ponds}</td><td class="r num">${m.recent_ponds_ha}</td><td>${esc(ARCH[m.dominant_system]?.label||ctxText(m.dominant_system))}</td></tr>`).join("")}</tbody></table></div>
+      <h3>Schemes behind farm ponds in ${esc(d.state)}</h3>${schemeList(links)}</div>`;}
+  P.innerHTML=`<div class="block"><div class="eyebrow">${esc(W.tehsil?W.tehsil+" tehsil, ":"")}${esc(d.district)}, ${esc(d.state)}</div>
+      <h2>${C.n.toLocaleString("en-IN")} waterbodies${W.show!=="all"?" · "+esc(WSTC[W.show].label.toLowerCase()):""}</h2>
+      <p><b>${C.rp}</b> recent ponds (${C.rpha.toFixed(1)} ha) first held water in 2022 or later.</p>
+      <div class="eyebrow">How often they hold water (waterbodies in scope)</div>${statusBar(C.st)}
+      <div class="eyebrow">Types</div>${typeBar(C.ty)}</div>
+    ${top}
+    <div class="block"><h3>Observed stresses and opportunities</h3>${ruleBars(C.rules)}</div>`;
+  P.querySelectorAll(".bar[data-ri]").forEach(e=>e.onclick=()=>{W.mode="rule";W.arg=+e.dataset.ri; wMapCtl(); WBMAP.draw(); wPane();});
+  P.querySelectorAll(".wrow").forEach(e=>e.onclick=()=>wGo("wb",+e.dataset.id));
+  P.querySelectorAll(".mrow").forEach(e=>e.onclick=()=>wGo("mws",e.dataset.u));
+}
+function ctxBlock(m){
+  if(!m) return '<p class="note">This micro-watershed is outside the watershed atlas, so its landscape context is not available.</p>';
+  const rows=[["Rainfall",m.ctx_rainfall],["Aquifer",m.ctx_aquifer],["Terrain",m.ctx_terrain],["Groundwater category",m.ctx_gw_category],["Canal",m.ctx_canal],["Cropping",m.ctx_cropping]];
+  return `<div class="tbl"><table><tbody>${rows.map(([l,v])=>`<tr><th>${l}</th><td>${ctxText(v)}</td></tr>`).join("")}<tr><th>Main system</th><td>${esc(ARCH[m.dominant_system]?.label||ctxText(m.dominant_system))}</td></tr></tbody></table></div>`;
+}
+function openInWatershed(u){
+  const d=wDist(); if(!wsBundleOk(d)) return;
+  S.atlas="ws"; try{localStorage.setItem("atlas",S.atlas)}catch(e){} S.tab="explore";
+  loadBundle(d.slug).then(b=>{S.district=d.district; S.level="mws"; const m=b.mwsById[u]; S.tehsil=m?m.t:null; S.mws=u; render();});
+}
+function wPaneMws(P,u,d,b){
+  const m=b.mws[u], ws=(b.byMws[u]||[]).filter(w=>W.show==="all"||w.st===W.show), C=wCounts(ws);
+  const sorted=ws.slice().sort((a,c)=>c.a-a.a);
+  P.innerHTML=`<div class="block"><div class="eyebrow">Micro-watershed · ${esc(d.district)}</div><h2 class="mono">MWS ${esc(u)}</h2>
+    <p>${ws.length} waterbodies with this MWS as home · <b>${m&&m.recent_ponds||0}</b> recent ponds${m&&m.recent_ponds_ha?` (${m.recent_ponds_ha} ha)`:""}</p>
+    ${ctxBlock(m)}${m&&wsBundleOk(d)?`<button class="btn ghost" id="wopenws">Open this MWS in the watershed atlas</button>`:""}</div>
+    <div class="block"><div class="eyebrow">How often they hold water</div>${statusBar(C.st)}</div>
+    <div class="block"><h3>Waterbodies</h3><div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Status</th><th class="r">ha</th><th class="r">Triggered</th></tr></thead><tbody>
+    ${sorted.map(w=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t].label)}</td><td><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${WST_COL[w.st]}"></i> ${esc(WSTC[w.st].label.split(" (")[0])}</td><td class="r num">${w.a}</td><td class="r num">${(w.ru||[]).filter(x=>x[1]==="s").length}</td></tr>`).join("")}</tbody></table></div></div>
+    <div class="block"><h3>Observed stresses and opportunities here</h3>${ruleBars(C.rules)}</div>`;
+  P.querySelectorAll(".wrow").forEach(e=>e.onclick=()=>wGo("wb",+e.dataset.id));
+  P.querySelectorAll(".bar[data-ri]").forEach(e=>e.onclick=()=>{W.mode="rule";W.arg=+e.dataset.ri; wMapCtl(); WBMAP.draw();});
+  if($("#wopenws")) $("#wopenws").onclick=()=>openInWatershed(u);
+}
+function fillChart(w){
+  const H=110, bw=9, gap=6, gw=bw*3+gap, W0=28, Wd=W0+WYEARS.length*gw+4;
+  const ser=[["k","Kharif","#2c6a9e"],["kr","Rabi","#5fae9e"],["krz","Summer","#d6a51f"]];
+  let s=`<svg viewBox="0 0 ${Wd} ${H+22}" width="100%" style="max-width:${Wd*1.6}px" role="img" aria-label="Water area each year">`;
+  [0,50,100].forEach(v=>{const y=H-v/100*H+2; s+=`<line x1="${W0-4}" x2="${Wd}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width=".5"/><text x="${W0-6}" y="${y+3}" font-size="7" text-anchor="end" fill="var(--muted)">${v}%</text>`;});
+  WYEARS.forEach((yr,i)=>{const x0=W0+i*gw; ser.forEach(([k,l,c],j)=>{const v=(w[k]||[])[i]; if(v==null){s+=`<text x="${x0+j*bw+bw/2}" y="${H}" font-size="6" text-anchor="middle" fill="var(--muted)">·</text>`; return;}
+      const h=Math.max(v/100*H,v>0?1:0); s+=`<rect x="${x0+j*bw}" y="${H-h+2}" width="${bw-1}" height="${h}" fill="${c}"><title>${yr} ${l}: ${v}%</title></rect>`;});
+    s+=`<text x="${x0+gw/2-gap/2}" y="${H+14}" font-size="7.5" text-anchor="middle" fill="var(--muted)">${yr}</text>`;});
+  s+="</svg>";
+  return s+`<div class="legend">${ser.map(([k,l,c])=>`<span><i style="background:${c}"></i>${l}</span>`).join("")}<span>Share of the waterbody's mapped extent holding water in each season, per hydrological year (July–June).</span></div>`;
+}
+function wPaneWb(P,w,d,b){
+  const m=b.mws[w.mws], T=WTYPE[w.t], inS=T.in_scope;
+  const facts=[["Type",esc(T.label)],["Area",w.a+" ha"],["Tehsil",esc(w.teh)],["Stream order",w.so??"–"],["Zone of influence",{w:"matched by waterbody id",l:"matched by location",["-"]:"not found"}[w.z]],["Location",`<span class="mono">${w.xy[1].toFixed(4)}, ${w.xy[0].toFixed(4)}</span>`]];
+  const vars=w.v?WIDX.web_vars.map((k,i)=>[WVAR_L[k]?WVAR_L[k][0]:k,w.v[i],WVAR_L[k]?WVAR_L[k][1]:""]).filter(x=>x[1]!=null):[];
+  let stNote="";
+  if(w.st==="x") stNote=`<p class="pubnote">${esc(WSTC.x.about)}</p>`;
+  if(w.st==="n") stNote=`<p class="pubnote">A <b>recent pond</b>: ${esc(WSTC.n.about)} Rules that look at change over the years do not apply yet.</p>`;
+  const rr=(w.ru||[]).map(([i,s,v])=>({i,s,v,r:WK.rules.rules[i]}));
+  const trig=rr.filter(x=>x.s==="s").sort((a,c)=>c.v-a.v), nt=rr.filter(x=>x.s==="n"), ins=rr.filter(x=>x.s==="i");
+  const ruleCard=x=>{const r=x.r, o=/opportunity/.test(r.id), links=schemesFor(r.id,w,d.state);
+    return `<div class="stress ${o?"opportunity":(x.v>=70?"severe":"")}"><div class="hd"><b>${esc(r.label)}</b>${ibar(x.v,o)}</div>
+      <p>${sigRefs(r.public_note)}</p>
+      <details><summary>Interventions, questions and schemes</summary><div class="walk">
+        <div><div class="eyebrow">Interventions</div><ul>${r.interventions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
+        <div><div class="eyebrow">Ask the community</div><ul>${r.questions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
+        <div><div class="eyebrow">Schemes</div>${schemeList(links)}</div></div></details></div>`;};
+  P.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.district)}, ${esc(d.state)}</div><h2>${wName(w)}</h2><div class="chips">${stPill(w.st)}<span class="chip">${esc(T.label)}</span></div>
+    ${stNote}<div class="tbl"><table><tbody>${facts.map(([l,v])=>`<tr><th>${l}</th><td>${v}</td></tr>`).join("")}
+    <tr><th>Micro-watershed</th><td><button class="btn ghost" id="wgomws" style="padding:1px 8px">MWS ${esc(w.mws||"–")}</button> ${m&&m.recent_ponds?`· ${m.recent_ponds} recent ponds`:""}</td></tr></tbody></table></div></div>
+    <div class="block"><h3>Water held, 2017–2024</h3>${fillChart(w)}
+      ${vars.length?`<div class="tbl"><table><tbody>${vars.map(([l,v,u])=>`<tr><th>${esc(l)}</th><td class="num">${u==="of 8"?v:fmtVal(v)}${u?" "+esc(u):""}</td></tr>`).join("")}</tbody></table></div>`:""}</div>
+    ${inS?`<div class="block"><h3>Roles it plays</h3><div class="bars">${WK.roles.roles.map((r,i)=>`<div class="bar" style="cursor:default" title="${esc(r.note)}"><span>${esc(r.label)}</span><span class="t"><span style="width:${((w.ro||[])[i]||0)*100}%;background:var(--accent)"></span></span><span class="num">${w.ro?w.ro[i].toFixed(2):"–"}</span></div>`).join("")}</div>
+      <p class="note">0 to 1, from cropping in its zone of influence, village fishery and irrigation sources, livestock and the home MWS. A rule's intensity rises with the roles that matter for it.</p></div>
+    <div class="block"><h3>Observed stresses and opportunities</h3>
+      ${trig.length?trig.map(ruleCard).join(""):'<p>No rule is triggered for this waterbody.</p>'}
+      ${nt.length?`<p class="note">Checked, not triggered: ${nt.map(x=>esc(x.r.label)).join(", ")}.</p>`:""}
+      ${ins.length?`<p class="note">Insufficient data: ${ins.map(x=>esc(x.r.label)).join(", ")}.</p>`:""}
+      ${rr.length<WK.rules.rules.length?`<p class="note">Not applicable to this type or status: ${WK.rules.rules.filter((r,i)=>!w.rmap[i]).map(r=>esc(r.label)).join(", ")}.</p>`:""}</div>`
+    :`<div class="block"><p>${esc(T.description)} Rules are not evaluated for this type.</p></div>`}
+    <div class="block"><h3>Landscape around it</h3>${ctxBlock(m)}</div>`;
+  $("#wgomws").onclick=()=>wGo("mws",w.mws);
+}
+
+/* ---------- waterbody knowledge tabs ---------- */
+function exprNames(e){return e?PyEval.names(e):[]}
+function ruleInputs(r){return [...new Set([r.trigger,r.gate,r.intensity].flatMap(exprNames))]}
+function renderWbGraph(m){
+  const cols=[["Signals: evidence",WK.signals.signals.filter(s=>s.kind!=="context").map(s=>["sig",s.id,s.label])],
+    ["Signals: context",WK.signals.signals.filter(s=>s.kind==="context").map(s=>["sig",s.id,s.label])],
+    ["Roles",WK.roles.roles.map(r=>["role",r.id,r.label])],["Observed stresses",WK.rules.rules.map(r=>["rule",r.id,r.label])],
+    ["Schemes",WK.schemes.schemes.map(s=>["sch",s.id,s.name.split(" (")[0].replace(/^Pradhan Mantri /,"PM ")])]];
+  const edges=[]; WK.rules.rules.forEach(r=>{ruleInputs(r).concat(r.roles||[],r.contexts||[]).forEach(n=>{if(WSIG[n]||WROLE[n]) edges.push([n,r.id]);});
+    (WK.schemes.links[r.id]||[]).forEach(l=>edges.push([r.id,l.scheme]));});
+  const E=[...new Set(edges.map(e=>e.join("|")))].map(e=>e.split("|"));
+  const colW=190, rowH=22, top=30, P={}; const H=top+Math.max(...cols.map(c=>c[1].length))*rowH+10, Wd=cols.length*colW+20;
+  cols.forEach(([t,ns],ci)=>ns.forEach(([k,id,l],ri)=>P[id]={x:10+ci*colW,y:top+ri*rowH+(H-top-ns.length*rowH)/2,k,l}));
+  const col={sig:"#c7861c",role:"#2c6a6e",rule:"#b8402f",sch:"#3f8a5a"};
+  const svg=()=>`<svg width="${Wd}" height="${H}" font-size="11">
+    ${cols.map(([t],ci)=>`<text x="${10+ci*colW}" y="16" font-weight="600" fill="var(--muted)">${esc(t)}</text>`).join("")}
+    <g id="gedges">${E.map(([a,b])=>{const A=P[a],B=P[b]; if(!A||!B) return ""; const x1=A.x+colW-30,y1=A.y+6,x2=B.x-2,y2=B.y+6;
+      return `<path data-a="${a}" data-b="${b}" d="M${x1},${y1} C${(x1+x2)/2},${y1} ${(x1+x2)/2},${y2} ${x2},${y2}" fill="none" stroke="var(--line)" stroke-width="1"/>`}).join("")}</g>
+    ${Object.entries(P).map(([id,p])=>`<g class="gnode" data-id="${id}" transform="translate(${p.x},${p.y})"><circle cx="-0" cy="6" r="4" fill="${col[p.k]}"/><text x="8" y="10" fill="var(--ink)">${esc(p.l.length>26?p.l.slice(0,25)+"…":p.l)}</text></g>`).join("")}</svg>`;
+  m.innerHTML=`<div class="doc" style="max-width:none"><div class="block"><h2>Knowledge graph</h2><p>How evidence becomes advice. Signals (from the water each waterbody held, its catchment, its zone of influence and its micro-watershed) and the roles a waterbody plays feed the rules for observed stresses and opportunities; each rule links to the schemes that can fund its interventions. Click a node to see its links and definition.</p></div>
+    <div class="graphwrap">${svg()}</div><div class="block gdetail" id="wgd"><p class="muted">Select a node.</p></div></div>`;
+  m.querySelectorAll(".gnode").forEach(g=>g.onclick=()=>{const id=g.dataset.id; const nb=new Set([id]);
+    m.querySelectorAll("#gedges path").forEach(p=>{const on=p.dataset.a===id||p.dataset.b===id; p.setAttribute("stroke",on?"var(--select)":"var(--line)"); p.setAttribute("stroke-width",on?2:1); if(on){nb.add(p.dataset.a);nb.add(p.dataset.b);}});
+    m.querySelectorAll(".gnode").forEach(n=>n.style.opacity=nb.has(n.dataset.id)?1:0.3);
+    $("#wgd").innerHTML=nodeDetail(id);});
+}
+function nodeDetail(id){
+  if(WSIG[id]){const s=WSIG[id]; const used=WK.rules.rules.filter(r=>ruleInputs(r).concat(r.contexts||[]).includes(id));
+    return `<h3>${esc(s.label)} <span class="mono muted">${id}</span></h3><p>${esc(s.note||"")}</p>${s.expr?`<p><code>${esc(s.expr)}</code></p>`:`<p class="note">Variable <code>${esc(s.var||"")}</code>${s.pool?`, pooled by ${esc(s.pool.by)}: lowest ${s.pool.pct}% (severe ${s.pool.severe_pct}%)`:` · threshold ${s.value}, severe ${s.severe}`}</p>`}<p class="note">Used by: ${used.map(r=>esc(r.label)).join(", ")||"–"}</p>`;}
+  if(WROLE[id]){const r=WROLE[id]; return `<h3>${esc(r.label)} role</h3><p>${esc(r.note)}</p><p><code>${esc(r.expr)}</code></p>`;}
+  if(WRULE[id]) return ruleDoc(WRULE[id],true);
+  if(WSCH[id]) return schemeDoc(WSCH[id]);
+  return "";
+}
+function ruleDoc(r,short){
+  const tot=WIDX.rules[r.id]; const links=WK.schemes.links[r.id]||[];
+  return `<div class="hd" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h3>${esc(r.label)}</h3><span class="note">${esc(r.group||"")} · triggered for ${tot.triggered.toLocaleString("en-IN")} of ${tot.applicable.toLocaleString("en-IN")} (${tot.applicable?Math.round(tot.triggered/tot.applicable*100):0}%)</span></div>
+    <p>${sigRefs(r.rationale)}</p>
+    <div class="tbl"><table><tbody><tr><th>Applies to</th><td>${r.applies_to.map(t=>esc(WTYPE[t]?.label||t)).join(", ")}</td></tr>
+      ${r.gate?`<tr><th>Gate</th><td><code>${esc(r.gate)}</code></td></tr>`:""}<tr><th>Trigger</th><td><code>${esc(r.trigger)}</code></td></tr><tr><th>Intensity</th><td><code>${esc(r.intensity)}</code></td></tr></tbody></table></div>
+    ${short?"":`<p class="pubnote">${sigRefs(r.public_note)}</p>`}
+    <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))"><div><div class="eyebrow">Interventions</div><ul>${r.interventions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
+    <div><div class="eyebrow">Ask the community</div><ul>${r.questions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
+    <div><div class="eyebrow">Schemes</div><ul>${links.map(l=>`<li>${esc(WSCH[l.scheme].name.split(" (")[0])}${WSCH[l.scheme].states?` <span class="muted">(${esc(WSCH[l.scheme].states.join(", "))})</span>`:""}: <span class="muted">${esc(l.for)}</span></li>`).join("")}</ul></div></div>`;
+}
+function schemeDoc(s){
+  const used=Object.entries(WK.schemes.links).filter(([k,ls])=>ls.some(l=>l.scheme===s.id)).map(([k])=>k==="recent_ponds"?"Recent ponds":WRULE[k].label);
+  return `<h3>${esc(s.name)}</h3><p class="note">${esc(s.level)}${s.states?" · "+esc(s.states.join(", ")):""} · ${esc(s.department)}</p>
+    <p><b>${esc(s.status)}.</b> ${esc(s.status_note||"")}</p><p class="note">Components: ${s.components.map(esc).join("; ")}</p>
+    <p class="note">Linked to: ${used.map(esc).join(", ")}</p>
+    <p class="note">${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">Scheme site</a>`:""}${s.sources.length?" · Sources: "+s.sources.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${i+1}</a>`).join(", "):""}</p>`;
+}
+function renderWbTypes(m){
+  const ds=WIDX.districts;
+  m.innerHTML=`<div class="doc" style="max-width:1100px"><div class="block"><h2>Waterbody types</h2><p>${esc(WK.types.note)}</p><p class="note">Size floor ${WK.types.min_area_ha} ha. Rules are evaluated for in-scope types only.</p></div>
+   <div class="block tbl"><table><thead><tr><th>Type</th><th>Rule</th><th>What it is</th>${ds.map(d=>`<th class="r">${esc(d.district)}</th>`).join("")}</tr></thead><tbody>
+   ${WK.types.types.map(t=>`<tr><td><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${WTYPE_COL[t.id]};margin-right:5px"></i><b>${esc(t.label)}</b>${t.in_scope?"":' <span class="muted">(out of scope)</span>'}</td><td><code>${esc(t.when)}</code></td><td>${esc(t.description)}</td>${ds.map(d=>`<td class="r num">${(d.by_type[t.id]||0).toLocaleString("en-IN")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+   <div class="block"><h3>Status: how often a waterbody holds water</h3><div class="tbl"><table><thead><tr><th>Status</th><th>Definition</th>${ds.map(d=>`<th class="r">${esc(d.district)}</th>`).join("")}</tr></thead><tbody>
+   ${Object.entries(WIDX.status).filter(([k])=>k!=="dry").map(([k,s])=>`<tr><td>${stPill(s.code)}</td><td>${esc(s.about)}</td>${ds.map(d=>`<td class="r num">${(d.by_status[k]||0).toLocaleString("en-IN")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+   <p class="note">Counts are of in-scope waterbodies. Ballia, on the Ganga and Ghaghara floodplain, has many waterbodies that hold water only in wet years.</p></div></div>`;
+}
+function renderWbSignals(m){
+  const row=s=>`<tr><td><b>${esc(s.label)}</b><br><span class="mono muted">${s.id}</span></td><td>${s.expr?`<code>${esc(s.expr)}</code>`:`<code>${esc(s.var)}</code> ${s.pool?`lowest ${s.pool.pct}% by ${esc(s.pool.by)} (severe ${s.pool.severe_pct}%)`:`${esc(s.direction||"")} · ${s.value} / severe ${s.severe}`}${s.gate?`<br>gate <code>${esc(s.gate)}</code>`:""}`}</td><td>${esc(s.note||"")}</td></tr>`;
+  const pools=WIDX.pools;
+  m.innerHTML=`<div class="doc" style="max-width:1100px"><div class="block"><h2>Signals and roles</h2><p>${esc(WK.signals.note)}</p></div>
+   <div class="block tbl"><h3>Evidence signals</h3><table><thead><tr><th>Signal</th><th>Test</th><th>Note</th></tr></thead><tbody>${WK.signals.signals.filter(s=>s.kind!=="context").map(row).join("")}</tbody></table></div>
+   <div class="block tbl"><h3>Context signals</h3><table><thead><tr><th>Signal</th><th>Test</th><th>Note</th></tr></thead><tbody>${WK.signals.signals.filter(s=>s.kind==="context").map(row).join("")}</tbody></table></div>
+   <div class="block tbl"><h3>Pooled thresholds</h3><table><thead><tr><th>Signal</th><th>Type</th><th class="r">Threshold</th><th class="r">Severe</th></tr></thead><tbody>${Object.entries(pools).flatMap(([s,t])=>Object.entries(t).map(([ty,[a,c]])=>`<tr><td>${esc(WSIG[s]?.label||s)}</td><td>${esc(WTYPE[ty]?.label||ty)}</td><td class="r num">${a}</td><td class="r num">${c}</td></tr>`)).join("")}</tbody></table></div>
+   <div class="block"><h3>Roles</h3><p>${esc(WK.roles.note)}</p>${WK.roles.roles.map(r=>`<div class="pwblock"><b>${esc(r.label)}</b><p>${esc(r.note)}</p><code>${esc(r.expr)}</code></div>`).join("")}</div></div>`;
+}
+function renderWbRules(m){
+  const groups=[...new Set(WK.rules.rules.map(r=>r.group||"Other"))];
+  m.innerHTML=`<div class="doc" style="max-width:1000px"><div class="block"><h2>Observed stresses and opportunities</h2><p>${esc(WK.rules.note)}</p>
+    <div class="tbl"><table><thead><tr><th>Rule</th>${WIDX.districts.map(d=>`<th class="r">${esc(d.district)}</th>`).join("")}<th class="r">All</th></tr></thead><tbody>
+    ${WK.rules.rules.map(r=>`<tr><td>${esc(r.label)}</td>${WIDX.districts.map(d=>{const x=d.rules[r.id]; return `<td class="r num">${x.applicable?Math.round(x.triggered/x.applicable*100)+"%":"–"}</td>`}).join("")}<td class="r num"><b>${WIDX.rules[r.id].applicable?Math.round(WIDX.rules[r.id].triggered/WIDX.rules[r.id].applicable*100)+"%":"–"}</b></td></tr>`).join("")}</tbody></table></div>
+    <p class="note">Share triggered among waterbodies where the rule applies.</p></div>
+    ${groups.map(g=>`<h2>${esc(g)}</h2>${WK.rules.rules.filter(r=>(r.group||"Other")===g).map(r=>`<div class="block">${ruleDoc(r)}</div>`).join("")}`).join("")}</div>`;
+}
+function renderWbQuestions(m){
+  m.innerHTML=`<div class="doc"><div class="block"><h2>Community questions</h2><p>Questions to take to the village or the waterbody's users when a rule is triggered. The data show where a waterbody's water falls short; the answers say why, and so which intervention fits. Ask the questions of the rules triggered for a waterbody (on its record in Explore) first.</p>
+    <button class="btn ghost" onclick="window.print()">Print</button></div>
+    ${WK.rules.rules.map(r=>`<div class="block"><h3>${esc(r.label)}</h3><p class="note">${esc(r.applies_to.map(t=>WTYPE[t]?.label||t).join(", "))}</p><ol>${r.questions.map(q=>`<li>${esc(q)}</li>`).join("")}</ol><p class="note">If confirmed: ${r.interventions.map(esc).join("; ")}.</p></div>`).join("")}</div>`;
+}
+function renderWbSchemes(m){
+  const st=[...new Set(WIDX.districts.map(d=>d.state))];
+  m.innerHTML=`<div class="doc"><div class="block"><h2>Schemes</h2><p>${esc(WK.schemes._about)}</p><p class="note">Checked on ${esc(WK.schemes.verified)}. MGNREGS, the main funder of village waterbody works, was replaced by VB-G RAM G on 1 July 2026; schemes that ran on MGNREGS funds (Amrit Sarovar, several state farm-pond schemes) should be checked against the new Act's works list.</p></div>
+    <h3>Central schemes</h3>${WK.schemes.schemes.filter(s=>s.level==="central").map(s=>`<div class="block">${schemeDoc(s)}</div>`).join("")}
+    ${st.map(x=>{const ss=WK.schemes.schemes.filter(s=>s.level==="state"&&s.states&&s.states.includes(x)); return ss.length?`<h3>${esc(x)}</h3>${ss.map(s=>`<div class="block">${schemeDoc(s)}</div>`).join("")}`:"";}).join("")}</div>`;
+}
+function renderWbMethod(m){
+  const n=WIDX.districts.reduce((s,d)=>s+d.n,0);
+  m.innerHTML=`<div class="doc">
+  <div class="block"><h2>Methodology</h2><p>The waterbody atlas uses the same knowledge-base pattern as the watershed atlas: data → signals → rules, with interventions, community questions and schemes on each rule. It covers ${n.toLocaleString("en-IN")} waterbodies in the tehsils of the eight watershed-atlas districts that have a zone-of-influence layer.</p></div>
+  <div class="block"><h3>Data</h3><p>CoRE Stack surface waterbody layers give, for each waterbody and hydrological year 2017–2024, the share of its mapped extent holding water in kharif (k), kharif and rabi (kr), and kharif, rabi and summer (krz), with its drainage position, stream order and catchment. Zone-of-influence layers give the cropping intensity of the land the waterbody irrigates. Mission Antyodaya village data (fish ponds, main irrigation source) are reached through the villages of the home micro-watershed. The landscape context (rainfall, aquifer, terrain, groundwater category, canals, cropping) is the watershed atlas's context for the home MWS. The Water Body Census (2017-18) is used only to check the patterns, not as an input.</p></div>
+  <div class="block"><h3>Cleaning and typing</h3><p>Fragments of one waterbody (same area and series, within about 30 m) are merged and counted once. Waterbodies under 0.05 ha are dropped. Very large waterbodies (50 ha or more, or spanning three or more MWS) are reservoirs or large rivers and are out of scope. The rest are typed in order: river reach, canal-fed, onstream tank, small onstream pond, headwater pond, village pond and farm pond, from type, size, drainage position and catchment-to-area ratio. Zones of influence are joined by waterbody id where the layer has one and otherwise by location: the zone's centre within 10 m or 10% of the waterbody's size, and its radius within 25% of the expected radius for that size.</p></div>
+  <div class="block"><h3>Status and recent ponds</h3><p>A waterbody <b>holds water regularly</b> if it was wet in 3 or more of the 8 years and is not new. It <b>rarely holds water</b> if wet in only 1 or 2 years: rules that need several wet years do not apply. It is <b>new</b> if it was first wet in 2022 or later and wet every year since; these are mostly farm ponds dug recently and are counted per micro-watershed as <b>recent ponds</b>, a positive sign of where pond-building schemes have reached. Single-year detections are kept rather than dropped as misdetections.</p></div>
+  <div class="block"><h3>Signals, roles and rules</h3><p>Fill is read relative to the tehsil and year: a waterbody's kharif fill divided by the median of waterbodies in its tehsil that year, so a drought year such as 2023 does not read as decline. Poor filling is pooled by type (lowest 20% of regular waterbodies of the same type, severe 10%). Retention compares rabi and summer water with kharif. Drought failure compares fill in the home MWS's drought years with normal years. Each waterbody gets five roles from 0 to 1 (irrigation, drought protection, fishery, livestock, recharge and domestic use); a triggered rule's intensity rises with the roles that matter for it. Rules apply by type and gate and are triggered, not triggered, or lack data.</p></div>
+  <div class="block"><h3>Check against the Water Body Census</h3><p>Rule patterns were compared with census fields for the matched waterbodies (how full, how often it fills, use, encroachment, repair, storage loss, water user associations, pisciculture) and six tuning changes were made. After them, waterbodies the census records as rarely full trigger inflow shortfall more often (6% → 20% across the census fill classes); those under repair trigger sudden loss more (19% vs 8%); those with a water user association trigger irrigation underuse less (19% vs 40%); encroached ones trigger siltation more (32% vs 21%). The census describes 2017-18 and the match is approximate, so it supports the direction rather than the exact rates.</p></div>
+  <div class="block"><h3>Known limitations</h3><ul>
+   <li>Most zone-of-influence layers have no waterbody id, so about 1 in 10 waterbodies has no matched zone and its irrigation role relies on the home MWS.</li>
+   <li>Water extent is mapped from satellite imagery at 10–30 m; small ponds and narrow river reaches are noisy, and some single-year detections may be misdetections.</li>
+   <li>The extent of a waterbody is the union of all years' water, so a pond that was enlarged shows low fill in earlier years.</li>
+   <li>Old layers without drainage fields (some tehsils) cannot be typed (WB-10). Fragmented waterbodies are merged by a heuristic.</li>
+   <li>Scheme names and periods change; every scheme carries a status note and should be checked before use.</li></ul>
+   <p class="note">Issues found in the CoRE Stack data are logged in <code>docs/core_stack_waterbody_api_issues.md</code>; the census comparison is in <code>docs/waterbody_census_comparison.md</code>.</p></div></div>`;
+}
+function renderWbData(m){
+  m.innerHTML=`<div class="doc"><div class="block"><h2>Data</h2><p>One table per district, one row per waterbody: identity, type, status, size, drainage, home MWS and its context, recent ponds in the MWS, indicators, roles, the intensity of each rule (blank: not applicable; 0: not triggered; NA: insufficient data) and the schemes linked to its triggered rules. Built by <code>python -m seft.cli wb-run</code>.</p></div>
+    <div class="block">${WIDX.districts.map(d=>`<div class="dl"><span><b>${esc(d.district)}</b>, ${esc(d.state)} · ${d.n.toLocaleString("en-IN")} waterbodies</span><a class="btn ghost" href="data/waterbody/csv/wb_${d.slug}.csv" download>CSV</a></div>`).join("")}</div>
+    <div class="block"><h3>Rebuild locally</h3><pre class="kex">python -m seft.cli wb-add  --state ... --district ... --tehsil ...   # add a tehsil to config/waterbody/locations.json
+python -m seft.cli wb-fetch          # watershed data + waterbody and zone-of-influence layers
+python -m seft.cli wb-run --merge    # build, score, write out/waterbody and web/data/waterbody
+python -m seft.cli wb-census         # compare with the Water Body Census</pre></div></div>`;
+}
+function renderWb(){
+  const m=$("#main");
+  const go=()=>{const t=W.tab; if(t==="explore") return renderWbExplore(m); if(t==="graph") return renderWbGraph(m); if(t==="types") return renderWbTypes(m);
+    if(t==="signals") return renderWbSignals(m); if(t==="rules") return renderWbRules(m); if(t==="questions") return renderWbQuestions(m);
+    if(t==="schemes") return renderWbSchemes(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
+  if(WIDX) return go();
+  m.innerHTML=`<div class="loading">Loading the waterbody atlas…</div>`;
+  loadWbData("index").then(x=>{WIDX=x; WK=x.knowledge; wIndex(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
 }
 
 /* ---------- boot ---------- */

@@ -16,7 +16,7 @@ from .build import build_all
 from .context import mws_context, attach
 from .villages import build_profiles
 from .indicators import compute, year_reference
-from .score import load_knowledge, base_env, pool_thresholds, score
+from .score import load_knowledge, base_env, pool_thresholds, score, scheme_links
 
 OUT = ROOT / 'out' / 'waterbody'
 ARCH = [a['id'] for a in load_json(ROOT / 'knowledge' / 'archetypes.json')['archetypes']]
@@ -26,6 +26,25 @@ VAR_OUT = ['years_wet', 'is_new', 'regular', 'k_fill', 'kr_mean', 'krz_mean', 'r
            'k_late', 'rel_slope', 'rel_late_to_early', 'drought_fill_ratio', 'catchment_ratio', 'zoi_ci_mean',
            'zoi_ci_slope', 'zoi_multi_crop_share', 'fish_village_share', 'surface_irrigation_share']
 CTX_OUT = ['ctx_rainfall', 'ctx_aquifer', 'ctx_terrain', 'ctx_gw_category', 'ctx_canal', 'ctx_cropping', 'dominant_system']
+
+STATUS = {'regular': {'code': 'r', 'label': 'Holds water regularly', 'about': 'Wet in 3 or more of the 8 years (2017-2024), and not new.'},
+          'rarely_wet': {'code': 'x', 'label': 'Rarely holds water (1-2 of 8 years)', 'about': 'Wet in only 1 or 2 of the 8 years. Rules that need several wet years do not apply; a short-lived pond, a pond that fills only in very wet years, or a misdetection.'},
+          'new': {'code': 'n', 'label': 'New (since 2022)', 'about': 'First wet in 2022 or later and wet every year since: mostly farm ponds dug recently. Counted per micro-watershed as recent ponds.'},
+          'dry': {'code': 'd', 'label': 'Never wet', 'about': 'No wet year in the series.'}}
+
+def status(b):
+    v = b.get('vars') or {}
+    if v.get('is_new'): return 'new'
+    if v.get('regular'): return 'regular'
+    return 'rarely_wet' if v.get('years_wet') else 'dry'
+
+def recent_ponds(bodies, scope):
+    """New waterbodies (status 'new', in scope) per home MWS: {uid: [count, area ha]}."""
+    out = collections.defaultdict(lambda: [0, 0.0])
+    for b in bodies:
+        if b['type'] in scope and b.get('status') == 'new' and b['home_mws']:
+            out[b['home_mws']][0] += 1; out[b['home_mws']][1] += b['area_ha']
+    return {k: [n, round(a, 2)] for k, (n, a) in out.items()}
 
 def _r(x, n=3):
     return round(x, n) if isinstance(x, float) else x
@@ -49,14 +68,15 @@ def score_all(cfg, log=print):
     for b in B:
         if b['type'] in scope: b['signals'], b['roles'], b['rules'] = score(b, b['vars'], K, pools)
         else: b['signals'], b['roles'], b['rules'] = {}, {}, {}
+        b['status'] = status(b)
     return B, stats, types, K, pools
 
 def _rule_cell(r):
     return r['intensity'] if r['status'] == 'triggered' else ('' if r['status'] == 'not applicable' else (0 if r['status'] == 'not triggered' else 'NA'))
 
-def csv_row(b, K):
+def csv_row(b, K, rp=None):
     z = b.get('zoi') or {}; m = b['mws']; v = b.get('vars', {})
-    row = {'wb_id': b['wb_id'], 'state': b['state'], 'district': b['district'], 'tehsil': b['tehsil'], 'type': b['type'],
+    row = {'wb_id': b['wb_id'], 'state': b['state'], 'district': b['district'], 'tehsil': b['tehsil'], 'type': b['type'], 'status': b['status'],
            'area_ha': b['area_ha'], 'n_fragments': b['n_fragments'], 'fragment_ids': ';'.join(map(str, b['fragment_ids'])),
            'wb_type': b['wb_type'], 'wb_name': b['wb_name'], 'on_drainage': b['on_drainage'], 'on_stream': b.get('on_stream'),
            'stream_order': b['stream_order'], 'catchment_ha': b['catchment_ha'], 'home_mws': b['home_mws'], 'mws_uids': ';'.join(b['mws_uids']),
@@ -64,10 +84,12 @@ def csv_row(b, K):
            'k_mean': _mean(b.get('k')), 'zoi_match': b['zoi_match'], 'zoi_radius_m': _r(z.get('zoi'), 1),
            'zoi_area_ha': z.get('zoi_area'), 'mws_in_atlas': b['mws_in_atlas'], 'n_mws_villages': b['n_mws_villages']}
     row.update({c: m.get(c) for c in CTX_OUT})
+    row['mws_recent_ponds'] = (rp or {}).get(b['home_mws'], [0])[0] if b['home_mws'] else ''
     row.update({f'share_{a}': _r(m.get(f'share_{a}')) for a in ARCH})
     row.update({c: _r(v.get(c)) for c in VAR_OUT})
     row.update({r['id']: b['roles'].get(r['id'], '') for r in K['roles']['roles']})
     row.update({r['id']: _rule_cell(b['rules'][r['id']]) if r['id'] in b['rules'] else '' for r in K['rules']['rules']})
+    row['schemes'] = ';'.join(sorted({s for rid, r in b['rules'].items() if r['status'] == 'triggered' for s in scheme_links(rid, b, K)}))
     return row
 
 def _i(xs):
@@ -75,13 +97,13 @@ def _i(xs):
 
 def web_record(b, K):
     """Compact record for the frontend. Keys: id, t (type), teh, mws (home MWS; its context is in the bundle's
-    'mws' table), a (area ha), xy (lon, lat), n (name), so (stream order), z (ZoI match: w=wb_id, l=location,
+    'mws' table), a (area ha), xy (lon, lat), n (name), so (stream order), st (status code, see index 'status'), z (ZoI match: w=wb_id, l=location,
     -=none), k/kr/krz (yearly %, rounded), v (WEB_VARS in order), ro (roles in index order),
     ru ([rule index, status s/n/i (triggered, not triggered, insufficient), intensity] for applicable rules)."""
     rids = [r['id'] for r in K['rules']['rules']]; roles = [r['id'] for r in K['roles']['roles']]
     rec = {'id': b['wb_id'], 't': b['type'], 'teh': b['tehsil'], 'mws': b['home_mws'], 'a': round(b['area_ha'], 2),
            'xy': [round(b['centroid'][0], 5), round(b['centroid'][1], 5)], 'so': b['stream_order'],
-           'z': {'wb_id': 'w', 'location': 'l'}.get(b['zoi_match'], '-'), 'k': _i(b.get('k')), 'kr': _i(b.get('kr')), 'krz': _i(b.get('krz'))}
+           'st': STATUS[b['status']]['code'], 'z': {'wb_id': 'w', 'location': 'l'}.get(b['zoi_match'], '-'), 'k': _i(b.get('k')), 'kr': _i(b.get('kr')), 'krz': _i(b.get('krz'))}
     if b.get('wb_name'): rec['n'] = b['wb_name']
     if b.get('roles'):
         rec['v'] = [_r(b['vars'].get(c), 2) for c in WEB_VARS]
@@ -107,17 +129,22 @@ def write_outputs(B, stats, types, K, pools, cfg, out=None, log=print):
     for d in cfg['districts']:
         bs = by.get(d['district'], []); s = slug(d['district'])
         if not bs: continue
-        rows = [csv_row(b, K) for b in bs]
+        rp = recent_ponds(bs, scope)
+        rows = [csv_row(b, K, rp) for b in bs]
         with open(out / 'csv' / f'wb_{s}.csv', 'w', newline='', encoding='utf-8') as f:
             w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
         mws = {b['home_mws']: {c: b['mws'].get(c) for c in CTX_OUT} for b in bs if b['mws']}
+        for u, (n, a) in rp.items():
+            if u in mws: mws[u]['recent_ponds'] = n; mws[u]['recent_ponds_ha'] = a
         (out / 'web' / f'w_{s}.json').write_text(json.dumps({'district': d['district'], 'state': d['state'], 'mws': mws,
             'waterbodies': [web_record(b, K) for b in bs]}, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')
         districts.append({'district': d['district'], 'state': d['state'], 'slug': s, 'tehsils': d['tehsils'], 'n': len(bs),
                           'by_type': dict(collections.Counter(b['type'] for b in bs)),
+                          'by_status': dict(collections.Counter(b['status'] for b in bs if b['type'] in scope)),
+                          'recent_ponds': sum(n for n, _ in rp.values()), 'recent_pond_mws': len(rp),
                           'rules': rates(bs, K, scope)})
         log(f"  {d['district']}: {len(bs)} waterbodies -> csv/wb_{s}.csv, web/w_{s}.json")
-    index = {'knowledge': K, 'types': types, 'web_vars': WEB_VARS, 'districts': districts, 'tehsil_stats': stats,
+    index = {'knowledge': K, 'types': types, 'web_vars': WEB_VARS, 'status': STATUS, 'districts': districts, 'tehsil_stats': stats,
              'pools': {k: {t: [round(a, 3), round(c, 3)] for t, (a, c) in v.items()} for k, v in pools.items()},
              'rules': rates(B, K, scope)}
     (out / 'web' / 'index.json').write_text(json.dumps(index, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')

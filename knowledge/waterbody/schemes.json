@@ -1,0 +1,330 @@
+{
+  "_about": "Government schemes that can fund the interventions named by the waterbody rules (rules.json), and the farm-pond schemes behind the 'recent ponds' count. Each scheme keeps the id it has in knowledge/schemes.json (the watershed atlas) where it exists there. 'states' limits a scheme to waterbodies in those states (null = all states). Each link says which of the rule's interventions the scheme can fund; 'types' optionally limits a link to some waterbody types. Status notes were checked on the date in 'verified' and should be checked again before use: scheme names, periods and guidelines change.",
+  "version": 1,
+  "verified": "2026-11-22",
+  "schemes": [
+    {
+      "id": "vbg_ram_g",
+      "watershed_id": "mgnrega_nrm",
+      "name": "Viksit Bharat - Guarantee for Rozgar and Ajeevika Mission (Gramin) (VB-G RAM G)",
+      "level": "central",
+      "states": null,
+      "department": "Ministry of Rural Development",
+      "components": ["rejuvenation of water bodies", "desilting and bund repair (as wage works)", "inlet and supply-channel clearing", "farm ponds", "recharge structures", "catchment treatment"],
+      "status": "In force since 1 July 2026; replaces MGNREGS",
+      "status_note": "The VB-G RAM G Act, 2025 came into force on 1 July 2026 and repealed the Mahatma Gandhi NREGA, 2005. It guarantees 125 days of wage work (up from 100). Its 'water security' priority area covers water conservation structures, irrigation support, groundwater recharge and rejuvenation of water bodies. Whether desilting and farm ponds are listed by name in the new schedules was not confirmed; check the state's works list. Works are planned through the gram panchayat.",
+      "sources": ["https://www.onmanorama.com/upsc/current-affairs/2026/07/01/vb-g-ram-g-act-comes-into-force-on-july-1.amp.html"],
+      "url": "https://rural.gov.in"
+    },
+    {
+      "id": "amrit_sarovar",
+      "name": "Mission Amrit Sarovar (Phase II)",
+      "level": "central",
+      "states": null,
+      "department": "Ministry of Rural Development (with Jal Shakti and other ministries)",
+      "components": ["new ponds of 1 acre or more", "rejuvenation of ponds and tanks", "user groups that maintain the pond and remove silt after each monsoon", "fishery and other uses by user groups"],
+      "status": "Phase II under way",
+      "status_note": "More than 68,000 Amrit Sarovars were completed by March 2025 against a target of 50,000. Phase II continues with a focus on water availability and community participation. It has no budget of its own: works are funded through VB-G RAM G (earlier MGNREGS), 15th Finance Commission grants, the PMKSY watershed component, CSR and crowdfunding. User groups, mostly from SHGs, maintain the ponds and remove silt after each monsoon.",
+      "sources": ["https://pib.gov.in/PressReleasePage.aspx?PRID=2114884"],
+      "url": "https://amritsarovar.gov.in"
+    },
+    {
+      "id": "rrr_waterbodies",
+      "name": "Repair, Renovation and Restoration (RRR) of water bodies, under PMKSY - Har Khet Ko Pani",
+      "level": "central",
+      "states": null,
+      "department": "Ministry of Jal Shakti (with the state water resources / minor irrigation department)",
+      "components": ["desilting", "bund and waste-weir repair", "supply-channel restoration", "catchment treatment", "command-area works"],
+      "status": "Approved for 2021-26; check whether extended beyond March 2026",
+      "status_note": "RRR is a component of PMKSY-HKKP, which was approved for 2021-26. Guidelines (2022) target water bodies with a culturable command area of about 40 ha and above (smaller in hilly and special-category areas), proposed by the state. Small farm ponds and village ponds are generally below its size range; it fits onstream tanks and larger canal-fed tanks.",
+      "sources": ["https://wrd.nagaland.gov.in/wp-content/uploads/2023/04/RRR_PMKSY_Guidelines_2022.pdf", "https://www.narendramodi.in/cabinet-approves-implementation-of-pradhan-mantri-krishi-sinchayee-yojana-for-2021-26"],
+      "url": "https://pmksy.gov.in"
+    },
+    {
+      "id": "pmksy_cadwm",
+      "name": "PMKSY - Command Area Development and Water Management (CAD&WM)",
+      "level": "central",
+      "states": null,
+      "department": "Ministry of Jal Shakti",
+      "components": ["field channels and outlets", "PIM / water user association strengthening", "micro-irrigation in commands", "drainage"],
+      "status": "Approved for 2021-26; check whether extended beyond March 2026",
+      "status_note": "Part of PMKSY-HKKP. Fits canal-fed waterbodies and the commands of larger tanks, where the problem is water distribution rather than storage.",
+      "sources": ["https://www.narendramodi.in/cabinet-approves-implementation-of-pradhan-mantri-krishi-sinchayee-yojana-for-2021-26"],
+      "url": "https://pmksy.gov.in"
+    },
+    {
+      "id": "pmksy_pdmc",
+      "name": "PMKSY - Per Drop More Crop (micro-irrigation)",
+      "level": "central",
+      "states": null,
+      "department": "Ministry of Agriculture and Farmers Welfare",
+      "components": ["drip and sprinkler subsidy", "secondary storage", "farm ponds (other interventions)"],
+      "status": "Active (verify current guidelines)",
+      "status_note": "Helps farmers use stored pond water efficiently, which matters where a pond holds water but little rabi crop is grown around it.",
+      "sources": [],
+      "url": "https://pmksy.gov.in"
+    },
+    {
+      "id": "pmksy_wdc",
+      "name": "PMKSY - Watershed Development Component (WDC 2.0)",
+      "level": "central",
+      "states": null,
+      "department": "Department of Land Resources",
+      "components": ["catchment (ridge-to-valley) treatment", "drainage-line treatment", "water harvesting structures"],
+      "status": "Active (verify current guidelines)",
+      "status_note": "Fits where the catchment is eroding (silt) or where runoff no longer reaches the waterbody.",
+      "sources": [],
+      "url": "https://dolr.gov.in"
+    },
+    {
+      "id": "jsa_catch_the_rain",
+      "name": "Jal Shakti Abhiyan: Catch the Rain (incl. Jal Sanchay Jan Bhagidari)",
+      "level": "central",
+      "states": null,
+      "department": "Ministry of Jal Shakti",
+      "components": ["renovation of traditional water bodies", "restoration of lakes and ponds", "recharge structures", "revival of defunct borewells"],
+      "status": "Active campaign; Jal Sanchay Jan Bhagidari 2.0 under way in 2026",
+      "status_note": "A convergence campaign rather than a funded scheme: works are funded through VB-G RAM G (earlier MGNREGS), Atal Bhujal, 15th Finance Commission grants and CSR. Rajasthan, for example, was fast-tracking Jal Sanchay Jan Bhagidari 2.0 works (restoration of lakes and ponds, recharge structures) before the 2026 monsoon.",
+      "sources": ["https://www.drishtiias.com/state-pcs-current-affairs/rajasthan-accelerates-water-conservation-under-jal-sanchay-jan-bhagidari-abhiyan-20"],
+      "url": "https://jsactr.mowr.gov.in"
+    },
+    {
+      "id": "atal_bhujal",
+      "name": "Atal Bhujal Yojana (Atal Jal)",
+      "level": "central",
+      "states": ["Maharashtra", "Rajasthan", "Uttar Pradesh"],
+      "department": "Ministry of Jal Shakti",
+      "components": ["village water security plans", "recharge structures", "demand-side measures"],
+      "status": "Verify current period and covered blocks",
+      "status_note": "Covers selected water-stressed blocks of seven states, including Maharashtra, Rajasthan and Uttar Pradesh among the atlas states. Check whether the block is covered.",
+      "sources": [],
+      "url": "https://ataljal.mowr.gov.in"
+    },
+    {
+      "id": "pmmsy",
+      "name": "Pradhan Mantri Matsya Sampada Yojana (PMMSY)",
+      "level": "central",
+      "states": null,
+      "department": "Department of Fisheries",
+      "components": ["new and renovated ponds for inland aquaculture", "fish seed and inputs", "reservoir cages", "fish farmer groups and FFPOs"],
+      "status": "Active; Rs 2,500 crore in BE 2026-27 (end year not confirmed)",
+      "status_note": "Launched in 2020 for five years; it still had a budget allocation of Rs 2,500 crore in 2026-27. In its first six years it supported about 23,285 ha of ponds for inland aquaculture and about 52,000 reservoir cages. Check the current guidelines for the inland pond components.",
+      "sources": ["https://ddnews.gov.in/en/fueling-the-blue-economy-six-years-of-pmmsy-transforming-indias-fisheries-sector/", "https://pib.gov.in/PressReleasePage.aspx?PRID=2237418"],
+      "url": "https://pmmsy.dof.gov.in"
+    },
+    {
+      "id": "day_nrlm",
+      "name": "Deendayal Antyodaya Yojana - National Rural Livelihoods Mission (DAY-NRLM)",
+      "level": "central",
+      "states": null,
+      "department": "Ministry of Rural Development",
+      "components": ["SHG livelihoods including fishery", "community investment fund", "user groups for village ponds"],
+      "status": "Active (verify current guidelines)",
+      "status_note": "SHGs often form the Amrit Sarovar user groups and can take up fishery in village ponds.",
+      "sources": [],
+      "url": "https://aajeevika.gov.in"
+    },
+    {
+      "id": "mh_gaalmukt",
+      "name": "Gaal-mukt Dharan, Gaal-yukt Shivar (silt-free dams, silt-rich fields)",
+      "level": "state",
+      "states": ["Maharashtra"],
+      "department": "Soil and Water Conservation Department, Maharashtra",
+      "components": ["desilting of tanks and small dams", "silt carted to farmers' fields"],
+      "status": "Active (verify current guidelines)",
+      "status_note": "Still reported in use in 2025-26 (for example, silt spread on farmland in Chhatrapati Sambhajinagar). Separately, in June 2026 Maharashtra revised its policy for desilting large irrigation dams, with silt sold to farmers; that policy is for dams, which this atlas leaves out as reservoirs.",
+      "sources": ["https://www.freepressjournal.in/pune/chhatrapati-sambhajinagar-304-hectares-of-farmland-enriched-under-galmukta-dharan-scheme", "https://www.thehitavada.com//Encyc/2026/6/23/desilting-to-take-place-in-all-dams-in-state-government-revises-dam-desilting-policy-.html"],
+      "url": "https://swcd.maharashtra.gov.in"
+    },
+    {
+      "id": "mh_jalyukt",
+      "name": "Jalyukt Shivar Abhiyan 2.0",
+      "level": "state",
+      "states": ["Maharashtra"],
+      "department": "Soil and Water Conservation Department, Maharashtra",
+      "components": ["desilting", "cement nala bunds and repair of old structures", "recharge"],
+      "status": "Active (verify current guidelines)",
+      "status_note": "The state government ordered water conservation works under Jalyukt Shivar 2.0 to be done on a war footing ahead of an expected El Niño year.",
+      "sources": ["https://www.freepressjournal.in/mumbai/maharashtra-cm-devendra-fadnavis-orders-war-footing-water-conservation-works-under-jalyukt-shivar-20-amid-el-nino-threat"],
+      "url": "https://swcd.maharashtra.gov.in"
+    },
+    {
+      "id": "mh_magel_shettale",
+      "name": "Magel Tyala Shettale (farm ponds on demand)",
+      "level": "state",
+      "states": ["Maharashtra"],
+      "department": "Agriculture Department, Maharashtra",
+      "components": ["farm ponds", "pond lining"],
+      "status": "Active (verify current guidelines)",
+      "status_note": "",
+      "sources": [],
+      "url": "https://krishi.maharashtra.gov.in"
+    },
+    {
+      "id": "rj_mjsa",
+      "name": "Mukhyamantri Jal Swavlamban Abhiyan 2.0",
+      "level": "state",
+      "states": ["Rajasthan"],
+      "department": "Watershed Development and Soil Conservation, Rajasthan",
+      "components": ["anicuts", "renovation of traditional water bodies", "mini percolation tanks", "farm ponds"],
+      "status": "Verify current status",
+      "status_note": "Recent reports on Rajasthan's water conservation drive name Jal Sanchay Jan Bhagidari 2.0 rather than MJSA 2.0; check which one the district is using.",
+      "sources": ["https://www.drishtiias.com/state-pcs-current-affairs/rajasthan-accelerates-water-conservation-under-jal-sanchay-jan-bhagidari-abhiyan-20"],
+      "url": "https://mjsa.water.rajasthan.gov.in"
+    },
+    {
+      "id": "rj_khet_talai",
+      "name": "Rajasthan farm pond (khet talai) and diggi subsidy",
+      "level": "state",
+      "states": ["Rajasthan"],
+      "department": "Agriculture Department, Rajasthan",
+      "components": ["farm ponds", "diggi", "pipelines and sprinklers"],
+      "status": "Active (verify current guidelines)",
+      "status_note": "",
+      "sources": [],
+      "url": "https://rajkisan.rajasthan.gov.in"
+    },
+    {
+      "id": "up_khet_talab",
+      "name": "Khet Talab Yojana",
+      "level": "state",
+      "states": ["Uttar Pradesh"],
+      "department": "Agriculture Department, Uttar Pradesh",
+      "components": ["farm ponds"],
+      "status": "Active (verify current guidelines)",
+      "status_note": "",
+      "sources": [],
+      "url": "https://agriculture.up.gov.in"
+    },
+    {
+      "id": "jh_nilambar",
+      "name": "Neelambar-Pitambar Jal Samriddhi Yojana",
+      "level": "state",
+      "states": ["Jharkhand"],
+      "department": "Rural Development Department, Jharkhand",
+      "components": ["farm ponds", "trench-cum-bunds", "loose boulder check dams"],
+      "status": "Verify current status",
+      "status_note": "Ran on MGNREGS funds; check how it continues under VB-G RAM G.",
+      "sources": [],
+      "url": "https://jsac.jharkhand.gov.in"
+    },
+    {
+      "id": "jh_irrigation",
+      "name": "Jharkhand pond renovation and micro-lift schemes",
+      "level": "state",
+      "states": ["Jharkhand"],
+      "department": "Agriculture / Water Resources, Jharkhand",
+      "components": ["pond renovation", "solar micro-lift irrigation"],
+      "status": "Verify current scheme names",
+      "status_note": "",
+      "sources": [],
+      "url": "https://jharkhand.gov.in"
+    },
+    {
+      "id": "od_oiipcra",
+      "name": "Odisha Integrated Irrigation Project for Climate Resilient Agriculture (OIIPCRA)",
+      "level": "state",
+      "states": ["Odisha"],
+      "department": "Department of Water Resources, Odisha",
+      "components": ["minor irrigation tank renovation", "WUA (pani panchayat) strengthening"],
+      "status": "Project period may have ended - verify",
+      "status_note": "World Bank-assisted project; check whether tank renovation continues under a successor scheme.",
+      "sources": [],
+      "url": "https://dowr.odisha.gov.in"
+    },
+    {
+      "id": "ap_apdmp",
+      "name": "Andhra Pradesh Drought Mitigation Project",
+      "level": "state",
+      "states": ["Andhra Pradesh"],
+      "department": "Agriculture Department, Andhra Pradesh",
+      "components": ["farm ponds", "community water use plans"],
+      "status": "Project period may have ended - verify",
+      "status_note": "",
+      "sources": [],
+      "url": "https://apagrisnet.gov.in"
+    }
+  ],
+  "links": {
+    "wb.inflow_shortfall": [
+      {"scheme": "vbg_ram_g", "for": "Clearing inlet channels and desilting as wage works"},
+      {"scheme": "amrit_sarovar", "for": "Rejuvenation of the pond or tank, including inlets", "types": ["village_pond", "headwater_pond", "small_onstream_pond", "onstream_tank"]},
+      {"scheme": "rrr_waterbodies", "for": "Supply-channel restoration and desilting", "types": ["onstream_tank"]},
+      {"scheme": "pmksy_wdc", "for": "Catchment treatment where runoff is diverted or the catchment is eroding"},
+      {"scheme": "jsa_catch_the_rain", "for": "Renovation of traditional water bodies"},
+      {"scheme": "mh_jalyukt", "for": "Desilting and repair of old structures"},
+      {"scheme": "mh_gaalmukt", "for": "Desilting, with silt taken to fields"},
+      {"scheme": "rj_mjsa", "for": "Renovation of traditional water bodies"}
+    ],
+    "wb.poor_retention": [
+      {"scheme": "vbg_ram_g", "for": "Bund strengthening and repair as wage works"},
+      {"scheme": "rrr_waterbodies", "for": "Bund and waste-weir repair", "types": ["onstream_tank"]},
+      {"scheme": "amrit_sarovar", "for": "Rejuvenation including bund repair", "types": ["village_pond", "headwater_pond", "small_onstream_pond", "onstream_tank"]},
+      {"scheme": "mh_magel_shettale", "for": "Lining of farm ponds", "types": ["farm_pond"]},
+      {"scheme": "rj_khet_talai", "for": "Lining of farm ponds", "types": ["farm_pond"]}
+    ],
+    "wb.siltation": [
+      {"scheme": "vbg_ram_g", "for": "Desilting as wage works"},
+      {"scheme": "amrit_sarovar", "for": "Rejuvenation; user groups remove silt after each monsoon", "types": ["village_pond", "headwater_pond", "small_onstream_pond", "onstream_tank"]},
+      {"scheme": "rrr_waterbodies", "for": "Desilting and catchment treatment", "types": ["onstream_tank", "canal_fed"]},
+      {"scheme": "pmksy_wdc", "for": "Catchment treatment to cut the silt load"},
+      {"scheme": "mh_gaalmukt", "for": "Desilting, with silt taken to farmers' fields"},
+      {"scheme": "mh_jalyukt", "for": "Desilting"},
+      {"scheme": "rj_mjsa", "for": "Renovation of traditional water bodies"},
+      {"scheme": "jsa_catch_the_rain", "for": "Renovation of traditional water bodies"}
+    ],
+    "wb.sudden_loss": [
+      {"scheme": "vbg_ram_g", "for": "Repairing a breached bund or blocked inlet as wage works"},
+      {"scheme": "rrr_waterbodies", "for": "Bund and waste-weir repair", "types": ["onstream_tank", "canal_fed"]},
+      {"scheme": "amrit_sarovar", "for": "Rejuvenation of the pond or tank", "types": ["village_pond", "headwater_pond", "small_onstream_pond", "onstream_tank"]},
+      {"scheme": "jh_irrigation", "for": "Pond renovation"},
+      {"scheme": "od_oiipcra", "for": "Minor irrigation tank renovation", "types": ["onstream_tank"]}
+    ],
+    "wb.drought_failure": [
+      {"scheme": "vbg_ram_g", "for": "Deepening, catchment and recharge works"},
+      {"scheme": "jsa_catch_the_rain", "for": "Recharge and renovation of water bodies"},
+      {"scheme": "atal_bhujal", "for": "Village water security plan, where the block is covered"},
+      {"scheme": "pmksy_wdc", "for": "Catchment treatment"}
+    ],
+    "wb.irrigation_underuse": [
+      {"scheme": "pmksy_cadwm", "for": "Field channels and water user association strengthening", "types": ["onstream_tank", "canal_fed"]},
+      {"scheme": "pmksy_pdmc", "for": "Drip or sprinkler irrigation from the stored water"},
+      {"scheme": "rj_khet_talai", "for": "Pipelines and sprinklers from farm ponds", "types": ["farm_pond"]},
+      {"scheme": "jh_irrigation", "for": "Solar micro-lift from ponds"},
+      {"scheme": "od_oiipcra", "for": "Pani panchayat strengthening and crop diversification", "types": ["onstream_tank", "canal_fed"]}
+    ],
+    "wb.livestock_summer_water": [
+      {"scheme": "vbg_ram_g", "for": "Deepening a section of the pond, or a cattle trough, as wage works"},
+      {"scheme": "amrit_sarovar", "for": "Rejuvenation that keeps water into summer", "types": ["village_pond", "headwater_pond", "small_onstream_pond", "onstream_tank"]}
+    ],
+    "wb.fishery_opportunity": [
+      {"scheme": "pmmsy", "for": "Fish seed, inputs and pond improvement for inland aquaculture"},
+      {"scheme": "day_nrlm", "for": "SHG fishery enterprise"},
+      {"scheme": "amrit_sarovar", "for": "Fishery by the pond's user group", "types": ["village_pond", "headwater_pond", "small_onstream_pond", "onstream_tank"]}
+    ],
+    "wb.fishery_constraint": [
+      {"scheme": "pmmsy", "for": "Seed, inputs and pond deepening for a longer culture period"},
+      {"scheme": "day_nrlm", "for": "Working capital for the fishing group"}
+    ],
+    "wb.canal_tail_shortfall": [
+      {"scheme": "pmksy_cadwm", "for": "Field channels, outlets and water user association strengthening"},
+      {"scheme": "rrr_waterbodies", "for": "Restoring the supply channel to the tank"},
+      {"scheme": "od_oiipcra", "for": "Pani panchayat strengthening"}
+    ],
+    "wb.river_dry_season_loss": [
+      {"scheme": "pmksy_wdc", "for": "Catchment and drainage-line treatment upstream"},
+      {"scheme": "jsa_catch_the_rain", "for": "Recharge structures in the catchment"},
+      {"scheme": "atal_bhujal", "for": "Limiting groundwater pumping near the river, where the block is covered"},
+      {"scheme": "vbg_ram_g", "for": "Recharge structures on tributaries"}
+    ],
+    "recent_ponds": [
+      {"scheme": "vbg_ram_g", "for": "Farm ponds as individual works (earlier under MGNREGS)"},
+      {"scheme": "mh_magel_shettale", "for": "Farm ponds on demand"},
+      {"scheme": "rj_khet_talai", "for": "Farm pond subsidy"},
+      {"scheme": "up_khet_talab", "for": "Farm pond subsidy"},
+      {"scheme": "jh_nilambar", "for": "Farm ponds"},
+      {"scheme": "ap_apdmp", "for": "Farm ponds"},
+      {"scheme": "pmksy_pdmc", "for": "Farm ponds as secondary storage with micro-irrigation"}
+    ]
+  }
+}

@@ -160,7 +160,7 @@ Steps:
 3. **Score both rule sets.** Atlas rules use the pooled thresholds from `web/data/index.json` so they match the live atlas (`--pools run` pools over the ground-truth MWS instead). Sheet rules (`knowledge/sheet_rules.json`, built by `tools/build_sheet_rules.py`, evaluated by `seft/sheet.py`) treat signals as 0/1, `or` as a sum and `and` as a product. An atlas pathway is present when any of its rules is triggered; unknown predictions are left out of accuracy.
 4. **Report.** Metrics (balanced accuracy, F1), sample firing rates, atlas OR/AND sheet combinations, and a confidence-tier table (how often the label is positive when both, one or neither rule set fires). `python tools/groundtruth_whatif.py` scores candidate rule changes without applying them.
 
-## Waterbody atlas (in progress)
+## Waterbody atlas
 
 The waterbody atlas uses the same operations as the watershed atlas, on its own locations file
 (`config/waterbody/locations.json`, by default the 73 tehsils of the eight original districts). Each waterbody is
@@ -199,12 +199,25 @@ python -m seft.cli wb-census           # compare with the Water Body Census fiel
      (knowledge, districts, firing rates, pooled thresholds) and `out/waterbody/web/w_<district>.json`, and copies
      the bundles and tables to `web/data/waterbody/` (`--merge` keeps districts this run does not cover;
      `--no-web` skips the copy).
+     Each waterbody also gets a **status**: `regular` (wet in 3 or more of the 8 years and not new), `rarely_wet`
+     (wet in 1 or 2 years; rules needing several wet years do not apply) or `new` (first wet in 2022 or later and
+     wet every year since, mostly recently dug farm ponds). New waterbodies are counted per home MWS as **recent
+     ponds** (`mws_recent_ponds` in the CSV, `recent_ponds` in the bundle's MWS table), a positive sign of where
+     pond-building schemes have reached. The `schemes` column lists the schemes linked to the triggered rules
+     (`knowledge/waterbody/schemes.json`, filtered by state and type).
 * **`wb-census`** (`seft/wb/census.py`) scores the same waterbodies and compares them with the Water Body Census
   fields that CoRE Stack matched to them, as `groundtruth` does for watersheds. It writes
   `out/waterbody/census/report.md`, `detail.csv` and `comparison.json`. The census fields are never inputs.
   Decisions taken from it are in `docs/waterbody_census_comparison.md`.
 
 ## How the frontend works
+
+The page has two atlases, switched at the top: **Watersheds** (described below) and **Waterbodies**. The waterbody
+atlas loads `web/data/waterbody/index.json` and `w_<district>.json` (or `wb_index.js` / `wb_w_<district>.js` from
+disk) and draws each district's MWS and tehsil outlines from the watershed bundle `d_<district>`. Its tabs: Explore
+(map coloured by type, status, recent ponds, any rule or role; district, MWS and waterbody records with the fill
+series, roles, triggered rules, interventions, questions and schemes), Knowledge graph, Waterbody types, Signals
+and roles, Observed stresses, Community questions, Schemes, Methodology and Data. Add `?atlas=wb` to open it directly.
 
 `web/index.html` is a single-page atlas. It does not read `knowledge/` or `data/raw/` itself. Everything it needs is written into `web/data/` by `run` (via `seft/webdata.py`).
 
