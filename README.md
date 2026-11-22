@@ -55,68 +55,134 @@ Which locations a run covers depends on how you add them:
   `--merge` keeps the districts already in `web/data/`, and `mws_all.csv` and `villages_all.csv` are rebuilt to
   include every district. The new districts' percentile thresholds are pooled over the new run only.
 
-### What `fetch` does
+The same flow, with the files each step writes:
 
-* **Geometry first.** For each tehsil it downloads the MWS polygons and village points from GeoServer
-  (`crop_intensity:{district}_{tehsil}_intensity` and `panchayat_boundaries:{district}_{tehsil}`) into
-  `data/geo/geometry_raw.json`. The MWS count is used to check that datasets are complete.
-* **One request per tehsil.** It calls `/api/v2/get_tehsil_data/` once per tehsil, without a `data`
-  filter, and splits the response into the datasets listed in `config/datasets.json`, stored in
-  `data/raw/<state>/<district>/<tehsil>/<dataset>.json`. The filter is not used because it rejects
-  `forest_fire`, `forest_fringes`, `tree_in_grassland` and `ndvi`, which the unfiltered response
-  includes (CS-83). Failed requests are retried. The presigned S3 links in `green_credit` are stripped.
-* **Full responses kept.** Each tehsil's complete response is also saved, gzipped, as
-  `data/raw/<state>/<district>/<tehsil>/_response.json.gz` (presigned links stripped). When a dataset is
-  added to `config/datasets.json` later, `fetch` extracts it from that file without calling the API;
-  `--force` downloads the response again.
-* **Back-fill.** A dataset that comes back cut off, or with fewer MWS than the geometry, is marked
-  `complete: false`. Incomplete `lulc_vector` and `croppingintensity_annual` are back-filled from the
-  GeoServer layers behind the API, which match it exactly (CS-59). Set `SEFT_NO_GEOSERVER=1` to skip
-  the back-fill when GeoServer cannot be reached.
-* **Audit.** `audit` lists anything still missing or incomplete. `fetch --force` re-downloads, and
-  `fetch --only lulc_vector` fetches a single dataset.
+```mermaid
+flowchart LR
+  add["add"] --> loc["config/locations.json"]
+  loc --> fetch["fetch"]
+  fetch --> raw["data/raw/ + data/geo/geometry_raw.json"]
+  loc --> run["run"]
+  raw --> run
+  kn["knowledge/*.json"] --> run
+  run --> csv["out/csv/"]
+  run --> webd["web/data/"]
+  webd --> atlas["web/index.html"]
+  kn --> gt["groundtruth"]
+  raw --> gt
+  webd --> gt
+  gt --> gto["out/groundtruth/"]
+```
 
-The default endpoints can be changed with the environment variables `CORE_STACK_API_BASE` and
-`CORE_STACK_GEOSERVER`.
+## What the commands do
+
+Every command is `python -m seft.cli <name>`. `--locations FILE` (default `config/locations.json`) is the worklist of districts and tehsils. `--knowledge` defaults to `knowledge/`, `--out` to `out/`.
+
+### `add`
+
+Creates or updates a locations file so later commands know where to work.
+
+* **Reads:** `--locations` if it already exists (`{"districts": [...]}`).
+* **Writes:** the same file. Adds a district if it is new, otherwise appends tehsils that are not already listed. Names must match the CoRE Stack API (`get_active_locations`), including hyphens (`Mulshi-Paud`).
+* **Used by:** `fetch`, `audit`, `run` and `all` as the list of places to download and analyse. The atlas district list is not updated until `run` writes `web/data/index.json`.
+
+```bash
+python -m seft.cli add --state Maharashtra --district Yavatmal --tehsils "Darwha,Pusad,Arni,Digras"
+# or a separate file:  --locations config/yavatmal.json
+```
+
+### `fetch`
+
+Downloads CoRE Stack data for every tehsil in the locations file. Cached complete files are skipped unless `--force`. `--only lulc_vector` fetches a single dataset.
+
+* **Reads:** `config/locations.json` (or `--locations`), `config/datasets.json` (which datasets, MWS vs village), any existing `data/geo/geometry_raw.json` and `data/raw/...` caches, and `data/geo/geoserver_backfill.json` (stored GeoServer rows for the test districts).
+* **Writes:**
+  * `data/geo/geometry_raw.json` — MWS polygons, village points and tehsil outlines, keyed `district_slug/tehsil_slug`. The MWS count is the expected row count for MWS-level datasets. `run` later copies these polygons into the atlas bundles.
+  * `data/raw/<state>/<district>/<tehsil>/_response.json.gz` — the tehsil's full API response (presigned S3 links stripped). A dataset added to `config/datasets.json` later is extracted from this file with no new API call.
+  * `data/raw/<state>/<district>/<tehsil>/<dataset>.json` — one cache file per dataset, with `rows`, `complete`, `n_rows` and `expected_mws`. These are the only raw inputs `run` needs.
+* **Used by:** `load.py` during `run` and `groundtruth`; `audit` to list gaps. `data/raw/` is gitignored and not shipped; without it, use `python -m seft.rescore` on the existing atlas bundles.
+
+What it does, in order:
+
+* **Geometry first.** For each tehsil it downloads MWS polygons and village points from GeoServer (`crop_intensity:{district}_{tehsil}_intensity` and `panchayat_boundaries:{district}_{tehsil}`) into `data/geo/geometry_raw.json`.
+* **One request per tehsil.** It calls `/api/v2/get_tehsil_data/` once, without a `data` filter, and splits the response into the datasets in `config/datasets.json`. The filter is not used because it rejects `forest_fire`, `forest_fringes`, `tree_in_grassland` and `ndvi`, which the unfiltered response includes (CS-83). Failed requests are retried. Presigned S3 links in `green_credit` are stripped (CS-62).
+* **Back-fill.** A dataset that comes back cut off, or with fewer MWS than the geometry, is marked `complete: false`. Incomplete `lulc_vector` and `croppingintensity_annual` are back-filled from the GeoServer layers behind the API (CS-59). Set `SEFT_NO_GEOSERVER=1` to skip that. Stored rows in `data/geo/geoserver_backfill.json` fill other truncated test-district datasets.
+* **Audit.** `python -m seft.cli audit` only reads the cache and prints what is still missing or incomplete. It writes nothing.
+
+The default endpoints can be changed with `CORE_STACK_API_BASE` and `CORE_STACK_GEOSERVER`.
+
+### `run`
+
+Turns the cache and the knowledge files into tables and the atlas. `python -m seft.cli all` is `fetch`, then `validate`, then `run`. `validate` only reads `knowledge/*.json` and checks that every expression parses and every id resolves; it writes nothing.
+
+* **Reads:**
+  * `--locations` and every `knowledge/*.json`
+  * `data/raw/<state>/<district>/<tehsil>/*.json` (refuses to start if `lulc_vector.json` is missing)
+  * `data/geo/geometry_raw.json` and `data/geo/india_states.json` (map outlines)
+  * optional `--answers FILE` (`community_answers.json` saved from the atlas)
+* **Writes:**
+  * `out/csv/mws_<district>.csv` and `villages_<district>.csv`, plus `mws_all.csv` and `villages_all.csv` — one row per MWS or village: indicators, context classes, system shares, pathway and stress status/intensity, schemes, village cluster size.
+  * `out/web/index.json` — district summaries, India state outlines, a copy of all nine knowledge files, and the pooled percentile thresholds used in this run.
+  * `out/web/d_<slug>.json` — one bundle per district: encoded MWS polygons, tehsil outlines, compact MWS records (indicators, mix, stresses, signals, schemes, village ids) and village rows with coordinates.
+  * `web/data/` — the same bundles as both `.json` (for `http://`) and `.js` (for `file://`), plus `web/data/csv/` copies of the tables. This is what `web/index.html` loads. `--no-web` skips the atlas and writes only CSV. `--merge` keeps district bundles already in `web/data/` that this run did not produce, and rebuilds `mws_all.csv` / `villages_all.csv` over every district in the atlas.
+
+Pooled percentile thresholds are computed across every MWS in this run (unless `rescore` / `groundtruth` pass in the atlas's stored pools). After `run`, open `web/index.html`; new districts appear on the India map with no HTML changes.
 
 ### Community answers
 
-The atlas lets a field team answer the questions in `knowledge/questions.json` for an MWS and re-assess the
-stresses. The answers can be saved as `community_answers.json`. Running
-`python -m seft.cli run --answers community_answers.json` gives the same results in the tables.
+The atlas lets a field team answer the questions in `knowledge/questions.json` for an MWS and re-assess the stresses in the browser. Save them from the Explore or Data tab as `community_answers.json`. Running `python -m seft.cli run --answers community_answers.json` writes the same posteriors and schemes into `out/csv/` and `web/data/`.
 
-## Checking the rules against ground truth
+### `groundtruth`
+
+Scores atlas rules and Signal_Verification sheet rules against labelled micro-watersheds.
 
 ```bash
 python -m seft.cli groundtruth --truth path/to/final_ground_truth.json
 ```
 
-The input lists micro-watersheds known to have a pathway (`positive`) or not (`negative`), by
-`block_name` (tehsil) and `uid`. The tool:
+The input lists MWS known to have a pathway (`positive`) or not (`negative`), by `block_name` (tehsil) and `uid`. `config/groundtruth/pathways.json` maps each ground-truth pathway to atlas rule ids and a sheet pattern.
 
-1. **Resolves locations.** Each block name is matched against `get_active_locations`, cached in
-   `config/groundtruth/active_locations.json` (`--refresh-locations` downloads it again). A name found in
-   more than one district is settled by which tehsil's data contain the listed uid. The result is in
-   `config/groundtruth/locations.json` and `resolution.json`.
-2. **Fetches the data.** It uses the normal fetcher, so the data are cached once under `data/raw/` and
-   reused. `--force` refreshes them, and `--no-fetch` uses only the cache.
-3. **Scores both rule sets.**
-   - **Atlas rules** use the atlas's own pooled thresholds from `web/data/index.json` (`--pools run`
-     pools over the ground-truth MWS instead).
-   - **Sheet rules** are the Signal_Verification sheet's patterns, in `knowledge/sheet_rules.json`. That
-     file is built by `tools/build_sheet_rules.py` and evaluated by `seft/sheet.py`. Their signals are
-     0/1, `or` is a sum and `and` a product.
-4. **Reports.** It writes confusion matrices to `out/groundtruth/report.md` and `confusion.csv`, and
-   one row per label with the rule results and signals to `detail.csv`.
+* **Reads:** the truth file; `config/groundtruth/pathways.json`; `knowledge/*.json` and `knowledge/sheet_rules.json`; `web/data/index.json` (atlas pooled thresholds, unless `--pools run`); `config/locations.json` when computing sample firing rates; `config/groundtruth/changes.md` and `suggestions.md` (copied into the report).
+* **Writes:**
+  * `config/groundtruth/active_locations.json` — cache of `get_active_locations` (`--refresh-locations` downloads it again).
+  * `config/groundtruth/locations.json` — resolved `{state, district, tehsils}` for the labelled blocks.
+  * `config/groundtruth/resolution.json` — how each block name was matched (including ambiguous names settled by uid).
+  * `config/groundtruth/final_ground_truth.json` — copy of `--truth` when a different path is passed.
+  * `data/raw/...` for those tehsils, through the normal fetcher (`--no-fetch` uses only the cache; `--force` re-downloads).
+  * `out/groundtruth/report.md` — confusion tables, combination tables, changes and suggestions.
+  * `out/groundtruth/confusion.csv`, `detail.csv` (one row per label with rule results and signals), `combinations.csv`, `results.json`.
+  * `out/groundtruth/sample_rates.json` — firing rates over the atlas sample, cached per knowledge version (`--no-sample` skips this).
 
-`config/groundtruth/pathways.json` maps each ground-truth pathway to atlas rules and a sheet pattern.
+Steps:
 
-The report also includes:
-- **Metrics:** balanced accuracy and F1 for every row.
-- **Firing rates:** the share of the atlas sample MWS where each rule fires. Computing this needs one run of the whole sample, which is then cached per knowledge version; `--no-sample` skips it.
-- **Combination tables:** atlas OR sheet, atlas AND sheet, and the sheet with each atlas sub-pathway, plus a confidence-tier table showing how often the label is positive when both, one or neither rule set fires.
-- **Changes made:** the list in `config/groundtruth/changes.md`.
-- **Pathway by pathway:** the original rule, the changes made and further options for each pathway, from `config/groundtruth/suggestions.md`. `python tools/groundtruth_whatif.py` scores candidate rule changes without applying them.
+1. **Resolve locations.** Each block name is matched against `get_active_locations` without case. `"Keonjhar (Kendujhar)"` also matches `keonjhar` and `kendujhar`. A name found in more than one district is settled by which tehsil's `lulc_vector.json` contains the listed uid.
+2. **Fetch** those tehsils into `data/raw/` like any other location.
+3. **Score both rule sets.** Atlas rules use the pooled thresholds from `web/data/index.json` so they match the live atlas (`--pools run` pools over the ground-truth MWS instead). Sheet rules (`knowledge/sheet_rules.json`, built by `tools/build_sheet_rules.py`, evaluated by `seft/sheet.py`) treat signals as 0/1, `or` as a sum and `and` as a product. An atlas pathway is present when any of its rules is triggered; unknown predictions are left out of accuracy.
+4. **Report.** Metrics (balanced accuracy, F1), sample firing rates, atlas OR/AND sheet combinations, and a confidence-tier table (how often the label is positive when both, one or neither rule set fires). `python tools/groundtruth_whatif.py` scores candidate rule changes without applying them.
+
+## How the frontend works
+
+`web/index.html` is a single-page atlas. It does not read `knowledge/` or `data/raw/` itself. Everything it needs is written into `web/data/` by `run` (via `seft/webdata.py`).
+
+**Boot.** On load it calls `loadData("index")`:
+
+* over `http://` or `https://`, it fetches `web/data/index.json`;
+* over `file://` (opened from disk), browsers block `fetch`, so it loads `web/data/index.js`, which assigns the same object to `window.SEFT_DATA["index"]`.
+
+`index.json` holds:
+
+* `districts` — name, slug, state, tehsil list, outline, bounds, area-weighted system mix, stress rates, top schemes (drives the India map and the district picker);
+* `states` — India state outlines, copied from `data/geo/india_states.json`;
+* `knowledge` — a snapshot of all nine `knowledge/*.json` files (tabs, labels, questions, scheme text, methodology);
+* `pools` and `signal_thresholds` — the percentile cut-offs used when this atlas was built.
+
+**District data.** Choosing a district calls `loadBundle(slug)`, which loads `web/data/d_<slug>.json` (or `.js`). That bundle has encoded MWS polygons (`m.g`), tehsil outlines, compact MWS records (indicators `i`, context `c`, mix `m`, stresses `s`, signal grades `sg`, schemes `sc`, village ids `v`) and village rows with lon/lat. Geometry uses the same delta encoding as `seft/geo.py` (`decode()` in the page). Bundles stay in memory (`BUNDLES`) so switching tehsils does not reload.
+
+**Tabs.** Explore (map + reading pane), Data (CSV downloads from `web/data/csv/mws_*.csv` and `villages_*.csv`), Knowledge graph, System archetypes, Stress rules, Community questions, Schemes, Methodology. The last five render only from `IDX.knowledge`; they do not hit the network again.
+
+**In-browser scoring.** The block between `/*CORE-START*/` and `/*CORE-END*/` mirrors `seft/expr.py`, `archetypes.py`, `signals.py` / `stresses.py`, `assess.py` and `schemes.py`. Community answers therefore re-score mix, stresses and schemes in the page without Python. Keep that block in step when changing those modules. Answers stay in the browser until saved as `community_answers.json` and passed to `run --answers`.
+
+**Without a rebuild.** Editing `knowledge/*.json` does not change the page until `run` (or `python -m seft.rescore`) rewrites `web/data/index.json`. `rescore` reuses indicators, contexts and mix already stored in the bundles, so it does not need `data/raw/`.
 
 ## Layout
 
@@ -125,39 +191,93 @@ config/
   locations.json      districts and tehsils to analyse (edit, or use `seft.cli add`)
   datasets.json       get_tehsil_data datasets and whether they are MWS- or village-level
   counts.json         MWS and village counts of the test tehsils (reference)
+  groundtruth/        labelled MWS, pathway map, location resolution (see groundtruth command)
 knowledge/            all logic and metadata, editable by experts (see knowledge/README.md)
-  variables.json      indicator definitions (expressions over the datasets)
-  contexts.json       context classes and district rainfall normals
-  archetypes.json     system archetypes, weights, share rules, confidence rubric
-  signals.json        signal library: system, stress and context signals with thresholds and grades
-  taxonomy.json       production systems → observed stresses → causal-pathway groups
-  causal_graph.json   nodes, signed edges, and the causal-pathway rules (signals by role, trigger, intensity, public note)
-  schemes.json        central and state schemes and the signals they respond to
-  questions.json      community MCQs: likelihood ratios for stresses, weight overrides for systems
-  sources.json        bibliography referenced by id from every other file
-seft/                 Python package
-  cli.py              command line (add, fetch, audit, validate, run, all)
-  fetch.py            API and GeoServer download, completeness checks, back-fill
-  ingest.py           parses API responses (including cut-off ones)
-  load.py             reads the cache, merges MWS shared across tehsils, apportions villages
-  expr.py             safe expression language used by every knowledge file
-  indicators.py, context.py, archetypes.py, signals.py, stresses.py, assess.py, schemes.py
-  rescore.py          re-scores the atlas from the indicators stored in web/data (no raw data needed)
-  pipeline.py         end-to-end analysis
-  export.py           CSV tables and atlas bundles
-  webdata.py          copies the bundles to web/data (.json and .js), combines the CSV tables
-  validate.py         checks every expression and id reference in knowledge/
-  audit.py            coverage report;  backfill.py: the GeoServer back-fill used for the test districts
+seft/                 Python package (walkthrough below)
+tools/                sheet-rule compiler and ground-truth what-if
 data/
   geo/                MWS, village and tehsil geometry, India state outlines, GeoServer back-fill of the test districts
   raw/                downloaded API data (created by fetch; not shipped)
 out/csv/              result tables (mws_<district>.csv, villages_<district>.csv, *_all.csv)
+out/groundtruth/      confusion matrices and detail from the groundtruth command
+out/web/              atlas bundles before they are copied to web/data (gitignored)
 web/
   index.html          the atlas
   data/               atlas data: index + one bundle per district, as .json and .js, and the CSV tables
 docs/                 CoRE Stack API issues log (CS-01 to CS-73)
-tests/test_offline.py runs add -> fetch -> audit -> validate -> run against a mock CoRE Stack server
+tests/test_offline.py add -> fetch -> audit -> validate -> run against a mock CoRE Stack server
 ```
+
+## Code walkthrough
+
+Read the files in this order. It is the path a new location takes from a tehsil name to a pixel on the map.
+
+### 1. Config and knowledge (what you edit)
+
+Nothing in `seft/` hard-codes a district, an indicator or a rule. Locations live in `config/locations.json`. Which API datasets to cache is `config/datasets.json`. Every formula, threshold, system share, stress rule, scheme and community question is a JSON file in `knowledge/` (`knowledge/README.md` is the editing guide). `config/counts.json` is a reference table of test-tehsil MWS counts; the pipeline does not read it.
+
+### 2. Entry point — `seft/cli.py`
+
+`python -m seft.cli` is the only command you need day to day. It parses subcommands and calls the modules below. `add` writes the locations file itself. `fetch` / `audit` / `validate` / `run` / `groundtruth` import the matching module. `all` is fetch, then validate, then run.
+
+### 3. Shared helpers — `seft/util.py`
+
+Repository root, JSON load/save, `slug` (cache path names) and `gs_slug` (GeoServer layer names, which keep hyphens). `raw_dir(state, district, tehsil)` is `data/raw/<slug>/<slug>/<slug>/`. `iter_locations` walks the locations file.
+
+### 4. Download — `seft/fetch.py`, `geo.py`, `ingest.py`, `schema.py`, `backfill.py`
+
+`fetch.py` is the driver described under `fetch` above: GeoServer geometry, one unfiltered API request per tehsil, split into dataset files, completeness checks, live GeoServer back-fill of truncated LULC and cropping intensity.
+
+* `geo.py` encodes Shapely polygons as compact integer delta-rings. The same encoding is stored in `geometry_raw.json`, copied into atlas bundles, and decoded in `web/index.html`.
+* `ingest.py` turns a `get_tehsil_data` JSON (or a string cut off at the MCP size limit) into `{dataset: (rows, units, complete)}`. `python -m seft.ingest` can parse a saved MCP response by hand.
+* `schema.py` maps the documented API column names (unit suffixes, `DeltaG_in_mm_2017-2018`) onto the internal names the knowledge files use (`hydro.delta_g`). It accepts both the nested v1-style rows and the flat v2 rows.
+* `backfill.py` applies `data/geo/geoserver_backfill.json` to incomplete test-district caches (hydrology, livestock, and similar) after the live fetch.
+
+### 5. Coverage check — `seft/audit.py`
+
+Reads each required dataset file in `data/raw/` and prints `missing` / `incomplete:n/expected` / `ok`. Use it after `fetch` and before `run`.
+
+### 6. Cache → one record per MWS — `seft/load.py`
+
+This is the join step. For each tehsil it reads the cached JSON files, aliases datasets (`lulc_vector` → `lulc`, `hydrological_annual` → `hydro`, …), turns yearly columns into numpy series on 2017–2024, and builds village tables. An MWS that straddles tehsils appears in several responses, sometimes with different values (CS-63); `load_district` keeps the copy from the home tehsil (largest village-area overlap) and records the others in `tehsils`. Village census and livestock values are apportioned to MWS by intersection area for indicators, and each village is assigned to the MWS it overlaps most for the cluster list.
+
+### 7. Expression language — `seft/expr.py`
+
+Every `expr` / `share` / `trigger` / `condition` in the knowledge files is evaluated here. Only arithmetic, comparisons, `and`/`or`/`not`, attribute access (`lulc.tree_forest_area`), `in`, and a whitelist of functions (`mean`, `slope`, `div`, `ramp`, …) are allowed, so a JSON file cannot run arbitrary code. Series are numpy arrays; missing values are NaN and propagate as unknown.
+
+### 8. Analysis pipeline — `seft/pipeline.py` and the stage modules
+
+`pipeline.run` is three passes over every MWS in the locations file:
+
+1. **Indicators** (`indicators.py` + `knowledge/variables.json`). Expressions over the loaded datasets, in dependency order. Village-based values are blanked when villages with data cover less than 20% of the MWS. District rainfall is then rescaled to the normals in `contexts.json` (`rain_norm`); Pune is left unscaled.
+2. **Contexts and system mix** (`context.py`, `archetypes.py`). Each MWS gets one class per dimension (rainfall regime, aquifer, terrain, groundwater category, canal access). Helpers and share rules split the MWS area among archetypes and close the shares to 100%. Community answers can override helpers or shift share (`assess.system_overrides`).
+3. **Signals, stresses, schemes** (`signals.py`, `stresses.py`, `assess.py`, `schemes.py`). Pooled percentiles are computed once over the whole run. Each signal grades 0–1; rules in `causal_graph.json` combine them (`systems` gate, `trigger`, `intensity` 0–100) and `taxonomy.json` rolls them up to observed stresses inside production systems. `assess.py` turns status + intensity + confidence into a prior and updates it with answer likelihood ratios. `schemes.py` matches central and state schemes to triggered stresses, state, eligibility condition and archetype share.
+
+`pipeline.score` is the per-MWS last step; `rescore.py` and `groundtruth.py` call it on records that already have indicators.
+
+### 9. Outputs — `seft/export.py` and `seft/webdata.py`
+
+`export.write_csv` writes the wide MWS and village tables. `export.write_web` builds `out/web/index.json` and `d_<slug>.json`, packing knowledge, geometry and results. `webdata.build` copies those bundles to `web/data/` as `.json` and `.js` and combines per-district CSVs into `mws_all.csv` / `villages_all.csv`. `--merge` is implemented here: existing `d_*.json` whose district is not in the new index are kept. `python -m seft.webdata` re-copies `out/web` if you need to, without re-running the analysis.
+
+### 10. Atlas — `web/index.html`
+
+See [How the frontend works](#how-the-frontend-works). After `run`, this is the only file a reader opens.
+
+### 11. Knowledge checks and rescore — `seft/validate.py`, `seft/rescore.py`
+
+`validate.py` walks every expression and id in `knowledge/` (variables, context classes, helpers, shares, signals, graph edges, scheme conditions, question targets, source ids). Run it after editing JSON, before `run`.
+
+`rescore.py` rebuilds stresses, schemes and tables from the indicators already stored in `web/data/`, without `data/raw/`. Use it after changing `signals.json`, `causal_graph.json`, `taxonomy.json`, `questions.json` or `schemes.json`. Variables added since the bundles were built stay missing until the locations are fetched and `run` again.
+
+### 12. Ground truth — `seft/groundtruth.py`, `seft/sheet.py`, `tools/`
+
+`groundtruth.py` is the `groundtruth` command: resolve blocks, fetch, score atlas + sheet, write `out/groundtruth/`. `sheet.py` evaluates `knowledge/sheet_rules.json` (0/1 signals; unknown signals make the trigger `insufficient data` unless every fill-in agrees). `tools/build_sheet_rules.py` regenerates that JSON from the Signal_Verification conventions. `tools/groundtruth_whatif.py` scores candidate atlas expressions against the last ground-truth cache without changing the live rules; results feed `config/groundtruth/suggestions.md`.
+
+### 13. Tests — `tests/test_offline.py`
+
+Starts a mock API and GeoServer serving a synthetic district built on Basantrai (Godda) geometry, copies the repo to a temp directory, and runs `add` → `fetch` → `audit` → `validate` → `run --merge`. The mock truncates `lulc_vector` so the GeoServer back-fill is exercised. No API key or network is needed.
+
+`seft/__init__.py` only holds the package version. `docs/core_stack_api_issues.md` is the numbered log (CS-01 …) of API quirks that the modules above work around.
 
 ## Data access
 
