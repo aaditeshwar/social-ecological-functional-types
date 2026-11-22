@@ -11,6 +11,15 @@
                                        # fetch ground-truth tehsils, score atlas and sheet rules, write
                                        # confusion matrices to out/groundtruth/
 
+Waterbody atlas (same operations, on config/waterbody/locations.json):
+    python -m seft.cli wb-add --state ... --district ... --tehsils "..."
+    python -m seft.cli wb-fetch        # API data (as fetch) + GeoServer waterbody and zone-of-influence layers
+    python -m seft.cli wb-audit        # missing layers and datasets
+    python -m seft.cli wb-validate     # check knowledge/waterbody/*.json
+    python -m seft.cli wb-run          # -> out/waterbody/csv/wb_<district>.csv, out/waterbody/web, web/data/waterbody
+    python -m seft.cli wb-all          # wb-fetch, wb-validate and wb-run
+    python -m seft.cli wb-census       # compare with the Water Body Census fields -> out/waterbody/census/
+
 Common options: --locations FILE (default config/locations.json). For run: --answers FILE (community
 answers saved from the atlas), --merge (keep districts already in the atlas that this run does not cover).
 """
@@ -19,6 +28,7 @@ from pathlib import Path
 from .util import ROOT, load_json, dump_json, raw_dir, iter_locations
 
 DEFAULT_LOC = str(ROOT / 'config' / 'locations.json')
+WB_LOC = str(ROOT / 'config' / 'waterbody' / 'locations.json')
 
 def cmd_add(a):
     p = Path(a.locations)
@@ -72,13 +82,25 @@ def cmd_run(a):
         from .webdata import build
         build(out / 'web', ROOT / 'web' / 'data', out / 'csv', merge=a.merge)
 
-def cmd_wb_layers(a):
+def cmd_wb_fetch(a):
     from .wb.layers import fetch_all_layers
-    fetch_all_layers(load_json(a.locations), force=a.force, bundle=a.bundle)
+    fetch_all_layers(load_json(a.locations), force=a.force)
+
+def cmd_wb_audit(a):
+    from .wb.audit import report
+    report(load_json(a.locations))
+
+def cmd_wb_validate(a):
+    from .wb.validate import validate
+    return validate()
 
 def cmd_wb_run(a):
     from .wb.run import main as wb_run
-    wb_run(a.locations, a.out)
+    wb_run(a.locations, a.out, merge=a.merge, web=not a.no_web)
+
+def cmd_wb_census(a):
+    from .wb.census import main as wb_census
+    wb_census(a.locations, a.out)
 
 def cmd_groundtruth(a):
     from .groundtruth import main as gt
@@ -104,14 +126,23 @@ def main(argv=None):
         p.add_argument('--no-web', action='store_true', help='only write CSV tables')
         if name == 'all':
             p.add_argument('--force', action='store_true'); p.add_argument('--only', help=argparse.SUPPRESS)
-    p = sub.add_parser('wb-layers', help='download the GeoServer waterbody and zone-of-influence layers')
-    p.add_argument('--locations', default=str(ROOT / 'config' / 'waterbody' / 'locations.json'),
-                   help='locations JSON (default config/waterbody/locations.json, the 73 tehsils of the original eight districts)')
-    p.add_argument('--force', action='store_true', help='re-download tehsils already cached')
-    p.add_argument('--bundle', help='also pack all downloaded layer files into this zip, for handing over')
-    p = sub.add_parser('wb-run', help='build the waterbody table: merge fragments, match zones of influence, type, add MWS context')
-    p.add_argument('--locations', default=str(ROOT / 'config' / 'waterbody' / 'locations.json'))
-    p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody'))
+    # waterbody atlas: same operations, on config/waterbody/locations.json
+    def wloc(p): p.add_argument('--locations', default=WB_LOC, help='locations JSON (default config/waterbody/locations.json)')
+    p = sub.add_parser('wb-add', help='add a district and its tehsils to the waterbody locations'); wloc(p)
+    p.add_argument('--state', required=True); p.add_argument('--district', required=True); p.add_argument('--tehsils')
+    p = sub.add_parser('wb-fetch', help='download API data and the GeoServer waterbody layers'); wloc(p)
+    p.add_argument('--force', action='store_true', help='re-download what is already cached')
+    p = sub.add_parser('wb-audit', help='list missing layers and datasets for the waterbody atlas'); wloc(p)
+    p = sub.add_parser('wb-validate', help='check the waterbody knowledge JSONs')
+    for name in ('wb-run', 'wb-all'):
+        p = sub.add_parser(name, help='waterbody atlas: build, score -> out/waterbody and web/data/waterbody' if name == 'wb-run'
+                           else 'wb-fetch + wb-validate + wb-run'); wloc(p)
+        p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody'))
+        p.add_argument('--merge', action='store_true', help='keep atlas districts that this run does not cover')
+        p.add_argument('--no-web', action='store_true', help='only write CSV tables and out/waterbody/web')
+        if name == 'wb-all': p.add_argument('--force', action='store_true')
+    p = sub.add_parser('wb-census', help='compare waterbody patterns with the Water Body Census fields -> out/waterbody/census'); wloc(p)
+    p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'census'))
     p = sub.add_parser('groundtruth', help='score atlas and sheet rules against ground-truth MWS')
     p.add_argument('--truth', default=str(ROOT / 'config' / 'groundtruth' / 'final_ground_truth.json'))
     p.add_argument('--refresh-locations', action='store_true', help='re-download get_active_locations')
@@ -128,8 +159,16 @@ def main(argv=None):
     elif a.cmd == 'validate': sys.exit(0 if cmd_validate(a) else 1)
     elif a.cmd == 'run': cmd_run(a)
     elif a.cmd == 'groundtruth': cmd_groundtruth(a)
-    elif a.cmd == 'wb-layers': cmd_wb_layers(a)
+    elif a.cmd == 'wb-add': cmd_add(a)
+    elif a.cmd == 'wb-fetch': cmd_wb_fetch(a)
+    elif a.cmd == 'wb-audit': cmd_wb_audit(a)
+    elif a.cmd == 'wb-validate': sys.exit(0 if cmd_wb_validate(a) else 1)
     elif a.cmd == 'wb-run': cmd_wb_run(a)
+    elif a.cmd == 'wb-census': cmd_wb_census(a)
+    elif a.cmd == 'wb-all':
+        cmd_wb_fetch(a)
+        if not cmd_wb_validate(a): sys.exit(1)
+        cmd_wb_run(a)
     elif a.cmd == 'all':
         cmd_fetch(a)
         if not cmd_validate(a): sys.exit(1)

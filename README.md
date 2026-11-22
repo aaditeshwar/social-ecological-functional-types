@@ -160,27 +160,49 @@ Steps:
 3. **Score both rule sets.** Atlas rules use the pooled thresholds from `web/data/index.json` so they match the live atlas (`--pools run` pools over the ground-truth MWS instead). Sheet rules (`knowledge/sheet_rules.json`, built by `tools/build_sheet_rules.py`, evaluated by `seft/sheet.py`) treat signals as 0/1, `or` as a sum and `and` as a product. An atlas pathway is present when any of its rules is triggered; unknown predictions are left out of accuracy.
 4. **Report.** Metrics (balanced accuracy, F1), sample firing rates, atlas OR/AND sheet combinations, and a confidence-tier table (how often the label is positive when both, one or neither rule set fires). `python tools/groundtruth_whatif.py` scores candidate rule changes without applying them.
 
-### `wb-layers` (waterbody atlas, in progress)
+## Waterbody atlas (in progress)
 
-Downloads the two GeoServer waterbody layers for every tehsil and keeps a compact copy. This is the first step of the waterbody atlas.
-
-* **Reads:** `config/waterbody/locations.json` (or `--locations`): by default the 73 tehsils of the eight original atlas districts. Layers come from `swb:surface_waterbodies_{district}_{tehsil}` (polygons, attributes, yearly `area`, `k`, `kr`, `krz`) and `swb:waterbodies_zoi_{district}_{tehsil}` (zone-of-influence circles with yearly cropping) on `CORE_STACK_GEOSERVER`.
-* **Writes:** `data/raw/<state>/<district>/<tehsil>/swb_layers.json.gz`, with waterbodies (attributes, yearly series as lists, centroid, bounding box, polygon simplified to about 5 m) and zones of influence (attributes, yearly cropping, centre, bounding box, radius `zoi` in metres). Cached tehsils are skipped unless `--force`. `--bundle FILE.zip` also packs all the layer files into one zip.
-* **Network:** GeoServer is on port 8443, so run this where that port is reachable.
-* **Caveat:** most tehsils' zone-of-influence layers carry no `wb_id` (WB-02 in `docs/core_stack_waterbody_api_issues.md`), so zones are matched to waterbodies by location.
+The waterbody atlas uses the same operations as the watershed atlas, on its own locations file
+(`config/waterbody/locations.json`, by default the 73 tehsils of the eight original districts). Each waterbody is
+the unit; its landscape context comes from the watershed pipeline through the MWS it lies in, and its villages
+are the villages intersecting that MWS.
 
 ```bash
-python -m seft.cli wb-layers --bundle wb_layers.zip
+python -m seft.cli wb-add --state Maharashtra --district Yavatmal --tehsils "Darwha,Pusad"
+python -m seft.cli wb-fetch            # API datasets (as fetch) + GeoServer waterbody and zone-of-influence layers
+python -m seft.cli wb-audit            # what is missing per tehsil
+python -m seft.cli wb-validate         # check knowledge/waterbody/*.json
+python -m seft.cli wb-run [--merge]    # build and score -> out/waterbody/, web/data/waterbody/
+python -m seft.cli wb-all              # wb-fetch, wb-validate, wb-run
+python -m seft.cli wb-census           # compare with the Water Body Census fields -> out/waterbody/census/
 ```
 
-### `wb-run` (waterbody atlas, in progress)
-
-Builds one record per waterbody from the layers saved by `wb-layers`, and attaches its landscape context.
-
-* **Reads:** the `swb_layers.json.gz` files, `knowledge/waterbody/types.json` (size floor and type rules), and the watershed atlas tables `out/csv/mws_all.csv` and `out/csv/villages_all.csv` (written by `run`).
-* **Does:** merges fragments of one waterbody (same `area_ored` and yearly series, polygons within about 30 m; WB-01), drops waterbodies under `min_area_ha` (0.05 ha), attaches the zone of influence (on `wb_id` where the zone layer has it, otherwise by location with a radius check; WB-02), assigns the first matching type, and takes the home MWS's context dimensions and archetype shares from the watershed atlas. Villages are those intersecting the home MWS.
-* **Scores:** per waterbody, the variables in `seft/wb/indicators.py`, the signals, roles and rules in `knowledge/waterbody/` (see its README), with village fishery and irrigation-source shares and MWS drought years from the cached API files (`seft/wb/villages.py`).
-* **Writes:** `out/waterbody/waterbodies.csv` (one row per waterbody, with roles and rule intensities: blank = not applicable, 0 = not triggered, NA = insufficient data) and `out/waterbody/summary.json` (counts by tehsil, type, zone match and setting; firing rates per rule and district; pooled thresholds).
+* **`wb-add`** writes to `config/waterbody/locations.json` (or `--locations`), exactly like `add`.
+* **`wb-fetch`** runs `fetch` for the same tehsils (cached datasets are skipped), then downloads
+  `swb:surface_waterbodies_{district}_{tehsil}` and `swb:waterbodies_zoi_{district}_{tehsil}` from
+  `CORE_STACK_GEOSERVER` into `data/raw/<state>/<district>/<tehsil>/swb_layers.json.gz` (attributes, yearly
+  series, centroid, bounding box and a simplified polygon per waterbody; centre, radius and yearly cropping per
+  zone of influence). GeoServer is on port 8443, so run it where that port is reachable.
+* **`wb-audit`** lists, per tehsil, the cached layers, waterbody and zone counts, whether zones carry `wb_id`
+  (WB-02) or must be matched by location, old layers without drainage fields (WB-10), and missing API datasets.
+* **`wb-run`** (`seft/wb/run.py`):
+  1. merges fragments of one waterbody (same `area_ored` and yearly series, polygons within about 30 m; WB-01),
+     drops waterbodies under 0.05 ha, joins each zone of influence on `wb_id` or, where the zone layer lacks
+     it, by location (centre distance and radius for size), and assigns a type (`knowledge/waterbody/types.json`);
+  2. runs the watershed pipeline for the same tehsils, with the atlas's pooled thresholds from
+     `web/data/index.json`, and gives each waterbody its home MWS's context dimensions, archetype shares and
+     variables;
+  3. adds village fishery and irrigation-source shares (Mission Antyodaya) and MWS drought years from the cached
+     API files, computes the waterbody variables, and scores signals, roles and rules (`knowledge/waterbody/`);
+  4. writes `out/waterbody/csv/wb_<district>.csv` (one row per waterbody; rule columns: blank = not applicable,
+     0 = not triggered, NA = insufficient data, otherwise the intensity), `out/waterbody/web/index.json`
+     (knowledge, districts, firing rates, pooled thresholds) and `out/waterbody/web/w_<district>.json`, and copies
+     the bundles and tables to `web/data/waterbody/` (`--merge` keeps districts this run does not cover;
+     `--no-web` skips the copy).
+* **`wb-census`** (`seft/wb/census.py`) scores the same waterbodies and compares them with the Water Body Census
+  fields that CoRE Stack matched to them, as `groundtruth` does for watersheds. It writes
+  `out/waterbody/census/report.md`, `detail.csv` and `comparison.json`. The census fields are never inputs.
+  Decisions taken from it are in `docs/waterbody_census_comparison.md`.
 
 ## How the frontend works
 

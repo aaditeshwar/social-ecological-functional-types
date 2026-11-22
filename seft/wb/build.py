@@ -143,7 +143,7 @@ def assign_type(b, types):
 def build_tehsil(state, district, tehsil, types, log=print):
     p = raw_dir(state, district, tehsil) / LAYERS_FILE
     if not p.exists():
-        log(f'  {district} / {tehsil}: no {LAYERS_FILE}; run wb-layers first'); return [], {}
+        log(f'  {district} / {tehsil}: no {LAYERS_FILE}; run wb-fetch first'); return [], {}
     with gzip.open(p, 'rt', encoding='utf-8') as f: doc = json.load(f)
     W = [w for w in doc['waterbodies'] if w.get('bbox')]
     bodies = [merged_record([W[i] for i in g]) for g in merge_fragments(W)]

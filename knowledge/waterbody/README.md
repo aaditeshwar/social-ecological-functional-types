@@ -1,7 +1,7 @@
 # Waterbody knowledge
 
 The waterbody atlas treats each waterbody as the unit and takes its landscape context from the watershed
-atlas (through its home MWS). Files, in the order they are used by `python -m seft.cli wb-run`:
+atlas (through its home MWS). Files, in the order they are used by `python -m seft.cli wb-run` (check them with `wb-validate`):
 
 - `types.json`: size floor (0.05 ha) and the type rules, checked in order (out of scope: reservoir, large river;
   in scope: river reach, canal-fed, on-stream tank, small on-stream pond, headwater pond, village pond, farm pond).

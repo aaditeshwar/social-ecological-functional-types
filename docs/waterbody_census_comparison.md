@@ -1,6 +1,6 @@
 # Waterbody patterns against the Water Body Census (22 Nov 2026)
 
-`python tools/wb_census_compare.py` joins the census fields that CoRE Stack matched to its waterbodies onto
+`python -m seft.cli wb-census` (report in `out/waterbody/census/`) joins the census fields that CoRE Stack matched to its waterbodies onto
 the waterbody atlas (6,134 in-scope waterbodies of 0.05 ha or more have census fields) and compares them with
 the atlas's signals, roles and rules.
 

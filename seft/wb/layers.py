@@ -12,7 +12,7 @@ circle itself is not kept, since it is fully described by the centre and the rad
 
 GeoServer runs on port 8443. Run this where that port is reachable (it is not from Claude's workspace).
 """
-import datetime, gzip, json, re, zipfile
+import datetime, gzip, json, re
 from pathlib import Path
 from ..util import ROOT, load_json, raw_dir, gs_slug, iter_locations
 from ..fetch import wfs
@@ -99,18 +99,19 @@ def fetch_tehsil_layers(state, district, tehsil, force=False, log=print):
         f'{"" if doc["zoi_has_wb_id"] else " (zones carry no wb_id)"}, {p.stat().st_size // 1024} KB')
     return p
 
-def fetch_all_layers(cfg, force=False, bundle=None, log=print):
+def fetch_all_layers(cfg, force=False, log=print, api=True):
+    """GeoServer waterbody layers for every tehsil, after the API datasets the waterbody rules and the
+    watershed context need (seft.fetch.fetch_all, which skips what is cached)."""
+    if api:
+        from ..fetch import fetch_all
+        log('API datasets (for the landscape context and village profiles):')
+        fetch_all(cfg, force=force, log=log)
+        log('GeoServer waterbody layers:')
     done, failed = [], []
     for state, district, tehsil in iter_locations(cfg):
         try:
             done.append(fetch_tehsil_layers(state, district, tehsil, force=force, log=log))
         except Exception as e:                          # keep going; report at the end
             failed.append((district, tehsil, str(e)[:200])); log(f'  {district} / {tehsil}: FAILED {str(e)[:200]}')
-    if bundle:
-        bundle = Path(bundle)
-        with zipfile.ZipFile(bundle, 'w', zipfile.ZIP_STORED) as z:   # files are already gzipped
-            for p in done:
-                z.write(p, p.relative_to(ROOT).as_posix())
-        log(f'bundle: {bundle} ({bundle.stat().st_size // (1024 * 1024)} MB, {len(done)} tehsils)')
     log(f'{len(done)} tehsils written, {len(failed)} failed')
     return done, failed

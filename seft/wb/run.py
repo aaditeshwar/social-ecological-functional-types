@@ -1,89 +1,169 @@
-"""`python -m seft.cli wb-run`: build waterbodies, attach landscape context, write tables.
+"""`python -m seft.cli wb-run`: the waterbody atlas run, mirroring `run` for watersheds.
 
-Writes out/waterbody/waterbodies.csv (one row per merged waterbody of at least types.json min_area_ha),
-out/waterbody/summary.json (counts by tehsil, type, ZoI match and landscape setting).
+For every tehsil in the locations file (default config/waterbody/locations.json):
+build waterbodies from the cached GeoServer layers (seft.wb.build), take the home MWS's context from the
+watershed pipeline (seft.wb.context), score signals, roles and rules (seft.wb.score), and write
+  out/waterbody/csv/wb_<district>.csv     one row per waterbody
+  out/waterbody/web/index.json            knowledge, districts, counts and firing rates
+  out/waterbody/web/w_<district>.json     waterbodies of one district for the frontend
+then copy the web bundles and the CSV tables to web/data/waterbody/ (with --merge, districts not in this run
+are kept), as `run` does with out/web and out/csv for watersheds.
 """
-import collections, csv, json
+import collections, csv, json, shutil
 from pathlib import Path
-from ..util import ROOT, load_json
+from ..util import ROOT, load_json, slug, iter_locations, raw_dir
 from .build import build_all
-from .context import attach, CTX_COLS, SHARE_COLS
+from .context import mws_context, attach
 from .villages import build_profiles
 from .indicators import compute, year_reference
 from .score import load_knowledge, base_env, pool_thresholds, score
 
+OUT = ROOT / 'out' / 'waterbody'
+ARCH = [a['id'] for a in load_json(ROOT / 'knowledge' / 'archetypes.json')['archetypes']]
+WEB_VARS = ['years_wet', 'k_fill', 'kr_mean', 'krz_mean', 'rel_slope', 'drought_fill_ratio', 'zoi_ci_mean', 'catchment_ratio']
+WEB = ROOT / 'web' / 'data' / 'waterbody'
+VAR_OUT = ['years_wet', 'is_new', 'regular', 'k_fill', 'kr_mean', 'krz_mean', 'retention_kr', 'retention_krz', 'k_early',
+           'k_late', 'rel_slope', 'rel_late_to_early', 'drought_fill_ratio', 'catchment_ratio', 'zoi_ci_mean',
+           'zoi_ci_slope', 'zoi_multi_crop_share', 'fish_village_share', 'surface_irrigation_share']
+CTX_OUT = ['ctx_rainfall', 'ctx_aquifer', 'ctx_terrain', 'ctx_gw_category', 'ctx_canal', 'ctx_cropping', 'dominant_system']
+
+def _r(x, n=3):
+    return round(x, n) if isinstance(x, float) else x
+
 def _mean(xs):
-    xs = [x for x in xs if isinstance(x, (int, float))]
+    xs = [x for x in xs or [] if isinstance(x, (int, float))]
     return round(sum(xs) / len(xs), 2) if xs else None
 
-VAR_OUT = ['years_wet', 'is_new', 'regular', 'k_fill', 'kr_mean', 'krz_mean', 'retention_kr', 'retention_krz', 'k_early', 'k_late',
-           'rel_slope', 'rel_late_to_early', 'drought_fill_ratio', 'catchment_ratio', 'zoi_ci_mean', 'zoi_ci_slope',
-           'zoi_multi_crop_share', 'fish_village_share', 'surface_irrigation_share']
-
-def _r(x):
-    return round(x, 3) if isinstance(x, float) else x
-
-def row(b):
-    z = b.get('zoi') or {}
-    m = b['mws']
-    return {
-        'wb_id': b['wb_id'], 'state': b['state'], 'district': b['district'], 'tehsil': b['tehsil'], 'type': b['type'],
-        'area_ha': b['area_ha'], 'n_fragments': b['n_fragments'], 'wb_type': b['wb_type'], 'wb_name': b['wb_name'],
-        'on_drainage': b['on_drainage'], 'on_stream': b.get('on_stream'), 'stream_order': b['stream_order'], 'catchment_ha': b['catchment_ha'],
-        'home_mws': b['home_mws'], 'n_mws': b['n_mws'], 'lon': b['centroid'][0], 'lat': b['centroid'][1],
-        'k_mean': _mean(b.get('k') or []), 'kr_mean': _mean(b.get('kr') or []), 'krz_mean': _mean(b.get('krz') or []),
-        'zoi_match': b['zoi_match'], 'zoi_radius_m': z.get('zoi'), 'zoi_area_ha': z.get('zoi_area'),
-        'zoi_ci_mean': _mean(z.get('cropping_intensity') or []),
-        'mws_in_atlas': b['mws_in_atlas'], 'n_mws_villages': len(b['mws_villages']),
-        **{c: m.get(c) for c in CTX_COLS}, 'main_system': m.get('main_system'),
-        **{c: m.get(c) for c in SHARE_COLS},
-        **{c: _r(b.get('vars', {}).get(c)) for c in VAR_OUT},
-        **(b.get('roles') or {}),
-        **{f"{rid}": (r['intensity'] if r['status'] == 'triggered' else ('' if r['status'] == 'not applicable' else (0 if r['status'] == 'not triggered' else 'NA')))
-           for rid, r in (b.get('rules') or {}).items()},
-    }
-
-def main(cfg_path=None, out=None, log=print):
-    cfg = load_json(cfg_path) if cfg_path else None
-    cfg = cfg or load_json(ROOT / 'config' / 'waterbody' / 'locations.json')
-    B, stats, types = build_all(cfg, log=log)
-    attach(B)
+def score_all(cfg, log=print):
+    """Build and score every waterbody of the locations. Returns (bodies, stats, types, K, pools)."""
     K = load_knowledge()
+    B, stats, types = build_all(cfg, log=log)
     scope = {t['id'] for t in types['types'] if t['in_scope']}
+    log('  landscape context: running the watershed pipeline for these tehsils')
+    ctx = mws_context(cfg, log=log)
     prof, drought = build_profiles(cfg)
+    attach(B, ctx, prof)
     ref = year_reference(B, scope)
     for b in B: b['vars'] = compute(b, prof, drought, ref)
     pools = pool_thresholds([base_env(b, b['vars']) for b in B if b['type'] in scope], K)
     for b in B:
-        if b['type'] in scope:
-            b['signals'], b['roles'], b['rules'] = score(b, b['vars'], K, pools)
-        else:
-            b['signals'], b['roles'], b['rules'] = {}, {}, {}
-    out = Path(out or ROOT / 'out' / 'waterbody'); out.mkdir(parents=True, exist_ok=True)
-    rows = [row(b) for b in B]
-    with open(out / 'waterbodies.csv', 'w', newline='', encoding='utf-8') as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
-    inscope = {t['id'] for t in types['types'] if t['in_scope']}
-    cnt = lambda key: dict(collections.Counter(key(b) for b in B).most_common())
-    summary = {
-        'min_area_ha': types['min_area_ha'], 'tehsils': stats,
-        'by_type': cnt(lambda b: b['type']),
-        'by_type_zoi_match': cnt(lambda b: f"{b['type']}|{b['zoi_match']}"),
-        'in_scope_by_setting': cnt(lambda b: f"{b['type']}|{b['mws'].get('ctx_rainfall')}|{b['mws'].get('ctx_aquifer')}" if b['type'] in inscope else None),
-        'in_scope_by_main_system': cnt(lambda b: f"{b['type']}|{b['mws'].get('main_system')}" if b['type'] in inscope else None),
-    }
-    rates = {}
+        if b['type'] in scope: b['signals'], b['roles'], b['rules'] = score(b, b['vars'], K, pools)
+        else: b['signals'], b['roles'], b['rules'] = {}, {}, {}
+    return B, stats, types, K, pools
+
+def _rule_cell(r):
+    return r['intensity'] if r['status'] == 'triggered' else ('' if r['status'] == 'not applicable' else (0 if r['status'] == 'not triggered' else 'NA'))
+
+def csv_row(b, K):
+    z = b.get('zoi') or {}; m = b['mws']; v = b.get('vars', {})
+    row = {'wb_id': b['wb_id'], 'state': b['state'], 'district': b['district'], 'tehsil': b['tehsil'], 'type': b['type'],
+           'area_ha': b['area_ha'], 'n_fragments': b['n_fragments'], 'fragment_ids': ';'.join(map(str, b['fragment_ids'])),
+           'wb_type': b['wb_type'], 'wb_name': b['wb_name'], 'on_drainage': b['on_drainage'], 'on_stream': b.get('on_stream'),
+           'stream_order': b['stream_order'], 'catchment_ha': b['catchment_ha'], 'home_mws': b['home_mws'], 'mws_uids': ';'.join(b['mws_uids']),
+           'lon': b['centroid'][0], 'lat': b['centroid'][1],
+           'k_mean': _mean(b.get('k')), 'zoi_match': b['zoi_match'], 'zoi_radius_m': _r(z.get('zoi'), 1),
+           'zoi_area_ha': z.get('zoi_area'), 'mws_in_atlas': b['mws_in_atlas'], 'n_mws_villages': b['n_mws_villages']}
+    row.update({c: m.get(c) for c in CTX_OUT})
+    row.update({f'share_{a}': _r(m.get(f'share_{a}')) for a in ARCH})
+    row.update({c: _r(v.get(c)) for c in VAR_OUT})
+    row.update({r['id']: b['roles'].get(r['id'], '') for r in K['roles']['roles']})
+    row.update({r['id']: _rule_cell(b['rules'][r['id']]) if r['id'] in b['rules'] else '' for r in K['rules']['rules']})
+    return row
+
+def _i(xs):
+    return [None if not isinstance(x, (int, float)) else round(x) for x in (xs or [])]
+
+def web_record(b, K):
+    """Compact record for the frontend. Keys: id, t (type), teh, mws (home MWS; its context is in the bundle's
+    'mws' table), a (area ha), xy (lon, lat), n (name), so (stream order), z (ZoI match: w=wb_id, l=location,
+    -=none), k/kr/krz (yearly %, rounded), v (WEB_VARS in order), ro (roles in index order),
+    ru ([rule index, status s/n/i (triggered, not triggered, insufficient), intensity] for applicable rules)."""
+    rids = [r['id'] for r in K['rules']['rules']]; roles = [r['id'] for r in K['roles']['roles']]
+    rec = {'id': b['wb_id'], 't': b['type'], 'teh': b['tehsil'], 'mws': b['home_mws'], 'a': round(b['area_ha'], 2),
+           'xy': [round(b['centroid'][0], 5), round(b['centroid'][1], 5)], 'so': b['stream_order'],
+           'z': {'wb_id': 'w', 'location': 'l'}.get(b['zoi_match'], '-'), 'k': _i(b.get('k')), 'kr': _i(b.get('kr')), 'krz': _i(b.get('krz'))}
+    if b.get('wb_name'): rec['n'] = b['wb_name']
+    if b.get('roles'):
+        rec['v'] = [_r(b['vars'].get(c), 2) for c in WEB_VARS]
+        rec['ro'] = [round(b['roles'].get(r, 0), 2) for r in roles]
+        rec['ru'] = [[i, {'triggered': 's', 'not triggered': 'n', 'insufficient data': 'i'}[b['rules'][rid]['status']], b['rules'][rid]['intensity']]
+                     for i, rid in enumerate(rids) if b['rules'][rid]['status'] != 'not applicable']
+    return rec
+
+def rates(bodies, K, scope):
+    out = {}
     for r in K['rules']['rules']:
-        st = collections.Counter(b['rules'][r['id']]['status'] for b in B if b['type'] in scope)
+        st = collections.Counter(b['rules'][r['id']]['status'] for b in bodies if b['type'] in scope)
         app = sum(v for k, v in st.items() if k != 'not applicable')
-        by_d = collections.defaultdict(lambda: [0, 0])
-        for b in B:
-            if b['type'] in scope and b['rules'][r['id']]['status'] != 'not applicable':
-                by_d[b['district']][0] += 1; by_d[b['district']][1] += b['rules'][r['id']]['status'] == 'triggered'
-        rates[r['id']] = {'label': r['label'], 'applicable': app, 'triggered': st['triggered'], 'insufficient': st['insufficient data'],
-                          'by_district': {d: [n, t] for d, (n, t) in by_d.items()}}
-    summary['rules'] = rates
-    summary['pooled_thresholds'] = {k: {t: [round(a, 2), round(c, 2)] for t, (a, c) in v.items()} for k, v in pools.items()}
-    (out / 'summary.json').write_text(json.dumps(summary, indent=1))
-    log(f'{len(B)} waterbodies written to {out / "waterbodies.csv"}')
-    return B, summary
+        out[r['id']] = {'label': r['label'], 'applicable': app, 'triggered': st['triggered'], 'insufficient': st['insufficient data']}
+    return out
+
+def write_outputs(B, stats, types, K, pools, cfg, out=None, log=print):
+    out = Path(out or OUT); (out / 'csv').mkdir(parents=True, exist_ok=True); (out / 'web').mkdir(parents=True, exist_ok=True)
+    scope = {t['id'] for t in types['types'] if t['in_scope']}
+    by = collections.defaultdict(list)
+    for b in B: by[b['district']].append(b)
+    districts = []
+    for d in cfg['districts']:
+        bs = by.get(d['district'], []); s = slug(d['district'])
+        if not bs: continue
+        rows = [csv_row(b, K) for b in bs]
+        with open(out / 'csv' / f'wb_{s}.csv', 'w', newline='', encoding='utf-8') as f:
+            w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
+        mws = {b['home_mws']: {c: b['mws'].get(c) for c in CTX_OUT} for b in bs if b['mws']}
+        (out / 'web' / f'w_{s}.json').write_text(json.dumps({'district': d['district'], 'state': d['state'], 'mws': mws,
+            'waterbodies': [web_record(b, K) for b in bs]}, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')
+        districts.append({'district': d['district'], 'state': d['state'], 'slug': s, 'tehsils': d['tehsils'], 'n': len(bs),
+                          'by_type': dict(collections.Counter(b['type'] for b in bs)),
+                          'rules': rates(bs, K, scope)})
+        log(f"  {d['district']}: {len(bs)} waterbodies -> csv/wb_{s}.csv, web/w_{s}.json")
+    index = {'knowledge': K, 'types': types, 'web_vars': WEB_VARS, 'districts': districts, 'tehsil_stats': stats,
+             'pools': {k: {t: [round(a, 3), round(c, 3)] for t, (a, c) in v.items()} for k, v in pools.items()},
+             'rules': rates(B, K, scope)}
+    (out / 'web' / 'index.json').write_text(json.dumps(index, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')
+    return index
+
+def build_web(src=None, dest=None, merge=False, log=print):
+    """Copy out/waterbody/web to web/data/waterbody, as seft.webdata.build does for watersheds."""
+    from ..webdata import write_js
+    src = Path(src or OUT / 'web'); dest = Path(dest or WEB); dest.mkdir(parents=True, exist_ok=True)
+    index = json.loads((src / 'index.json').read_text(encoding='utf-8'))
+    if merge and (dest / 'index.json').exists():
+        old = json.loads((dest / 'index.json').read_text(encoding='utf-8'))
+        have = {d['district'] for d in index['districts']}
+        kept = [d for d in old['districts'] if d['district'] not in have and (dest / f"w_{d['slug']}.json").exists()]
+        index['districts'] += kept
+        if kept: log('  kept from earlier runs: ' + ', '.join(d['district'] for d in kept))
+    names = ['index'] + [f"w_{d['slug']}" for d in index['districts']]
+    for n in names:
+        if n == 'index': text = json.dumps(index, separators=(',', ':'), ensure_ascii=False)
+        else:
+            f = src / f'{n}.json'
+            if not f.exists(): continue
+            text = f.read_text(encoding='utf-8')
+        (dest / f'{n}.json').write_text(text, encoding='utf-8')
+        write_js(f'wb_{n}', text, dest)
+    if not merge:
+        for f in list(dest.glob('w_*.json')) + list(dest.glob('wb_w_*.js')):
+            stem = f.stem[3:] if f.stem.startswith('wb_') else f.stem
+            if stem not in names: f.unlink()
+    csv_src = src.parent / 'csv'
+    if csv_src.exists():                  # per-district tables for download, as web/data/csv for watersheds
+        (dest / 'csv').mkdir(exist_ok=True)
+        keep = {f"wb_{d['slug']}.csv" for d in index['districts']}
+        for f in csv_src.glob('wb_*.csv'): shutil.copy2(f, dest / 'csv' / f.name)
+        if not merge:
+            for f in (dest / 'csv').glob('wb_*.csv'):
+                if f.name not in keep: f.unlink()
+    log(f'  wrote {len(names)} bundles to {dest}: {", ".join(d["district"] for d in index["districts"])}')
+
+def main(cfg_path=None, out=None, merge=False, web=True, log=print):
+    cfg = load_json(cfg_path or ROOT / 'config' / 'waterbody' / 'locations.json')
+    missing = [(d, t) for s, d, t in iter_locations(cfg) if not (raw_dir(s, d, t) / 'swb_layers.json.gz').exists()]
+    if missing:
+        names = ', '.join(f'{d}/{t}' for d, t in missing[:8]) + (' ...' if len(missing) > 8 else '')
+        raise SystemExit(f'No waterbody layers for {len(missing)} tehsil(s): {names}\nRun `python -m seft.cli wb-fetch` first.')
+    B, stats, types, K, pools = score_all(cfg, log=log)
+    write_outputs(B, stats, types, K, pools, cfg, out, log=log)
+    if web: build_web(Path(out or OUT) / 'web', merge=merge, log=log)
+    return B
