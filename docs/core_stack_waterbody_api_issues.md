@@ -30,6 +30,7 @@ Clarified by the CoRE Stack team (22 Nov 2026), so not logged as issues:
 | WB-07 | Medium | Census fields carry wrong admin and basin names | `get_waterbodies_data_by_admin` |
 | WB-08 | Low | No coordinates or geometry in the API response | `get_waterbodies_data_by_admin` |
 | WB-09 | Low | Waterbodies in MWS outside the tehsil are included without a flag | `get_waterbodies_data_by_admin` |
+| WB-10 | Medium | Ananthapur / Nallacheruvu waterbody layer lacks `UID`, drainage, stream order and type fields | GeoServer `swb:surface_waterbodies_*` |
 | CS-12 | Low | Waterbody list bloats the response, little usable content | `get_mws_kyl_indicators` |
 | CS-43 | High | Kharif and rabi surface water areas are near-identical; seasonal fields appear nested and are undefined | `get_tehsil_data` |
 | CS-44 | Medium | Three undefined "total" water areas that disagree (`total_area`, `total_swb_area`, kharif) | `get_tehsil_data` |
@@ -43,6 +44,8 @@ Clarified by the CoRE Stack team (22 Nov 2026), so not logged as issues:
 - Observed (Kaviti): `wb_id` 15293126 (`total_area` 0.02 ha) and 15293143 (0.01 ha) both report `area_ored` 21.37 ha and the same `area`, `k`, `kr` and `krz` series for 2017–24. Both are pieces of the Bahuda river.
 - Records that share `area_ored` and an identical yearly series: 1,010 records but 464 distinct series in Kaviti, 1,781 and 892 in Gogunda, 1,118 and 470 in Morshi. Some identical series in very small waterbodies may be chance, so these counts are an upper bound on fragmentation.
 - Impact: summing waterbodies counts the same water several times; a fragment of 0.01 ha appears to hold 20 ha of water.
+- Scale (GeoServer layers for all 73 tehsils of the eight atlas districts, 22 Nov 2026): 155,052 waterbody records. Grouping records that share `area_ored` and the same yearly series and whose polygons touch or lie within about 30 m gives 118,419 waterbodies; 21,397 of them are made of 2 or more fragments (58,030 records). For 98% of these groups `area_ored` is within a factor of two of the fragments' summed `total_area`, which confirms they are pieces of one waterbody. Grouping on the series alone is not enough: many unrelated small waterbodies kilometres apart share identical series, often all zeros.
+- Each fragment also gets its own zone of influence, sized for the whole waterbody (seen in Bardez and Sitampeta).
 - Suggested fix: merge fragments into one waterbody with one id, or give every fragment a parent id.
 
 **WB-02. Zone-of-influence records cannot be linked to waterbody records** (High)
@@ -51,6 +54,8 @@ Clarified by the CoRE Stack team (22 Nov 2026), so not logged as issues:
 - A spatial match works for most: for 626 of Kaviti's 866 zones of influence, the centre of the zone lies within 10 m of a waterbody's centre (median 3 m), and the radius rises steadily with waterbody area (about 27 m at 0.01 ha, 140 m at 0.1 ha, 500 m at 1 ha, 790 m at 8 ha). Most of the 384 waterbodies left without a zone are fragments of one waterbody (WB-01): 337 of them share their series with another record.
 - Impact: cropping intensity in a waterbody's zone of influence, the main evidence for irrigation use, cannot be attached to the waterbody from the API alone.
 - Checked on 22 Nov 2026 for all 73 tehsils of the eight atlas districts: only Srikakulam / Sitampeta has a zone-of-influence layer with `wb_id` (1,886 zones; all 1,705 of its waterbodies have one, and `UID` equals `wb_id`). The other 72 use the MWS-uid-and-index form with no `wb_id`; for Pune / Baramati the zone-of-influence layer could not be read at all. Outside these districts, North Goa / Bardez also has `wb_id`, while South Goa / Sanguem does not.
+- Matching by location, validated on Sitampeta (where `wb_id` is present): using the centroid of each merged waterbody, a zone is accepted when its centre lies within max(10 m, 10% of the waterbody's side) and its radius is within 25% of the radius expected for the waterbody's `area_ored`. 1,250 of Sitampeta's 1,321 merged waterbodies get a zone this way, all of them the correct one; the zones left over are those of other fragments of the same waterbody. Over all 73 tehsils, 104,374 of 120,081 zones match a waterbody, and 87–91% of waterbodies of 0.1 ha or more get a zone.
+- Radius against `area_ored`, from 96,280 unambiguous pairs: about 27 m at 0.01 ha, 144 m at 0.1 ha, 501 m at 1 ha, 815 m at 10 ha and 1,130 m at 100 ha.
 - Suggested fix: put `wb_id` on each zone-of-influence record and feature, or nest the zone-of-influence fields inside the waterbody record. Explain what the index in the zone-of-influence `UID` refers to.
 
 **WB-03. `category_sq_m` is "0-500" for every waterbody** (Medium)
@@ -78,6 +83,11 @@ Clarified by the CoRE Stack team (22 Nov 2026), so not logged as issues:
 **WB-08. No coordinates or geometry in the API response** (Low)
 - Observed: waterbody records have no latitude, longitude or polygon, except the census coordinates on matched records. Geometry is only in the GeoServer layer.
 - Suggested fix: add a centroid (latitude, longitude) to each record.
+
+**WB-10. Ananthapur / Nallacheruvu waterbody layer lacks `UID`, drainage, stream order and type fields** (Medium)
+- Observed (`swb:surface_waterbodies_ananthapur_nallacheruvu`, 22 Nov 2026): the 500 features carry only `wb_id`, `mws_uid_list`, `area_ored`, `total_area`, basin fields and the yearly series. `UID`, `on_drainage_line`, `max_stream_order`, `max_catchment_area`, `waterbody_type` and the village fields are missing, as in an older version of the layer.
+- Impact: these waterbodies cannot be typed by drainage position or as river or canal.
+- Suggested fix: regenerate the layer with the current pipeline.
 
 **WB-09. Waterbodies in MWS outside the tehsil are included without a flag** (Low)
 - Observed (Kaviti): 51 of 1,010 waterbodies and 29 of 866 zone-of-influence records lie in MWS that are not among the tehsil's 16 MWS. `mws_uid_list` is a pipe-separated string.
