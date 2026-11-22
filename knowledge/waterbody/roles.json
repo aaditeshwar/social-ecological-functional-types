@@ -1,0 +1,35 @@
+{
+ "note": "Roles: what a waterbody's water is likely used for, from its landscape. Each is a weight from 0 to 1. A rule's intensity is scaled by the roles it harms, so the same problem counts more where the water matters more. Missing values count as 0 (nz).",
+ "roles": [
+  {
+   "id": "role_irrigation",
+   "label": "Irrigation",
+   "expr": "clip(0.6 * ramp(nz(zoi_multi_crop_share), 0.3, 0.8) + 0.2 * ramp(nz(mws_irr_share), 0.2, 0.8) + 0.2 * nz(surface_irrigation_share) + ifelse(type == 'canal_fed', 0.3, 0), 0, 1)",
+   "note": "Double and triple cropping in the zone of influence (from 30% of its cropland, full at 80%; 60% of the weight), irrigated share in the home MWS (from 20%, full at 80%), villages naming surface water or canals as their main irrigation source; canal-fed waterbodies get 0.3 more."
+  },
+  {
+   "id": "role_drought_protection",
+   "label": "Kharif drought protection",
+   "expr": "clip(min(1, (nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid)) / 0.4) * ifelse(ctx_rainfall == 'semi_arid', 1, ifelse(ctx_rainfall == 'dry_subhumid', 0.8, 0.5)), 0, 1)",
+   "note": "Rainfed farming in the home MWS (full at 40% of the area), weighted by climate: semi-arid 1, dry sub-humid 0.8, humid 0.5."
+  },
+  {
+   "id": "role_fishery",
+   "label": "Fishery",
+   "expr": "clip(min(1, nz(fish_village_share) / 0.5), 0, 1)",
+   "note": "Share of the home MWS's village area reporting fish community ponds or fish farming in Mission Antyodaya (full at 50%)."
+  },
+  {
+   "id": "role_livestock",
+   "label": "Livestock water",
+   "expr": "ifelse(nz(share_pastoral) >= 0.05, clip(min(1, nz(share_pastoral) / 0.15) * (0.7 + 0.3 * min(1, nz(mws_tlu_per_ha))), 0, 1), 0)",
+   "note": "Pastoral land of 5% or more in the home MWS (full at 15%), raised by village livestock density. Mixed crop-livestock MWS without pastoral land do not count, as in the watershed atlas."
+  },
+  {
+   "id": "role_recharge_domestic",
+   "label": "Recharge and domestic water",
+   "expr": "clip(0.4 * ifelse(ctx_aquifer == 'hard_rock', 1, 0) * ramp(nz(mws_soge_stage), 50, 100) + 0.3 * ramp(nz(mws_soge_stage), 50, 100) + 0.3 * (1 - min(1, nz(mws_piped_water_coverage))), 0, 1)",
+   "note": "Groundwater stage of extraction (from 50%, full at 100%), counted twice over on hard rock, and households without piped water."
+  }
+ ]
+}

@@ -14,7 +14,7 @@ SHARE_COLS = ['share_rainfed_dryland', 'share_rainfed_rice_subhumid', 'share_gro
               'share_pastoral', 'share_peri_urban']
 VAR_COLS = ['area_ha', 'rain_norm', 'aquifer_class', 'soge_stage', 'f_crop', 'f_commons', 'ci_mean', 'double_share',
             'irr_share', 'tlu_per_ha', 'pop_density', 'piped_water_coverage', 'dr_years_modsev4', 'dry_spell_years3',
-            'runoff_ratio', 'f_sloping', 'river_present', 'n_upstream']
+            'runoff_ratio', 'f_sloping', 'river_present', 'n_upstream', 'degr_frac']
 
 def _num(v):
     try: return float(v)

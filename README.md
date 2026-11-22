@@ -179,7 +179,8 @@ Builds one record per waterbody from the layers saved by `wb-layers`, and attach
 
 * **Reads:** the `swb_layers.json.gz` files, `knowledge/waterbody/types.json` (size floor and type rules), and the watershed atlas tables `out/csv/mws_all.csv` and `out/csv/villages_all.csv` (written by `run`).
 * **Does:** merges fragments of one waterbody (same `area_ored` and yearly series, polygons within about 30 m; WB-01), drops waterbodies under `min_area_ha` (0.05 ha), attaches the zone of influence (on `wb_id` where the zone layer has it, otherwise by location with a radius check; WB-02), assigns the first matching type, and takes the home MWS's context dimensions and archetype shares from the watershed atlas. Villages are those intersecting the home MWS.
-* **Writes:** `out/waterbody/waterbodies.csv` (one row per waterbody) and `out/waterbody/summary.json` (counts by tehsil, type, zone match and setting).
+* **Scores:** per waterbody, the variables in `seft/wb/indicators.py`, the signals, roles and rules in `knowledge/waterbody/` (see its README), with village fishery and irrigation-source shares and MWS drought years from the cached API files (`seft/wb/villages.py`).
+* **Writes:** `out/waterbody/waterbodies.csv` (one row per waterbody, with roles and rule intensities: blank = not applicable, 0 = not triggered, NA = insufficient data) and `out/waterbody/summary.json` (counts by tehsil, type, zone match and setting; firing rates per rule and district; pooled thresholds).
 
 ## How the frontend works
 

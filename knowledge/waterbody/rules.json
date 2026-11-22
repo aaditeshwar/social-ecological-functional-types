@@ -1,0 +1,343 @@
+{
+ "note": "Stress and opportunity rules for waterbodies. 'applies_to' lists the waterbody types a rule is checked for; 'gate' is an extra condition (for example a known zone of influence). Triggers use signal grades (true when above 0). Intensity runs from 0 to 100 and is scaled by the roles named in 'roles' (the highest of them), so a problem counts more where the water matters more. Rules are checked only for waterbodies that hold water in 3 or more of the 8 years and are not new (ctx_regular), except where noted.",
+ "rules": [
+  {
+   "id": "wb.inflow_shortfall",
+   "label": "Inflow shortfall",
+   "group": "Filling",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond",
+    "farm_pond"
+   ],
+   "gate": "ctx_regular",
+   "trigger": "s_poor_fill and not s_sudden_loss",
+   "intensity": "100 * s_poor_fill * (0.5 + 0.5 * max(role_irrigation, role_drought_protection, role_fishery, role_livestock, role_recharge_domestic))",
+   "roles": [
+    "role_irrigation",
+    "role_drought_protection",
+    "role_fishery",
+    "role_livestock",
+    "role_recharge_domestic"
+   ],
+   "contexts": [
+    "ctx_small_catchment",
+    "ctx_large_catchment"
+   ],
+   "rationale": "The waterbody fills to a small part of its extent even in years without drought. A large catchment for its size (ctx_large_catchment) points to blocked inlet channels or diverted runoff; a small catchment (ctx_small_catchment) points to a waterbody too large for its catchment, where inlet works will not help.",
+   "public_note": "This waterbody fills only partly in the monsoon, even in normal years (s_poor_fill). If its catchment is large for its size (ctx_large_catchment), inlet channels may be blocked or runoff diverted; if small (ctx_small_catchment), the catchment may not produce enough runoff. Ask whether the inlet channels need clearing.",
+   "interventions": [
+    "Clear and repair inlet channels",
+    "Catchment treatment where runoff is diverted"
+   ],
+   "questions": [
+    "Are the inlet channels of this waterbody blocked or broken?",
+    "Has runoff that used to reach it been diverted (roads, fields, other structures)?"
+   ]
+  },
+  {
+   "id": "wb.poor_retention",
+   "label": "Poor retention",
+   "group": "Retention",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond",
+    "farm_pond",
+    "canal_fed"
+   ],
+   "gate": "ctx_regular",
+   "trigger": "s_dries_by_rabi",
+   "intensity": "100 * s_dries_by_rabi * (0.5 + 0.5 * max(role_irrigation, role_fishery, role_livestock))",
+   "roles": [
+    "role_irrigation",
+    "role_fishery",
+    "role_livestock"
+   ],
+   "contexts": [
+    "ctx_alluvium",
+    "ctx_hard_rock"
+   ],
+   "rationale": "Most of the water is gone by rabi. (Drying by summer is common in small waterbodies and is checked only where livestock depend on it.) On alluvium (ctx_alluvium) seepage is a likely cause; on hard rock (ctx_hard_rock) heavy drawdown for irrigation or leakage through the bund or sluice is more likely. Matters most where the water is needed in rabi or summer.",
+   "public_note": "This waterbody loses most of its water by rabi (s_dries_by_rabi). On alluvial soils (ctx_alluvium) this may be seepage; on hard rock (ctx_hard_rock) it may be heavy drawing for irrigation, or leaks through the bund or a damaged sluice gate. Ask whether the sluice gate holds water.",
+   "interventions": [
+    "Repair sluice gates and bund",
+    "Rules for sharing and timing water draws"
+   ],
+   "questions": [
+    "Is the sluice gate or outlet damaged, so that water leaks out?",
+    "Does the bund leak or has it breached?",
+    "How many months after the monsoon does it hold water?"
+   ]
+  },
+  {
+   "id": "wb.siltation",
+   "label": "Shrinking or silting",
+   "group": "Storage",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond",
+    "canal_fed"
+   ],
+   "gate": "ctx_regular",
+   "trigger": "s_shrinking and not s_sudden_loss",
+   "intensity": "100 * s_shrinking * (0.7 + 0.3 * ctx_eroding_catchment) * (0.5 + 0.5 * max(role_irrigation, role_drought_protection, role_fishery, role_livestock, role_recharge_domestic))",
+   "roles": [
+    "role_irrigation",
+    "role_drought_protection",
+    "role_fishery",
+    "role_livestock",
+    "role_recharge_domestic"
+   ],
+   "contexts": [
+    "ctx_eroding_catchment"
+   ],
+   "rationale": "Relative to the tehsil's other waterbodies in the same years, kharif fill has fallen steadily over 2017-24. Siltation is the commonest cause, more likely where the catchment is sloping, has high runoff or degrading land (ctx_eroding_catchment). Encroachment of the bed is another; the census fields and community questions can separate the two.",
+   "public_note": "The share of this waterbody that fills in the monsoon has been falling year after year (s_shrinking). Silt from the catchment is a common reason, more so where the catchment is sloping or eroding (ctx_eroding_catchment). Desilting may restore storage; ask how deep the silt is and whether the bed is being cultivated.",
+   "interventions": [
+    "Desilting",
+    "Catchment treatment against erosion",
+    "Remove encroachment of the bed"
+   ],
+   "questions": [
+    "How much silt has built up in the waterbody?",
+    "Is part of the bed being cultivated or built on?"
+   ]
+  },
+  {
+   "id": "wb.sudden_loss",
+   "label": "Stopped holding water",
+   "group": "Storage",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond",
+    "farm_pond",
+    "canal_fed"
+   ],
+   "gate": "years_wet >= 3",
+   "trigger": "s_sudden_loss",
+   "intensity": "100 * s_sudden_loss * (0.5 + 0.5 * max(role_irrigation, role_drought_protection, role_fishery, role_livestock, role_recharge_domestic))",
+   "roles": [
+    "role_irrigation",
+    "role_drought_protection",
+    "role_fishery",
+    "role_livestock",
+    "role_recharge_domestic"
+   ],
+   "contexts": [],
+   "rationale": "The waterbody filled well in 2017-19 but hardly at all in the last two years. A breached bund, a blocked or diverted inlet, deliberate draining or encroachment are likely; this needs a field check rather than a remote diagnosis.",
+   "public_note": "This waterbody used to fill well but has held little or no water in the last two years (s_sudden_loss). The bund may have breached, the inlet may be blocked, or the bed may have been drained or taken over. Ask what changed.",
+   "interventions": [
+    "Bund or breach repair",
+    "Clear the inlet",
+    "Remove encroachment"
+   ],
+   "questions": [
+    "Has the bund breached or the waterbody been drained?",
+    "Has the inlet been blocked or the bed encroached in recent years?"
+   ]
+  },
+  {
+   "id": "wb.drought_failure",
+   "label": "Fails in drought years",
+   "group": "Filling",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond",
+    "farm_pond"
+   ],
+   "gate": "ctx_regular and n_drought_years >= 1 and n_normal_years >= 2",
+   "trigger": "s_drought_failure and role_drought_protection >= 0.3",
+   "intensity": "100 * s_drought_failure * role_drought_protection",
+   "roles": [
+    "role_drought_protection"
+   ],
+   "contexts": [
+    "ctx_dry_climate"
+   ],
+   "rationale": "Kharif fill falls to half or less in the home MWS's drought years, where rainfed farming depends on it for protective irrigation. Deepening, catchment improvements or linking to a larger source raise drought resilience.",
+   "public_note": "In drought years this waterbody fills to half or less of its usual level (s_drought_failure), just when rainfed crops nearby need protective irrigation. Ask how crops fared in recent drought years and whether the water was shared fairly.",
+   "interventions": [
+    "Deepening and desilting for more carry-over storage",
+    "Water sharing rules for protective irrigation in dry spells"
+   ],
+   "questions": [
+    "In drought years, could farmers get water from this waterbody for a protective irrigation?",
+    "How was the water shared in the last dry year?"
+   ]
+  },
+  {
+   "id": "wb.irrigation_underuse",
+   "label": "Water not reaching fields",
+   "group": "Use",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "village_pond",
+    "canal_fed"
+   ],
+   "gate": "ctx_regular and ctx_zoi",
+   "trigger": "s_water_lasts and (s_zoi_low_ci or s_zoi_ci_decline)",
+   "intensity": "100 * min(s_water_lasts, max(s_zoi_low_ci, s_zoi_ci_decline)) * (0.6 + 0.4 * max(role_irrigation, role_drought_protection))",
+   "roles": [
+    "role_irrigation",
+    "role_drought_protection"
+   ],
+   "contexts": [],
+   "rationale": "Water lasts into rabi, but cropping intensity in the zone of influence is low or falling. Distribution channels, fair-sharing arrangements or the absence of a water user group may be limiting use; this is a management opportunity rather than a water shortage.",
+   "public_note": "This waterbody holds water into rabi (s_water_lasts), but fields around it grow little in the second season (s_zoi_low_ci) or less than before (s_zoi_ci_decline). Field channels, sharing rules or a water user group could help farmers use the water.",
+   "interventions": [
+    "Repair field channels and outlets",
+    "Form or revive a water user association with sharing rules"
+   ],
+   "questions": [
+    "Who uses water from this waterbody, and how is it shared?",
+    "Are the field channels from the waterbody working?"
+   ]
+  },
+  {
+   "id": "wb.livestock_summer_water",
+   "label": "No summer water for livestock",
+   "group": "Use",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond"
+   ],
+   "gate": "ctx_regular and role_livestock >= 0.3",
+   "trigger": "s_no_summer_water",
+   "intensity": "100 * s_no_summer_water * role_livestock",
+   "roles": [
+    "role_livestock"
+   ],
+   "contexts": [],
+   "rationale": "In a pastoral setting, the waterbody holds no water in summer, when animals depend most on surface water.",
+   "public_note": "Livestock graze in this area, but this waterbody holds no water in summer (s_no_summer_water). Deepening part of it, or a separate cattle trough fed from it, could keep drinking water for animals.",
+   "interventions": [
+    "Deepen a section for dry-season storage",
+    "Cattle troughs"
+   ],
+   "questions": [
+    "Where do animals drink in summer?",
+    "Does this waterbody dry up before the summer months?"
+   ]
+  },
+  {
+   "id": "wb.fishery_opportunity",
+   "label": "Fishery opportunity",
+   "group": "Use",
+   "kind": "opportunity",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "village_pond",
+    "canal_fed"
+   ],
+   "gate": "ctx_regular and role_fishery >= 0.3 and area_ha >= 0.5",
+   "trigger": "s_water_lasts",
+   "intensity": "100 * s_water_lasts * role_fishery",
+   "roles": [
+    "role_fishery"
+   ],
+   "contexts": [],
+   "rationale": "Villages around it practise fishery, and the waterbody holds water into rabi, long enough for a fish crop.",
+   "public_note": "Villages here fish in community ponds (role: fishery), and this waterbody holds water into rabi (s_water_lasts). It may support fish rearing by a group, under the panchayat's lease rules.",
+   "interventions": [
+    "Fish seed stocking by a group or cooperative",
+    "Panchayat fishing lease"
+   ],
+   "questions": [
+    "Is this waterbody used for fishing, and who holds the rights?"
+   ]
+  },
+  {
+   "id": "wb.fishery_constraint",
+   "label": "Too short-lived for fishery",
+   "group": "Use",
+   "applies_to": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "village_pond",
+    "canal_fed"
+   ],
+   "gate": "ctx_regular and role_fishery >= 0.3 and area_ha >= 0.5",
+   "trigger": "s_dries_by_rabi",
+   "intensity": "100 * s_dries_by_rabi * role_fishery",
+   "roles": [
+    "role_fishery"
+   ],
+   "contexts": [],
+   "rationale": "Villages around it practise fishery, but the waterbody loses most of its water by rabi, too early for a fish crop.",
+   "public_note": "Villages here fish in community ponds, but this waterbody loses most of its water by rabi (s_dries_by_rabi), too early for a fish crop. Better retention would help.",
+   "interventions": [
+    "Improve retention (sluice and bund repair, deepening)"
+   ],
+   "questions": [
+    "Is fishing in this waterbody limited because it dries early?"
+   ]
+  },
+  {
+   "id": "wb.canal_tail_shortfall",
+   "label": "Short of canal water",
+   "group": "Filling",
+   "applies_to": [
+    "canal_fed"
+   ],
+   "gate": "years_wet >= 3",
+   "trigger": "s_dries_by_rabi or s_poor_fill",
+   "intensity": "100 * max(s_dries_by_rabi, s_poor_fill) * (0.5 + 0.5 * role_irrigation)",
+   "roles": [
+    "role_irrigation"
+   ],
+   "contexts": [],
+   "rationale": "A canal-fed waterbody that fills poorly or loses water by rabi may be at the tail end of the canal, or getting irregular releases.",
+   "public_note": "This waterbody is fed by a canal but fills poorly or dries by rabi (s_poor_fill, s_dries_by_rabi). It may be at the tail of the canal or receive irregular releases. Ask when canal water arrives here.",
+   "interventions": [
+    "Rotation schedule agreed with the irrigation department",
+    "Water user association at the outlet"
+   ],
+   "questions": [
+    "When and how often does canal water reach this waterbody?"
+   ]
+  },
+  {
+   "id": "wb.river_dry_season_loss",
+   "label": "River drying in summer",
+   "group": "Filling",
+   "applies_to": [
+    "river_reach"
+   ],
+   "gate": "years_wet >= 3",
+   "trigger": "s_dry_season_decline or (s_no_summer_water and s_shrinking)",
+   "intensity": "100 * max(s_dry_season_decline, min(s_no_summer_water, s_shrinking)) * (0.5 + 0.5 * max(role_irrigation, role_livestock, role_recharge_domestic))",
+   "roles": [
+    "role_irrigation",
+    "role_livestock",
+    "role_recharge_domestic"
+   ],
+   "contexts": [
+    "ctx_gw_stressed"
+   ],
+   "rationale": "The river stretch holds less water in summer over the years. Upstream extraction or falling groundwater (ctx_gw_stressed) reducing baseflow are likely causes; sand mining is another, not visible in the data.",
+   "public_note": "This stretch of river holds less water in summer than it used to (s_dry_season_decline). Pumping upstream or falling groundwater may be reducing its flow. Ask whether sand is being mined here.",
+   "interventions": [
+    "Regulate pumping from the river in summer",
+    "Recharge in the catchment"
+   ],
+   "questions": [
+    "Has the river here started drying earlier in summer?",
+    "Is sand being mined from this stretch?"
+   ]
+  }
+ ]
+}
