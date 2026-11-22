@@ -1789,11 +1789,19 @@ function renderWbMethod(m){
 }
 function renderWbData(m){
   m.innerHTML=`<div class="doc"><div class="block"><h2>Data</h2><p>One table per district, one row per waterbody: identity, type, status, size, drainage, home MWS and its context, recent ponds in the MWS, indicators, roles, the intensity of each rule (blank: not applicable; 0: not triggered; NA: insufficient data) and the schemes linked to its triggered rules. Built by <code>python -m seft.cli wb-run</code>.</p></div>
-    <div class="block">${WIDX.districts.map(d=>`<div class="dl"><span><b>${esc(d.district)}</b>, ${esc(d.state)} · ${d.n.toLocaleString("en-IN")} waterbodies</span><a class="btn ghost" href="data/waterbody/csv/wb_${d.slug}.csv" download>CSV</a></div>`).join("")}</div>
+    <div class="block">${WIDX.districts.map(d=>`<div class="dl"><span><b>${esc(d.district)}</b>, ${esc(d.state)} · ${d.n.toLocaleString("en-IN")} waterbodies</span><button class="btn ghost" data-wf="wb_${d.slug}.csv">Save CSV</button></div>`).join("")}</div>
     <div class="block"><h3>Rebuild locally</h3><pre class="kex">python -m seft.cli wb-add  --state ... --district ... --tehsil ...   # add a tehsil to config/waterbody/locations.json
 python -m seft.cli wb-fetch          # watershed data + waterbody and zone-of-influence layers
 python -m seft.cli wb-run --merge    # build, score, write out/waterbody and web/data/waterbody
 python -m seft.cli wb-census         # compare with the Water Body Census</pre></div></div>`;
+  m.querySelectorAll("[data-wf]").forEach(b=>b.onclick=()=>saveWbCsv(b.dataset.wf));
+}
+async function saveWbCsv(name){
+  /* local: web/data/waterbody/csv/; published: waterbody/ beside the page */
+  if(location.protocol==="file:"){const a=document.createElement("a");a.href="data/waterbody/csv/"+name;a.download=name;document.body.appendChild(a);a.click();a.remove();return;}
+  toast("Preparing "+name+"…");
+  for(const p of ["data/waterbody/csv/"+name,"waterbody/"+name,name]){try{const r=await fetch(p); if(!r.ok) continue; await saveFile(name,await r.blob()); return;}catch(e){}}
+  toast("Could not find "+name+". Run python -m seft.cli wb-run to build it.");
 }
 function renderWb(){
   const m=$("#main");
