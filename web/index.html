@@ -160,6 +160,11 @@ const BUNDLES={};
 const S={tab:"explore", level:"india", district:null, tehsil:null, mws:null, mode:"dominant", modeArg:null, showVillages:true};
 try{const t=localStorage.getItem("wsa_tab"); if(t) S.tab=t;}catch(e){}
 S.atlas="ws"; try{const a=localStorage.getItem("atlas"); if(a==="wb"||a==="ws") S.atlas=a; if(/[?#&]atlas=wb/.test(location.href)) S.atlas="wb";}catch(e){}
+const NUMW=["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve"];
+function atlasSub(){const t=ATLAS_HEAD[S.atlas][1];
+  if(S.atlas==="ws"&&IDX){const n=IDX.districts.reduce((a,d)=>a+(d.n_mws||0),0); return t.replace(/^Eight districts, [\d,]+ micro-watersheds/,`${NUMW[IDX.districts.length]||IDX.districts.length} districts, ${n.toLocaleString("en-IN")} micro-watersheds`);}
+  if(S.atlas==="wb"&&WIDX){const n=WIDX.districts.reduce((a,d)=>a+d.n,0); return t.replace(/^Eight districts, [\d,]+ ponds/,`${NUMW[WIDX.districts.length]||WIDX.districts.length} districts, ${(Math.round(n/1000)*1000).toLocaleString("en-IN")} ponds`);}
+  return t;}
 const ATLAS_HEAD={ws:["Watershed Systems Atlas","Eight districts, 4,598 micro-watersheds. Each watershed is read as a mixture of farming and land-use systems; a causal knowledge graph turns its indicators into stresses, opportunities and matching government schemes."],
   wb:["Waterbody Atlas","Eight districts, 65,000 ponds, tanks and river reaches. Each waterbody is typed, read through eight years of the water it held, and checked for stresses and opportunities with interventions, community questions and schemes."]};
 
@@ -432,7 +437,7 @@ function renderTabs(){
   const wb=S.atlas==="wb", tabs=wb?WTABS:TABS, cur=wb?W.tab:S.tab;
   $("#atlassw").innerHTML=[["ws","Watersheds"],["wb","Waterbodies"]].map(([id,l])=>`<button role="tab" aria-selected="${S.atlas===id}" data-a="${id}">${l}</button>`).join("");
   $("#atlassw").onclick=e=>{const b=e.target.closest("button"); if(!b||b.dataset.a===S.atlas) return; S.atlas=b.dataset.a; try{localStorage.setItem("atlas",S.atlas)}catch(e){} render();};
-  $("#atitle").textContent=ATLAS_HEAD[S.atlas][0]; $("#asub").textContent=ATLAS_HEAD[S.atlas][1]; document.title=ATLAS_HEAD[S.atlas][0];
+  $("#atitle").textContent=ATLAS_HEAD[S.atlas][0]; $("#asub").textContent=atlasSub(); document.title=ATLAS_HEAD[S.atlas][0];
   $("#tabs").innerHTML=tabs.map(([id,l])=>`<button role="tab" aria-selected="${cur===id}" data-tab="${id}">${l}</button>`).join("");
   $("#tabs").onclick=e=>{const b=e.target.closest("button"); if(!b) return;
     if(S.atlas==="wb"){W.tab=b.dataset.tab; try{localStorage.setItem("wba_tab",W.tab)}catch(e){}}
@@ -1315,7 +1320,7 @@ function renderMethod(m){
   <div class="block"><h3>Purpose and framing</h3>
    <p>The atlas follows the idea of social-ecological functional types (SEFTs) from Vallejos et al. (2020, <i>Ecosystems</i> 23:471–484), who grouped census tracts of the Argentine Chaco by how ecosystems function and how people use them. Their types came from clustering and did not model relationships. Here the same idea is made explicit and causal: each micro-watershed (MWS) is decomposed into a mixture of system archetypes using transparent rules, and a knowledge graph of causal pathways turns CoRE Stack indicators into stresses and opportunities, conditioned on aquifer, rainfall, terrain and canal context. Stresses follow production system → observed stress → causal pathway, with causal pathways written as combinations of signals, and carry an intensity from 0 to 100. All logic lives in nine JSON files that experts can read and edit.</p></div>
   <div class="block"><h3>Study area and data</h3>${drawsOn("Study area and data")}
-   <ul><li>Eight districts with at least four populated tehsils in CoRE Stack: Pune and Amaravati (Maharashtra), Ananthapur and Srikakulam (Andhra Pradesh), Godda (Jharkhand), Koraput (Odisha), Udaipur (Rajasthan) and Ballia (Uttar Pradesh). Keonjhar was dropped because the API does not resolve its name.</li>
+   <ul><li>Eight districts with at least four populated tehsils in CoRE Stack: Pune and Amaravati (Maharashtra), Ananthapur and Srikakulam (Andhra Pradesh), Godda (Jharkhand), Koraput (Odisha), Udaipur (Rajasthan) and Ballia (Uttar Pradesh). Keonjhar was dropped because the API does not resolve its name.</li>${IDX.districts.length>8?`<li>Added later with the same commands (<code>add</code>, <code>fetch</code>, <code>run --merge</code>): ${IDX.districts.slice(8).map(d=>`${esc(d.district)} (${esc(d.state)}, ${d.tehsils.length} tehsils)`).join(", ")}. The tehsil and watershed counts below are for the first eight.</li>`:""}
    <li>73 tehsils were pulled from the CoRE Stack <code>get_tehsil_data</code> API: land use (2017–24), cropping intensity, kharif drought weeks and dry spells, hydrological balance, surface water bodies, aquifer, terrain, groundwater assessment category, canals, Green Credit projects, tree-cover and degradation change, urbanisation, restoration opportunity, village livestock and census values. The empty <code>drought</code> section was ignored in favour of the kharif drought data. An empty <code>green_credit</code> section is read as no project.</li>
    <li>Where API responses were truncated (land use for tehsils with more than about 118 MWS), values were back-filled from the CoRE Stack GeoServer, which matches the API exactly where both exist. Watershed and village geometry also come from GeoServer.</li>
    <li>972 watersheds straddle tehsil boundaries and are returned by each tehsil, sometimes with different hydrology and drought values. Each is counted once, using the copy from its home tehsil (the one with most village area inside it), which leaves 4,598 unique watersheds.</li></ul></div>
@@ -2060,7 +2065,7 @@ function renderWbMethod(m){
   m.innerHTML=`<div class="doc"><h2>Methodology</h2>
   <div class="block"><h3>Purpose and framing</h3><p>The waterbody atlas applies the approach of the watershed atlas to single waterbodies. Each waterbody is typed, read through its own water series, placed in the landscape of its home micro-watershed, and checked against transparent rules for observed stresses and opportunities. Every threshold, rule and question sits in editable JSON files with its sources; the page and the Python pipeline evaluate the same files.</p></div>
   <div class="block"><h3>Data</h3>${wDrawsOn("Data")}<ul>
-   <li>${n.toLocaleString("en-IN")} waterbodies in ${nt} tehsils of the eight watershed-atlas districts that have a zone-of-influence layer.</li>
+   <li>${n.toLocaleString("en-IN")} waterbodies in ${nt} tehsils of the ${WIDX.districts.length} watershed-atlas districts (${WIDX.districts.map(d=>esc(d.district)).join(", ")}); every tehsil used has a zone-of-influence layer.</li>
    <li><b>Surface water bodies</b> (CoRE Stack GeoServer layer <span class="mono">swb:surface_waterbodies_&lt;district&gt;_&lt;tehsil&gt;</span>): for each waterbody and hydrological year 2017–2024, the share of its mapped extent holding water in kharif (k), through rabi (kr) and through zaid (krz), with its drainage position, stream order, catchment and CoRE Stack's own type. Fragments of one waterbody with the same area and series, within about 30 m, are merged.</li>
    <li><b>Zones of influence</b> (<span class="mono">swb:waterbodies_zoi_…</span>): the land around a waterbody that it irrigates, with yearly cropping intensity and double- and triple-cropped area. Joined by waterbody id where the layer has one and otherwise by location; ${zl[1]?Math.round(zl[0]/zl[1]*100):0}% of waterbodies have a zone.</li>
    <li><b>Home micro-watershed</b>: the MWS holding most of the waterbody. Its context (rainfall, aquifer, terrain, groundwater category, canals, cropping), system shares and variables come from the watershed atlas pipeline run for the same tehsils.</li>
@@ -2118,7 +2123,7 @@ function renderWb(){
     if(t==="schemes") return renderWbSchemes(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
   if(WIDX) return go();
   m.innerHTML=`<div class="loading">Loading the waterbody atlas…</div>`;
-  loadWbData("index").then(x=>{WIDX=x; WK=x.knowledge; wIndex(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
+  loadWbData("index").then(x=>{WIDX=x; WK=x.knowledge; wIndex(); $("#asub").textContent=atlasSub(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
 }
 
 /* ---------- boot ---------- */
