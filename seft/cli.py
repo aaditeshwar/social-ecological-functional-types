@@ -5,6 +5,7 @@
     python -m seft.cli fetch           # API data + GeoServer geometry for every location (needs CORE_STACK_API_KEY)
     python -m seft.cli audit           # which datasets are missing or incomplete
     python -m seft.cli validate        # check the knowledge JSONs after editing
+    python -m seft.cli refresh-knowledge   # put edited text-only knowledge (interventions, notes) into web/data
     python -m seft.cli run             # indicators, systems, stresses, schemes -> out/csv, out/web and web/data
     python -m seft.cli all             # fetch, validate and run in one go
     python -m seft.cli groundtruth --truth FILE
@@ -103,6 +104,10 @@ def cmd_wb_census(a):
     from .wb.census import main as wb_census
     wb_census(a.locations, a.out)
 
+def cmd_refresh_knowledge(a):
+    from .webdata import refresh_knowledge
+    refresh_knowledge()
+
 def cmd_wb_assess(a):
     from .wb.assess import main as wb_assess
     wb_assess(a.answers, a.locations, a.out)
@@ -148,6 +153,7 @@ def main(argv=None):
         if name == 'wb-all': p.add_argument('--force', action='store_true')
     p = sub.add_parser('wb-census', help='compare waterbody patterns with the Water Body Census fields -> out/waterbody/census'); wloc(p)
     p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'census'))
+    sub.add_parser('refresh-knowledge', help='put the current knowledge files (e.g. interventions) into web/data without re-scoring')
     p = sub.add_parser('wb-assess', help='re-assess waterbodies with community answers saved from the page -> out/waterbody/answers'); wloc(p)
     p.add_argument('--answers', required=True, help='community answers JSON saved from the waterbody atlas')
     p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'answers'))
@@ -174,6 +180,7 @@ def main(argv=None):
     elif a.cmd == 'wb-run': cmd_wb_run(a)
     elif a.cmd == 'wb-census': cmd_wb_census(a)
     elif a.cmd == 'wb-assess': cmd_wb_assess(a)
+    elif a.cmd == 'refresh-knowledge': cmd_refresh_knowledge(a)
     elif a.cmd == 'wb-all':
         cmd_wb_fetch(a)
         if not cmd_wb_validate(a): sys.exit(1)

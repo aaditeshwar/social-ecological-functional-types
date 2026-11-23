@@ -7,7 +7,7 @@
  "schemes": [
   {
    "id": "mgnrega_nrm",
-   "name": "Mahatma Gandhi NREGS - natural resource management works",
+   "name": "VB-G RAM G (formerly MGNREGS) - natural resource management works",
    "level": "central",
    "state": null,
    "department": "Ministry of Rural Development",
@@ -41,9 +41,9 @@
    "archetypes": [],
    "condition": null,
    "caution": null,
-   "notes": "Default convergence vehicle; works planned through the gram panchayat labour budget.",
-   "url": "https://nrega.nic.in",
-   "status": "Active (verify current guidelines)"
+   "notes": "Default convergence vehicle; works planned through the gram panchayat. The Viksit Bharat - Guarantee for Rozgar and Ajeevika Mission (Gramin) Act replaced the Mahatma Gandhi NREGA on 1 July 2026 with 125 days of wage work and water security as a priority area; the id is kept so earlier answers and tables still match.",
+   "url": "https://rural.gov.in",
+   "status": "In force since 1 July 2026, replacing MGNREGS (verify the new works list)"
   },
   {
    "id": "pmksy_wdc",

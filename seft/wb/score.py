@@ -17,6 +17,8 @@ def load_knowledge(kdir=None):
            'questions': {'type_questions': [], 'stress_questions': []}, 'sources': {'sources': []}}
     for n, empty in opt.items():
         K[n] = load_json(kdir / f'{n}.json') if (kdir / f'{n}.json').exists() else empty
+    # interventions: the catalogue shared with the watershed atlas (knowledge/interventions.json)
+    K['interventions'] = load_json(ROOT / 'knowledge' / 'interventions.json')
     # sources: the waterbody bibliography plus the watershed entries it cites (knowledge/sources.json)
     own = {x['id'] for x in K['sources']['sources']}
     cited = set(_cited(K))
@@ -31,6 +33,34 @@ def _cited(o):
             else: yield from _cited(v)
     elif isinstance(o, list):
         for x in o: yield from _cited(x)
+
+DIMS = ('rainfall', 'aquifer', 'terrain', 'gw_category', 'canal', 'cropping')
+
+def iv_names(K):
+    """Watershed names the intervention fit tests read, as they appear in a waterbody's home-MWS table:
+    variable x -> mws_x, a context dimension d -> ctx_d, share_<system> unchanged."""
+    import re
+    out = set()
+    for iv in K['interventions']['interventions']:
+        for e in (iv.get('suits'), iv.get('avoid')):
+            for m in re.finditer(r"'[^']*'|([A-Za-z_][A-Za-z0-9_]*)", e or ''):
+                n = m.group(1)
+                if not n or n in ('nz', 'min', 'max', 'and', 'or', 'not', 'in', 'True', 'False'): continue
+                out.add('ctx_' + n if n in DIMS else n if n.startswith('share_') else 'mws_' + n)
+    return sorted(out)
+
+def iv_env(mws):
+    """Fit-test environment for a waterbody from its home-MWS values (inverse of iv_names)."""
+    import math
+    e = {}
+    for k, v in (mws or {}).items():
+        if isinstance(v, (dict, list)): continue
+        v = math.nan if v is None else v
+        if k.startswith('mws_'): e[k[4:]] = v
+        elif k.startswith('share_'): e[k] = v
+        elif k.startswith('ctx_') and k[4:] in DIMS: e[k[4:]] = v or ''
+    for d in DIMS: e.setdefault(d, '')
+    return e
 
 def scheme_links(key, b, K):
     """Schemes linked to a rule id (or 'recent_ponds') that apply to this waterbody's state and type."""

@@ -275,6 +275,9 @@ _BIN = {
 }
 
 def _cmp(op, a, b):
+    # membership first: a list of text such as ['hilly', 'undulating'] is not a numeric array
+    if isinstance(op, ast.In): return a in (b or [])
+    if isinstance(op, ast.NotIn): return a not in (b or [])
     A, B = _arr(a), _arr(b)
     if A is not None or B is not None:
         x = A if A is not None else a

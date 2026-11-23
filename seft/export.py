@@ -8,10 +8,19 @@ from .geo import to_shape, encode_geom
 
 STATUS = {'triggered': 2, 'not triggered': 1, 'not applicable': 0, 'unknown': -1, 'insufficient data': -1}
 SEV = {'severe': 2, 'moderate': 1}
-KFILES = ('variables', 'contexts', 'archetypes', 'signals', 'taxonomy', 'causal_graph', 'schemes', 'questions', 'sources')
+KFILES = ('variables', 'contexts', 'archetypes', 'signals', 'taxonomy', 'causal_graph', 'schemes', 'questions', 'sources', 'interventions')
 
 def _knowledge(kd):
     return {k: load_json(kd / f'{k}.json') for k in KFILES}
+
+def _scheme_names(K):
+    from .interventions import scheme_names
+    wb = ROOT / 'knowledge' / 'waterbody' / 'schemes.json'
+    return scheme_names(K['schemes'], load_json(wb) if wb.exists() else None)
+
+def _wb_rule_labels():
+    p = ROOT / 'knowledge' / 'waterbody' / 'rules.json'
+    return {r['id']: r['label'] for r in load_json(p)['rules']} if p.exists() else {}
 
 def _pw_cols(K):
     from .stresses import os_keys
@@ -32,7 +41,7 @@ def write_csv(records, villages, K, outdir):
             ['share_' + a for a in arch] + ['dominant_system', 'systems_present'] +
             [f'{k}_{x}' for k in pw for x in ('status', 'intensity')] +
             [f'{s}_status' for s in sids] + [f'{s}_intensity' for s in sids] + [f'{s}_severity' for s in sids] + [f'{s}_posterior' for s in sids] +
-            ['mix_raw_total', 'n_answers', 'schemes', 'canal_projects', 'n_villages'])
+            ['mix_raw_total', 'n_answers', 'schemes', 'interventions_suited', 'interventions_possible', 'canal_projects', 'n_villages'])
     for d, recs in list(by.items()) + [('all', records)]:
         p = outdir / f'mws_{slug(d)}.csv'
         with open(p, 'w', newline='') as f:
@@ -45,7 +54,10 @@ def write_csv(records, villages, K, outdir):
                            [r['stress'][s]['status'] for s in sids] + [r['stress'][s].get('intensity') for s in sids] +
                            [r['stress'][s].get('severity') or '' for s in sids] +
                            [r['stress'][s].get('posterior') for s in sids] + [r['mix'].get('raw_total'), len(r.get('answers') or {})] +
-                           [';'.join(x['id'] for x in r['schemes']), ';'.join(r['canals']), r.get('n_villages', '')])
+                           [';'.join(x['id'] for x in r['schemes']),
+                            ';'.join(x['id'] for x in r.get('interventions', []) if x['fit'] == 'suited'),
+                            ';'.join(x['id'] for x in r.get('interventions', []) if x['fit'] == 'possible'),
+                            ';'.join(r['canals']), r.get('n_villages', '')])
         files.append(p)
     if villages is None:
         return files
@@ -141,11 +153,13 @@ def write_web(records, villages, clusters, meta, K, cfg, outdir, geom_path=None)
         for k in pw:
             sc[k] = round(sum(1 for r in recs if r['pathways'][k]['status'] == 'triggered') / n, 3)
         scheme_ct = Counter(x['id'] for r in recs for x in r['schemes'])
+        iv_ct = Counter(x['id'] for r in recs for x in r.get('interventions', []) if x['fit'] == 'suited')
         districts.append({'district': d, 'state': dcfg['state'], 'slug': slug(d), 'n_mws': len(recs),
                           'n_villages': len(villages[d]), 'tehsils': [t['name'] for t in teh], 'outline': outline,
-                          'bounds': bounds, 'mix': mix, 'stress_rate': sc, 'top_schemes': scheme_ct.most_common(12),
+                          'bounds': bounds, 'mix': mix, 'stress_rate': sc, 'top_schemes': scheme_ct.most_common(12), 'top_interventions': iv_ct.most_common(12),
                           'rain_factor': round(meta['rain_factors'].get(d, 1.0), 3)})
     index = {'districts': districts, 'states': states, 'knowledge': K, 'pools': meta['pools'], 'var_ids': var_ids,
-             'signal_ids': sig_ids, 'signal_thresholds': meta.get('signal_thresholds', {})}
+             'signal_ids': sig_ids, 'signal_thresholds': meta.get('signal_thresholds', {}),
+             'scheme_names': _scheme_names(K), 'wb_rule_labels': _wb_rule_labels()}
     dump_json(index, outdir / 'index.json')
     return outdir

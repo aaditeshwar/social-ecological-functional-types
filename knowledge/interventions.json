@@ -1,0 +1,2982 @@
+{
+ "_about": "Interventions for water security and ecological restoration, shared by the watershed and waterbody atlases. Supply-side interventions add water (harvest, store, recharge, restore land that lets rain soak in); demand-side interventions reduce or reallocate use (crops, irrigation methods, rules and institutions). Each entry gives where it is built ('where', with the site rules of the CoRE Stack structure-suitability spreadsheet and the ridge-to-valley table of the watershed-development toolkit paper), the landscapes it suits ('landscape', 'archetypes'), a landscape fit test evaluated for each micro-watershed ('suits', 'avoid'), the watershed stresses and waterbody rules it responds to ('addresses', 'addresses_wb', limited to 'wb_types'), schemes that fund it, examples from civil society practice, and sources. Site rules apply to a specific site and need field checks; the fit test only says whether the micro-watershed's landscape is the kind where the intervention usually works.",
+ "version": 1,
+ "verified": "2026-11-23",
+ "sides": {
+  "supply": "Adds water or keeps it in the landscape: harvesting, storage, recharge, soil and land restoration.",
+  "demand": "Reduces or reallocates water use: crops, irrigation methods, rules, institutions and planning."
+ },
+ "categories": {
+  "drainage_line": "Drainage-line treatment (across streams, by stream order)",
+  "area_treatment": "Area treatment on slopes and ridges (off drainage lines)",
+  "soil_moisture": "On-farm soil and moisture conservation",
+  "storage": "Farm and village storage",
+  "recharge": "Groundwater recharge",
+  "waterbody": "Waterbody rehabilitation",
+  "restoration": "Ecological restoration of commons, forest and banks",
+  "drainage": "Drainage, waterlogging and floods",
+  "drinking_water": "Drinking water",
+  "cropping": "Crops and soils",
+  "irrigation_efficiency": "Irrigation methods",
+  "governance": "Rules, planning and institutions",
+  "livestock": "Livestock and fodder",
+  "livelihood": "Water-based livelihoods"
+ },
+ "fit": {
+  "about": "Landscape fit for a micro-watershed (and, in the waterbody atlas, for the waterbody's home micro-watershed): 'suited' when 'suits' holds and 'avoid' does not; 'not suited' when 'avoid' holds; otherwise 'possible'. Expressions read the watershed variables (variables.json), the system shares (share_<archetype>), and the context classes as terrain, aquifer, rainfall, gw_category, canal and cropping. A missing value never makes an intervention suited or unsuited. In the waterbody atlas an intervention is shown for a waterbody only if its type is in 'wb_types' (when given).",
+  "levels": {
+   "suited": "The landscape is the kind where this intervention usually works; check the site rules on the ground.",
+   "possible": "Nothing in the data rules it in or out; decide from site rules and community knowledge.",
+   "not suited": "The landscape works against it (reason given); consider other interventions first."
+  }
+ },
+ "site_rules_about": "Site rules from the CoRE Stack 'Water structures — suitability rules' spreadsheet: for each parameter, the accepted (ideal), partially accepted (works with caution) and not accepted range. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement from the toolkit paper (Table 1). Where the two disagree (for example the catchment of check dams), both are shown: the paper follows the technical manuals for large structures, the spreadsheet the small structures CSOs most often plan.",
+ "interventions": [
+  {
+   "id": "loose_boulder_check",
+   "name": "Loose boulder checks",
+   "side": "supply",
+   "category": "drainage_line",
+   "what": "Small dry-stone barriers across first-order gullies and streams. They slow flash runoff, trap silt and let water soak in; the first treatment of a gully before larger structures downstream.",
+   "where": "Drainage line, stream order 1 (up to 3), upper catchment",
+   "site_spec": "Stream order 1, catchment 2–50 ha (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "1–10%",
+     "partial": "6–20%",
+     "not_accepted": "> 20%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "2–10 ha",
+     "partial": "—",
+     "not_accepted": "< 2 or > 10 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Croplands, barren, shrub/scrub, trees/forest",
+     "partial": "—",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Hilly and undulating land with gullies: forest-fringe, pastoral and upland rainfed micro-watersheds; also above tanks that are silting up.",
+   "archetypes": [
+    "forest_fringe",
+    "pastoral",
+    "rainfed_dryland",
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "f_hill >= 0.15 or terrain in ['hilly', 'undulating']",
+   "avoid": "f_sloping < 0.05",
+   "avoid_note": "Almost no sloping land: few gullies to treat.",
+   "addresses": [
+    "soil.erosion",
+    "fodder.commons_degradation",
+    "forest.fringe_degradation",
+    "waterbody_shrinkage",
+    "groundwater.recharge_opportunity"
+   ],
+   "addresses_wb": [
+    "wb.siltation",
+    "wb.sudden_loss"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "mh_jalyukt",
+    "rj_mjsa",
+    "jh_nilambar"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "mgnrega_samarthya2024",
+    "pmksy_wdc"
+   ],
+   "practice": [],
+   "caution": null
+  },
+  {
+   "id": "earthen_gully_plug",
+   "name": "Earthen and brushwood gully plugs",
+   "side": "supply",
+   "category": "drainage_line",
+   "what": "Earthen or brushwood plugs in small, steep gullies to stop gully head-cutting and hold silt; usually combined with vegetation on the plug.",
+   "where": "Drainage line, stream order 1, steep upper slopes",
+   "site_spec": "Stream order 2, catchment 50–500 ha for earthen gully plugs (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "10–20%",
+     "partial": "—",
+     "not_accepted": "< 10 or > 20%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1",
+     "partial": "2, 3",
+     "not_accepted": "> 3"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "≤ 2 ha",
+     "partial": "2–10 ha",
+     "not_accepted": "> 10 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Trees/forest, shrub/scrub, barren",
+     "partial": "—",
+     "not_accepted": "Croplands; Built-up; water in any season"
+    }
+   ],
+   "landscape": "Steep, uncultivated slopes under scrub, forest or barren land: forest-fringe and commons-dominated micro-watersheds.",
+   "archetypes": [
+    "forest_fringe",
+    "pastoral"
+   ],
+   "suits": "f_hill >= 0.2 and f_forest + f_shrub + f_barren >= 0.2",
+   "avoid": "f_hill < 0.03",
+   "avoid_note": "No steep land.",
+   "addresses": [
+    "soil.erosion",
+    "forest.fringe_degradation",
+    "fodder.commons_degradation"
+   ],
+   "addresses_wb": [
+    "wb.siltation"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "campa",
+    "green_india"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "mgnrega_samarthya2024"
+   ],
+   "practice": [],
+   "caution": null
+  },
+  {
+   "id": "gabion_rockfill",
+   "name": "Gabion structures and rock-fill dams",
+   "side": "supply",
+   "category": "drainage_line",
+   "what": "Boulders packed in wire mesh (gabions) or loose rock-fill across second-order streams; flexible, they hold silt and raise local water tables where flows are too strong for loose boulders.",
+   "where": "Drainage line, stream order 2",
+   "site_spec": "Gabions / rock-fill dams: stream order 2, catchment 50–500 ha (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "5–15%",
+     "partial": "—",
+     "not_accepted": "> 15%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "2–6",
+     "partial": "—",
+     "not_accepted": "—"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "40–250 ha",
+     "partial": "—",
+     "not_accepted": "< 40 or > 250 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Barren, shrub/scrub",
+     "partial": "Croplands",
+     "not_accepted": "Trees/forest; Built-up; water in any season"
+    }
+   ],
+   "landscape": "Undulating to hilly land with second-order streams in scrub or barren catchments; where stone is available locally.",
+   "archetypes": [
+    "pastoral",
+    "rainfed_dryland",
+    "forest_fringe"
+   ],
+   "suits": "f_sloping >= 0.3 and f_shrub + f_barren >= 0.1",
+   "avoid": "f_sloping < 0.1",
+   "avoid_note": "Flat: streams too slow for gabions to help.",
+   "addresses": [
+    "soil.erosion",
+    "groundwater.recharge_opportunity",
+    "waterbody_shrinkage"
+   ],
+   "addresses_wb": [
+    "wb.siltation"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "mh_jalyukt"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "mgnrega_samarthya2024"
+   ],
+   "practice": [],
+   "caution": null
+  },
+  {
+   "id": "check_dam",
+   "name": "Check dams, cement nala bunds and anicuts",
+   "side": "supply",
+   "category": "drainage_line",
+   "what": "Masonry or concrete weirs across seasonal streams that store water in the stream bed through the monsoon and recharge the aquifer; downstream wells and fields benefit (the paper estimates the downstream cropping area that a check dam protects).",
+   "where": "Drainage line, stream order 3 and higher (paper); the spreadsheet accepts orders 1–3 with 10–40 ha catchments",
+   "site_spec": "Earthen dams, check dams, nadis and bandharas: stream order 3+, catchment > 500 ha (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "≤ 15%",
+     "partial": "—",
+     "not_accepted": "> 15%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4, 5, 6",
+     "not_accepted": "> 6"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "10–40 ha",
+     "partial": "40–100 ha",
+     "not_accepted": "< 10 or > 100 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "partial": "Barren, shrub/scrub",
+     "not_accepted": "Trees/forest; Built-up; water in any season"
+    }
+   ],
+   "landscape": "Hard-rock (basalt, granite, gneiss) micro-watersheds with seasonal streams and well-irrigated farms downstream; most useful where the weathered zone can take recharge. Least useful on flat alluvial plains with shallow water tables.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "rainfed_dryland",
+    "tree_crops"
+   ],
+   "suits": "(aquifer == 'hard_rock' or soge_stage >= 70) and f_slopy + f_hill >= 0.15",
+   "avoid": "aquifer == 'alluvium' and terrain == 'plain' and nz(soge_stage) < 70 and rain_norm >= 1000",
+   "avoid_note": "Flat, humid alluvial plain with a shallow, safe water table: little room for extra recharge and a risk of waterlogging.",
+   "caution": "Upstream structures cut inflow to tanks and check dams downstream (Wable et al. 2022); plan at micro-watershed scale and keep part of the runoff flowing. Desilt regularly.",
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.water_balance_deficit",
+    "groundwater.recharge_opportunity",
+    "irrigation.rabi_water_shortfall",
+    "drought.kharif_drought",
+    "livestock_water_scarcity",
+    "drinking_water.scarcity"
+   ],
+   "addresses_wb": [
+    "wb.river_dry_season_loss",
+    "wb.drought_failure"
+   ],
+   "wb_types": [
+    "river_reach",
+    "onstream_tank"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "jsa_catch_the_rain",
+    "atal_bhujal",
+    "mh_jalyukt",
+    "rj_mjsa"
+   ],
+   "practice": [
+    "Saurashtra (Gujarat): check-dam and well-recharge movement of the 1990s, led by farmers and diamond merchants",
+    "Ralegan Siddhi and Hiware Bazar (Ahmednagar, Maharashtra): cement nala bunds and check dams with village rules on water use",
+    "Utthan, Bhavnagar (Gujarat): check dams in the paper's Morchand village plan"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "cgwb_recharge2020",
+    "wable2022",
+    "mgnrega_samarthya2024"
+   ]
+  },
+  {
+   "id": "percolation_tank",
+   "name": "Percolation tanks",
+   "side": "supply",
+   "category": "recharge",
+   "what": "Shallow tanks on second- and third-order streams sited over permeable strata so that stored water percolates to wells downstream within a few months, rather than being used directly.",
+   "where": "Drainage line, stream order 2–3, gentle slopes",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "3–6%",
+     "partial": "—",
+     "not_accepted": "< 3 or > 6%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "2, 3",
+     "partial": "4",
+     "not_accepted": "—"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "10–40 ha",
+     "partial": "40–100 ha",
+     "not_accepted": "< 10 or > 100 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "partial": "Barren, shrub/scrub",
+     "not_accepted": "Trees/forest; Built-up; water in any season"
+    }
+   ],
+   "landscape": "Hard-rock areas with a weathered or fractured zone and falling water levels, in semi-arid and dry sub-humid climates; gently sloping cropland with wells downstream.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "tree_crops",
+    "rainfed_dryland"
+   ],
+   "suits": "aquifer == 'hard_rock' and nz(soge_stage) >= 70 and rainfall in ['semi_arid', 'dry_subhumid']",
+   "avoid": "aquifer == 'saline' or gw_category == 'saline_gw'",
+   "avoid_note": "Saline aquifer: recharge water mixes with saline groundwater.",
+   "caution": "Silt seals the bed within a few years; desilt and treat the catchment. Check the strata: over massive rock with no weathered zone, water evaporates instead of recharging.",
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.water_balance_deficit",
+    "groundwater.recharge_opportunity",
+    "drinking_water.scarcity",
+    "irrigation.rabi_water_shortfall"
+   ],
+   "addresses_wb": [
+    "wb.drought_failure"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "jsa_catch_the_rain",
+    "atal_bhujal",
+    "mh_jalyukt",
+    "rj_mjsa"
+   ],
+   "sources": [
+    "structure_rules",
+    "cgwb_recharge2020"
+   ],
+   "practice": [],
+   "site_spec": null
+  },
+  {
+   "id": "subsurface_dyke",
+   "name": "Sub-surface dykes (underground bandharas)",
+   "side": "supply",
+   "category": "recharge",
+   "what": "An impermeable wall dug across a stream bed down to bedrock, holding groundwater in the sand and gravel upstream; it keeps wells beside the stream wet into summer without surface evaporation.",
+   "where": "Stream or river beds with sandy fill over shallow bedrock",
+   "landscape": "Seasonal rivers and wide nalas with sandy beds in hard-rock or coastal areas; drinking-water wells near the stream.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "rainfed_dryland"
+   ],
+   "suits": "river_present >= 1 and aquifer in ['hard_rock', 'alluvium']",
+   "avoid": "river_present < 1 and n_upstream == 0",
+   "avoid_note": "No river or upstream inflow through the micro-watershed.",
+   "addresses": [
+    "drinking_water.scarcity",
+    "irrigation.rabi_water_shortfall",
+    "groundwater.water_balance_deficit"
+   ],
+   "addresses_wb": [
+    "wb.river_dry_season_loss"
+   ],
+   "wb_types": [
+    "river_reach"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "jsa_catch_the_rain",
+    "jjm"
+   ],
+   "sources": [
+    "cgwb_recharge2020"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "site_spec": null
+  },
+  {
+   "id": "diversion_based_irrigation",
+   "name": "Diversion-based irrigation",
+   "side": "supply",
+   "category": "storage",
+   "what": "Small weirs that divert part of a perennial or long-flowing stream into gravity channels to fields, without pumps or large storage; a traditional system in hill areas.",
+   "where": "Hill streams that flow beyond the monsoon",
+   "landscape": "Hilly, sub-humid and humid tribal areas with streams that flow into rabi: forest-fringe and rainfed-rice micro-watersheds (for example Koraput, Godda).",
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "forest_fringe"
+   ],
+   "suits": "terrain == 'hilly' and rainfall in ['dry_subhumid', 'humid'] and (river_present >= 1 or n_upstream >= 1)",
+   "avoid": "rainfall == 'semi_arid'",
+   "avoid_note": "Streams do not flow long enough after the monsoon.",
+   "addresses": [
+    "irrigation.rabi_water_shortfall",
+    "productivity.rice_fallow_opportunity",
+    "drought.kharif_drought",
+    "productivity.declining_intensity"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "jh_irrigation",
+    "od_oiipcra"
+   ],
+   "practice": [
+    "Hill streams in Odisha and Jharkhand: diversion-based irrigation promoted by NGOs such as PRADAN and by state minor-irrigation programmes"
+   ],
+   "sources": [
+    "expert_judgement",
+    "crida_koraput"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "cct",
+   "name": "Continuous contour trenches (CCT)",
+   "side": "supply",
+   "category": "area_treatment",
+   "what": "Trenches dug along the contour on uncultivated slopes; they stop sheet runoff, hold soil and moisture for grass and saplings, and recharge the aquifer below.",
+   "where": "Ridges and upper slopes, non-cultivated land",
+   "site_spec": "Ridges and steep slopes of 10–25% (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "1–10%",
+     "partial": "—",
+     "not_accepted": "< 1 or > 10%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "2–10 ha",
+     "partial": "10–20 ha",
+     "not_accepted": "< 2 or > 20 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Barren, shrub/scrub, trees/forest",
+     "partial": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Ridges and upper slopes under scrub, open forest or barren commons; the first step of ridge-to-valley treatment in hard-rock watersheds.",
+   "archetypes": [
+    "pastoral",
+    "forest_fringe",
+    "rainfed_dryland"
+   ],
+   "suits": "f_sloping >= 0.25 and f_commons + f_forest >= 0.15",
+   "avoid": "f_commons + f_forest < 0.03",
+   "avoid_note": "Almost no uncultivated land to trench.",
+   "caution": "On slopes over 25% or in shallow soils use staggered trenches; avoid trenching dense natural forest.",
+   "addresses": [
+    "soil.erosion",
+    "fodder.commons_degradation",
+    "forest.fringe_degradation",
+    "groundwater.recharge_opportunity",
+    "forest.tree_cover_loss"
+   ],
+   "addresses_wb": [
+    "wb.siltation",
+    "wb.inflow_shortfall"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "campa",
+    "green_india",
+    "mh_jalyukt",
+    "rj_mjsa"
+   ],
+   "practice": [
+    "Watershed Organisation Trust (WOTR), Ahmednagar: ridge-to-valley treatment starting with CCT on hill slopes"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "mgnrega_samarthya2024",
+    "pmksy_wdc"
+   ]
+  },
+  {
+   "id": "sct",
+   "name": "Staggered contour trenches (SCT)",
+   "side": "supply",
+   "category": "area_treatment",
+   "what": "Short trenches in a staggered pattern on steeper slopes, where continuous trenches would be unstable.",
+   "where": "Steep slopes (10–25%), non-cultivated",
+   "site_spec": "Ridges and steep slopes of 10–25% (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "10–25%",
+     "partial": "—",
+     "not_accepted": "< 10 or > 25%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "≤ 2 ha",
+     "partial": "2–10 ha",
+     "not_accepted": "> 10 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Barren, shrub/scrub, trees/forest",
+     "partial": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Hill slopes and ridges in forest-fringe and pastoral micro-watersheds.",
+   "archetypes": [
+    "forest_fringe",
+    "pastoral"
+   ],
+   "suits": "f_hill >= 0.2",
+   "avoid": "f_hill < 0.03",
+   "avoid_note": "No steep land.",
+   "addresses": [
+    "soil.erosion",
+    "forest.fringe_degradation",
+    "fodder.commons_degradation",
+    "forest.tree_cover_loss"
+   ],
+   "addresses_wb": [
+    "wb.siltation"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "campa",
+    "green_india"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "mgnrega_samarthya2024"
+   ],
+   "practice": [],
+   "caution": null
+  },
+  {
+   "id": "wat",
+   "name": "Water absorption trenches (WAT)",
+   "side": "supply",
+   "category": "area_treatment",
+   "what": "Deep trenches at the foothills, where hill runoff reaches farmland; they intercept runoff, recharge the aquifer and protect fields from erosion.",
+   "where": "Foothills, at the break of slope",
+   "site_spec": "At the foothills (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "0–6%",
+     "partial": "—",
+     "not_accepted": "> 6%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "≤ 2 ha",
+     "partial": "2–10 ha",
+     "not_accepted": "> 10 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Barren, shrub/scrub, trees/forest",
+     "partial": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Micro-watersheds where hills meet farmland (both hill and plain or gentle-slope land present).",
+   "archetypes": [
+    "rainfed_dryland",
+    "groundwater_irrigated",
+    "forest_fringe"
+   ],
+   "suits": "f_hill >= 0.1 and f_plain + f_slopy >= 0.3",
+   "avoid": "f_hill < 0.02",
+   "avoid_note": "No hills above the farmland.",
+   "addresses": [
+    "soil.erosion",
+    "groundwater.recharge_opportunity",
+    "drought.kharif_drought"
+   ],
+   "addresses_wb": [
+    "wb.siltation"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules"
+   ],
+   "practice": [],
+   "caution": null,
+   "wb_types": null
+  },
+  {
+   "id": "trench_cum_bund",
+   "name": "Trench-cum-bund networks (TCB)",
+   "side": "supply",
+   "category": "area_treatment",
+   "what": "Lines of trenches with the dug soil formed into a bund below, on gentle slopes and fallows; they harvest sheet runoff for recharge. The paper's Mala Khera (Bhilwara) plan projects that a TCB network protects about 13 ha of downstream crops and one well.",
+   "where": "Gentle slopes, fallows and field edges",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "0–6%",
+     "partial": "—",
+     "not_accepted": "> 6%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "≤ 2 ha",
+     "partial": "—",
+     "not_accepted": "—"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "partial": "Barren, shrub/scrub, trees/forest",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Semi-arid hard-rock micro-watersheds with gentle slopes, fallows and well-irrigated fields below.",
+   "archetypes": [
+    "rainfed_dryland",
+    "groundwater_irrigated",
+    "pastoral"
+   ],
+   "suits": "rainfall == 'semi_arid' and f_slopy >= 0.15",
+   "avoid": "f_slopy + f_plain < 0.1",
+   "avoid_note": "Little gentle land.",
+   "caution": "TCBs lose much of their storage to evaporation (paper, Table 3); they work for recharge, not storage.",
+   "addresses": [
+    "groundwater.recharge_opportunity",
+    "groundwater.water_balance_deficit",
+    "soil.erosion",
+    "drought.kharif_drought"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "rj_mjsa"
+   ],
+   "practice": [
+    "Foundation for Ecological Security (FES), Mandalgarh (Bhilwara, Rajasthan): TCBs in the paper's Mala Khera plan"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules"
+   ],
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "contour_graded_bunds",
+   "name": "Contour, graded and field bunds",
+   "side": "supply",
+   "category": "soil_moisture",
+   "what": "Earthen bunds on farm boundaries along the contour (in low rainfall and permeable soils, to hold water) or with a slight grade (in higher rainfall and clayey soils, to drain excess safely); they keep soil and moisture on the field.",
+   "where": "On farm, broad slopes of 1–10%",
+   "site_spec": "Broad slopes 6–10% on farm boundaries: contour bunding, graded bunding, ditching (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope (contour bund)",
+     "unit": "%",
+     "accepted": "1–6%",
+     "partial": "—",
+     "not_accepted": "< 1 or > 6%"
+    },
+    {
+     "parameter": "Slope (graded bund)",
+     "unit": "%",
+     "accepted": "1–10%",
+     "partial": "—",
+     "not_accepted": "< 1 or > 10%"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "≤ 2 ha",
+     "partial": "—",
+     "not_accepted": "> 2 ha"
+    },
+    {
+     "parameter": "Land use (farm bund)",
+     "unit": "—",
+     "accepted": "Single kharif, single non-kharif, double, triple cropping",
+     "partial": "Shrub/scrub, barren",
+     "not_accepted": "Trees/forest; Built-up; water in any season"
+    }
+   ],
+   "landscape": "Rainfed cropland on gentle slopes: contour bunds in semi-arid areas, graded bunds in sub-humid and humid areas and on black clay soils.",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid) >= 0.2 and f_slopy >= 0.1",
+   "avoid": "f_crop < 0.1",
+   "avoid_note": "Little cropland.",
+   "addresses": [
+    "soil.erosion",
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "soil.nutrient_deficiency",
+    "productivity.declining_intensity"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "nmsa_rad",
+    "mh_pocra"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "mgnrega_samarthya2024"
+   ],
+   "practice": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null
+  },
+  {
+   "id": "stone_bunding",
+   "name": "Stone bunding and stone terraces",
+   "side": "supply",
+   "category": "soil_moisture",
+   "what": "Bunds of field stones around waste and fallow land and stony fields; they hold soil and let water through, and bring degraded land back into use.",
+   "where": "Broad slopes (6–10%) off farm, around waste and fallow land",
+   "site_spec": "Broad slopes 6–10% off farm: stone bunding around waste and fallow lands (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "1–10%",
+     "partial": "—",
+     "not_accepted": "> 10%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1",
+     "partial": "2, 3",
+     "not_accepted": "> 3"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "≤ 1 ha",
+     "partial": "1–10 ha",
+     "not_accepted": "> 10 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "partial": "Barren, shrub/scrub, trees/forest",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Stony, sloping rainfed land and fallows: dryland and forest-fringe micro-watersheds where farmland is being abandoned.",
+   "archetypes": [
+    "rainfed_dryland",
+    "forest_fringe",
+    "pastoral"
+   ],
+   "suits": "f_sloping >= 0.2 and (degr_frac >= 0.02 or f_barren + f_shrub >= 0.1)",
+   "avoid": "f_sloping < 0.05",
+   "avoid_note": "Flat land.",
+   "addresses": [
+    "soil.erosion",
+    "productivity.farmland_abandonment",
+    "soil.nutrient_deficiency"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "mh_birsa_munda"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules"
+   ],
+   "practice": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null
+  },
+  {
+   "id": "bench_terracing",
+   "name": "Bench terraces",
+   "side": "supply",
+   "category": "soil_moisture",
+   "what": "Level steps cut into steep cultivated slopes; they stop erosion and hold water for rice and vegetables in hills.",
+   "where": "Steep cultivated slopes (over 10%)",
+   "site_spec": "On-farm bench terracing on ridges and steep slopes (paper, Table 1)",
+   "landscape": "Hill farming in humid and sub-humid tribal areas (for example Koraput, the Eastern Ghats and the Chhotanagpur plateau).",
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "forest_fringe"
+   ],
+   "suits": "terrain == 'hilly' and rainfall in ['dry_subhumid', 'humid'] and f_crop >= 0.2",
+   "avoid": "f_hill < 0.05",
+   "avoid_note": "No steep land under cultivation.",
+   "addresses": [
+    "soil.erosion",
+    "productivity.declining_intensity",
+    "productivity.farmland_abandonment"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "mgnrega_samarthya2024"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null
+  },
+  {
+   "id": "diversion_drain",
+   "name": "Diversion and drainage-soakage channels",
+   "side": "supply",
+   "category": "drainage",
+   "what": "Channels from the foothills to a stream that carry excess hill runoff around fields, preventing inundation and gullying; soakage channels also let part of it infiltrate.",
+   "where": "Foothills to the nearest stream, along field edges",
+   "site_spec": "Diversion drains start at the foothills and end in a stream (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "0–6%",
+     "partial": "—",
+     "not_accepted": "> 6%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "2–6",
+     "partial": "—",
+     "not_accepted": "—"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "2–40 ha",
+     "partial": "40–250 ha",
+     "not_accepted": "> 250 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "partial": "Trees/forest, built-up, barren, shrub/scrub",
+     "not_accepted": "Water in any season"
+    }
+   ],
+   "landscape": "Farmland below hills in humid and sub-humid areas, and canal commands or plains with waterlogging and flooding.",
+   "archetypes": [
+    "canal_irrigated",
+    "rainfed_rice_subhumid",
+    "tank_irrigated"
+   ],
+   "suits": "rainfall in ['dry_subhumid', 'humid'] or canal == 'canal_present'",
+   "addresses": [
+    "irrigation.waterlogging",
+    "flood_exposure",
+    "soil.erosion"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_cadwm",
+    "fmbap"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules"
+   ],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null
+  },
+  {
+   "id": "in_situ_moisture",
+   "name": "In-situ moisture conservation (ridges and furrows, broad beds, mulching)",
+   "side": "supply",
+   "category": "soil_moisture",
+   "what": "Field practices that keep rain where it falls: conservation furrows, ridge-and-furrow and broad-bed-and-furrow layouts, dead furrows, residue mulch and deep summer ploughing.",
+   "where": "On farm, rainfed cropland",
+   "landscape": "Rainfed dryland in semi-arid and dry sub-humid climates, especially black (vertisol) and red soils with dry spells during kharif.",
+   "archetypes": [
+    "rainfed_dryland"
+   ],
+   "suits": "nz(share_rainfed_dryland) >= 0.2 and rainfall in ['semi_arid', 'dry_subhumid']",
+   "avoid": "f_crop < 0.1",
+   "avoid_note": "Little cropland.",
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "soil.erosion",
+    "soil.nutrient_deficiency"
+   ],
+   "schemes": [
+    "nmsa_rad",
+    "natural_farming",
+    "ap_apcnf",
+    "mh_pocra"
+   ],
+   "practice": [
+    "Andhra Pradesh Community-managed Natural Farming (Rythu Sadhikara Samstha): year-round soil cover, mulching in Anantapur's dry farms"
+   ],
+   "sources": [
+    "drought_manual",
+    "crida_anantapur",
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "farm_pond",
+   "name": "Farm ponds (unlined)",
+   "side": "supply",
+   "category": "storage",
+   "what": "Dug ponds on a farmer's field that store runoff for one or two protective irrigations during kharif dry spells and for rabi nursery or vegetables. The paper scores sites by catchment area, natural depression and distance to an upstream drainage line, and projects the number of fillings and irrigation cycles.",
+   "where": "On farm, broad slopes up to 6%, near a drainage line",
+   "site_spec": "Farm pond (5% model), 30-40 model, tanks, khadins/johads: broad slopes 6–10% on farm, catchment < 2 ha (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "0–6%",
+     "partial": "—",
+     "not_accepted": "> 6%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "2–6",
+     "partial": "—",
+     "not_accepted": "—"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "1–2 ha",
+     "partial": "—",
+     "not_accepted": "< 1 or > 2 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Single kharif, single non-kharif, croplands, shrub/scrub, barren, double cropping",
+     "partial": "—",
+     "not_accepted": "Trees/forest; triple cropping; Built-up; water in any season"
+    }
+   ],
+   "landscape": "Rainfed farms with dry spells in kharif, on gentle land with fine-textured soils that hold water; most useful where groundwater is scarce or saline. Pair with recharge works upstream (the paper's integrated planning delineates the upstream area that feeds a pond within the 120-day monsoon).",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "tank_irrigated"
+   ],
+   "suits": "nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid) >= 0.2 and f_plain + f_slopy >= 0.3",
+   "avoid": "f_plain + f_slopy < 0.1",
+   "avoid_note": "Almost all land steeper than 6%.",
+   "caution": "In over-exploited blocks, ponds (especially lined ones) are often filled from borewells and used as storage of groundwater, which speeds depletion (Prasad et al. 2022). Ponds in hard rock need upstream recharge to fill reliably.",
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "irrigation.rabi_water_shortfall",
+    "livestock_water_scarcity",
+    "fishery_potential",
+    "productivity.declining_intensity"
+   ],
+   "addresses_wb": [
+    "wb.inflow_shortfall"
+   ],
+   "wb_types": [
+    "farm_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "mh_magel_shettale",
+    "rj_khet_talai",
+    "up_khet_talab",
+    "jh_nilambar",
+    "ap_apdmp",
+    "pmksy_pdmc"
+   ],
+   "practice": [
+    "Utthan, Bhavnagar (Gujarat) and FES, Anugul (Odisha): farm and community ponds in the paper's village plans"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "crida_farmponds",
+    "prasad2022"
+   ]
+  },
+  {
+   "id": "five_percent_model",
+   "name": "5% model pits",
+   "side": "supply",
+   "category": "storage",
+   "what": "A pit dug in the lowest corner of each paddy field, taking about 5% of its area; it catches runoff and seepage, saves the transplanted crop in dry spells and recharges groundwater.",
+   "where": "On farm, upland and medium-land paddy fields",
+   "site_spec": "Farm pond (5% model): broad slopes, catchment < 2 ha (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "0–6%",
+     "partial": "—",
+     "not_accepted": "> 6%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "≤ 2 ha",
+     "partial": "2–10 ha",
+     "not_accepted": "> 10 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping, barren, shrub/scrub, trees/forest",
+     "partial": "—",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Rainfed rice uplands in the sub-humid east (Chhotanagpur plateau, Eastern Ghats): Jharkhand, Odisha, West Bengal.",
+   "archetypes": [
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "nz(share_rainfed_rice_subhumid) >= 0.2 and rainfall in ['dry_subhumid', 'humid']",
+   "avoid": "rainfall == 'semi_arid' and nz(share_rainfed_rice_subhumid) < 0.05",
+   "avoid_note": "Dry climate without rainfed rice.",
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "productivity.rice_fallow_opportunity",
+    "groundwater.recharge_opportunity"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "jh_nilambar",
+    "jh_birsa_harit"
+   ],
+   "practice": [
+    "PRADAN in Jharkhand and West Bengal: the 5% model for rainfed paddy uplands"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "mgnrega_samarthya2024"
+   ],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null
+  },
+  {
+   "id": "model_30_40",
+   "name": "30×40 model",
+   "side": "supply",
+   "category": "storage",
+   "what": "Uplands divided into 30 × 40 ft plots, each with a small pit at its lowest corner and bunds around it; the whole slope is treated so that most rain infiltrates, reviving upland cultivation and tree crops.",
+   "where": "Upland slopes of 3–10%",
+   "site_spec": "30-40 model on broad slopes, catchment < 2 ha (paper, Table 1)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "3–10%",
+     "partial": "—",
+     "not_accepted": "< 3 or > 10%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "2–6",
+     "partial": "—",
+     "not_accepted": "—"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "1–10 ha",
+     "partial": "—",
+     "not_accepted": "< 1 or > 10 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Single kharif, single non-kharif, double, triple cropping, barren, shrub/scrub",
+     "partial": "Trees/forest",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Degraded rainfed uplands in the sub-humid east and in dryland plateaus, especially land left fallow.",
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "rainfed_dryland",
+    "tree_crops"
+   ],
+   "suits": "f_slopy >= 0.2 and rainfall in ['dry_subhumid', 'humid'] and (degr_frac >= 0.01 or f_barren + f_shrub >= 0.1)",
+   "avoid": "f_slopy + f_hill < 0.05",
+   "avoid_note": "No upland slopes.",
+   "addresses": [
+    "productivity.farmland_abandonment",
+    "soil.erosion",
+    "drought.kharif_drought",
+    "agroforestry_opportunity"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "jh_birsa_harit",
+    "jh_nilambar"
+   ],
+   "practice": [
+    "PRADAN, Purulia (West Bengal) and Jharkhand: the 30×40 model for upland development"
+   ],
+   "sources": [
+    "structure_rules",
+    "corestack_toolkit2026"
+   ],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null
+  },
+  {
+   "id": "community_pond",
+   "name": "Community ponds and new tanks (incl. Amrit Sarovar)",
+   "side": "supply",
+   "category": "storage",
+   "what": "Village ponds of about a hectare on a second- or higher-order drainage line, used for irrigation, livestock, fish and recharge, maintained by a user group.",
+   "where": "Drainage line, gentle land, 10–40 ha catchment",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "0–6%",
+     "partial": "—",
+     "not_accepted": "> 6%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "2–6",
+     "partial": "—",
+     "not_accepted": "—"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "10–40 ha",
+     "partial": "40–100 ha",
+     "not_accepted": "< 10 or > 100 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "partial": "Barren, shrub/scrub, trees/forest",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Villages with few waterbodies that hold water into rabi, livestock and fishery needs, on gentle land; in the paper's Baragotha (Anugul) plan a community pond fills about 12 times a monsoon.",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "pastoral",
+    "tank_irrigated"
+   ],
+   "suits": "nz(swb_rabi_persist) < 0.3 and f_plain + f_slopy >= 0.3",
+   "avoid": "f_plain + f_slopy < 0.1",
+   "avoid_note": "Little gentle land.",
+   "caution": "Site it where runoff reaches it but floods will not breach it; agree on users and maintenance before digging.",
+   "addresses": [
+    "livestock_water_scarcity",
+    "drought.kharif_drought",
+    "fishery_potential",
+    "waterbody_shrinkage",
+    "drinking_water.scarcity",
+    "irrigation.rabi_water_shortfall"
+   ],
+   "addresses_wb": [
+    "wb.livestock_summer_water"
+   ],
+   "wb_types": [
+    "village_pond",
+    "headwater_pond",
+    "small_onstream_pond"
+   ],
+   "schemes": [
+    "amrit_sarovar",
+    "mgnrega_nrm",
+    "jsa_catch_the_rain",
+    "pmmsy"
+   ],
+   "practice": [
+    "FES, Anugul (Odisha): community pond in the paper's Baragotha plan"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "structure_rules",
+    "amrit_sarovar_pib2025"
+   ],
+   "site_spec": null
+  },
+  {
+   "id": "traditional_harvesting",
+   "name": "Traditional runoff harvesting: johads, nadis, khadins, bandharas",
+   "side": "supply",
+   "category": "storage",
+   "what": "Earthen crescent bunds (johads), village ponds (nadis), runoff-farming bunds (khadins) and diversion weirs (bandharas, phad systems) built and managed by communities, revived with local knowledge.",
+   "where": "Drainage lines and valley floors in dry regions",
+   "site_spec": "Khadins/johads on broad slopes (Table 1); nadis and bandharas on stream order 3+ (paper, Table 1)",
+   "landscape": "Semi-arid and arid areas with short, intense monsoons: Rajasthan (johads, nadis, khadins) and the Deccan (bandharas).",
+   "archetypes": [
+    "rainfed_dryland",
+    "pastoral"
+   ],
+   "suits": "rainfall == 'semi_arid'",
+   "avoid": "rainfall == 'humid'",
+   "avoid_note": "Humid climate: other structures fit better.",
+   "addresses": [
+    "livestock_water_scarcity",
+    "drinking_water.scarcity",
+    "groundwater.recharge_opportunity",
+    "drought.kharif_drought",
+    "fodder.commons_degradation"
+   ],
+   "addresses_wb": [
+    "wb.inflow_shortfall",
+    "wb.livestock_summer_water"
+   ],
+   "wb_types": [
+    "village_pond",
+    "headwater_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "rj_mjsa",
+    "jsa_catch_the_rain",
+    "amrit_sarovar"
+   ],
+   "practice": [
+    "Tarun Bharat Sangh, Alwar (Rajasthan): community-built johads that revived seasonal rivers",
+    "Seva Mandir, Udaipur: anicuts and pasture with village institutions"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "cazri_watershed2024",
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "caution": null
+  },
+  {
+   "id": "dug_well_recharge",
+   "name": "Dug-well and borewell recharge",
+   "side": "supply",
+   "category": "recharge",
+   "what": "Runoff from fields or roofs led through a silt trap and filter into an open well or around a borewell, recharging the aquifer that the well draws on.",
+   "where": "Existing wells on farms and in villages",
+   "landscape": "Hard-rock areas where farms irrigate from dug wells and water levels fall in summer: groundwater-irrigated and orchard micro-watersheds in over-exploited or critical blocks.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "tree_crops"
+   ],
+   "suits": "aquifer == 'hard_rock' and nz(share_groundwater_irrigated) + nz(share_tree_crops) >= 0.15 and nz(soge_stage) >= 70",
+   "avoid": "aquifer == 'saline' or gw_category == 'saline_gw'",
+   "avoid_note": "Saline aquifer.",
+   "caution": "Filter well: polluted runoff (pesticides, dung) goes straight into the aquifer.",
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.water_balance_deficit",
+    "drinking_water.scarcity",
+    "groundwater.irrigation_expansion"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "atal_bhujal",
+    "jsa_catch_the_rain"
+   ],
+   "practice": [
+    "Saurashtra (Gujarat): farmers' well-recharge movement",
+    "Aga Khan Rural Support Programme (India) in Gujarat: well recharge in coastal and hard-rock areas"
+   ],
+   "sources": [
+    "cgwb_recharge2020",
+    "shah2009"
+   ],
+   "site_rules": [],
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "recharge_pits_shafts",
+   "name": "Recharge pits, soak pits and recharge shafts",
+   "side": "supply",
+   "category": "recharge",
+   "what": "Pits and shafts filled with gravel that let runoff and grey water reach permeable layers; shafts pierce a clay cap in alluvium. Bhungroo-type systems store excess monsoon water underground in waterlogged fields for rabi use.",
+   "where": "Farm corners, village lanes, schools, low spots that waterlog",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "0–6%",
+     "partial": "—",
+     "not_accepted": "> 6%"
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "2–6",
+     "partial": "—",
+     "not_accepted": "—"
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "2–10 ha",
+     "partial": "—",
+     "not_accepted": "< 2 or > 10 ha"
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "0–60 m",
+     "partial": "60–150 m",
+     "not_accepted": "> 150 m"
+    },
+    {
+     "parameter": "Land use (recharge pits)",
+     "unit": "—",
+     "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
+     "partial": "Barren, shrub/scrub, trees/forest",
+     "not_accepted": "Built-up; water in any season"
+    }
+   ],
+   "landscape": "Alluvial plains with a clay layer, settlements and waterlogged low spots; peri-urban villages with paved surfaces.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "peri_urban",
+    "canal_irrigated"
+   ],
+   "suits": "aquifer == 'alluvium' or nz(share_peri_urban) >= 0.1",
+   "avoid": "aquifer == 'saline'",
+   "avoid_note": "Saline aquifer.",
+   "caution": "Arsenic and fluoride areas (for example Ballia's Ganga–Ghaghara alluvium): recharge only clean water and test wells.",
+   "addresses": [
+    "groundwater.over_extraction",
+    "irrigation.waterlogging",
+    "drinking_water.scarcity",
+    "urban_encroachment"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "jsa_catch_the_rain",
+    "jjm",
+    "up_groundwater_act"
+   ],
+   "practice": [
+    "Naireeta Services, Gujarat: Bhungroo systems that store excess monsoon water underground"
+   ],
+   "sources": [
+    "structure_rules",
+    "cgwb_recharge2020",
+    "nih_ballia"
+   ],
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "rooftop_rwh",
+   "name": "Rooftop rainwater harvesting",
+   "side": "supply",
+   "category": "recharge",
+   "what": "Roof water stored in tanks for drinking or led to recharge pits; mandatory for new buildings in many states.",
+   "where": "Households, schools, public buildings",
+   "landscape": "Peri-urban villages and towns, hilly villages with poor wells, and places where groundwater is saline or fluoride-affected (stored roof water for drinking).",
+   "archetypes": [
+    "peri_urban"
+   ],
+   "suits": "nz(share_peri_urban) >= 0.1 or f_built >= 0.05 or gw_category == 'saline_gw'",
+   "addresses": [
+    "drinking_water.scarcity",
+    "drinking_water.salinity",
+    "urban_encroachment"
+   ],
+   "schemes": [
+    "jjm",
+    "jsa_catch_the_rain",
+    "pmay_g"
+   ],
+   "sources": [
+    "cgwb_recharge2020",
+    "jjm_guidelines"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "desilting",
+   "name": "Desilting, with silt taken to fields",
+   "side": "supply",
+   "category": "waterbody",
+   "what": "Removing silt from tanks and ponds to restore storage, and spreading the fertile silt on farms; done by the community or with machines after the waterbody dries.",
+   "where": "Existing tanks and ponds",
+   "landscape": "Tanks and ponds in eroding catchments (sloping land, high runoff, degraded farmland) whose storage has fallen; fields nearby that benefit from silt.",
+   "archetypes": [
+    "tank_irrigated",
+    "rainfed_dryland",
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "f_sloping >= 0.3 or degr_frac >= 0.02 or runoff_ratio >= 0.25",
+   "caution": "Test silt for contamination near towns; do not dig through the clay bed; treat the catchment or the silt returns in a few years.",
+   "addresses": [
+    "waterbody_shrinkage",
+    "soil.nutrient_deficiency"
+   ],
+   "addresses_wb": [
+    "wb.siltation",
+    "wb.inflow_shortfall",
+    "wb.livestock_summer_water",
+    "wb.fishery_constraint"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "headwater_pond",
+    "village_pond",
+    "farm_pond",
+    "canal_fed"
+   ],
+   "schemes": [
+    "mh_gaalmukt",
+    "amrit_sarovar",
+    "rrr_waterbodies",
+    "mgnrega_nrm",
+    "jsa_catch_the_rain",
+    "mh_jalyukt"
+   ],
+   "practice": [
+    "DHAN Foundation (Tamil Nadu, Andhra Pradesh): tank-user associations that desilt and manage tanks",
+    "Kudimaramathu (Tamil Nadu) and Mission Kakatiya (Telangana): state tank-desilting drives with farmer participation"
+   ],
+   "sources": [
+    "palanisami_tanks",
+    "rrr_guidelines2022",
+    "amrit_sarovar_pib2025"
+   ],
+   "site_rules": [],
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "inlet_restoration",
+   "name": "Restoring inlet and supply channels",
+   "side": "supply",
+   "category": "waterbody",
+   "what": "Clearing, re-cutting and protecting the channels that bring runoff or canal water into a tank, and removing obstructions such as roads, fields or walls built across them.",
+   "where": "Feeder channels of tanks and ponds",
+   "landscape": "Tanks with large catchments that no longer fill, in hard-rock tank-irrigated areas and canal tails.",
+   "archetypes": [
+    "tank_irrigated",
+    "canal_irrigated"
+   ],
+   "suits": "nz(share_tank_irrigated) + nz(share_canal_irrigated) >= 0.1",
+   "addresses": [
+    "waterbody_shrinkage"
+   ],
+   "addresses_wb": [
+    "wb.inflow_shortfall",
+    "wb.canal_tail_shortfall",
+    "wb.drought_failure"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "village_pond",
+    "canal_fed"
+   ],
+   "schemes": [
+    "rrr_waterbodies",
+    "mgnrega_nrm",
+    "amrit_sarovar",
+    "pmksy_cadwm"
+   ],
+   "practice": [
+    "DHAN Foundation: restoring supply channels in tank cascades"
+   ],
+   "sources": [
+    "mosse2003",
+    "rrr_guidelines2022"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "bund_sluice_repair",
+   "name": "Repairing bunds, sluices and waste weirs",
+   "side": "supply",
+   "category": "waterbody",
+   "what": "Strengthening and raising tank bunds, repairing or replacing leaking sluices and outlets, and rebuilding waste weirs so that floods pass without breaching.",
+   "where": "Tank and pond structures",
+   "landscape": "Older tanks that lose water early or breached in recent years.",
+   "archetypes": [
+    "tank_irrigated"
+   ],
+   "suits": "nz(share_tank_irrigated) >= 0.05 or swb_frac >= 0.02",
+   "addresses": [
+    "waterbody_shrinkage",
+    "flood_exposure"
+   ],
+   "addresses_wb": [
+    "wb.poor_retention",
+    "wb.sudden_loss"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "village_pond",
+    "headwater_pond",
+    "canal_fed"
+   ],
+   "schemes": [
+    "rrr_waterbodies",
+    "mgnrega_nrm",
+    "amrit_sarovar",
+    "od_oiipcra"
+   ],
+   "sources": [
+    "rrr_guidelines2022",
+    "palanisami_tanks"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "encroachment_protection",
+   "name": "Protecting waterbody beds and catchments from encroachment",
+   "side": "supply",
+   "category": "waterbody",
+   "what": "Demarcating the full tank level and the bed in revenue records, removing encroachments, notifying waterbodies under the wetland rules and keeping a buffer free of building.",
+   "where": "Waterbody beds, foreshores and feeder channels",
+   "landscape": "Peri-urban and intensively farmed areas where beds are farmed or built on.",
+   "archetypes": [
+    "peri_urban",
+    "tank_irrigated"
+   ],
+   "suits": "nz(share_peri_urban) >= 0.1 or urb_frac >= 0.01 or nz(share_tank_irrigated) >= 0.05",
+   "addresses": [
+    "waterbody_shrinkage",
+    "urban_encroachment"
+   ],
+   "addresses_wb": [
+    "wb.siltation",
+    "wb.sudden_loss"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "village_pond",
+    "headwater_pond"
+   ],
+   "schemes": [
+    "amrit_sarovar",
+    "rrr_waterbodies"
+   ],
+   "sources": [
+    "wetland_rules2017",
+    "wbc2023"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "tank_cascade",
+   "name": "Restoring tank cascades",
+   "side": "supply",
+   "category": "waterbody",
+   "what": "Treating a chain of tanks along a stream as one system: restoring the links between them so that surplus from one fills the next, and sharing water across villages.",
+   "where": "Chains of tanks on one drainage line",
+   "landscape": "Hard-rock tank-irrigated landscapes of the Deccan and south India (for example Ananthapur and Chittoor).",
+   "archetypes": [
+    "tank_irrigated"
+   ],
+   "suits": "nz(share_tank_irrigated) >= 0.1 and aquifer == 'hard_rock'",
+   "addresses": [
+    "waterbody_shrinkage",
+    "irrigation.rabi_water_shortfall"
+   ],
+   "addresses_wb": [
+    "wb.inflow_shortfall",
+    "wb.drought_failure"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond"
+   ],
+   "schemes": [
+    "rrr_waterbodies",
+    "mgnrega_nrm"
+   ],
+   "practice": [
+    "DHAN Foundation: cascade-level tank development (Vayalagam)"
+   ],
+   "sources": [
+    "mosse2003",
+    "palanisami_tanks"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "pond_deepening_pocket",
+   "name": "Deepening a pocket of the pond for summer water",
+   "side": "supply",
+   "category": "waterbody",
+   "what": "Digging one deeper section of a shallow pond (or a separate dug-out beside it) so that some water lasts through summer for animals and fish, with a ramp or trough for cattle.",
+   "where": "Village and headwater ponds that dry by February",
+   "landscape": "Pastoral and dryland villages where animals depend on ponds in April–June.",
+   "archetypes": [
+    "pastoral",
+    "rainfed_dryland"
+   ],
+   "suits": "nz(share_pastoral) >= 0.1 or tlu_per_ha >= 0.5",
+   "addresses": [
+    "livestock_water_scarcity"
+   ],
+   "addresses_wb": [
+    "wb.livestock_summer_water",
+    "wb.fishery_constraint",
+    "wb.poor_retention"
+   ],
+   "wb_types": [
+    "village_pond",
+    "headwater_pond",
+    "small_onstream_pond"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "amrit_sarovar"
+   ],
+   "sources": [
+    "igfri_vision",
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "pond_lining",
+   "name": "Lining farm ponds",
+   "side": "supply",
+   "category": "waterbody",
+   "what": "Plastic (geomembrane) or clay lining of farm ponds in permeable soils so that stored water lasts long enough for protective irrigation.",
+   "where": "Farm ponds in sandy, gravelly or fractured ground",
+   "landscape": "Light-textured soils and fractured rock where unlined ponds lose water within weeks; only where groundwater is not over-exploited.",
+   "archetypes": [
+    "rainfed_dryland",
+    "tree_crops"
+   ],
+   "suits": "gw_category in ['safe', 'semi_critical'] and rainfall == 'semi_arid'",
+   "avoid": "gw_category in ['over_exploited', 'critical']",
+   "avoid_note": "Over-exploited or critical block: lined ponds are typically filled from borewells and add to depletion.",
+   "caution": "Lining removes the recharge an unlined pond provides; subsidise only with an undertaking not to fill from borewells.",
+   "addresses_wb": [
+    "wb.poor_retention"
+   ],
+   "wb_types": [
+    "farm_pond"
+   ],
+   "schemes": [
+    "mh_magel_shettale",
+    "rj_khet_talai",
+    "pmksy_pdmc"
+   ],
+   "sources": [
+    "prasad2022",
+    "crida_farmponds"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "addresses": [],
+   "site_spec": null
+  },
+  {
+   "id": "commons_pasture",
+   "name": "Pasture and commons restoration",
+   "side": "supply",
+   "category": "restoration",
+   "what": "Protecting village commons (social or physical fencing), seeding native grasses and legumes, soil and water works, and rotational grazing rules agreed by the village; restores fodder and infiltration.",
+   "where": "Village commons, grazing land, degraded scrub",
+   "landscape": "Pastoral and dryland villages with open commons under heavy grazing.",
+   "archetypes": [
+    "pastoral",
+    "rainfed_dryland",
+    "forest_fringe"
+   ],
+   "suits": "f_commons >= 0.1 and (nz(share_pastoral) >= 0.1 or tlu_per_ha >= 0.5)",
+   "avoid": "f_commons < 0.02",
+   "avoid_note": "Almost no open commons.",
+   "addresses": [
+    "fodder.commons_degradation",
+    "fodder.grazing_pressure",
+    "soil.erosion",
+    "livestock_water_scarcity"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "rj_pasture",
+    "nlm",
+    "ap_sheep"
+   ],
+   "practice": [
+    "Foundation for Ecological Security (Rajasthan, Odisha, Andhra Pradesh): commons restoration with village institutions",
+    "Seva Mandir, Udaipur: pasture land development"
+   ],
+   "sources": [
+    "igfri_vision",
+    "wri_restoration"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "forest_regeneration",
+   "name": "Assisted natural regeneration and community forest management",
+   "side": "supply",
+   "category": "restoration",
+   "what": "Protecting degraded forest so rootstock regenerates, gap planting with native species, and community forest-rights management plans that set harvest and grazing rules.",
+   "where": "Degraded forest and forest fringe",
+   "landscape": "Forest-fringe micro-watersheds with tree-cover loss or degradation; tribal areas with community forest rights.",
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "suits": "f_forest >= 0.1 and (tcd_frac >= 0.01 or nz(share_forest_fringe) >= 0.15)",
+   "avoid": "f_forest < 0.02",
+   "avoid_note": "Almost no forest.",
+   "addresses": [
+    "forest.tree_cover_loss",
+    "forest.fringe_degradation",
+    "soil.erosion"
+   ],
+   "schemes": [
+    "green_india",
+    "campa",
+    "fra_cfr",
+    "dajgua",
+    "pmvdy"
+   ],
+   "practice": [
+    "Community forest rights management by gram sabhas in Odisha and Maharashtra (for example Mendha Lekha, Gadchiroli)"
+   ],
+   "sources": [
+    "fra2006",
+    "isfr2023",
+    "wri_restoration"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "fire_management",
+   "name": "Community fire management",
+   "side": "supply",
+   "category": "restoration",
+   "what": "Fire lines cleared before the dry season, village fire watchers, controlled burning where traditional, and rules against setting fire for fresh grass or mahua collection.",
+   "where": "Forest and scrub",
+   "landscape": "Dry deciduous forest-fringe areas with frequent fires (Eastern Ghats, central India).",
+   "archetypes": [
+    "forest_fringe"
+   ],
+   "suits": "fire_per_100km2 >= 5 and f_forest + f_shrub >= 0.15",
+   "avoid": "f_forest + f_shrub < 0.05",
+   "avoid_note": "Little forest or scrub.",
+   "addresses": [
+    "forest.fire",
+    "forest.tree_cover_loss"
+   ],
+   "schemes": [
+    "green_india",
+    "campa",
+    "fra_cfr"
+   ],
+   "sources": [
+    "fsi_fire"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "agroforestry",
+   "name": "Agroforestry, bund plantations and orchards (wadi)",
+   "side": "supply",
+   "category": "restoration",
+   "what": "Trees on bunds and field edges, small fruit-tree orchards with intercrops on degraded or fallow land (the wadi model), and fodder trees; they add income, organic matter and soil cover.",
+   "where": "Field bunds, fallows, homesteads",
+   "landscape": "Rainfed farms with fallows or degraded land, tribal areas, and farms near markets for fruit.",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "tree_crops",
+    "forest_fringe"
+   ],
+   "suits": "degr_frac >= 0.01 or f_barren + f_shrub >= 0.1 or nz(share_tree_crops) >= 0.1",
+   "addresses": [
+    "agroforestry_opportunity",
+    "productivity.farmland_abandonment",
+    "soil.nutrient_deficiency",
+    "soil.erosion"
+   ],
+   "schemes": [
+    "smaf",
+    "midh",
+    "mgnrega_nrm",
+    "jh_birsa_harit",
+    "rj_forestry",
+    "mh_fundkar"
+   ],
+   "practice": [
+    "BAIF: the wadi (tree-based farming) model with tribal families in Gujarat and Maharashtra"
+   ],
+   "sources": [
+    "wri_restoration",
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "riparian_buffer",
+   "name": "Riparian buffers and streambank planting",
+   "side": "supply",
+   "category": "restoration",
+   "what": "Native trees, grasses and bamboo along streams and river banks; they stabilise banks, filter silt and keep the stream shaded.",
+   "where": "Banks of streams and rivers",
+   "landscape": "Micro-watersheds with a river or many streams, eroding banks or sand mining.",
+   "archetypes": [
+    "forest_fringe",
+    "rainfed_rice_subhumid",
+    "canal_irrigated"
+   ],
+   "suits": "river_present >= 1",
+   "addresses": [
+    "soil.erosion",
+    "flood_exposure"
+   ],
+   "addresses_wb": [
+    "wb.river_dry_season_loss"
+   ],
+   "wb_types": [
+    "river_reach"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "green_india",
+    "campa"
+   ],
+   "sources": [
+    "wri_restoration",
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "water_budgeting",
+   "name": "Village crop-water budgeting and water security plans",
+   "side": "demand",
+   "category": "governance",
+   "what": "The village estimates water available from rain, surface storage and groundwater, and the water its crops need, and agrees a crop plan for the season. The paper's impact projection shows that at landscape scale changing the cropping pattern did far more than new structures (about 92% against 8% of the deficit in one micro-watershed).",
+   "where": "Village or micro-watershed",
+   "landscape": "Groundwater-irrigated and dryland micro-watersheds with a water-balance deficit or over-exploited groundwater; also where new structures are planned, to set expectations.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "tree_crops",
+    "rainfed_dryland",
+    "canal_irrigated"
+   ],
+   "suits": "nz(soge_stage) >= 70 or et_p_ratio >= 0.9",
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "groundwater.water_balance_deficit",
+    "irrigation.rabi_water_shortfall",
+    "drinking_water.scarcity"
+   ],
+   "addresses_wb": [
+    "wb.drought_failure",
+    "wb.irrigation_underuse"
+   ],
+   "schemes": [
+    "atal_bhujal",
+    "mh_pocra",
+    "mgnrega_nrm"
+   ],
+   "practice": [
+    "Watershed Organisation Trust (WOTR), Maharashtra: water budgeting with village water stewardship",
+    "FES India Observatory: crop water budgeting tool",
+    "Atal Bhujal Yojana: gram-panchayat water security plans"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "fes_budgeting2025",
+    "atal_demand2021",
+    "mojs_croppattern2021"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "crop_diversification",
+   "name": "Shifting to less water-intensive crops",
+   "side": "demand",
+   "category": "cropping",
+   "what": "Moving part of the area from paddy, sugarcane or banana to millets, pulses, oilseeds or short-duration varieties. The paper's crop evapotranspiration (kharif): paddy 262 mm, pigeon pea 325 mm, cotton 281 mm, maize 180 mm, millet 150 mm, sorghum 136 mm, green gram 127 mm; shifting a quarter of the area saved about 9% of crop water.",
+   "where": "Cropland, decided by farmers and the village",
+   "landscape": "Groundwater-irrigated and canal areas in over-exploited or critical blocks; rice and sugarcane in semi-arid hard rock.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "canal_irrigated",
+    "tree_crops",
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "nz(soge_stage) >= 70 and irr_share >= 0.3",
+   "caution": "Needs assured procurement or markets for the new crops; savings vanish if saved water expands the irrigated area.",
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "groundwater.water_balance_deficit",
+    "irrigation.rabi_water_shortfall",
+    "drought.kharif_drought"
+   ],
+   "schemes": [
+    "od_millets",
+    "nmeo",
+    "nfsm_trfa",
+    "atal_bhujal",
+    "natural_farming"
+   ],
+   "practice": [
+    "Odisha Millets Mission (including Koraput)",
+    "Haryana's Mera Pani Meri Virasat: incentives for leaving paddy",
+    "Hiware Bazar (Maharashtra): village ban on water-intensive crops such as sugarcane"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "fao56",
+    "mojs_croppattern2021",
+    "atal_demand2021"
+   ],
+   "site_rules": [],
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "micro_irrigation",
+   "name": "Drip and sprinkler irrigation, with a cap on irrigated area",
+   "side": "demand",
+   "category": "irrigation_efficiency",
+   "what": "Drip for orchards, sugarcane and vegetables, sprinklers for field crops; cuts application losses. Water is saved for the aquifer only if the irrigated area is not expanded.",
+   "where": "Irrigated farms",
+   "landscape": "Groundwater-irrigated farms and orchards in semi-arid hard rock (for example the Warud–Morshi orange belt in Amravati, Ananthapur's groundnut and horticulture).",
+   "archetypes": [
+    "groundwater_irrigated",
+    "tree_crops"
+   ],
+   "suits": "nz(share_groundwater_irrigated) + nz(share_tree_crops) >= 0.15",
+   "caution": "Efficiency gains are often used to expand area and increase total consumption (the irrigation-efficiency paradox, Grafton et al. 2018); pair with water budgeting or area caps.",
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "irrigation.rabi_water_shortfall"
+   ],
+   "addresses_wb": [
+    "wb.irrigation_underuse"
+   ],
+   "wb_types": [
+    "farm_pond",
+    "village_pond"
+   ],
+   "schemes": [
+    "pmksy_pdmc",
+    "midh",
+    "atal_bhujal"
+   ],
+   "sources": [
+    "grafton2018",
+    "cgwb_naquim_warud"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "conveyance_pipelines",
+   "name": "Underground pipelines and lined field channels",
+   "side": "demand",
+   "category": "irrigation_efficiency",
+   "what": "Replacing earthen field channels from tanks, canals or wells with buried pipes or lined channels, reducing seepage and evaporation and letting water reach tail fields.",
+   "where": "Tank, canal and well commands",
+   "landscape": "Canal and tank commands with long field channels and tail-end shortages; seepage-driven waterlogging.",
+   "archetypes": [
+    "canal_irrigated",
+    "tank_irrigated",
+    "groundwater_irrigated"
+   ],
+   "suits": "canal == 'canal_present' or nz(share_tank_irrigated) >= 0.05",
+   "addresses": [
+    "irrigation.rabi_water_shortfall",
+    "irrigation.waterlogging"
+   ],
+   "addresses_wb": [
+    "wb.irrigation_underuse",
+    "wb.canal_tail_shortfall"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "canal_fed",
+    "village_pond",
+    "farm_pond"
+   ],
+   "schemes": [
+    "pmksy_cadwm",
+    "pmksy_pdmc",
+    "rrr_waterbodies"
+   ],
+   "sources": [
+    "mowr_waterlogging",
+    "palanisami_tanks"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "rice_water_saving",
+   "name": "Rice water saving: SRI, alternate wetting and drying, direct seeding",
+   "side": "demand",
+   "category": "cropping",
+   "what": "System of Rice Intensification, alternate wetting and drying in irrigated rice, and direct-seeded rice instead of puddled transplanting; less water per tonne of rice.",
+   "where": "Irrigated and rainfed rice fields",
+   "landscape": "Rice-growing micro-watersheds: canal and groundwater-irrigated rice, and rainfed rice in the sub-humid east.",
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "canal_irrigated",
+    "groundwater_irrigated",
+    "tank_irrigated"
+   ],
+   "suits": "nz(share_rainfed_rice_subhumid) + nz(share_canal_irrigated) >= 0.2",
+   "addresses": [
+    "groundwater.over_extraction",
+    "irrigation.rabi_water_shortfall",
+    "irrigation.waterlogging",
+    "drought.kharif_drought"
+   ],
+   "schemes": [
+    "nfsm_trfa",
+    "natural_farming",
+    "day_nrlm"
+   ],
+   "practice": [
+    "PRADAN with SHG federations in Jharkhand and Odisha: SRI paddy"
+   ],
+   "sources": [
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "protective_irrigation",
+   "name": "Protective irrigation at critical crop stages",
+   "side": "demand",
+   "category": "irrigation_efficiency",
+   "what": "Using stored pond or tank water for one or two irrigations at sowing, flowering or grain filling during dry spells, rather than for a full second crop; the paper sizes the cycles a pond supports (for example 4 cycles of 50 mm for 3 ha of paddy).",
+   "where": "Farms below ponds and tanks",
+   "landscape": "Rainfed farms with mid-season dry spells, where ponds or tanks hold water through kharif.",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "tank_irrigated"
+   ],
+   "suits": "nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid) >= 0.2",
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing"
+   ],
+   "addresses_wb": [
+    "wb.drought_failure",
+    "wb.irrigation_underuse"
+   ],
+   "wb_types": [
+    "farm_pond",
+    "village_pond",
+    "headwater_pond",
+    "small_onstream_pond",
+    "onstream_tank"
+   ],
+   "schemes": [
+    "pmksy_pdmc",
+    "mgnrega_nrm",
+    "pmfby"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "crida_farmponds"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "groundwater_rules",
+   "name": "Community groundwater rules and monitoring",
+   "side": "demand",
+   "category": "governance",
+   "what": "Farmers measure rainfall and water levels in their wells, share the data, and agree rules: spacing and depth limits for new borewells, no-borewell zones near drinking-water sources, sharing of existing wells, and crop choices for the season.",
+   "where": "Aquifer or village",
+   "landscape": "Hard-rock aquifers in over-exploited or critical blocks with dense borewells.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "tree_crops"
+   ],
+   "suits": "gw_category in ['over_exploited', 'critical'] or nz(soge_stage) >= 90",
+   "addresses": [
+    "groundwater.over_extraction",
+    "groundwater.irrigation_expansion",
+    "drinking_water.scarcity",
+    "drinking_water.mining"
+   ],
+   "schemes": [
+    "atal_bhujal",
+    "up_groundwater_act"
+   ],
+   "practice": [
+    "Andhra Pradesh Farmer Managed Groundwater Systems (APFAMGS): hydrological monitoring by farmers in drought-prone districts",
+    "ACWADAM with partner NGOs: participatory groundwater management",
+    "Hiware Bazar (Maharashtra): village ban on new borewells"
+   ],
+   "sources": [
+    "shah2009",
+    "cgwb_gec2015"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "pim_wua",
+   "name": "Water user associations and agreed sharing (warabandi)",
+   "side": "demand",
+   "category": "governance",
+   "what": "Tank and canal users form or revive an association that schedules turns, maintains channels and collects fees; rotations reach tail-end fields.",
+   "where": "Tank and canal commands",
+   "landscape": "Canal and tank commands with unequal distribution or unused stored water.",
+   "archetypes": [
+    "canal_irrigated",
+    "tank_irrigated"
+   ],
+   "suits": "canal == 'canal_present' or nz(share_tank_irrigated) >= 0.05",
+   "addresses": [
+    "irrigation.rabi_water_shortfall",
+    "irrigation.waterlogging"
+   ],
+   "addresses_wb": [
+    "wb.irrigation_underuse",
+    "wb.canal_tail_shortfall",
+    "wb.drought_failure"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "canal_fed",
+    "small_onstream_pond",
+    "village_pond"
+   ],
+   "schemes": [
+    "pmksy_cadwm",
+    "od_oiipcra",
+    "day_nrlm"
+   ],
+   "practice": [
+    "DHAN Foundation: tank farmers' associations",
+    "Pani panchayats in Odisha"
+   ],
+   "sources": [
+    "mosse2003",
+    "wb_census_check"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "waterlogging_drainage",
+   "name": "Drainage and conjunctive use against waterlogging",
+   "side": "demand",
+   "category": "drainage",
+   "what": "Surface and sub-surface drains, pumping shallow groundwater alongside canal water (conjunctive use), bio-drainage with trees, and less water-intensive crops in seepage areas.",
+   "where": "Canal commands and low-lying land",
+   "landscape": "Canal commands and floodplains with high water tables and waterlogged fields.",
+   "archetypes": [
+    "canal_irrigated"
+   ],
+   "suits": "canal == 'canal_present' and aquifer == 'alluvium'",
+   "addresses": [
+    "irrigation.waterlogging",
+    "flood_exposure"
+   ],
+   "schemes": [
+    "pmksy_cadwm",
+    "fmbap"
+   ],
+   "sources": [
+    "mowr_waterlogging"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "rice_fallow_pulses",
+   "name": "Rabi pulses and oilseeds on rice fallows",
+   "side": "demand",
+   "category": "cropping",
+   "what": "Zero-till or relay sowing of lentil, chickpea, linseed, mustard or grass pea after kharif rice, using residual moisture with one protective irrigation at most.",
+   "where": "Rice fields left fallow after kharif",
+   "landscape": "Rainfed rice areas of the sub-humid east with land fallow in rabi (Jharkhand, Odisha, eastern UP).",
+   "archetypes": [
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "nz(share_rainfed_rice_subhumid) >= 0.15 and rainfall in ['dry_subhumid', 'humid']",
+   "addresses": [
+    "productivity.rice_fallow_opportunity",
+    "productivity.declining_intensity"
+   ],
+   "schemes": [
+    "nfsm_trfa",
+    "nmeo",
+    "jh_didi_bari"
+   ],
+   "sources": [
+    "gumma2016"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "soil_health",
+   "name": "Soil organic matter and balanced nutrients",
+   "side": "demand",
+   "category": "cropping",
+   "what": "Composting, green manure, residue retention, tank silt, natural farming practices and soil-test-based fertiliser; more organic matter holds more water in the root zone.",
+   "where": "Cropland",
+   "landscape": "Farms with low nitrogen or organic carbon, and rainfed farms where water-holding capacity limits crops.",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid",
+    "groundwater_irrigated"
+   ],
+   "suits": "nz(soil_oc_low_frac) >= 0.3 or nz(soil_n_low_frac) >= 0.3",
+   "addresses": [
+    "soil.nutrient_deficiency",
+    "drought.kharif_drought",
+    "productivity.declining_intensity"
+   ],
+   "schemes": [
+    "soil_health_card",
+    "natural_farming",
+    "ap_apcnf",
+    "mh_gaalmukt"
+   ],
+   "practice": [
+    "Andhra Pradesh Community-managed Natural Farming"
+   ],
+   "sources": [
+    "shc_ratings"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "drought_contingency",
+   "name": "Drought contingency crop plans and seed",
+   "side": "demand",
+   "category": "cropping",
+   "what": "Short-duration and drought-tolerant varieties, contingency crops for delayed monsoon, community seed banks, and crop insurance; from the district agriculture contingency plans.",
+   "where": "Rainfed cropland",
+   "landscape": "Rainfed dryland in semi-arid and dry sub-humid climates with frequent drought or delayed sowing.",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "rainfall in ['semi_arid', 'dry_subhumid'] and nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid) >= 0.2",
+   "addresses": [
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "multidimensional_vulnerability"
+   ],
+   "schemes": [
+    "pmfby",
+    "nmsa_rad",
+    "od_millets"
+   ],
+   "sources": [
+    "drought_manual",
+    "crida_anantapur",
+    "crida_udaipur"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "fodder_livestock",
+   "name": "Fodder banks, troughs and herd management",
+   "side": "demand",
+   "category": "livestock",
+   "what": "Fodder plots and banks, silage, stall-feeding of improved animals, cattle troughs fed from a source protected from contamination, and agreed grazing calendars; reduces pressure on commons and water.",
+   "where": "Village and household",
+   "landscape": "Pastoral and mixed villages with high livestock density or summer water stress for animals.",
+   "archetypes": [
+    "pastoral",
+    "rainfed_dryland"
+   ],
+   "suits": "tlu_per_ha >= 0.5 or nz(share_pastoral) >= 0.1",
+   "addresses": [
+    "fodder.grazing_pressure",
+    "livestock_water_scarcity",
+    "fodder.commons_degradation"
+   ],
+   "addresses_wb": [
+    "wb.livestock_summer_water"
+   ],
+   "schemes": [
+    "nlm",
+    "ap_sheep",
+    "mgnrega_nrm"
+   ],
+   "sources": [
+    "igfri_vision",
+    "fao_tlu"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "drinking_source",
+   "name": "Protecting and recharging drinking-water sources",
+   "side": "supply",
+   "category": "drinking_water",
+   "what": "Recharge structures above drinking-water wells and borewells, no-irrigation-pumping zones around them, village water safety plans and testing; Jal Jeevan Mission's source-sustainability works.",
+   "where": "Village drinking-water sources",
+   "landscape": "Villages with low piped-water coverage or sources that fail in summer, especially in over-exploited hard-rock blocks.",
+   "archetypes": [
+    "groundwater_irrigated",
+    "rainfed_dryland",
+    "forest_fringe"
+   ],
+   "suits": "nz(piped_water_coverage) < 0.5 or nz(soge_stage) >= 90",
+   "addresses": [
+    "drinking_water.scarcity",
+    "drinking_water.mining",
+    "drinking_water.salinity"
+   ],
+   "schemes": [
+    "jjm",
+    "atal_bhujal",
+    "jsa_catch_the_rain",
+    "od_jalanidhi"
+   ],
+   "practice": [
+    "Gram Vikas, Odisha: village piped water with community management"
+   ],
+   "sources": [
+    "jjm_guidelines",
+    "cgwb_recharge2020"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "water_treatment",
+   "name": "Safe water for saline, fluoride or arsenic areas",
+   "side": "supply",
+   "category": "drinking_water",
+   "what": "Community treatment plants (for example reverse osmosis or defluoridation), arsenic-removal units or deeper safe aquifers, and stored roof water for drinking.",
+   "where": "Villages with poor groundwater quality",
+   "landscape": "Saline aquifers, fluoride belts (hard rock in Rajasthan and Andhra Pradesh) and arsenic in the Ganga alluvium (for example Ballia).",
+   "archetypes": [
+    "groundwater_irrigated",
+    "rainfed_dryland"
+   ],
+   "suits": "aquifer == 'saline' or gw_category == 'saline_gw'",
+   "addresses": [
+    "drinking_water.salinity",
+    "drinking_water.scarcity"
+   ],
+   "schemes": [
+    "jjm"
+   ],
+   "sources": [
+    "jjm_guidelines",
+    "nih_ballia"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "flood_adaptation",
+   "name": "Flood adaptation: raised platforms, tolerant rice, drainage and safe water",
+   "side": "supply",
+   "category": "drainage",
+   "what": "Raised homestead and hand-pump platforms, submergence-tolerant rice (Swarna-Sub1), clearing drainage lines, maintaining embankments and early warning.",
+   "where": "Floodplain villages",
+   "landscape": "Floodplains of large rivers (for example the Ganga–Ghaghara around Ballia).",
+   "archetypes": [
+    "canal_irrigated",
+    "rainfed_rice_subhumid",
+    "groundwater_irrigated"
+   ],
+   "suits": "river_present >= 1 and terrain == 'plain' and aquifer == 'alluvium'",
+   "addresses": [
+    "flood_exposure",
+    "irrigation.waterlogging"
+   ],
+   "schemes": [
+    "fmbap",
+    "up_flood",
+    "pmfby"
+   ],
+   "practice": [
+    "Megh Pyne Abhiyan, north Bihar: safe drinking water and sanitation in flood-prone villages"
+   ],
+   "sources": [
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "green_zoning",
+   "name": "Keeping recharge zones and waterbodies free of building",
+   "side": "demand",
+   "category": "governance",
+   "what": "Mapping recharge zones, drainage lines and waterbodies in village and town plans, and keeping them out of new layouts; mandatory rainwater harvesting in new buildings.",
+   "where": "Peri-urban villages and towns",
+   "landscape": "Peri-urban micro-watersheds where farmland and waterbodies are being built on.",
+   "archetypes": [
+    "peri_urban"
+   ],
+   "suits": "nz(share_peri_urban) >= 0.1 or urb_frac >= 0.01",
+   "addresses": [
+    "urban_encroachment",
+    "waterbody_shrinkage",
+    "flood_exposure"
+   ],
+   "schemes": [
+    "amrit_sarovar"
+   ],
+   "sources": [
+    "wetland_rules2017",
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "fishery_development",
+   "name": "Inland fishery in seasonal ponds and tanks",
+   "side": "demand",
+   "category": "livelihood",
+   "what": "Stocking fingerlings of fast-growing carps matched to how long the water lasts, leases to SHGs or fishers' cooperatives, and sharing rules with irrigators so that fish and irrigation coexist.",
+   "where": "Ponds and tanks holding water 4 months or more",
+   "landscape": "Waterbodies that hold water into rabi in villages that already fish; sub-humid and humid areas.",
+   "archetypes": [
+    "tank_irrigated",
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "swb_frac >= 0.01 and rainfall in ['dry_subhumid', 'humid']",
+   "addresses": [
+    "fishery_potential",
+    "multidimensional_vulnerability"
+   ],
+   "addresses_wb": [
+    "wb.fishery_opportunity",
+    "wb.fishery_constraint"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "small_onstream_pond",
+    "village_pond",
+    "headwater_pond",
+    "canal_fed"
+   ],
+   "schemes": [
+    "pmmsy",
+    "day_nrlm",
+    "ffpm"
+   ],
+   "sources": [
+    "pmmsy_guidelines",
+    "mission_antyodaya"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "site_spec": null
+  },
+  {
+   "id": "equitable_planning",
+   "name": "Settlement-wise, equitable planning with SHGs",
+   "side": "demand",
+   "category": "governance",
+   "what": "Planning settlement by settlement so that marginalised hamlets get structures first (as CSOs do with tools such as Commons Connect), SHG and producer groups for water-based livelihoods, and land development of SC/ST farmers' plots.",
+   "where": "Village and hamlet",
+   "landscape": "Villages with high Scheduled Tribe or Scheduled Caste shares, low assets and weak access to irrigation.",
+   "archetypes": [
+    "forest_fringe",
+    "rainfed_rice_subhumid",
+    "rainfed_dryland"
+   ],
+   "suits": "st_share >= 0.3 or nz(shg_coverage) < 0.3",
+   "addresses": [
+    "multidimensional_vulnerability",
+    "productivity.farmland_abandonment"
+   ],
+   "schemes": [
+    "day_nrlm",
+    "mgnrega_nrm",
+    "pm_janman",
+    "dajgua"
+   ],
+   "practice": [
+    "Commons Connect: digital participatory planning used by CSO field teams (paper)",
+    "PRADAN, FES and others: hamlet-level planning with women's groups"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "nrlm_framework"
+   ],
+   "site_rules": [],
+   "caution": null,
+   "avoid": null,
+   "avoid_note": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_spec": null
+  },
+  {
+   "id": "solar_pumps_safeguards",
+   "name": "Solar and community lift irrigation, where groundwater is safe",
+   "side": "supply",
+   "category": "irrigation_efficiency",
+   "what": "Solar pumps or community lift schemes on rivers, ponds and shallow aquifers to irrigate a rabi crop, run by user groups; only where groundwater or surface water is under-used.",
+   "where": "Farms near streams, ponds or shallow wells",
+   "landscape": "Sub-humid eastern India and floodplains with safe groundwater and single-season cropping (rice fallows).",
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "groundwater_irrigated"
+   ],
+   "suits": "gw_category == 'safe' and rainfall in ['dry_subhumid', 'humid']",
+   "avoid": "gw_category in ['over_exploited', 'critical']",
+   "avoid_note": "Over-exploited or critical block: free solar power accelerates pumping.",
+   "addresses": [
+    "productivity.rice_fallow_opportunity",
+    "productivity.declining_intensity",
+    "irrigation.rabi_water_shortfall"
+   ],
+   "addresses_wb": [
+    "wb.irrigation_underuse"
+   ],
+   "wb_types": [
+    "onstream_tank",
+    "village_pond",
+    "river_reach",
+    "canal_fed"
+   ],
+   "schemes": [
+    "pm_kusum",
+    "jh_irrigation",
+    "od_cm_kisan"
+   ],
+   "sources": [
+    "shah2009",
+    "expert_judgement"
+   ],
+   "site_rules": [],
+   "practice": [],
+   "caution": null,
+   "site_spec": null
+  }
+ ]
+}

@@ -25,6 +25,9 @@ page (web/index.html, Waterbodies); `wb-validate` checks that every id, expressi
   results as the page.
 - `schemes.json`: the schemes that can fund each rule's interventions, and the farm-pond schemes behind recent
   ponds, with status notes checked on the date in `verified` (MGNREGS was replaced by VB-G RAM G on 1 July 2026).
+- Interventions come from the shared catalogue `knowledge/interventions.json`: `addresses_wb` lists the waterbody
+  rules an intervention responds to and `wb_types` the types it applies to; its landscape fit is judged on the
+  waterbody's home micro-watershed. `wb-run` writes `interventions_suited` / `interventions_possible` per waterbody.
 - `sources.json`: waterbody sources. Every `sources` list may also cite ids from the watershed `knowledge/sources.json`.
   Thresholds without a published norm cite `expert_judgement`.
 

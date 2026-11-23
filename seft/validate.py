@@ -120,7 +120,43 @@ def validate(kd=None):
             for sh in o.get('shift', []):
                 for a in sh['from'] + (sh['to'] if isinstance(sh['to'], list) else [sh['to']]):
                     if a not in arch: errs.append(f"question {q['id']}.{o['id']}: unknown archetype {a}")
+    # interventions (shared with the waterbody atlas)
+    ivp = kd / 'interventions.json'
+    n_iv = 0
+    if ivp.exists():
+        IV = load_json(ivp); wbk = kd / 'waterbody'
+        wb_rules = {r['id'] for r in load_json(wbk / 'rules.json')['rules']} if (wbk / 'rules.json').exists() else set()
+        wb_types = {t['id'] for t in load_json(wbk / 'types.json')['types']} if (wbk / 'types.json').exists() else set()
+        sch = {x['id'] for x in K['schemes']['schemes']}
+        if (wbk / 'schemes.json').exists(): sch |= {x['id'] for x in load_json(wbk / 'schemes.json')['schemes']}
+        dims = {'rainfall', 'aquifer', 'terrain', 'gw_category', 'canal', 'cropping'}
+        seen_iv = set()
+        for x in IV['interventions']:
+            w = f"intervention {x['id']}"; n_iv += 1
+            if x['id'] in seen_iv: errs.append(f'{w}: duplicate id')
+            seen_iv.add(x['id'])
+            if x['side'] not in IV['sides']: errs.append(f"{w}: unknown side {x['side']}")
+            if x['category'] not in IV['categories']: errs.append(f"{w}: unknown category {x['category']}")
+            for k in ('suits', 'avoid'):
+                if x.get(k): chk(x[k], f'{w} {k}', dims)
+            for a in x.get('archetypes', []):
+                if a not in arch: errs.append(f'{w}: unknown archetype {a}')
+            for a in x.get('addresses', []):
+                if a not in stresses: errs.append(f'{w}: unknown stress {a}')
+            for a in x.get('addresses_wb', []):
+                if a not in wb_rules: errs.append(f'{w}: unknown waterbody rule {a}')
+            for a in x.get('wb_types') or []:
+                if a not in wb_types: errs.append(f'{w}: unknown waterbody type {a}')
+            for a in x.get('schemes', []):
+                if a not in sch: errs.append(f'{w}: unknown scheme {a}')
+            for a in x.get('sources', []):
+                if a not in src: errs.append(f'{w}: unknown source {a}')
+            if not x.get('addresses') and not x.get('addresses_wb'): errs.append(f'{w}: addresses nothing')
+        covered = {a for x in IV['interventions'] for a in x.get('addresses', [])}
+        for st in sorted(stresses - covered): errs.append(f'rule {st}: no intervention addresses it')
+        cov_wb = {a for x in IV['interventions'] for a in x.get('addresses_wb', [])}
+        for st in sorted(wb_rules - cov_wb): errs.append(f'waterbody rule {st}: no intervention addresses it')
     for e in errs: print('ERROR', e)
     print(f"{len(errs)} problems; {len(var)} variables, {len(arch)} archetypes, {len(nodes)} graph nodes, "
-          f"{len(K['causal_graph']['edges'])} edges, {len(sig)} signals, {len(stresses)} rules under {sum(len(p['observed_stresses']) for p in T['production_systems'])} observed stresses in {len(T['production_systems'])} production systems, {len(K['schemes']['schemes'])} schemes, {len(qids)} questions, {len(src)} sources")
+          f"{len(K['causal_graph']['edges'])} edges, {len(sig)} signals, {len(stresses)} rules under {sum(len(p['observed_stresses']) for p in T['production_systems'])} observed stresses in {len(T['production_systems'])} production systems, {len(K['schemes']['schemes'])} schemes, {len(qids)} questions, {n_iv} interventions, {len(src)} sources")
     return not errs

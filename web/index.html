@@ -132,6 +132,9 @@ pre.kex{margin:0;background:var(--sunk);border-radius:4px;padding:8px 10px;font-
 .atlassw{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:6px 0 8px;background:var(--surface)}
 .atlassw button{border:0;background:none;padding:5px 14px;cursor:pointer;font-weight:600;color:var(--muted)}
 .atlassw button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+ul.ivl{margin:4px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
+details.ivb>summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+details.ivb[open]>summary{margin-bottom:6px}
 ul.wsch{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.85rem}
 .walk ul{margin:2px 0 0;padding-left:18px}
 @media print{header.top nav,.atlassw,.btn{display:none!important}}
@@ -168,7 +171,7 @@ function atlasSub(){const t=ATLAS_HEAD[S.atlas][1];
 const ATLAS_HEAD={ws:["Watershed Systems Atlas","Eight districts, 4,598 micro-watersheds. Each watershed is read as a mixture of farming and land-use systems; a causal knowledge graph turns its indicators into stresses, opportunities and matching government schemes."],
   wb:["Waterbody Atlas","Eight districts, 65,000 ponds, tanks and river reaches. Each waterbody is typed, read through eight years of the water it held, and checked for stresses and opportunities with interventions, community questions and schemes."]};
 
-const TABS=[["explore","Explore"],["graph","Knowledge graph"],["archetypes","System archetypes"],["rules","Observed stresses"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
+const TABS=[["explore","Explore"],["graph","Knowledge graph"],["archetypes","System archetypes"],["rules","Observed stresses"],["interventions","Interventions"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
 
 /* ---------- helpers ---------- */
 const VAR={}, ARCH={}, STR={}, SCH={}, SRC={}, NODE={}, QBY={}, HLP={}, SIG={}, PSY={}, OSX={}, GRP={}; let ALLQ=[];
@@ -452,6 +455,7 @@ function render(){
   if(S.tab==="graph") return renderGraph(m);
   if(S.tab==="archetypes") return renderArchetypes(m);
   if(S.tab==="rules") return renderRules(m);
+  if(S.tab==="interventions") return renderInterventions(m,"ws");
   if(S.tab==="questions") return renderQuestions(m);
   if(S.tab==="schemes") return renderSchemes(m);
   if(S.tab==="method") return renderMethod(m);
@@ -700,9 +704,11 @@ function renderPane(){
     p.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.state)}</div><h2>${title}</h2><p class="muted">${sub}</p>${mixBar(A.shares,A.ids)}${mixList(A.shares,A.ids)}
       <p class="note">Shares are area-weighted means of each watershed's system mix. ${d.rain_factor!==1?`Rainfall regime uses CoRE precipitation rescaled by ×${d.rain_factor} to the district normal.`:""}</p></div>
       <div class="block">${stressBars(A.rates)}</div>${teh}
-      <div class="block"><div class="eyebrow">Schemes most often matched</div>${schemeList(A.sch,A.n)}<p class="note">Open a watershed to see why each scheme is suggested.</p></div>`;
+      <div class="block"><div class="eyebrow">Schemes most often matched</div>${schemeList(A.sch,A.n)}<p class="note">Open a watershed to see why each scheme is suggested.</p></div>
+      ${ivDistrictBlock(ms,d)}`;
     p.querySelectorAll(".bar[data-k]").forEach(el=>el.onclick=()=>{const [a,...b]=el.dataset.k.split(":");S.mode=a;S.modeArg=b.join(":"); renderMapCtl(); MAP.draw();});
     p.querySelectorAll("tr[data-t]").forEach(el=>el.onclick=()=>go("tehsil",el.dataset.t));
+    ivBindLinks(p);
     return;
   }
   renderMws(p,b.mwsById[S.mws],b,d);
@@ -883,7 +889,12 @@ function stressCardHtml(id,st,x,m,R,opts={}){
     <p class="note">${esc(s.interpretation)}</p>
     <p class="note">Data: ${dataLabel(x)} · probability before answers ${pct(st.prior)}${ans}</p>
     <details><summary>Signals behind this result</summary>${sigTable(s,m,R)}<p class="note"><b>Trigger:</b> <code>${exprHtml(s.trigger)}</code><br><b>Intensity:</b> <code>${exprHtml(s.intensity)}</code> · severe at ${s.severe_at}</p></details>
-    <details><summary>Public note</summary><p class="pubnote">${pubHtml(s.public_note)}</p></details></div>`;}
+    <details><summary>Public note</summary><p class="pubnote">${pubHtml(s.public_note)}</p></details>
+    ${opts.noIv?"":ivCardDetails(id,m,R)}</div>`;}
+function ivCardDetails(id,m,R){const xs=ivFor(id,"addresses"); if(!xs.length) return "";
+  const d=curDistrict(); const env=d?ivEnvWs(m,d,R&&R.shares):null;
+  const list=xs.map(iv=>({iv,fit:ivFit(iv,env)})).sort((a,b)=>IV_RANK[b.fit]-IV_RANK[a.fit]);
+  return `<details><summary>Interventions that respond (${list.filter(x=>x.fit==="suited").length} suited here)</summary>${ivMiniList(list)}</details>`;}
 function pubHtml(t){return esc(t).replace(/\b(?:s|ctx|sys)_[a-z0-9_]+\b/g,n=>SIG[n]?vref(n,n):n);}
 function sigRow(id,role,m,R){
   const x=SIG[id],i=SIGIDX[id];let g=m.sg?m.sg[i]:null;
@@ -983,6 +994,7 @@ function renderMws(p,m,b,d){
       ${pwPosO.length?pwPosO.map(k=>pathwayBlock(k,R,m)).join(""):'<p class="muted">No opportunity is flagged.</p>'}
       <details><summary>Observed stresses evaluated, not present (${pwEval.length})</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">${pwEval.map(k=>pathwayBlock(k,R,m,{all:true})).join("")}</div></details>
       <p class="note">Causal pathways not applicable to this system mix: ${na.map(k=>esc(sLabel(k))).join(", ")||"none"}.</p></div>
+    ${ivPlanBlock(ivSuggest(ivEnvWs(m,d,R.shares),new Set(pos),"addresses"),{label:"stresses and opportunities",unit:"micro-watershed",keyLab:ivStressLabel,applied:hasApplied(m.u)})}
     <div class="block" id="strq"><div class="eyebrow">Ask the community (${strQ.length} questions)</div>
       <p class="note">Questions for the stresses evaluated here, those already present first. Each answer is evidence for or against a stress and changes its probability (see the Community questions tab). Answers are kept in this browser; save them to use with the Python pipeline.</p>
       ${status}
@@ -1006,6 +1018,7 @@ function renderMws(p,m,b,d){
     const y=window.scrollY;renderPane();MAP.draw();window.scrollTo(0,y);toast(hasApplied(m.u)?"Re-assessed with "+Object.keys(APPLIED[m.u]).length+" answers":"Showing results from data alone");});
   $("#clr").onclick=()=>{delete ANS[m.u];delete APPLIED[m.u];saveAns();renderPane();MAP.draw();toast("Answers cleared for "+m.u)};
   $("#sva").onclick=saveAnswers;
+  ivBindLinks(p);
 }
 function saveAnswers(){
   if(!Object.keys(ANS).length){toast("No answers to save yet");return}
@@ -1050,7 +1063,7 @@ function toast(msg){let t=$("#toast"); if(!t){t=document.createElement("div"); t
 function renderData(m){
   const files=[["mws_all.csv","All watersheds: indicators, context, system shares, observed-stress status and intensity, causal-pathway status, intensity, severity and probability, schemes (one row per MWS)"],["villages_all.csv","All villages: census and livestock values, assigned MWS and overlap share"]];
   IDX.districts.forEach(d=>{files.push([`mws_${d.slug}.csv`,`${d.district}: watersheds`]);files.push([`villages_${d.slug}.csv`,`${d.district}: villages`]);});
-  const kfiles=["variables","contexts","archetypes","signals","taxonomy","causal_graph","schemes","questions","sources"];
+  const kfiles=["variables","contexts","archetypes","signals","taxonomy","causal_graph","schemes","questions","interventions","sources"];
   m.innerHTML=`<div class="doc"><h2>Data downloads</h2>
     <p>Everything shown in the atlas can be saved: first the knowledge files that hold the logic, then the result tables. Watershed tables carry every indicator in <code>variables.json</code>, the context class on each dimension, the share of each system archetype, the status and intensity of each observed stress within each production system, and the status, intensity (0–100), severity and probability of each causal pathway. Missing values are blank.</p>
     <p class="note" id="dlnote"></p>
@@ -1172,7 +1185,8 @@ function ruleBlock(s){const qs=questionsFor(s.id);const respond=K.schemes.scheme
       <tr><td><span class="role">Intensity (0–100)</span></td><td><code>${exprHtml(s.intensity)}</code> · severe at ${s.severe_at}</td></tr></tbody></table></div>
     ${qs.length?`<details><summary>Community questions for this rule (${qs.length})</summary><div class="tbl"><table><thead><tr><th>Question</th><th>Answer → likelihood ratio</th></tr></thead><tbody>${qs.map(q=>`<tr><td>${esc(q.text)}</td><td>${q.options.map(o=>{const e=o.stress.find(e=>e.id===s.id);return `${esc(o.label)}: <b>${e?"×"+e.lr+(e.severe?" (severe)":""):"×1"}</b>`}).join("<br>")}</td></tr>`).join("")}</tbody></table></div></details>`:""}
     ${s.replaces?`<p class="note">Replaces the earlier rule <span class="mono">${esc(s.replaces)}</span>.</p>`:""}
-    <p class="note"><b>Sources:</b> ${srcLinks(s.sources)}</p><p class="note"><b>Schemes that respond:</b> ${respond||"–"}</p></div>`;}
+    <p class="note"><b>Sources:</b> ${srcLinks(s.sources)}</p><p class="note"><b>Schemes that respond:</b> ${respond||"–"}</p>
+    <p class="note"><b>Interventions that respond:</b> ${ivFor(s.id,"addresses").map(iv=>`${ivLink(iv)} <span class="muted">(${iv.side})</span>`).join("; ")||"–"}</p></div>`;}
 function renderRules(m){
   const G=K.causal_graph,A=K.questions.assessment,T=K.taxonomy,bp=A.base_prior;
   const link=x=>GRP[x]?`<a href="#g_${x}" data-jump="g_${x}"><b>${esc(GRP[x].label)}</b></a> (${GRP[x].children.map(c=>`<a href="#r_${c}" data-jump="r_${c}">${esc(STR[c].label)}</a>${STR[c].type==="opportunity"?' <span class="muted">opportunity</span>':""}`).join(" · ")})`:`<a href="#r_${x}" data-jump="r_${x}">${esc(STR[x].label)}</a>`;
@@ -1249,10 +1263,12 @@ const KSCHEMA=[
   list:"schemes",fields:[["id, name, level, state, department","identity; state is null for central schemes"],["addresses","stress ids the scheme responds to"],["archetypes","systems it fits (empty = any)"],["condition","optional eligibility expression"],["purpose, relevant_components, caution, notes, status, url","shown in the Schemes tab"]]},
  {file:"questions.json",role:"Community MCQs and how answers change the systems and the stresses.",top:[["assessment","base_prior, confidence_shrink, positive_at, severe_at, bands and the rules in words"],["lr_scale","the likelihood-ratio scale used to write options"],["system_questions","questions that adjust the system mix"],["stress_questions","questions that inform stresses"]],
   list:"stress_questions",fields:[["id, text, rationale, origin","question, why it is asked, and whether it comes from CoRE insights"],["stresses / show_if","stress ids it informs, or the condition for showing a system question"],["options","list of {id, label, stress [{id, lr, severe}], set {weight: value}, shift [{from, to, fraction}]}"]]},
+ {file:"interventions.json",role:"Supply- and demand-side interventions shared by both atlases: where they go, site rules, the landscapes they suit, what they respond to, schemes, practice and sources.",top:[["sides","supply and demand"],["categories","id → label of the intervention categories"],["fit","how landscape fit is judged, and its levels"],["site_rules_about","where the site rules come from"],["interventions","list of interventions (below)"]],
+  list:"interventions",fields:[["id, name, side, category","identity, supply or demand side, and category"],["what, where, site_spec","what it is, where it is built, and the ridge-to-valley placement from the toolkit paper"],["site_rules","[{parameter, unit, accepted, partial, not_accepted}] from the structure-suitability spreadsheet"],["landscape, archetypes","the landscapes and system archetypes where it fits best"],["suits, avoid, avoid_note","landscape fit test for a micro-watershed: suited, possible or not suited"],["caution","known risks (for example, ponds filled from borewells)"],["addresses, addresses_wb, wb_types","watershed stresses and waterbody rules it responds to; waterbody types it applies to"],["schemes, practice, sources","funding schemes, examples from civil society practice, and source ids"]]},
  {file:"sources.json",role:"Bibliography. Every sources list in the other files holds ids from here.",top:[["sources","list of sources (below)"]],
   list:"sources",fields:[["id","referenced from other files"],["citation, url","reference"],["used_for","what the source supports"]]}
 ];
-const DRAWS={"Study area and data":["config/locations.json","config/datasets.json"],"Indicators":["variables.json"],"Contexts":["contexts.json"],"System archetypes":["archetypes.json","variables.json"],"Signals, rules and pathways":["signals.json","causal_graph.json","taxonomy.json"],"Community questions and re-assessment":["questions.json","causal_graph.json","archetypes.json"],"Thresholds":["signals.json","variables.json","sources.json"],"Village clusters and schemes":["schemes.json","causal_graph.json"],"Sources":["sources.json"]};
+const DRAWS={"Study area and data":["config/locations.json","config/datasets.json"],"Indicators":["variables.json"],"Contexts":["contexts.json"],"System archetypes":["archetypes.json","variables.json"],"Signals, rules and pathways":["signals.json","causal_graph.json","taxonomy.json"],"Community questions and re-assessment":["questions.json","causal_graph.json","archetypes.json"],"Thresholds":["signals.json","variables.json","sources.json"],"Village clusters and schemes":["schemes.json","causal_graph.json"],"Interventions":["interventions.json","sources.json"],"Sources":["sources.json"]};
 function drawsOn(t){const f=DRAWS[t];return f?`<p class="note">Draws on: ${f.map(x=>`<a href="#kfiles" class="mono" data-kf>${x}</a>`).join(", ")}</p>`:"";}
 /* examples shown for each knowledge file: real entries, long text shortened */
 function trimJ(o,n=110){
@@ -1293,6 +1309,9 @@ const KEX={
   ["A new question for the drinking-water rules.",()=>pick(K.questions.stress_questions,"id","jjm_taps")],
   ["A system question. Options override weights (set) instead of, or as well as, changing stresses.",()=>pick(K.questions.system_questions,"id","sys_rabi_source")],
   ["Settings for turning data results into probabilities (the prior rises with intensity).",()=>only(K.questions.assessment,["base_prior","confidence_shrink","positive_at","severe_at","bands"])]],
+ "interventions.json":[
+  ["A drainage-line structure with its site rules and landscape fit test.",()=>only(pick(K.interventions.interventions,"id","check_dam"),["id","name","side","category","where","site_spec","site_rules","archetypes","suits","avoid","addresses","addresses_wb","schemes","sources"])],
+  ["A demand-side intervention.",()=>only(pick(K.interventions.interventions,"id","crop_diversification"),["id","name","side","category","suits","addresses","schemes","practice"])]],
  "sources.json":[
   ["A source, cited by id elsewhere.",()=>pick(K.sources.sources,"id","cgwb_gec2015")]]
 };
@@ -1337,6 +1356,8 @@ function renderMethod(m){
   <div class="block"><h3>Thresholds</h3>${drawsOn("Thresholds")}<p>Absolute thresholds come from published norms where they exist: CGWB stage-of-extraction categories (70%, 90%, 100%), CGWB decadal water-level fall classes, the Drought Manual's 3–4 week dry-spell trigger and sown-area impact indicator, the Census town density of 400 persons/km², and IGFRI grazing capacity. Where no norm exists, values are expert judgement and are labelled so. Thresholds can differ by context, for example a lower drought threshold for sub-humid systems that are less adapted to dry spells.</p>
    <p>The CoRE Stack groundwater balance is a model estimate with a strong negative bias across the pilot: the median watershed loses 76 mm of storage a year and its water level falls 1.3 m a year, including watersheds in Safe blocks. Absolute water-level thresholds are therefore kept in the signals but switched off (<code>use_absolute: false</code>), and the pooled 25th or 75th percentile is used instead. The same applies to the share of years with storage loss and to rising water levels in canal commands. An expert can switch them back on once the series has been checked against observation wells.</p></div>
   <div class="block"><h3>Village clusters and schemes</h3>${drawsOn("Village clusters and schemes")}<p>A village belongs to the watershed it overlaps most. Its whole population and livestock are listed in that watershed's cluster, while watershed indicators use area-apportioned values. Schemes are matched when they respond to a triggered stress or opportunity, belong to the right state, meet their eligibility condition and, where listed, fit one of the watershed's main systems. Scheme coverage and names change; every entry carries a status note and should be checked before use.</p></div>
+  <div class="block"><h3>Interventions</h3>${drawsOn("Interventions")}<p>${K.interventions?K.interventions.interventions.length:0} supply- and demand-side interventions (Interventions tab) respond to the observed stresses and opportunities. Their placement follows the ridge-to-valley sequence of watershed-development manuals as summarised in the CoRE Stack toolkit paper: area treatment on ridges and slopes (contour and staggered trenches on 10–25% slopes, water absorption trenches at the foothills, bunds and terraces on farms), then drainage-line treatment by stream order (loose boulder checks on first-order streams with 2–50 ha catchments, gabions and gully plugs on second-order streams with 50–500 ha, check dams, nadis and bandharas on third-order and larger streams), with farm ponds, the 5% and 30×40 models and tanks on gentle land with catchments under 2 ha. Site rules for 24 structures (slope, stream order, catchment, distance to drainage, land use) come from the CoRE Stack structure-suitability spreadsheet. Demand-side measures follow the paper's crop-water accounting (FAO-56 crop coefficients) and its finding that, in one micro-watershed, changing crops met far more of the deficit than new structures. The catalogue extends both with recharge structures from the CGWB master plan, waterbody rehabilitation, ecological restoration, drinking water, flood and governance measures, and practice documented by civil society organisations.</p>
+   <p>For each micro-watershed, an intervention is <b>suited</b> when its landscape fit test holds (for example, check dams where the aquifer is hard rock or the block is stressed, and the land slopes), <b>not suited</b> when its avoid test holds (for example, solar pumps in over-exploited blocks), and <b>possible</b> otherwise. The fit test uses only what the data can see; the site rules and the community decide the actual site. Suggestions follow the stresses present after any community answers. The Python pipeline writes the suited and possible interventions to the MWS tables (<span class="mono">seft/interventions.py</span>).</p></div>
   ${kschemaHtml()}
   <div class="block"><h3>Known limitations</h3><ul>
    <li>CoRE precipitation is spatially smooth: the 450 to over 2,000 mm gradient across Pune appears as 627–874 mm, and Pune is left uncorrected.</li>
@@ -1357,7 +1378,7 @@ function renderMethod(m){
 let WIDX=null, WK=null; const WBB={};
 const W={tab:"explore", district:null, tehsil:null, wb:null, mws:null, mode:"type", arg:null, show:"all"};
 try{const t=localStorage.getItem("wba_tab"); if(t) W.tab=t;}catch(e){}
-const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["rules","Observed stresses"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
+const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["rules","Observed stresses"],["interventions","Interventions"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
 if(!WTABS.some(t=>t[0]===W.tab)) W.tab="explore";
 const WYEARS=[2017,2018,2019,2020,2021,2022,2023,2024];
 const WTYPE_COL={river_reach:"#3b6fb6",canal_fed:"#7b6aa8",onstream_tank:"#1f7a74",small_onstream_pond:"#5fae9e",headwater_pond:"#a5803a",village_pond:"#c8642f",farm_pond:"#d6a51f",reservoir:"#8a958f",large_river:"#8a958f",unclassified:"#8a958f"};
@@ -1828,7 +1849,13 @@ function wStressCard(r,x,R,b,d,muted){
       ${sg.roles.map(id=>`<tr><td><span class="role">role</span><br>${wvref(id)}</td><td class="r num">${fmtVal(R.roles[id])}</td><td><code>${wExprHtml(WROLE[id].expr)}</code></td><td></td><td></td></tr>`).join("")}</tbody></table></div>
       <p class="note">${r.gate?`<b>Checked where:</b> <code>${wExprHtml(r.gate)}</code><br>`:""}<b>Trigger:</b> <code>${wExprHtml(r.trigger)}</code><br><b>Intensity:</b> <code>${wExprHtml(r.intensity)}</code> · severe at ${r.severe_at}</p></details>
     <details><summary>Interventions and schemes</summary><div class="walk"><div><div class="eyebrow">Interventions</div><ul>${r.interventions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-      <div><div class="eyebrow">Schemes in ${esc(d.state)}</div>${wSchemeList(links)}</div></div></details></div>`;}
+      <div><div class="eyebrow">Schemes in ${esc(d.state)}</div>${wSchemeList(links)}</div></div></details>
+    ${wIvCard(r,R)}</div>`;}
+function wIvCard(r,R){const xs=ivFor(r.id,"addresses_wb").filter(iv=>!iv.wb_types||iv.wb_types.includes(R.type)); if(!xs.length) return "";
+  const list=xs.map(iv=>({iv,fit:ivFit(iv,R.ivEnv)})).sort((a,b)=>IV_RANK[b.fit]-IV_RANK[a.fit]);
+  return `<details><summary>Interventions from the catalogue (${list.filter(x=>x.fit==="suited").length} suited here)</summary>${ivMiniList(list)}${R.ivEnv?"":'<p class="note">The home micro-watershed is outside the watershed atlas, so landscape fit is not known.</p>'}</details>`;}
+/* landscape-fit environment for a waterbody: its home micro-watershed's record in the watershed bundle */
+function wIvEnv(w,d){const b=BUNDLES[d.slug]; const m=b&&b.mwsById&&b.mwsById[w.mws]; const dd=IDX.districts.find(x=>x.district===d.district); return m&&dd?ivEnvWs(m,dd):null;}
 function wQuestionHtml(q,key){
   const cur=(WANS[key]||{})[q.id]; const inf=q.rules||[];
   return `<fieldset class="q" data-q="${q.id}"><legend>${esc(q.text)}</legend>
@@ -1844,6 +1871,7 @@ function typeWalk(R){
       return `<tr${hit?' style="font-weight:600"':""}><td>${esc(t.label)}</td><td><code>${wExprHtml(t.when)}</code></td><td>${hit?"yes: assigned":v===null?"unknown":(v?"yes (an earlier type matched)":"no")}</td></tr>`;}).join("")}</tbody></table></div></div>`;}
 function wPaneWb(P,w,d,b){
   const key=wKey(b,w), R=wAssessC(w,b), T=WTYPE[R.type], inS=T.in_scope, m=b.mws[w.mws];
+  R.ivEnv=wIvEnv(w,d);
   const changed=R.type!==R.typeData;
   const facts=[["Type",esc(T.label)+(changed?` <span class="muted">(from data: ${esc(WTYPE[R.typeData].label)})</span>`:"")],["Area",w.a+" ha"],["Tehsil",esc(w.teh)],["Stream order",w.so??"–"],["Zone of influence",{w:"matched by waterbody id",l:"matched by location",["-"]:"not found"}[w.z]],["Location",`<span class="mono">${w.xy[1].toFixed(4)}, ${w.xy[0].toFixed(4)}</span>`]];
   let stNote="";
@@ -1881,11 +1909,13 @@ function wPaneWb(P,w,d,b){
       <p class="note">Questions for the rules evaluated here, those already present first. Each answer is evidence for or against a rule and multiplies its odds by a likelihood ratio (Observed stresses tab). Answers are kept in this browser; save them to use with the Python pipeline.</p>
       ${status}${strQ.map(q=>wQuestionHtml(q,key)).join("")||'<p class="muted">No rule is evaluated here, so there are no stress questions.</p>'}
       <div class="filters"><button class="btn" data-wapply>Re-assess stresses</button><button class="btn ghost" id="wclr">Clear answers for this waterbody</button><button class="btn ghost" id="wsva">Save all answers (JSON)</button></div></div>
+    ${ivPlanBlock(ivSuggest(R.ivEnv,new Set(pos.map(r=>r.id)),"addresses_wb",R.type),{label:"rules",unit:"waterbody's home micro-watershed",keyLab:ivWbLabel,applied:wHasApplied(b,w)})}
     <div class="block"><div class="eyebrow">Suggested schemes (${sch.size})</div>${sch.size?`<div class="tbl"><table><thead><tr><th>Scheme</th><th>Because of</th></tr></thead><tbody>${[...sch].map(([id,bc])=>{const s=WSCH[id];return `<tr><td><b>${esc(s.name)}</b><br><span class="note">${s.level==="state"?esc(s.states.join(", ")):"Central"} · ${esc(s.status)}</span></td><td>${bc.map(esc).join(", ")}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">No scheme matched.</p>'}
       <p class="note">Schemes follow the rules that are present${wHasApplied(b,w)?" after the community answers":""}, filtered by state and waterbody type.</p></div>`
     :`<div class="block"><p>${esc(T.description)} Rules are not evaluated for this type.</p></div>`}
     <div class="block"><h3>Landscape around it</h3>${ctxBlock(m)}<details><summary>All variables of this waterbody</summary><div class="tbl"><table><tbody>${varRows}</tbody></table></div></details></div>`;
   $("#wgomws").onclick=()=>wGo("mws",w.mws);
+  ivBindLinks(P);
   P.querySelectorAll("fieldset.q").forEach(fs=>fs.addEventListener("change",e=>{
     const q=fs.dataset.q,v=e.target.value; WANS[key]=WANS[key]||{};
     if(v) WANS[key][q]=v; else delete WANS[key][q];
@@ -1980,6 +2010,7 @@ function wRuleBlock(r,short){
     <div class="tbl"><table><thead><tr><th>Question</th><th>Answer → likelihood ratio</th></tr></thead><tbody>${qs.map(q=>`<tr><td>${esc(q.text)}<br><span class="note">${esc(q.rationale)}</span></td><td>${q.options.map(o=>{const e=o.stress.find(e=>e.id===r.id);return `${esc(o.label)}: <b>${e?"×"+e.lr+(e.severe?" (severe)":""):"×1"}</b>`}).join("<br>")}</td></tr>`).join("")}</tbody></table></div>
     <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))"><div><div class="eyebrow">Interventions</div><ul>${r.interventions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
     <div><div class="eyebrow">Schemes</div><ul>${links.map(l=>`<li>${esc(WSCH[l.scheme].name.split(" (")[0])}${WSCH[l.scheme].states?` <span class="muted">(${esc(WSCH[l.scheme].states.join(", "))})</span>`:""}: <span class="muted">${esc(l.for)}</span></li>`).join("")}</ul></div></div>
+    <p class="note"><b>Interventions from the catalogue:</b> ${ivFor(r.id,"addresses_wb").map(iv=>`${ivLink(iv)} <span class="muted">(${iv.side})</span>`).join("; ")||"–"}</p>
     <p class="note"><b>Sources:</b> ${srcLinksW(r.sources)}</p></div>`;}
 function renderWbRules(m){
   const A=WK.questions.assessment,bp=A.base_prior, groups=[...new Set(WK.rules.rules.map(r=>r.group||"Other"))];
@@ -2039,8 +2070,9 @@ const WKSCHEMA=[
  {file:"rules.json",k:"rules",role:"Rules for observed stresses and opportunities.",top:[["evaluation","the steps, in words"],["confidence_scale","meaning of high / medium / low"],["rules","list (below)"]],list:"rules",fields:[["id, label, group, type","rule id, name, group (Filling, Retention, Storage, Use) and stress / opportunity"],["applies_to, gate","types it is checked for and an extra condition"],["trigger, intensity, severe_at","expressions over signals and roles; intensity 0–100, severe at severe_at"],["roles, contexts","roles that scale it and context signals it reads"],["rationale, public_note, interventions","why, a plain-language note, and what can be done"],["confidence, sources","rating and source ids"]]},
  {file:"questions.json",k:"questions",role:"Community questions and how answers change the type and the rules.",top:[["assessment","priors, confidence shrink, bands, positive_at, severe_at"],["lr_scale","the likelihood-ratio scale"],["type_questions","questions whose options set type fields ('set')"],["stress_questions","questions whose options carry likelihood ratios ('stress')"]],list:"stress_questions",fields:[["id, text, rationale, origin, sources","the question, why it is asked, and its basis"],["rules / applies_to","rules a stress question informs; types a type question is asked for"],["options","{id, label, stress [{id, lr, severe}], set {field: value}}"]]},
  {file:"schemes.json",k:"schemes",role:"Schemes that fund the interventions, and the links from rules to schemes.",top:[["verified","date the status notes were checked"],["schemes","list (below)"],["links","rule id (or recent_ponds) → [{scheme, for, types}]"]],list:"schemes",fields:[["id, name, level, states, department","identity; states null for all states"],["components, status, status_note, sources, url","what it funds and its current status"]]},
+ {file:"interventions.json",k:"interventions",role:"The intervention catalogue shared with the watershed atlas (knowledge/interventions.json): which waterbody rules each intervention responds to (addresses_wb), for which waterbody types (wb_types), and its landscape fit test, site rules, schemes and sources.",top:[["fit","how landscape fit is judged"],["interventions","list (below)"]],list:"interventions",fields:[["id, name, side, category","identity, supply or demand side, category"],["addresses_wb, wb_types","waterbody rules it responds to and the types it applies to"],["suits, avoid","landscape fit test, evaluated on the home micro-watershed"],["site_rules, where, landscape","siting guidance"],["schemes, practice, sources","funding, examples and sources"]]},
  {file:"sources.json",k:"sources",role:"Bibliography; the watershed sources.json is read too.",top:[["sources","list (below)"]],list:"sources",fields:[["id","cited from other files"],["citation, url","reference"],["used_for","what it supports"]]}];
-const WDRAWS={"Data":["config/waterbody/locations.json","variables.json"],"Types":["types.json","variables.json"],"Variables":["variables.json"],"Signals and thresholds":["signals.json","sources.json"],"Roles":["roles.json"],"Rules":["rules.json","signals.json","roles.json"],"Community questions and re-assessment":["questions.json","types.json","rules.json"],"Schemes":["schemes.json"],"Sources":["sources.json"]};
+const WDRAWS={"Data":["config/waterbody/locations.json","variables.json"],"Types":["types.json","variables.json"],"Variables":["variables.json"],"Signals and thresholds":["signals.json","sources.json"],"Roles":["roles.json"],"Rules":["rules.json","signals.json","roles.json"],"Community questions and re-assessment":["questions.json","types.json","rules.json"],"Schemes":["schemes.json"],"Interventions":["interventions.json"],"Sources":["sources.json"]};
 function wDrawsOn(t){const f=WDRAWS[t];return f?`<p class="note">Draws on: ${f.map(x=>`<a href="#wkfiles" class="mono" data-wkf>${x}</a>`).join(", ")}</p>`:"";}
 const WKEX={"types.json":[["A type rule, and the derived field it uses.",()=>[WK.types.derived[1],only(WTYPE.village_pond,["id","label","in_scope","when","sources"])]]],
  "variables.json":[["A variable.",()=>WVAR.rel_slope],["A type field set only by answers.",()=>WTF.ownership]],
@@ -2081,6 +2113,7 @@ function renderWbMethod(m){
   <div class="block"><h3>Community questions and re-assessment</h3>${wDrawsOn("Community questions and re-assessment")}<p>The data leave some things unknown, so the atlas carries ${WALLQ.length} multiple-choice questions. ${WK.questions.type_questions.length} type questions set ownership or inflow; the type rules run again and every rule is re-scored for the new type, in the page as in <span class="mono">seft/wb/assess.py</span>. ${WK.questions.stress_questions.length} stress questions carry likelihood ratios: the data result sets a prior (by status, intensity and the rule's confidence) and each answer multiplies the odds. The ratios are expert judgement on a fixed scale, with their direction checked against the census comparison where it covers the rule; they should be calibrated as answers from the field accumulate. Save answers from the page and run <code>python -m seft.cli wb-assess --answers file.json</code> to get the same results as a table.</p></div>
   <div class="block"><h3>Check against the Water Body Census</h3><p>Rule patterns were compared with census fields for the matched waterbodies (how full, how often it fills, use, encroachment, repair, storage loss, water user associations, pisciculture) and six tuning changes were made. After them, waterbodies the census records as rarely full trigger inflow shortfall more often (6% to 20% across the census fill classes); those under repair trigger sudden loss more (19% against 8%); those with a water user association trigger irrigation underuse less (19% against 40%); encroached ones trigger siltation more (32% against 21%). The census describes 2017-18 and the match is approximate, so it supports the direction rather than the exact rates (${srcLinksW(["wb_census_check"])}).</p></div>
   <div class="block"><h3>Schemes</h3>${wDrawsOn("Schemes")}<p>Each rule links to the schemes that can fund its interventions, filtered by the waterbody's state and type; recent ponds link to the farm-pond schemes. A scheme is suggested for a waterbody when one of its linked rules is present after any answers. Status notes were checked on ${esc(WK.schemes.verified)}.</p></div>
+  <div class="block"><h3>Interventions</h3>${wDrawsOn("Interventions")}<p>Each rule links to interventions in the catalogue shared with the watershed atlas (Interventions tab): waterbody rehabilitation (desilting, inlet restoration, bund and sluice repair, cascades, encroachment protection, lining, summer-water pockets), catchment treatment above the waterbody (trenches, loose boulder checks, gully plugs), and use of the stored water (protective irrigation, conveyance, water user associations, fishery). An intervention is offered for a waterbody when one of its rules is present and the waterbody's type is in the intervention's types. Its landscape fit (suited, possible, not suited) is judged on the home micro-watershed's terrain, slope, aquifer, rainfall, land use and systems, using the same test as the watershed atlas. Site rules from the CoRE Stack structure-suitability spreadsheet and the ridge-to-valley placement of the toolkit paper are shown with each intervention.</p></div>
   ${wKschemaHtml()}
   <div class="block"><h3>Known limitations</h3><ul>
    <li>Most zone-of-influence layers have no waterbody id; about 1 in 10 waterbodies has no matched zone and its irrigation role relies on the home MWS.</li>
@@ -2093,7 +2126,7 @@ function renderWbMethod(m){
   m.querySelectorAll("[data-wkf]").forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById("wkfiles")?.scrollIntoView();});
 }
 function renderWbData(m){
-  const kf=["types","variables","signals","roles","rules","questions","schemes","sources"];
+  const kf=["types","variables","signals","roles","rules","questions","schemes","interventions","sources"];
   m.innerHTML=`<div class="doc"><h2>Data downloads</h2>
     <p>The knowledge files that hold the logic, then one table per district with one row per waterbody: identity, type, status, size, drainage, home MWS and its context, recent ponds in the MWS, variables, roles, the intensity of each rule (blank: not applicable; 0: not triggered; NA: insufficient data) and the schemes linked to its triggered rules. Built by <code>python -m seft.cli wb-run</code>.</p>
     <div><div class="eyebrow">Knowledge files (editable logic)</div>${kf.map(f=>`<div class="dl"><span><b class="mono">${f}.json</b><br><span class="note">${esc((WKSCHEMA.find(x=>x.file===f+".json")||{}).role||"")}</span></span><button class="btn ghost" data-wk="${f}">Save</button></div>`).join("")}</div>
@@ -2119,12 +2152,115 @@ async function saveWbCsv(name){
 function renderWb(){
   const m=$("#main");
   const go=()=>{const t=W.tab; if(t==="explore") return renderWbExplore(m); if(t==="graph") return renderWbGraph(m); if(t==="types") return renderWbTypes(m);
-    if(t==="rules") return renderWbRules(m); if(t==="questions") return renderWbQuestions(m);
+    if(t==="rules") return renderWbRules(m); if(t==="questions") return renderWbQuestions(m); if(t==="interventions") return renderInterventions(m,"wb");
     if(t==="schemes") return renderWbSchemes(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
   if(WIDX) return go();
   m.innerHTML=`<div class="loading">Loading the waterbody atlas…</div>`;
   loadWbData("index").then(x=>{WIDX=x; WK=x.knowledge; wIndex(); $("#asub").textContent=atlasSub(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
 }
+
+/* ================= Interventions (knowledge/interventions.json, shared by both atlases) =================
+   Landscape fit mirrors seft/interventions.py: 'not suited' if avoid holds, 'suited' if suits holds, else 'possible'.
+   Expressions read watershed variables, share_<system> and the context classes by dimension name. */
+const IV_DIMS=["rainfall","aquifer","terrain","gw_category","canal","cropping"];
+const IV_FIT={suited:{cls:"opp",label:"suited here"},possible:{cls:"conf",label:"possible"},"not suited":{cls:"severe",label:"not suited here"}};
+const IV_SIDE={supply:"Supply side",demand:"Demand side"};
+let IVX=null;
+function ivCat(){const C=K&&K.interventions; if(!C) return null; if(!IVX){IVX={}; C.interventions.forEach(x=>IVX[x.id]=x);} return C;}
+/* fit-test environment for a watershed record m of district d; shares from the assessment R when answers changed the mix */
+function ivEnvWs(m,d,shares){
+  const e={};IDX.var_ids.forEach((v,i)=>e[v]=m.i[i]);
+  K.contexts.dimensions.forEach((x,i)=>{if(IV_DIMS.includes(x.id)) e[x.id]=m.c[i]||"";});
+  IV_DIMS.forEach(k=>{if(!(k in e)) e[k]="";});
+  K.archetypes.archetypes.forEach((a,i)=>e["share_"+a.id]=(shares||m.m)[i]);
+  e.state=d.state; e.district=d.district; return e;}
+function ivTrue(expr,env){if(!expr) return false; const r=PyEval.safe(expr,env); return r===true||r===1;}
+function ivFit(iv,env){if(!env) return "possible"; if(ivTrue(iv.avoid,env)) return "not suited"; if(ivTrue(iv.suits,env)) return "suited"; return "possible";}
+const IV_RANK={suited:2,possible:1,"not suited":0};
+function ivSuggest(env,positive,key,wbType){
+  const C=ivCat(); if(!C) return [];
+  const out=[];
+  C.interventions.forEach(iv=>{
+    if(wbType!=null&&iv.wb_types&&!iv.wb_types.includes(wbType)) return;
+    const hit=(iv[key]||[]).filter(x=>positive.has(x)); if(!hit.length) return;
+    const f=ivFit(iv,env); out.push({iv,fit:f,because:hit,rank:IV_RANK[f]*10+hit.length});});
+  out.sort((a,b)=>b.rank-a.rank); return out;}
+function ivFor(id,key){const C=ivCat(); return C?C.interventions.filter(x=>(x[key]||[]).includes(id)):[];}
+function ivSchemeName(id){return (IDX.scheme_names||{})[id]||(SCH[id]&&SCH[id].name)||id}
+function ivStressLabel(id){return STR[id]?sLabel(id):id}
+function ivWbLabel(id){return (typeof WRULE!=="undefined"&&WRULE[id])?WRULE[id].label:((IDX.wb_rule_labels||{})[id]||id)}
+function ivPill(f){const x=IV_FIT[f]; return `<span class="pill ${x.cls}">${esc(x.label)}</span>`;}
+function ivLink(iv){return `<a href="#" data-iv="${iv.id}">${esc(iv.name)}</a>`}
+function ivBindLinks(root){root.querySelectorAll("[data-iv]").forEach(a=>a.onclick=e=>{e.preventDefault(); const id=a.dataset.iv;
+  if(S.atlas==="wb") W.tab="interventions"; else S.tab="interventions"; render(); setTimeout(()=>{const el=document.getElementById("iv_"+id); if(el){el.open=true; el.scrollIntoView();}},60);});}
+/* compact list for one stress or rule: suited first, with the reason when not suited */
+function ivMiniList(list){
+  if(!list.length) return '<p class="note">No intervention in the catalogue responds to this.</p>';
+  return `<ul class="ivl">${list.map(x=>`<li>${ivPill(x.fit)} ${ivLink(x.iv)} <span class="muted">· ${esc(IV_SIDE[x.iv.side])}, ${esc(x.iv.where)}</span>${x.fit==="not suited"&&x.iv.avoid_note?`<br><span class="note">${esc(x.iv.avoid_note)}</span>`:""}</li>`).join("")}</ul>`;}
+/* block of suggestions for an MWS or a waterbody */
+function ivPlanBlock(list,opts){
+  const lab=opts.label, keyLab=opts.keyLab;
+  const suited=s=>list.filter(x=>x.iv.side===s&&x.fit==="suited");
+  const poss=list.filter(x=>x.fit==="possible"), ns=list.filter(x=>x.fit==="not suited");
+  const tbl=xs=>xs.length?`<div class="tbl"><table><thead><tr><th>Intervention</th><th>Responds to</th><th>Schemes</th></tr></thead><tbody>${xs.map(x=>`<tr><td>${ivLink(x.iv)}<br><span class="note">${esc(x.iv.where)}</span>${x.iv.caution?`<br><span class="note" style="color:var(--bad)">Caution: ${esc(x.iv.caution)}</span>`:""}</td><td>${x.because.map(b=>esc(keyLab(b))).join(", ")}</td><td class="note">${x.iv.schemes.slice(0,3).map(s=>esc(ivSchemeName(s))).join("; ")}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">None suited from the data; see the possible ones below.</p>';
+  return `<div class="block" id="ivplan"><div class="eyebrow">Suitable interventions (${list.filter(x=>x.fit==="suited").length} suited, ${poss.length} possible)</div>
+    <p class="note">Interventions that respond to the ${lab} present${opts.applied?" after the community answers":""}, from the shared catalogue. <b>Suited</b> means this ${opts.unit}'s landscape (terrain, slope, aquifer, rainfall, land use, systems) is the kind where the intervention usually works; <b>possible</b> means the data neither favour nor rule it out. Every structure still needs its site rules checked on the ground (Interventions tab).</p>
+    <h3>Supply side, suited here</h3>${tbl(suited("supply"))}<h3>Demand side, suited here</h3>${tbl(suited("demand"))}
+    ${poss.length?`<details><summary>Possible here (${poss.length})</summary>${ivMiniList(poss)}</details>`:""}
+    ${ns.length?`<details><summary>Not suited to this landscape (${ns.length})</summary><ul class="ivl">${ns.map(x=>`<li>${ivLink(x.iv)}: <span class="note">${esc(x.iv.avoid_note||"")}</span></li>`).join("")}</ul></details>`:""}</div>`;}
+
+/* ---------- Interventions tab (both atlases) ---------- */
+function ivSiteTable(iv){
+  if(!iv.site_rules.length) return "";
+  return `<div class="tbl"><table><thead><tr><th>Site parameter</th><th>Accepted</th><th>Partially accepted</th><th>Not accepted</th></tr></thead><tbody>${iv.site_rules.map(r=>`<tr><td>${esc(r.parameter)}${r.unit&&r.unit!=="—"?` <span class="muted">(${esc(r.unit)})</span>`:""}</td><td>${esc(r.accepted)}</td><td>${esc(r.partial)}</td><td>${esc(r.not_accepted)}</td></tr>`).join("")}</tbody></table></div>`;}
+function ivBlock(iv,mode){
+  const C=ivCat(), arch=iv.archetypes.map(a=>ARCH[a]?ARCH[a].label:a);
+  const resp=(iv.addresses||[]).map(x=>esc(ivStressLabel(x))), respW=(iv.addresses_wb||[]).map(x=>esc(ivWbLabel(x)));
+  const first=mode==="wb"?[["Waterbody rules it responds to",respW],["Watershed stresses it responds to",resp]]:[["Watershed stresses it responds to",resp],["Waterbody rules it responds to",respW]];
+  return `<details class="ivb block" id="iv_${iv.id}"><summary><b>${esc(iv.name)}</b> <span class="pill ${iv.side==="supply"?"opp":"conf"}">${esc(IV_SIDE[iv.side])}</span> <span class="muted">${esc(C.categories[iv.category]||iv.category)}</span></summary>
+    <p>${esc(iv.what)}</p>
+    <p><b>Where it goes.</b> ${esc(iv.where)}.${iv.site_spec?` <span class="note">Ridge-to-valley placement: ${esc(iv.site_spec)}.</span>`:""}</p>
+    ${ivSiteTable(iv)}
+    <p><b>Landscapes it suits.</b> ${esc(iv.landscape)}</p>
+    ${arch.length?`<p class="note">System archetypes where it fits best: ${arch.map(a=>`<span class="chip">${esc(a)}</span>`).join(" ")}</p>`:""}
+    <div class="tbl"><table><tbody>${iv.suits?`<tr><td><span class="role">Suited where</span></td><td><code>${exprHtml(iv.suits)}</code></td></tr>`:""}${iv.avoid?`<tr><td><span class="role">Not suited where</span></td><td><code>${exprHtml(iv.avoid)}</code>${iv.avoid_note?`<br><span class="note">${esc(iv.avoid_note)}</span>`:""}</td></tr>`:""}${iv.wb_types?`<tr><td><span class="role">Waterbody types</span></td><td>${iv.wb_types.map(t=>esc((typeof WTYPE!=="undefined"&&WTYPE[t])?WTYPE[t].label:t.replace(/_/g," "))).join(", ")}</td></tr>`:""}</tbody></table></div>
+    ${iv.caution?`<p class="note" style="color:var(--bad)"><b>Caution.</b> ${esc(iv.caution)}</p>`:""}
+    ${first.filter(([l,x])=>x.length).map(([l,x])=>`<p class="note"><b>${l}:</b> ${x.join("; ")}</p>`).join("")}
+    ${iv.schemes.length?`<p class="note"><b>Schemes that fund it:</b> ${iv.schemes.map(s=>esc(ivSchemeName(s))).join("; ")}</p>`:""}
+    ${iv.practice.length?`<p class="note"><b>In practice:</b></p><ul class="ivl">${iv.practice.map(p=>`<li class="note">${esc(p)}</li>`).join("")}</ul>`:""}
+    <p class="note"><b>Sources:</b> ${srcLinks(iv.sources)} · id <span class="mono">${iv.id}</span></p></details>`;}
+function renderInterventions(m,mode){
+  const C=ivCat(); if(!C){m.innerHTML='<div class="doc"><p>The interventions catalogue is not in this build. Run <code>python -m seft.cli refresh-knowledge</code>.</p></div>';return;}
+  const key=mode==="wb"?"addresses_wb":"addresses";
+  const list=C.interventions.filter(x=>(x[key]||[]).length);
+  const targets=mode==="wb"?WK.rules.rules.map(r=>[r.id,r.label]):K.causal_graph.stresses.map(s=>[s.id,sLabel(s.id)]);
+  const cats=Object.keys(C.categories);
+  m.innerHTML=`<div class="doc"><h2>Interventions</h2>
+    <p>${list.length} interventions for water security and ecological restoration that respond to the ${mode==="wb"?"waterbody rules":"observed stresses and opportunities"}. Supply-side interventions add water or keep it in the landscape (harvesting, storage, recharge, soil and land restoration); demand-side interventions reduce or reallocate use (crops, irrigation methods, rules and institutions). The list combines the ridge-to-valley works of the watershed-development toolkit paper, the structure-suitability rules of the CoRE Stack spreadsheet, government scheme guidelines, and practice documented by civil society organisations. The same catalogue serves the ${mode==="wb"?"watershed":"waterbody"} atlas.</p>
+    <div class="block"><h3>How to read it</h3><ul>
+      <li><b>Where it goes</b> and the <b>site rules</b> are for choosing a site on the ground: slope, stream order, catchment area, distance to the nearest drainage line and land use, each with an accepted, partially accepted and not accepted range.</li>
+      <li><b>Landscapes it suits</b> and the <b>fit test</b> are evaluated for every ${mode==="wb"?"waterbody's home micro-watershed":"micro-watershed"}: ${esc(C.fit.about)}</li>
+      <li>In Explore, each ${mode==="wb"?"waterbody":"micro-watershed"} lists the interventions that respond to the ${mode==="wb"?"rules":"stresses"} present there, suited ones first, and each ${mode==="wb"?"rule":"stress"} card lists its responding interventions with their fit.</li>
+      <li>Supply and demand go together: the paper's projection for one micro-watershed found new structures covered about 8% of its water deficit and a shift in cropping about 92%. Where groundwater is over-exploited, plan demand-side measures with every structure.</li></ul>
+      <p class="note">${esc(C.site_rules_about)} Checked on ${esc(C.verified)}.</p></div>
+    <div class="block"><h3>Which interventions respond to which ${mode==="wb"?"rule":"stress"}</h3><div class="tbl"><table><thead><tr><th>${mode==="wb"?"Rule":"Stress or opportunity"}</th><th>Supply side</th><th>Demand side</th></tr></thead><tbody>
+      ${targets.map(([id,l])=>{const xs=ivFor(id,key);return `<tr><td>${esc(l)}</td><td>${xs.filter(x=>x.side==="supply").map(ivLink).join(", ")||"–"}</td><td>${xs.filter(x=>x.side==="demand").map(ivLink).join(", ")||"–"}</td></tr>`}).join("")}</tbody></table></div></div>
+    ${["supply","demand"].map(sd=>`<h2 style="margin-top:12px">${IV_SIDE[sd]}</h2><p class="note">${esc(C.sides[sd])}</p>
+      ${cats.map(c=>{const xs=list.filter(x=>x.side===sd&&x.category===c); return xs.length?`<div class="eyebrow" style="margin-top:10px">${esc(C.categories[c])}</div>${xs.map(x=>ivBlock(x,mode)).join("")}`:"";}).join("")}`).join("")}</div>`;
+  ivBindLinks(m);
+  const h=location.hash.match(/iv_([a-z0-9_]+)/); if(h){const el=document.getElementById("iv_"+h[1]); if(el){el.open=true; el.scrollIntoView();}}
+}
+
+/* district or tehsil: interventions most often suited for the stresses present (from data alone) */
+function ivDistrictBlock(ms,d){
+  if(!ivCat()) return "";
+  const ct={}; let n=0;
+  ms.forEach(m=>{const pos=new Set(Object.entries(m.s).filter(([k,x])=>x[0]===2).map(([k])=>k)); if(!pos.size) return; n++;
+    ivSuggest(ivEnvWs(m,d),pos,"addresses").forEach(x=>{if(x.fit==="suited") ct[x.iv.id]=(ct[x.iv.id]||0)+1;});});
+  const top=Object.entries(ct).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if(!top.length) return "";
+  return `<div class="block"><div class="eyebrow">Interventions most often suited</div><div class="tbl"><table><thead><tr><th>Intervention</th><th>Side</th><th class="r">MWS</th></tr></thead><tbody>${top.map(([id,c])=>`<tr><td>${ivLink(IVX[id])}</td><td>${esc(IV_SIDE[IVX[id].side])}</td><td class="r num">${c} <span class="muted">(${Math.round(c/ms.length*100)}%)</span></td></tr>`).join("")}</tbody></table></div>
+    <p class="note">Micro-watersheds where the intervention responds to a stress or opportunity triggered by the data and the landscape suits it. Open a watershed for its full list, or see the Interventions tab.</p></div>`;}
 
 /* ---------- boot ---------- */
 (async()=>{

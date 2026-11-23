@@ -11,6 +11,13 @@ from .stresses import load_graph, load_taxonomy, evaluate_stresses, hierarchy
 from .signals import load_signals, pooled_percentiles, threshold_table
 from .schemes import load_schemes, match, eligible
 from .assess import load_questions, system_overrides, reassess
+from .interventions import load_interventions, suggest, fit_env
+
+_IV = None
+def _iv():
+    global _IV
+    if _IV is None: _IV = load_interventions()
+    return _IV
 
 def run(locations=None, knowledge_dir=None, log=print, answers=None, pools=None, keep=None):
     """answers: optional {mws_uid: {question_id: option_id}} from community meetings.
@@ -71,4 +78,6 @@ def score(r, G, Q, S, T, SC, pools):
     r['pathways'] = hierarchy(r['stress'], sig, G, T)
     r['schemes'] = match(r['env'], r['stress'], r['mix'], SC, r['state'])
     r['eligible'] = eligible(r['env'], SC, r['state'])
+    pos = {k for k, v in r['stress'].items() if v.get('positive', v.get('status') == 'triggered')}
+    r['interventions'] = suggest(fit_env(r['env'], r['ctx'], r['mix']['shares']), pos, _iv())
     return r

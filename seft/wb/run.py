@@ -16,7 +16,8 @@ from .build import build_all
 from .context import mws_context, attach
 from .villages import build_profiles
 from .indicators import compute, year_reference
-from .score import load_knowledge, base_env, pool_thresholds, score, scheme_links
+from .score import load_knowledge, base_env, pool_thresholds, score, scheme_links, iv_names, iv_env
+from ..interventions import suggest
 
 OUT = ROOT / 'out' / 'waterbody'
 ARCH = [a['id'] for a in load_json(ROOT / 'knowledge' / 'archetypes.json')['archetypes']]
@@ -59,7 +60,7 @@ def env_names(K):
     for r in K['rules']['rules']: exprs += [r.get('gate'), r.get('trigger'), r.get('intensity')]
     skip = _FUNCS | {x['id'] for x in K['signals']['signals']} | {r['id'] for r in K['roles']['roles']}
     names = {m.group(1) for e in exprs if e for m in _NAME.finditer(e) if m.group(1)} - skip
-    mws = sorted(n for n in names if n.startswith(('mws_', 'share_', 'ctx_')))
+    mws = sorted(set(n for n in names if n.startswith(('mws_', 'share_', 'ctx_'))) | set(iv_names(K)))
     wb = [v['id'] for v in K['variables']['variables']]
     wb += sorted(n for n in names - set(mws) if n not in wb)
     return wb, mws
@@ -115,6 +116,10 @@ def csv_row(b, K, rp=None):
     row.update({r['id']: b['roles'].get(r['id'], '') for r in K['roles']['roles']})
     row.update({r['id']: _rule_cell(b['rules'][r['id']]) if r['id'] in b['rules'] else '' for r in K['rules']['rules']})
     row['schemes'] = ';'.join(sorted({s for rid, r in b['rules'].items() if r['status'] == 'triggered' for s in scheme_links(rid, b, K)}))
+    pos = {rid for rid, r in b['rules'].items() if r['status'] == 'triggered'}
+    ivs = suggest(iv_env(b['mws']), pos, K['interventions'], key='addresses_wb', wb_type=b['type']) if pos else []
+    row['interventions_suited'] = ';'.join(x['id'] for x in ivs if x['fit'] == 'suited')
+    row['interventions_possible'] = ';'.join(x['id'] for x in ivs if x['fit'] == 'possible')
     return row
 
 def _i(xs):

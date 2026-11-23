@@ -353,7 +353,10 @@ responses if needed. Without network access, `python -m seft.rescore` re-scores 
 
 ## Editing the knowledge
 
-See `knowledge/README.md`. Run `python -m seft.cli validate` after every edit, then `run`.
+See `knowledge/README.md`. Run `python -m seft.cli validate` after every edit, then `run`. Interventions for both
+atlases are in `knowledge/interventions.json` (supply and demand side, with site rules, landscape fit, schemes,
+civil-society practice and sources); after editing only their text, `python -m seft.cli refresh-knowledge` updates the
+page without re-scoring.
 Without the raw API cache, `python -m seft.rescore` re-scores the shipped atlas from its stored indicators
 (refreshed 16 Nov 2026). A variable added after that stays missing until the locations are fetched again.
 
