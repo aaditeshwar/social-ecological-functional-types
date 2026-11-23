@@ -1,4 +1,17 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.pri{display:inline-block;border-radius:3px;padding:0 6px;font-size:.7rem;font-weight:600;letter-spacing:.02em;vertical-align:1px;white-space:nowrap}
+.pri.must{background:var(--bad);color:#fff} .pri.useful{background:var(--warn);color:#fff} .pri.skip{border:1px solid var(--line);color:var(--muted)}
+.pri.done{border:1px solid var(--ok);color:var(--ok)} .pri.atlas{border:1px solid var(--accent);color:var(--accent);font-weight:500}
+.ccwrap{display:flex;flex-direction:column;gap:12px;max-width:1100px;margin:0 auto}
+.block.ccpicks{display:flex;flex-direction:row;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:flex-start} .ccpicks .note{flex-basis:100%}
+.ccpick{display:flex;flex-direction:column;gap:2px;font-size:.8rem;color:var(--muted);min-width:0;max-width:100%} .ccpick select{min-width:min(14em,100%);max-width:100%;width:100%;padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink)}
+details.ccstep>summary{cursor:pointer;display:flex;gap:10px;align-items:flex-start;list-style:none} details.ccstep>summary::-webkit-details-marker{display:none}
+.ccn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.ccbody{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+details.ccsec{border:1px solid var(--line);border-radius:6px;padding:6px 10px;background:var(--surface)} details.ccsec>summary{cursor:pointer}
+details.ccsec[open]>summary{margin-bottom:6px} details.cclow>summary{cursor:pointer;color:var(--muted);font-size:.85rem;margin:4px 0}
+.ccinf{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin:8px 0} .ccsub{border-top:1px dashed var(--line);padding-top:6px;margin-top:6px}
+fieldset.cc .opts input[type=number],fieldset.cc .opts input[type=text]{padding:3px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+</style></head><body>
 <meta charset="utf-8">
 <title>Watershed Systems Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -162,13 +175,14 @@ let IDX=null, K=null;
 const BUNDLES={};
 const S={tab:"explore", level:"india", district:null, tehsil:null, mws:null, mode:"dominant", modeArg:null, showVillages:true};
 try{const t=localStorage.getItem("wsa_tab"); if(t) S.tab=t;}catch(e){}
-S.atlas="ws"; try{const a=localStorage.getItem("atlas"); if(a==="wb"||a==="ws") S.atlas=a; if(/[?#&]atlas=wb/.test(location.href)) S.atlas="wb";}catch(e){}
+S.atlas="ws"; try{const a=localStorage.getItem("atlas"); if(a==="wb"||a==="ws"||a==="cc") S.atlas=a; const u=location.href.match(/[?#&]atlas=(wb|ws|cc)/); if(u) S.atlas=u[1];}catch(e){}
 const NUMW=["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve"];
 function atlasSub(){const t=ATLAS_HEAD[S.atlas][1];
   if(S.atlas==="ws"&&IDX){const n=IDX.districts.reduce((a,d)=>a+(d.n_mws||0),0); return t.replace(/^Eight districts, [\d,]+ micro-watersheds/,`${NUMW[IDX.districts.length]||IDX.districts.length} districts, ${n.toLocaleString("en-IN")} micro-watersheds`);}
   if(S.atlas==="wb"&&WIDX){const n=WIDX.districts.reduce((a,d)=>a+d.n,0); return t.replace(/^Eight districts, [\d,]+ ponds/,`${NUMW[WIDX.districts.length]||WIDX.districts.length} districts, ${(Math.round(n/1000)*1000).toLocaleString("en-IN")} ponds`);}
   return t;}
 const ATLAS_HEAD={ws:["Watershed Systems Atlas","Eight districts, 4,598 micro-watersheds. Each watershed is read as a mixture of farming and land-use systems; a causal knowledge graph turns its indicators into stresses, opportunities and matching government schemes."],
+  cc:["Commons Connect","A field visit with the atlas: the landscape, resource mapping and planning forms of Commons Connect, with the questions ranked by how likely their answers are to change what the atlas infers."],
   wb:["Waterbody Atlas","Eight districts, 65,000 ponds, tanks and river reaches. Each waterbody is typed, read through eight years of the water it held, and checked for stresses and opportunities with interventions, community questions and schemes."]};
 
 const TABS=[["explore","Explore"],["graph","Knowledge graph"],["archetypes","System archetypes"],["rules","Observed stresses"],["interventions","Interventions"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
@@ -437,19 +451,21 @@ function matchSchemes(m,shares,positive,env,d){
 
 /* ---------- tabs ---------- */
 function renderTabs(){
-  const wb=S.atlas==="wb", tabs=wb?WTABS:TABS, cur=wb?W.tab:S.tab;
-  $("#atlassw").innerHTML=[["ws","Watersheds"],["wb","Waterbodies"]].map(([id,l])=>`<button role="tab" aria-selected="${S.atlas===id}" data-a="${id}">${l}</button>`).join("");
+  const wb=S.atlas==="wb", cc=S.atlas==="cc", tabs=cc?CCTABS:wb?WTABS:TABS, cur=cc?CC.tab:wb?W.tab:S.tab;
+  $("#atlassw").innerHTML=[["ws","Watersheds"],["wb","Waterbodies"],["cc","Commons Connect"]].map(([id,l])=>`<button role="tab" aria-selected="${S.atlas===id}" data-a="${id}">${l}</button>`).join("");
   $("#atlassw").onclick=e=>{const b=e.target.closest("button"); if(!b||b.dataset.a===S.atlas) return; S.atlas=b.dataset.a; try{localStorage.setItem("atlas",S.atlas)}catch(e){} render();};
   $("#atitle").textContent=ATLAS_HEAD[S.atlas][0]; $("#asub").textContent=atlasSub(); document.title=ATLAS_HEAD[S.atlas][0];
   $("#tabs").innerHTML=tabs.map(([id,l])=>`<button role="tab" aria-selected="${cur===id}" data-tab="${id}">${l}</button>`).join("");
   $("#tabs").onclick=e=>{const b=e.target.closest("button"); if(!b) return;
-    if(S.atlas==="wb"){W.tab=b.dataset.tab; try{localStorage.setItem("wba_tab",W.tab)}catch(e){}}
+    if(S.atlas==="cc"){CC.tab=b.dataset.tab; try{localStorage.setItem("cc_tab",CC.tab)}catch(e){}}
+    else if(S.atlas==="wb"){W.tab=b.dataset.tab; try{localStorage.setItem("wba_tab",W.tab)}catch(e){}}
     else {S.tab=b.dataset.tab; try{localStorage.setItem("wsa_tab",S.tab)}catch(e){}}
     render();};
 }
 function render(){
   renderTabs();
   if(S.atlas==="wb") return renderWb();
+  if(S.atlas==="cc") return renderCC();
   const m=$("#main");
   if(S.tab==="explore") return renderExplore(m);
   if(S.tab==="graph") return renderGraph(m);
@@ -487,6 +503,7 @@ async function go(level,arg){
     $("#pane").innerHTML=`<div class="loading">Loading ${esc(arg)}…</div>`; await loadBundle(curDistrict().slug);}
   if(level==="tehsil"){S.tehsil=arg;S.mws=null;S.level="tehsil";}
   if(level==="mws"){S.mws=arg;S.level="mws"; const b=BUNDLES[curDistrict().slug]; if(!S.tehsil) S.tehsil=b.mwsById[arg].t;}
+  if(level==="mws"){CC.district=S.district;CC.tehsil=S.tehsil;CC.mws=S.mws;}
   refreshExplore(level!=="mws");
 }
 function refreshExplore(refit){
@@ -944,9 +961,9 @@ function mixWalk(R,m){
    <div class="tbl"><table><thead><tr><th>System</th><th>Rule with this MWS's values</th><th class="r">Raw</th><th class="r">Closed</th><th class="r">Final</th></tr></thead><tbody>${A.archetypes.map((a,i)=>`<tr><td>${esc(a.label)}</td><td><code>${substitute(a.share,env)}</code></td><td class="r num">${pct(R.mix.raw[a.id])}</td><td class="r num">${pct(R.mix.closed[a.id])}</td><td class="r num"><b>${pct(R.shares[i])}</b></td></tr>`).join("")}
    <tr><td><b>Total</b></td><td></td><td class="r num"><b>${pct(R.mix.tot)}</b></td><td class="r num">100%</td><td class="r num">100%</td></tr></tbody></table></div>
    <p class="note">${R.mix.tot<0.999?`The raw shares add up to ${pct(R.mix.tot)}; the remaining ${pct(1-R.mix.tot)} is land the land-cover layer did not classify, added to "${esc(ARCH.other.label)}".`:R.mix.tot>1.001?`The raw shares add up to ${pct(R.mix.tot)} because cropland and built-up come from different layers and overlap slightly; every share is divided by ${R.mix.tot.toFixed(3)}.`:"The raw shares already add up to 100%."} ${R.C.shifts.length?"Community answers then moved share between systems without changing the total.":""}</p></div>`;}
-function questionHtml(q,uid){
+function questionHtml(q,uid,pr){
   const cur=(ANS[uid]||{})[q.id];const inf=[...new Set(q.options.flatMap(o=>o.stress.map(e=>e.id)))];
-  return `<fieldset class="q" data-q="${q.id}"><legend>${esc(q.text)}</legend>
+  return `<fieldset class="q" data-q="${q.id}"><legend>${esc(q.text)} ${prChip(pr,!!cur)}</legend>${pr&&pr[1]?`<p class="note">${esc(pr[1])}</p>`:""}
     <div class="opts">${q.options.map(o=>`<label><input type="radio" name="q_${q.id}" value="${o.id}" ${cur===o.id?"checked":""}> ${esc(o.label)}</label>`).join("")}
       <label class="muted"><input type="radio" name="q_${q.id}" value="" ${!cur?"checked":""}> Not asked or don't know</label></div>
     <p class="note">${q.origin.startsWith("CoRE")?'<span class="chip">From CoRE insights</span> ':""}${inf.length?"Informs: "+inf.map(x=>esc(sLabel(x))).join(", "):""}${q.options.some(o=>o.set||o.shift)?(inf.length?" · ":"")+"Adjusts the system mix":""}</p></fieldset>`;}
@@ -970,6 +987,9 @@ function renderMws(p,m,b,d){
   const strQ=K.questions.stress_questions.filter(q=>q.stresses.some(s=>relevant.has(s)));
   strQ.sort((a,c)=>Math.max(...c.stresses.map(s=>R.st[s].positive?2:relevant.has(s)?1:0))-Math.max(...a.stresses.map(s=>R.st[s].positive?2:relevant.has(s)?1:0)));
   void pos;
+  const PR=wsAsk(m,d)||{}, prS=q=>(PR[q.id]||[0])[0];
+  if(CCD){sysQ.sort((a,c)=>prS(c)-prS(a)); strQ.sort((a,c)=>prS(c)-prS(a));}
+  const strHi=CCD?strQ.filter(q=>prS(q)>=CCP().bands[1].min):strQ, strLo=CCD?strQ.filter(q=>prS(q)<CCP().bands[1].min):[];
   const otherQ=K.questions.stress_questions.filter(q=>!strQ.includes(q));
   const pending=!sameAns(ANS[m.u],APPLIED[m.u]);
   const nAns=Object.keys(ANS[m.u]||{}).length;
@@ -985,7 +1005,7 @@ function renderMws(p,m,b,d){
       <div class="filters"><button class="btn ghost" id="dlm">Download this watershed (JSON)</button></div></div>
     <div class="block" id="sysq"><div class="eyebrow">Check the systems with the community (${sysQ.length})</div>
       <p class="note">Answers replace an inferred weight (for example the canal weight) or move share between systems, then the mix is recomputed. Stress rules that depend on the mix are re-checked too.</p>
-      ${sysQ.map(q=>questionHtml(q,m.u)).join("")||'<p class="muted">No system questions apply here.</p>'}
+      ${sysQ.map(q=>questionHtml(q,m.u,PR[q.id])).join("")||'<p class="muted">No system questions apply here.</p>'}
       <div class="filters"><button class="btn" data-apply>Re-compute system mix</button></div></div>
     <div class="block"><div class="eyebrow">Observed stresses (${pwPosS.length} flagged)</div>
       <p class="note">Production systems present here: ${esc(psPresent.join(", "))}. Each observed stress is flagged when any of its causal pathways is likely present. Intensity (0–100) comes from how far the signals pass their thresholds; an observed stress shows its highest causal pathway.</p>
@@ -996,9 +1016,10 @@ function renderMws(p,m,b,d){
       <p class="note">Causal pathways not applicable to this system mix: ${na.map(k=>esc(sLabel(k))).join(", ")||"none"}.</p></div>
     ${ivPlanBlock(ivSuggest(ivEnvWs(m,d,R.shares),new Set(pos),"addresses"),{label:"stresses and opportunities",unit:"micro-watershed",keyLab:ivStressLabel,applied:hasApplied(m.u)})}
     <div class="block" id="strq"><div class="eyebrow">Ask the community (${strQ.length} questions)</div>
-      <p class="note">Questions for the stresses evaluated here, those already present first. Each answer is evidence for or against a stress and changes its probability (see the Community questions tab). Answers are kept in this browser; save them to use with the Python pipeline.</p>
+      <p class="note">Questions for the stresses evaluated here, ranked by their must-ask score: how likely the answer is to change a stress, because the rule is near its threshold, the data are missing or uncertain, or the rule is held with low confidence (Commons Connect tab, Methodology). Each answer is evidence for or against a stress and changes its probability (see the Community questions tab). Answers are kept in this browser; save them to use with the Python pipeline.</p>
       ${status}
-      ${strQ.map(q=>questionHtml(q,m.u)).join("")}
+      ${strHi.map(q=>questionHtml(q,m.u,PR[q.id])).join("")}
+      ${strLo.length?`<details><summary>Questions unlikely to change the result here (${strLo.length})</summary>${strLo.map(q=>questionHtml(q,m.u,PR[q.id])).join("")}</details>`:""}
       ${otherQ.length?`<details><summary>Questions for stresses that do not apply here (${otherQ.length})</summary>${otherQ.map(q=>questionHtml(q,m.u)).join("")}</details>`:""}
       <div class="filters"><button class="btn" data-apply>Re-assess stresses</button><button class="btn ghost" id="clr">Clear answers for this MWS</button><button class="btn ghost" id="sva">Save all answers (JSON)</button></div></div>
     <div class="block"><div class="eyebrow">Suggested schemes (${R.schemes.length})</div>${R.schemes.length?`<div class="tbl"><table><thead><tr><th>Scheme</th><th>Because of</th></tr></thead><tbody>${R.schemes.map(([id,bc])=>{const s=SCH[id];return `<tr><td><b>${esc(s.name)}</b><br><span class="note">${s.level==="state"?esc(s.state):"Central"} · ${esc(s.relevant_components.slice(0,3).join(", "))}</span>${s.caution?`<br><span class="note" style="color:var(--bad)">Caution: ${esc(s.caution)}</span>`:""}</td><td>${bc.map(x=>esc(sLabel(x))).join(", ")}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">No scheme matched.</p>'}
@@ -1856,9 +1877,9 @@ function wIvCard(r,R){const xs=ivFor(r.id,"addresses_wb").filter(iv=>!iv.wb_type
   return `<details><summary>Interventions from the catalogue (${list.filter(x=>x.fit==="suited").length} suited here)</summary>${ivMiniList(list)}${R.ivEnv?"":'<p class="note">The home micro-watershed is outside the watershed atlas, so landscape fit is not known.</p>'}</details>`;}
 /* landscape-fit environment for a waterbody: its home micro-watershed's record in the watershed bundle */
 function wIvEnv(w,d){const b=BUNDLES[d.slug]; const m=b&&b.mwsById&&b.mwsById[w.mws]; const dd=IDX.districts.find(x=>x.district===d.district); return m&&dd?ivEnvWs(m,dd):null;}
-function wQuestionHtml(q,key){
+function wQuestionHtml(q,key,pr){
   const cur=(WANS[key]||{})[q.id]; const inf=q.rules||[];
-  return `<fieldset class="q" data-q="${q.id}"><legend>${esc(q.text)}</legend>
+  return `<fieldset class="q" data-q="${q.id}"><legend>${esc(q.text)} ${prChip(pr,!!cur)}</legend>${pr&&pr[1]?`<p class="note">${esc(pr[1])}</p>`:""}
     <div class="opts">${q.options.map(o=>`<label><input type="radio" name="wq_${q.id}" value="${o.id}" ${cur===o.id?"checked":""}> ${esc(o.label)}</label>`).join("")}
       <label class="muted"><input type="radio" name="wq_${q.id}" value="" ${!cur?"checked":""}> Not asked or don't know</label></div>
     <p class="note">${inf.length?"Informs: "+inf.map(x=>esc(WRULE[x].label)).join(", "):"Can change the waterbody type (sets "+[...new Set(q.options.flatMap(o=>Object.keys(o.set||{})))].map(k=>wvref(k)).join(", ")+")"}</p></fieldset>`;}
@@ -1885,6 +1906,9 @@ function wPaneWb(P,w,d,b){
   const typeQ=WK.questions.type_questions.filter(q=>!q.applies_to||q.applies_to.includes(R.typeData)||q.applies_to.includes(R.type));
   const strQ=WK.questions.stress_questions.filter(q=>q.rules.some(r=>relevant.has(r)));
   strQ.sort((a,c)=>Math.max(...c.rules.map(r=>st[r].positive?2:relevant.has(r)?1:0))-Math.max(...a.rules.map(r=>st[r].positive?2:relevant.has(r)?1:0)));
+  const WPR=wAskWb(w,b,R)||{}, wpS=q=>(WPR[q.id]||[0])[0];
+  if(CCD){typeQ.sort((a,c)=>wpS(c)-wpS(a)); strQ.sort((a,c)=>wpS(c)-wpS(a));}
+  const wHi=CCD?strQ.filter(q=>wpS(q)>=CCP().bands[1].min):strQ, wLo=CCD?strQ.filter(q=>wpS(q)<CCP().bands[1].min):[];
   const pending=JSON.stringify(WANS[key]||{})!==JSON.stringify(WAPPLIED[key]||{}), nAns=Object.keys(WANS[key]||{}).length;
   const status=`<p class="note" id="wansStatus">${pending?`<b>${nAns} answer${nAns===1?"":"s"} not yet applied.</b> `:""}${wHasApplied(b,w)?`${Object.keys(WAPPLIED[key]).length} community answer(s) applied to this waterbody.`:"No community answers applied yet; results are from data alone."}</p>`;
   const sch=new Map(); pos.forEach(r=>schemesFor(r.id,R.type,d.state).forEach(l=>{if(!sch.has(l.scheme)) sch.set(l.scheme,[]); sch.get(l.scheme).push(r.label);}));
@@ -1897,7 +1921,7 @@ function wPaneWb(P,w,d,b){
       ${kv.length?`<div class="tbl"><table><tbody>${kv.map(k=>`<tr><th>${wvref(k)}</th><td class="num">${wVal(k,R.env[k])}</td></tr>`).join("")}</tbody></table></div>`:""}</div>
     <div class="block" id="wtypeq"><div class="eyebrow">Waterbody type</div><h3>${esc(T.label)}</h3><p>${esc(T.description)}</p>
       <details><summary>How this type was assigned</summary>${typeWalk(R)}</details>
-      ${typeQ.length?`<p class="note">The data cannot see who owns a pond or whether a small stream feeds it. Answers set those fields, the type rules are evaluated again, and every rule is re-scored for the new type.</p>${typeQ.map(q=>wQuestionHtml(q,key)).join("")}<div class="filters"><button class="btn" data-wapply>Re-compute type</button></div>`:""}</div>
+      ${typeQ.length?`<p class="note">The data cannot see who owns a pond or whether a small stream feeds it. Answers set those fields, the type rules are evaluated again, and every rule is re-scored for the new type.</p>${typeQ.map(q=>wQuestionHtml(q,key,WPR[q.id])).join("")}<div class="filters"><button class="btn" data-wapply>Re-compute type</button></div>`:""}</div>
     ${inS?`<div class="block"><h3>Roles it plays</h3><div class="bars">${WK.roles.roles.map(r=>`<div class="bar" style="cursor:default"><span>${wvref(r.id,r.label)}</span><span class="t"><span style="width:${(R.roles[r.id]||0)*100}%;background:var(--accent)"></span></span><span class="num">${(R.roles[r.id]||0).toFixed(2)}</span></div>`).join("")}</div>
       <p class="note">0 to 1, from cropping in its zone of influence, village fishery and irrigation sources, livestock and the home MWS. A rule's intensity rises with the roles that matter for it. Hover a role for its formula.</p></div>
     <div class="block"><div class="eyebrow">Observed stresses and opportunities (${pos.length} present)</div>
@@ -1906,8 +1930,9 @@ function wPaneWb(P,w,d,b){
       ${evald.length?`<details><summary>Evaluated, not present (${evald.length})</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">${evald.map(r=>wStressCard(r,st[r.id],R,b,d,true)).join("")}</div></details>`:""}
       <p class="note">Not applicable to this type or status: ${na.map(r=>esc(r.label)).join(", ")||"none"}.</p></div>
     <div class="block" id="wstrq"><div class="eyebrow">Ask the community (${strQ.length} questions)</div>
-      <p class="note">Questions for the rules evaluated here, those already present first. Each answer is evidence for or against a rule and multiplies its odds by a likelihood ratio (Observed stresses tab). Answers are kept in this browser; save them to use with the Python pipeline.</p>
-      ${status}${strQ.map(q=>wQuestionHtml(q,key)).join("")||'<p class="muted">No rule is evaluated here, so there are no stress questions.</p>'}
+      <p class="note">Questions for the rules evaluated here, ranked by their must-ask score (how likely the answer is to change a rule or the type; Commons Connect tab, Methodology). Each answer is evidence for or against a rule and multiplies its odds by a likelihood ratio (Observed stresses tab). Answers are kept in this browser; save them to use with the Python pipeline.</p>
+      ${status}${wHi.map(q=>wQuestionHtml(q,key,WPR[q.id])).join("")||(strQ.length?"":'<p class="muted">No rule is evaluated here, so there are no stress questions.</p>')}
+      ${wLo.length?`<details><summary>Questions unlikely to change the result here (${wLo.length})</summary>${wLo.map(q=>wQuestionHtml(q,key,WPR[q.id])).join("")}</details>`:""}
       <div class="filters"><button class="btn" data-wapply>Re-assess stresses</button><button class="btn ghost" id="wclr">Clear answers for this waterbody</button><button class="btn ghost" id="wsva">Save all answers (JSON)</button></div></div>
     ${ivPlanBlock(ivSuggest(R.ivEnv,new Set(pos.map(r=>r.id)),"addresses_wb",R.type),{label:"rules",unit:"waterbody's home micro-watershed",keyLab:ivWbLabel,applied:wHasApplied(b,w)})}
     <div class="block"><div class="eyebrow">Suggested schemes (${sch.size})</div>${sch.size?`<div class="tbl"><table><thead><tr><th>Scheme</th><th>Because of</th></tr></thead><tbody>${[...sch].map(([id,bc])=>{const s=WSCH[id];return `<tr><td><b>${esc(s.name)}</b><br><span class="note">${s.level==="state"?esc(s.states.join(", ")):"Central"} · ${esc(s.status)}</span></td><td>${bc.map(esc).join(", ")}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">No scheme matched.</p>'}
@@ -2262,10 +2287,342 @@ function ivDistrictBlock(ms,d){
   return `<div class="block"><div class="eyebrow">Interventions most often suited</div><div class="tbl"><table><thead><tr><th>Intervention</th><th>Side</th><th class="r">MWS</th></tr></thead><tbody>${top.map(([id,c])=>`<tr><td>${ivLink(IVX[id])}</td><td>${esc(IV_SIDE[IVX[id].side])}</td><td class="r num">${c} <span class="muted">(${Math.round(c/ms.length*100)}%)</span></td></tr>`).join("")}</tbody></table></div>
     <p class="note">Micro-watersheds where the intervention responds to a stress or opportunity triggered by the data and the landscape suits it. Open a watershed for its full list, or see the Interventions tab.</p></div>`;}
 
+
+/* ---------- must-ask scores: mirror of seft/priority.py (rules in commons_connect.json 'priority') ---------- */
+let CCD=null;                                   /* knowledge/commons_connect.json (web/data/commons_connect.json) */
+const CCP=()=>CCD?CCD.priority:null;
+const prRnd=x=>Math.floor(x+0.5);
+const prKey=id=>id.replace(/\./g,"__");
+function prBand(s){const P=CCP(); if(s==null||!P) return null; for(const b of P.bands) if(s>=b.min) return b.id; return "skip";}
+function prChip(pr,ans,work){if(!pr||pr[0]==null) return ""; const b=prBand(pr[0]), L=(work?{must:"Priority",useful:"Consider",skip:"Low"}:{must:"Must ask",useful:"Useful",skip:"Can skip"})[b];
+  return `<span class="pri ${b}" title="Must-ask score ${pr[0]} of 100${pr[1]?": "+esc(pr[1]):""}">${L} · ${pr[0]}</span>${ans?' <span class="pri done">answered</span>':""}`;}
+function prPost(p,lr){const o=p/(1-p)*lr; return o/(1+o);}
+function prRule(x,conf,lrs,A){
+  const W=CCP().stress_weights, p=x.post; if(p==null) return null;
+  const pa=A.positive_at, outs=lrs.map(l=>prPost(p,l));
+  const fl=outs.some(q=>(q>=pa)!==(p>=pa))?Math.min(1,(p<pa?p:1-p)/0.5):0;
+  const mv=Math.max(0,...outs.map(q=>Math.abs(q-p))), unc=1-Math.abs(2*p-1), I=(x.inten||0)/100;
+  const bd=x.code===2?1-I:(x.code===1?I:1), lc={low:1,medium:0.5}[conf]||0;
+  return 100*(W.flip*fl+W.move*Math.min(1,mv/W.move_full)+W.uncertainty*unc+W.borderline*bd+W.low_confidence*lc);}
+function prStressQ(q,st,confOf,A){
+  const W=CCP().stress_weights, rs=[];
+  [...new Set(q.options.flatMap(o=>(o.stress||[]).map(e=>e.id)))].forEach(rid=>{const x=st[rid]; if(!x||x.post==null) return;
+    const lrs=q.options.map(o=>(o.stress||[]).filter(e=>e.id===rid).reduce((t,e)=>t*e.lr,1));
+    const s=prRule(x,confOf(rid),lrs,A); if(s!=null) rs.push([s,rid]);});
+  if(!rs.length) return [0,null];
+  rs.sort((a,b)=>b[0]-a[0]);
+  const bonus=W.breadth_bonus*rs.slice(1).filter(r=>r[0]>=W.breadth_at).length;
+  return [Math.min(100,rs[0][0]+bonus),rs[0][1]];}
+function prShares(m,d,sets,shifts){return computeMix(m,d,sets,shifts).shares;}   /* unrounded, as seft/priority.py _shares */
+function prPresent(sh){const fill=K.archetypes.normalisation.fill; return new Set(K.archetypes.archetypes.filter(a=>a.id!==fill&&(sh[a.id]||0)>=a.present_at).map(a=>a.id));}
+function prSystemQ(q,m,d,C){
+  const W=CCP().system_weights, base=prShares(m,d,C.sets,C.shifts), pres=prPresent(base), at={};
+  K.archetypes.archetypes.forEach(a=>at[a.id]=a.present_at);
+  let cross=0; const tvs=[];
+  q.options.forEach(o=>{const sets={...C.sets,...(o.set||{})}, shifts=[...C.shifts,...(o.shift||[])], sh=prShares(m,d,sets,shifts);
+    const ks=new Set([...Object.keys(sh),...Object.keys(base)]); let tv=0; ks.forEach(k=>tv+=Math.abs((sh[k]||0)-(base[k]||0))); tvs.push(tv/2);
+    const p2=prPresent(sh); [...new Set([...p2,...pres])].filter(a=>p2.has(a)!==pres.has(a)).forEach(a=>{cross=Math.max(cross,1-Math.min(1,Math.abs((base[a]||0)-at[a])/at[a]));});});
+  const tv=tvs.length?tvs.reduce((t,x)=>t+x,0)/tvs.length:0;
+  return 100*(W.cross*cross+W.shift*Math.min(1,tv/W.shift_full));}
+const PRCACHE=new Map();
+function wsAsk(m,d){
+  if(!CCD) return null;
+  const a=APPLIED[m.u]||{}, ck=m.u+"|"+JSON.stringify(a); if(PRCACHE.has(ck)) return PRCACHE.get(ck);
+  const R=getAssess(m,d), A=K.questions.assessment, conf=id=>(STR[id]||{}).confidence, env=envFor(m,d), out={};
+  K.questions.system_questions.forEach(q=>{
+    if(q.show_if&&PyEval.safe(q.show_if,env)!==true){out[q.id]=[0,"not asked here (its condition fails)"];return;}
+    const s1=prSystemQ(q,m,d,R.C), [s2,rid]=prStressQ(q,R.st,conf,A);
+    out[q.id]=[prRnd(Math.max(s1,s2)),s1>=s2?"an answer would change the system mix":"could change "+sLabel(rid)];});
+  K.questions.stress_questions.forEach(q=>{const [s,rid]=prStressQ(q,R.st,conf,A); out[q.id]=[prRnd(s),rid?prWhy(rid,R.st[rid]):"its stresses do not apply here"];});
+  if(PRCACHE.size>300) PRCACHE.clear(); PRCACHE.set(ck,out); return out;}
+function prWhy(rid,x){const I=x.inten, p=x.post; const where=x.code===2?(I!=null&&I<40?"just past its threshold":"triggered by the data"):x.code===1?(I>0?"close to its threshold":"not triggered by the data"):"data missing";
+  return `could change ${sLabel(rid)} (now ${pct(p)}, ${where})`;}
+/* waterbody: type and stress questions */
+const wbX=x=>({code:x.status==="triggered"?2:x.status==="not triggered"?1:x.status==="not applicable"?0:-1,inten:x.intensity,post:x.post});
+function wAskWb(w,b,R){
+  if(!CCD) return null;
+  const A=WK.questions.assessment, st={}, out={}, Wt=CCP().type_weights;
+  Object.entries(R.st).forEach(([k,x])=>st[k]=wbX(x));
+  WK.questions.type_questions.forEach(q=>{
+    if(q.applies_to&&!q.applies_to.includes(R.typeData)&&!q.applies_to.includes(R.type)){out[q.id]=[0,"does not apply to this type"];return;}
+    const ts=q.options.map(o=>wAssignType(w,{...R.C.sets,...(o.set||{})}).type), n=ts.filter(t=>t!==R.type).length;
+    out[q.id]=[prRnd(100*((n?Wt.any:0)+Wt.share*n/ts.length)),n?`${n} of ${ts.length} answers would change the type`:"no answer changes the type"];});
+  WK.questions.stress_questions.forEach(q=>{const [s,rid]=prStressQ(q,st,id=>(WRULE[id]||{}).confidence,A);
+    out[q.id]=[prRnd(s),rid?`could change ${(WRULE[rid]||{}).label||rid} (now ${pct(st[rid].post)})`:"its rules do not apply here"];});
+  return out;}
+/* Commons Connect questions */
+function ccScore(q,env,ask){
+  const P=CCP(); if(q.role!=="inform") return [null,"record"];
+  const M=q.must_ask||{}; let s=M.base; if(s==null&&!(q.atlas_match||[]).length&&!(M.rules||[]).length) s=P.default_base;
+  let why=M.why||(s!=null?"base score":""); s=s||0;
+  (q.atlas_match||[]).forEach(m=>{let v=ask[m.atlas+":"+m.id]; if(v==null) return; v*=P.match_weight[m.how]; if(v>s){s=v; why=`${m.how==="same"?"same question as":m.how==="derived"?"answers":"overlaps"} atlas question ${m.id}`;}});
+  for(const r of M.rules||[]){const t=PyEval.safe(r.if,env); if(!(t===true||t===1)) continue;
+    const v=typeof r.score==="number"?r.score:PyEval.safe(r.score,env); if(typeof v!=="number"||!isFinite(v)) continue;
+    if(r.mode==="set") return [prRnd(v),r.why]; if(v>s){s=v; why=r.why;}}
+  return [prRnd(Math.min(100,s)),why];}
+function ccFormScores(form,env,ask){
+  const out={}; form.questions.forEach(q=>out[q.name]=ccScore(q,env,ask));
+  form.questions.forEach(q=>{if(!q.routes) return; const ks=q.routes.map(c=>out[c]&&out[c][0]).filter(v=>v!=null);
+    if(ks.length&&Math.max(...ks)>(out[q.name][0]||0)) out[q.name]=[Math.max(...ks),"leads to the questions below it"];});
+  return out;}
+function ccEnvWs(m,d,R,ask){
+  const e=envFor(m,d), A=K.questions.assessment;
+  K.archetypes.archetypes.forEach((a,i)=>e["share_"+a.id]=R.shares[i]);
+  K.contexts.dimensions.forEach((x,i)=>e[x.id]=m.c[i]||"");
+  K.taxonomy.production_systems.forEach(p=>{const v=psOn(m,p.id,R.se); e["ps_"+p.id]=v==null?null:(v?1:0);});
+  Object.entries(R.st).forEach(([sid,x])=>{const k=prKey(sid); e["p_"+k]=x.post; e["pos_"+k]=x.post==null?null:(x.post>=A.positive_at?1:0);
+    e["urg_"+k]=x.post==null?null:prRule(x,(STR[sid]||{}).confidence,CCP().urgency_lrs,A);});
+  Object.entries(ask||{}).forEach(([k,v])=>e["ask_"+k]=v[0]);
+  return e;}
+
+/* ---------- Commons Connect: the field visit, emulated (knowledge/commons_connect.json) ---------- */
+const CC={tab:"visit", district:null, tehsil:null, mws:null};
+try{const t=localStorage.getItem("cc_tab"); if(t) CC.tab=t;}catch(e){}
+const CCTABS=[["visit","Field visit"],["forms","Forms"],["method","Methodology"]];
+let CCANS={}; try{CCANS=JSON.parse(localStorage.getItem("cc_answers")||"{}")||{}}catch(e){CCANS={}}
+function ccSave(){try{localStorage.setItem("cc_answers",JSON.stringify(CCANS))}catch(e){}}
+const ccForm=id=>CCD.forms.find(f=>f.id===id);
+function ccA(u){return CCANS[u]=CCANS[u]||{_feed:{},landscape:{},settlement:[{}],waterbody:{},well:[{}],crop:[{}],forest_patch:[{}],plan:{}};}
+function ccGet(u,path){const A=ccA(u),p=path.split("."); let o=A; for(const k of p){if(o[k]==null) o[k]=/^\d+$/.test(k)?{}:{}; o=o[k];} return o;}
+function ccDefault(q){return q.type==="select_multiple"?[]:(q.type==="integer"||q.type==="decimal")?null:"";}
+function ccPrefill(q,env){for(const r of q.prefill||[]){const t=PyEval.safe(r.if,env); if(t===true||t===1) return r;} return null;}
+function ccVals(form,qs,ans,env){const v={}; qs.forEach(q=>{let x=ans[q.name]; if(x==null){const p=ccPrefill(q,env); x=p?(p.values||p.value):ccDefault(q);} v[q.name]=x;}); return v;}
+function ccVisible(q,vals){const ex=q.relevant_expr||(q.origin!=="odk"?q.relevant:null); if(!ex) return true;
+  const r=PyEval.safe(ex,vals); return r===true||r===1;}
+function ccOptLabel(q,id){const o=(q.options||[]).find(o=>o.id===id); return o?o.label:id;}
+/* the atlas answer a Commons Connect answer gives, for 'same' and 'derived' matches */
+function ccFeeds(q,val,vals){
+  const out=[];
+  (q.atlas_match||[]).forEach(m=>{if(m.how==="overlap") return; let opt=null;
+    if(m.bins){let x=m.value?PyEval.safe(m.value,vals):(val===""||val==null?null:Number(val)); if(typeof x!=="number"||!isFinite(x)) return;
+      for(const [up,o] of m.bins){if(up==null||x<up){opt=o;break;}}}
+    else if(m.map&&typeof val==="string") opt=m.map[val]||null;
+    if(opt) out.push([m.atlas,m.id,opt]);});
+  return out;}
+function ccAtlasQ(atlas,id){return atlas==="ws"?QBY[id]:(typeof WQ!=="undefined"?WQ[id]:null);}
+
+/* ---------- one question ---------- */
+function ccQHtml(q,val,pr,pre,path,ctx){
+  const nm=`cc_${path}_${q.name}`.replace(/[^A-Za-z0-9_]/g,"_"), answered=val!=null&&val!==""&&!(Array.isArray(val)&&!val.length);
+  const preIds=pre?[].concat(pre.values||pre.value):[];
+  const mark=id=>preIds.includes(id)?' <span class="pri atlas" title="'+esc(pre.why)+'">atlas</span>':"";
+  let inp="";
+  if(q.type==="select_one") inp=`<div class="opts">${(q.options||[]).map(o=>`<label><input type="radio" name="${nm}" value="${esc(o.id)}" ${val===o.id?"checked":""}> ${esc(o.label)}${mark(o.id)}</label>`).join("")}
+      <label class="muted"><input type="radio" name="${nm}" value="" ${!answered?"checked":""}> Not asked yet</label></div>`;
+  else if(q.type==="select_multiple") inp=`<div class="opts">${(q.options||[]).map(o=>`<label><input type="checkbox" value="${esc(o.id)}" ${(val||[]).includes(o.id)?"checked":""}> ${esc(o.label)}${mark(o.id)}</label>`).join("")}</div>`;
+  else if(q.type==="integer"||q.type==="decimal") inp=`<div class="opts"><input type="number" ${q.type==="integer"?'step="1"':'step="any"'} value="${val==null?"":esc(val)}" style="max-width:10em"></div>`;
+  else inp=`<div class="opts"><input type="text" value="${esc(val||"")}" style="width:100%;max-width:28em"></div>`;
+  const notes=[];
+  if(pr&&pr[1]&&pr[0]!=null) notes.push(esc(pr[1]));
+  if(pre&&!answered) notes.push(`<b>Atlas expects:</b> ${esc(preIds.map(i=>ccOptLabel(q,i)).join(", "))} (${esc(pre.why)}): confirm or correct`);
+  const am=(q.atlas_match||[]); if(am.length) notes.push("Atlas: "+am.map(m=>`<span class="mono">${esc(m.id)}</span> (${m.how})`).join(", "));
+  if(answered&&ctx){const f=ccFeeds(q,val,ctx.vals); if(f.length) notes.push("Passed to the atlas: "+f.map(([a,id,o])=>{const aq=ccAtlasQ(a,id); const ol=aq?(aq.options.find(x=>x.id===o)||{}).label:o; return `<span class="mono">${esc(id)}</span> = ${esc(ol||o)}`}).join("; "));}
+  if(!answered&&ctx&&ctx.atlasAns){const hit=am.filter(m=>m.how!=="overlap").map(m=>[m,(m.atlas==="ws"?ctx.atlasAns.ws:ctx.atlasAns.wb)[m.id]]).filter(x=>x[1]);
+    if(hit.length) notes.push("Already answered in the atlas: "+hit.map(([m,o])=>{const aq=ccAtlasQ(m.atlas,m.id); return `<span class="mono">${esc(m.id)}</span> = ${esc(aq?(aq.options.find(x=>x.id===o)||{}).label||o:o)}`}).join("; "));}
+  if(q.atlas_hint&&ctx&&ctx.env) notes.push(esc(q.atlas_hint.replace(/\{(\w+):pct\}/g,(_,k)=>pct(ctx.env[k])).replace(/\{(\w+)\}/g,(_,k)=>ctx.env[k]??"–")));
+  if(q.note) notes.push(esc(q.note));
+  return `<fieldset class="q cc" data-path="${esc(path)}" data-q="${esc(q.name)}" data-t="${q.type}"><legend>${esc(q.label||q.name)} ${prChip(pr,answered)}</legend>${inp}
+    <p class="note">${notes.join(" · ")}</p></fieldset>`;}
+
+/* ---------- one form instance: priority questions shown, the rest collapsed ---------- */
+function ccFormHtml(form,qs,ans,env,ask,path,ctx,opts={}){
+  const vals=ccVals(form,qs,ans,env), sc=ccFormScores({questions:qs},env,ask);
+  const vis=qs.filter(q=>ccVisible(q,vals)), hid=qs.length-vis.length;
+  const inf=vis.filter(q=>q.role==="inform"), rec=vis.filter(q=>q.role!=="inform"&&!["image","audio","geopoint","note"].includes(q.type)&&!q.hidden);
+  const c={...ctx,vals}; const show=[], low=[];
+  inf.forEach(q=>{const b=prBand(sc[q.name][0]); (b==="skip"?low:show).push(q);});
+  const qh=q=>ccQHtml(q,ans[q.name],sc[q.name],ans[q.name]==null?ccPrefill(q,env):null,path,c);
+  return `${show.map(qh).join("")||'<p class="muted">No question here is likely to add information.</p>'}
+    ${low.length?`<details class="cclow"><summary>${low.length} question${low.length===1?"":"s"} unlikely to add information</summary>${low.map(qh).join("")}</details>`:""}
+    ${rec.length&&!opts.noRecords?`<details class="cclow"><summary>Also recorded in the form (${rec.length})</summary><p class="note">${rec.map(q=>esc(q.label||q.name)).join(" · ")}</p></details>`:""}
+    ${hid?`<p class="note">${hid} more question${hid===1?"":"s"} appear only after an earlier answer (as in the ODK form).</p>`:""}`;}
+
+/* ---------- views ---------- */
+async function renderCC(){
+  const m=$("#main");
+  if(!CCD){m.innerHTML=`<div class="loading">Loading the Commons Connect forms…</div>`;
+    try{CCD=await loadData("commons_connect");}catch(e){m.innerHTML=`<div class="loading"><p><b>The Commons Connect forms did not load.</b></p><p>Build them with <code>python -m seft.cli cc-build --forms &lt;folder&gt;</code> and <code>python -m seft.cli refresh-knowledge</code>.</p></div>`;return;}}
+  if(!WIDX){try{WIDX=await loadWbData("index"); WK=WIDX.knowledge; wIndex();}catch(e){}}
+  $("#asub").textContent=atlasSub();
+  if(CC.tab==="forms") return ccRenderForms(m);
+  if(CC.tab==="method") return ccRenderMethod(m);
+  return ccRenderVisit(m);}
+async function ccPick(level,v){
+  if(level==="district"){CC.district=v||null;CC.tehsil=CC.mws=null;}
+  if(level==="tehsil"){CC.tehsil=v||null;CC.mws=null;}
+  if(level==="mws"){CC.mws=v||null;}
+  ccRenderVisit($("#main"));}
+async function ccRenderVisit(m){
+  if(!CC.district&&S.district){CC.district=S.district;CC.tehsil=S.tehsil;CC.mws=S.mws;}
+  const d=CC.district?IDX.districts.find(x=>x.district===CC.district):null;
+  let b=null, wb=null;
+  if(d){m.innerHTML=`<div class="loading">Loading ${esc(d.district)}…</div>`; b=await loadBundle(d.slug);
+    if(WIDX&&WIDX.districts.some(x=>x.slug===d.slug)){try{wb=await wBundle(d.slug);}catch(e){wb=null;}}}
+  const ms=b?b.mws.filter(x=>!CC.tehsil||x.t===CC.tehsil||(x.ts||[]).includes(CC.tehsil)):[];
+  const mm=b&&CC.mws?b.mwsById[CC.mws]:null;
+  const sel=(id,lab,opts,cur,ph)=>`<label class="ccpick">${lab}<select id="${id}"><option value="">${ph}</option>${opts.map(([v,l])=>`<option value="${esc(v)}" ${v===cur?"selected":""}>${esc(l)}</option>`).join("")}</select></label>`;
+  const picks=`<div class="block ccpicks">${sel("ccd","State and district",IDX.districts.map(x=>[x.district,`${x.district}, ${x.state}`]),CC.district,"Choose a district")}
+    ${d?sel("cct","Tehsil",d.tehsils.map(t=>[t,t]),CC.tehsil,"All tehsils"):""}
+    ${d?sel("ccm","Micro-watershed",ms.map(x=>[x.u,`${x.u} · ${ARCH[x.dom]?ARCH[x.dom].label:""}`]),CC.mws,`Choose one of ${ms.length}`):""}
+    <p class="note">The same selection as in the atlases: state and district, then tehsil, then micro-watershed. Opening a micro-watershed in the Watersheds atlas also selects it here.</p></div>`;
+  if(!mm){m.innerHTML=`<div class="ccwrap">${picks}${ccIntro()}</div>`; ccBindPicks(); return;}
+  const y=window.scrollY;
+  m.innerHTML=`<div class="ccwrap" id="ccvisit">${picks}${ccVisitHtml(mm,d,b,wb)}</div>`;
+  ccBindPicks(); ccBindVisit(mm,d,b,wb); window.scrollTo(0,y);}
+function ccBindPicks(){const g=id=>$("#"+id); if(g("ccd")) g("ccd").onchange=e=>ccPick("district",e.target.value);
+  if(g("cct")) g("cct").onchange=e=>ccPick("tehsil",e.target.value); if(g("ccm")) g("ccm").onchange=e=>ccPick("mws",e.target.value);}
+function ccIntro(){
+  return `<div class="block"><h2>A field visit with Commons Connect</h2>
+    <p>Choose a micro-watershed. The page then walks through the visit in the order a field worker would: the landscape, then resource mapping (settlements, waterbodies, wells, crops, forest patches), then planning of new works and maintenance.</p>
+    <p class="note">At each step the atlas shows what it already infers and ranks the questions by a must-ask score: how likely the answer is to change the inference, because a rule is near its threshold, the data are missing or uncertain, or an answer could move a system across its presence line. Questions unlikely to add information are collapsed. Answers to questions that match an atlas question are passed to the atlas straight away, so the inference and the scores update as you go. Answers stay in this browser.</p></div>`;}
+function ccStep(n,title,sub,body,open=true,id=""){return `<details class="block ccstep" ${open?"open":""} ${id?`id="${id}"`:""}><summary><span class="ccn">${n}</span><span><b>${title}</b><br><span class="note">${sub}</span></span></summary><div class="ccbody">${body}</div></details>`;}
+function ccVisitHtml(mm,d,b,wb){
+  const R=getAssess(mm,d), ask=wsAsk(mm,d), askK={}; Object.entries(ask).forEach(([k,v])=>askK["ws:"+k]=v[0]);
+  const env=ccEnvWs(mm,d,R,ask), A=ccA(mm.u);
+  const wbs=wb?(wb.byMws[mm.u]||[]):[], wbR=wbs.map(w=>{const r=wAssessC(w,wb); return {w,R:r,ask:wAskWb(w,wb,r)};});
+  env.n_wb=wbs.length; if(WK) WK.rules.rules.forEach(r=>env["wbpos_"+prKey(r.id)]=wbR.filter(x=>x.R.st[r.id]&&x.R.st[r.id].positive).length);
+  wbR.forEach(x=>Object.entries(x.ask||{}).forEach(([k,v])=>{askK["wb:"+k]=Math.max(askK["wb:"+k]||0,v[0]);}));
+  const ctx={env,atlasAns:{ws:APPLIED[mm.u]||{},wb:{}}};
+  const ids=K.archetypes.archetypes.map(a=>a.id);
+  /* 0. inference */
+  const st=R.st, all=Object.keys(st), pos=all.filter(k=>st[k].positive).sort((a,c)=>st[c].post-st[a].post);
+  const unc=all.filter(k=>!st[k].positive&&st[k].post!=null&&st[k].post>=0.3);
+  const ps=K.taxonomy.production_systems.filter(p=>psOn(mm,p.id,R.se)===true).map(p=>p.label);
+  const nMust=Object.values(ask).filter(v=>prBand(v[0])==="must").length;
+  const inf=`<div class="block"><div class="eyebrow">${esc(d.district)} · ${esc(mm.t)} · micro-watershed ${esc(mm.u)}</div><h2>What the atlas infers</h2>
+    ${mixBar(R.shares,ids)}${mixList(R.shares,ids,0.03)}
+    <p class="note">Production systems present: ${esc(ps.join(", "))}. ${wbs.length?`${wbs.length} waterbodies mapped.`:"No mapped waterbodies (or no waterbody data for this district)."}</p>
+    <div class="ccinf"><div><b>Likely stresses and opportunities (${pos.length})</b><div class="chips">${pos.map(k=>`<span class="chip" title="${esc(sLabel(k))}">${esc(STR[k].label)} ${pct(st[k].post)}</span>`).join("")||'<span class="muted">none</span>'}</div></div>
+      <div><b>Uncertain: worth checking (${unc.length})</b><div class="chips">${unc.map(k=>`<span class="chip">${esc(STR[k].label)} ${pct(st[k].post)}</span>`).join("")||'<span class="muted">none</span>'}</div></div></div>
+    <p class="note">${nMust} of the ${Object.keys(ask).length} atlas questions are must-ask here. ${hasApplied(mm.u)?`${Object.keys(APPLIED[mm.u]).length} atlas answers applied so far.`:"No answers yet: the inference is from data alone."}</p>
+    <div class="filters"><button class="btn ghost" id="ccsave">Save answers (JSON)</button><button class="btn ghost" id="ccclear">Clear answers for this MWS</button><button class="btn ghost" id="ccopen">Open in the Watersheds atlas</button></div></div>`;
+  /* 1. landscape */
+  const L=ccForm("landscape");
+  const land=L.sections.map(s=>{const qs=L.questions.filter(q=>q.section===s.id); const on=psOn(mm,s.production_system,R.se);
+    const sc=ccFormScores({questions:qs},env,askK); const best=Math.max(0,...qs.map(q=>sc[q.name][0]||0));
+    return `<details class="ccsec" ${best>=60?"open":""}><summary><b>${esc(s.title)}</b> ${on===true?'<span class="chip">present here</span>':on===false?'<span class="chip">not found by the atlas</span>':""} ${s.added?'<span class="chip">added from the atlas</span>':""} <span class="pri ${prBand(best)}">best ${best}</span></summary>
+      ${ccFormHtml(L,qs,A.landscape,env,askK,"landscape",ctx,{noRecords:true})}</details>`;}).join("");
+  /* 2. resource mapping */
+  const inst=(fid,label,unit,extra="")=>{const F=ccForm(fid); const list=A[fid]||[{}];
+    return `${F.about?`<p class="note">${esc(F.about)}</p>`:""}${extra}${list.map((ans,i)=>`<details class="ccsec" ${i===list.length-1?"open":""}><summary><b>${esc(ans._name||`${label} ${i+1}`)}</b></summary>${ccFormHtml(F,F.questions,ans,env,askK,`${fid}.${i}`,ctx)}</details>`).join("")}
+      <div class="filters"><button class="btn ghost" data-add="${fid}">Add another ${esc(unit)}</button></div>`;};
+  const vill=mm.v.map(id=>b.vById[id]).filter(Boolean).sort((a,c)=>(c[5]||0)-(a[5]||0));
+  if(vill.length&&A.settlement.length===1&&!A.settlement[0]._name&&Object.keys(A.settlement[0]).length===0) A.settlement[0]._name=vill[0][1]||String(vill[0][0]);
+  const settle=inst("settlement","Settlement","settlement",vill.length?`<p class="note">Census villages here: ${vill.map(v=>esc(v[1]||v[0])).join(", ")}. A form is filled for each settlement (hamlet or tola) in them.</p>`:"");
+  const wbHtml=wbs.length?`<p class="note">${esc(ccForm("waterbody").about)} Sorted by the most informative first.</p>${wbR.sort((a,c)=>Math.max(0,...Object.values(c.ask||{}).map(v=>v[0]))-Math.max(0,...Object.values(a.ask||{}).map(v=>v[0]))).slice(0,40).map(x=>ccWbHtml(x,wb,env,askK,A,ctx)).join("")}${wbs.length>40?`<p class="note">${wbs.length-40} smaller or less informative waterbodies are not listed.</p>`:""}`:'<p class="muted">No waterbodies from the waterbody atlas for this micro-watershed. Structures found on the walk are added with the form.</p>';
+  const forestOn=psOn(mm,"forest",R.se)===true||(env.f_forest||0)>=0.03;
+  /* 3. planning */
+  const plan=ccPlanHtml(mm,d,R,env,askK,A,wbR,ctx);
+  return inf+ccStep(1,"Landscape","Atlas inference first; ask what is likely to change it.",land)
+    +ccStep(2,"Resource mapping: settlements","Transect walk: one form per settlement.",settle,false)
+    +ccStep(3,"Resource mapping: waterbodies",`${wbs.length} mapped: type and stresses from the waterbody atlas; ask only what adds information.`,wbHtml,false)
+    +ccStep(4,"Resource mapping: wells","One form per well, hand pump or borewell.",inst("well","Well","well"),false)
+    +ccStep(5,"Resource mapping: crops","One form per farm patch.",inst("crop","Farm patch","farm patch"),false)
+    +ccStep(6,"Resource mapping: forest patches",forestOn?"Forest is present here.":"Little forest is mapped here; fill only if the community uses a forest patch.",inst("forest_patch","Forest patch","forest patch"),false)
+    +ccStep(7,"Planning","New works and maintenance, ranked by what suits this landscape and the stresses found.",plan,false);}
+function ccWbHtml(x,wb,envWs,askK,A,ctx){
+  const {w,R}=x, F=ccForm("waterbody"), key=wKey(wb,w), T=WTYPE[R.type]||{label:R.type};
+  const env={...envWs,...R.env,wtype:R.type,area_ha:w.a}; const ask={...askK};
+  Object.entries(x.ask||{}).forEach(([k,v])=>{ask["wb:"+k]=v[0]; env["wask_"+k]=v[0];});
+  WK.rules.rules.forEach(r=>{const s=R.st[r.id]; env["wp_"+prKey(r.id)]=s?s.post:null; env["wpos_"+prKey(r.id)]=s&&s.post!=null?(s.positive?1:0):null;});
+  const pos=WK.rules.rules.filter(r=>R.st[r.id]&&R.st[r.id].positive);
+  const best=Math.max(0,...Object.values(x.ask||{}).map(v=>v[0]));
+  const ans=A.waterbody[w.id]=A.waterbody[w.id]||{};
+  return `<details class="ccsec"><summary><b>${w.n?esc(w.n):"Waterbody"} <span class="mono">#${w.id}</span></b> <span class="chip">${esc(T.label)}</span> <span class="muted">${w.a} ha</span> ${pos.map(r=>`<span class="chip">${esc(r.label)}</span>`).join("")} <span class="pri ${prBand(best)}">best ${best}</span></summary>
+    ${ccFormHtml(F,F.questions,ans,env,ask,`waterbody.${w.id}`,{...ctx,atlasAns:{ws:ctx.atlasAns.ws,wb:WAPPLIED[key]||{}}})}</details>`;}
+function ccPlanHtml(mm,d,R,env,askK,A,wbR,ctx){
+  const ivEnv=ivEnvWs(mm,d,R.shares), PS=CCP().planning_scores; ivCat();
+  const wbPos=new Set(); wbR.forEach(x=>Object.entries(x.R.st).forEach(([k,s])=>{if(s.positive) wbPos.add(k);}));
+  const ivScore=id=>{const iv=IVX[id]; if(!iv) return [0,null,[]]; const f=ivFit(iv,ivEnv);
+    const hit=[...(iv.addresses||[]).filter(s=>R.positive.has(s)),...(iv.addresses_wb||[]).filter(s=>wbPos.has(s))];
+    const s=f==="suited"?(hit.length?PS.suited_stress:PS.suited):f==="possible"?(hit.length?PS.possible_stress:PS.possible):PS.not_suited; return [s,f,hit];};
+  const hitLab=h=>h.startsWith("wb.")?((WRULE[h]||{}).label||h):(STR[h]?STR[h].label:h);
+  return CCD.plan_groups.map(g=>{const forms=CCD.forms.filter(f=>f.section==="planning"&&f.group===g.id);
+    return `<h3 style="margin-top:10px">${esc(g.label)}</h3>`+forms.map(F=>{
+      const wq=F.questions.find(q=>q.work_map), dq=F.questions.filter(q=>q.demand_iv);
+      const rows=[]; if(wq) (wq.options||[]).forEach(o=>{const ivs=wq.work_map[o.id]||[]; const sc=ivs.map(ivScore); rows.push({label:o.label,ivs,sc,best:Math.max(0,...sc.map(s=>s[0]))});});
+      dq.forEach(q=>{const sc=q.demand_iv.map(ivScore); rows.push({label:q.label,ivs:q.demand_iv,sc,best:Math.max(0,...sc.map(s=>s[0]))});});
+      rows.sort((a,c)=>c.best-a.best); const best=rows.length?rows[0].best:40;
+      const list=(A.plan[F.id]=A.plan[F.id]||[{}]);
+      const cand=F.kind==="maintenance"&&F.group==="surface_waterbody"?wbR.filter(x=>["wb.siltation","wb.poor_retention","wb.inflow_shortfall","wb.sudden_loss"].some(k=>x.R.st[k]&&x.R.st[k].positive)):[];
+      const qs=F.questions.map(q=>{if(q===wq) return {...q,must_ask:{base:best,why:"the best-suited work type here"}};
+        if(q.demand_iv){const b2=Math.max(0,...q.demand_iv.map(id=>ivScore(id)[0])); return {...q,must_ask:{base:b2,why:"how well "+q.demand_iv.map(id=>IVX[id]?IVX[id].name:id).join(", ")+" suits this landscape"}};}
+        return q;});
+      return `<details class="ccsec"><summary><b>${esc(F.title)}</b> <span class="chip">${F.kind==="maintenance"?"maintenance":"new works"}</span> ${prChip([best,"the best-suited work type here"],false,true)}</summary>
+        ${F.about?`<p class="note">${esc(F.about)}</p>`:""}
+        ${rows.length?`<div class="tbl"><table><thead><tr><th>Work type</th><th>Score</th><th>Interventions and fit here</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td>${prChip([r.best,""],false,true)}</td><td>${r.ivs.map((id,i)=>{const [s,f,hit]=r.sc[i]; return IVX[id]?`${esc(IVX[id].name)} <span class="pill ${IV_FIT[f].cls}">${IV_FIT[f].label}</span>${hit.length?` <span class="note">responds to ${esc(hit.map(hitLab).join(", "))}</span>`:""}`:esc(id)}).join("<br>")}</td></tr>`).join("")}</tbody></table></div>`:""}
+        ${cand.length?`<p class="note"><b>Candidates from the waterbody atlas:</b> ${cand.map(x=>`#${x.w.id} (${esc((WTYPE[x.R.type]||{}).label||x.R.type)}, ${x.w.a} ha)`).join(", ")}</p>`:""}
+        ${list.map((ans,i)=>`<div class="ccsub"><div class="eyebrow">Proposal ${i+1}</div>${ccFormHtml(F,qs,ans,env,askK,`plan.${F.id}.${i}`,ctx)}</div>`).join("")}
+        <div class="filters"><button class="btn ghost" data-add="plan.${F.id}">Add another proposal</button></div></details>`;}).join("");}).join("")
+    +`<p class="note">${esc(CCP().planning)}</p>`;}
+function ccBindVisit(mm,d,b,wb){
+  const root=$("#ccvisit"); if(!root) return;
+  $("#ccsave").onclick=()=>saveFile(`commons_connect_${mm.u}.json`,JSON.stringify({about:"Commons Connect answers from the atlas page, with the atlas answers they set.",mws:mm.u,district:d.district,saved:new Date().toISOString(),commons_connect:CCANS[mm.u]||{},watershed_answers:ANS[mm.u]||{},waterbody_answers:Object.fromEntries(Object.entries(WANS).filter(([k])=>(wb&&(wb.byMws[mm.u]||[]).some(w=>k===wKey(wb,w)))))},null,1));
+  $("#ccclear").onclick=()=>{const fd=(CCANS[mm.u]||{})._feed||{};
+    Object.keys(fd).forEach(k=>{const [a,id,wk]=k.split("|"); if(a==="ws"&&ANS[mm.u]) delete ANS[mm.u][id]; if(a==="wb"&&wk&&WANS[wk]) delete WANS[wk][id];});
+    if(ANS[mm.u]&&!Object.keys(ANS[mm.u]).length) delete ANS[mm.u]; if(ANS[mm.u]) APPLIED[mm.u]={...ANS[mm.u]}; else delete APPLIED[mm.u];
+    Object.keys(WANS).forEach(k=>{if(!Object.keys(WANS[k]).length) delete WANS[k]; if(WANS[k]) WAPPLIED[k]={...WANS[k]}; else delete WAPPLIED[k];});
+    delete CCANS[mm.u]; ccSave(); saveAns(); wSaveAns(); toast("Answers cleared for this micro-watershed"); ccRenderVisit($("#main"));};
+  $("#ccopen").onclick=()=>{S.atlas="ws"; S.tab="explore"; try{localStorage.setItem("atlas","ws")}catch(e){} render(); go("district",d.district).then(()=>go("mws",mm.u));};
+  root.querySelectorAll("[data-add]").forEach(bt=>bt.onclick=()=>{const p=bt.dataset.add.split("."), A=ccA(mm.u); let o=A; p.forEach((k,i)=>{if(i<p.length-1) o=o[k];}); const k=p[p.length-1]; (o[k]=o[k]||[]).push({}); ccSave(); ccRenderVisit($("#main"));});
+  root.addEventListener("change",e=>{const fs=e.target.closest("fieldset.cc"); if(!fs) return;
+    const path=fs.dataset.path, qn=fs.dataset.q, t=fs.dataset.t; let v;
+    if(t==="select_multiple") v=[...fs.querySelectorAll("input[type=checkbox]:checked")].map(x=>x.value);
+    else if(t==="integer"||t==="decimal"){const x=e.target.value; v=x===""?null:Number(x);}
+    else v=e.target.value;
+    const ans=ccGet(mm.u,path); if(v==null||v===""||(Array.isArray(v)&&!v.length)) delete ans[qn]; else ans[qn]=v;
+    ccFeedAtlas(mm,d,wb,path,qn); ccSave(); ccRenderVisit($("#main"));});}
+/* pass 'same' and 'derived' answers to the atlases, and withdraw them when the answer is cleared */
+function ccFeedAtlas(mm,d,wb,path,qn){
+  const A=ccA(mm.u), fid=path.split(".")[0]==="plan"?path.split(".")[1]:path.split(".")[0], F=ccForm(fid); if(!F) return;
+  const q=F.questions.find(x=>x.name===qn); if(!q||!q.atlas_match) return;
+  const ans=ccGet(mm.u,path), vals={}; F.questions.forEach(x=>vals[x.name]=ans[x.name]??ccDefault(x));
+  const wid=fid==="waterbody"?path.split(".")[1]:null, wkey=wid&&wb?wKey(wb,wb.byId[wid]):null;
+  const feeds=ccFeeds(q,ans[qn],vals), src=path+"/"+qn;
+  q.atlas_match.filter(m=>m.how!=="overlap").forEach(m=>{const fk=`${m.atlas}|${m.id}|${wkey||""}`, f=feeds.find(x=>x[0]===m.atlas&&x[1]===m.id);
+    if(m.atlas==="ws"){ANS[mm.u]=ANS[mm.u]||{}; if(f){ANS[mm.u][m.id]=f[2]; A._feed[fk]=src;} else if(A._feed[fk]===src){delete ANS[mm.u][m.id]; delete A._feed[fk];}
+      if(!Object.keys(ANS[mm.u]).length) delete ANS[mm.u]; if(ANS[mm.u]) APPLIED[mm.u]={...ANS[mm.u]}; else delete APPLIED[mm.u]; saveAns();}
+    else if(m.atlas==="wb"&&wkey){WANS[wkey]=WANS[wkey]||{}; if(f){WANS[wkey][m.id]=f[2]; A._feed[fk]=src;} else if(A._feed[fk]===src){delete WANS[wkey][m.id]; delete A._feed[fk];}
+      if(!Object.keys(WANS[wkey]).length) delete WANS[wkey]; if(WANS[wkey]) WAPPLIED[wkey]={...WANS[wkey]}; else delete WAPPLIED[wkey]; wSaveAns();}});}
+
+/* ---------- forms tab: the structured local version ---------- */
+function ccRenderForms(m){
+  const cover=[]; const idx={};
+  CCD.forms.forEach(f=>f.questions.forEach(q=>(q.atlas_match||[]).forEach(a=>{(idx[a.atlas+":"+a.id]=idx[a.atlas+":"+a.id]||[]).push([f,q,a]);})));
+  const atl=[...K.questions.system_questions.map(q=>["ws",q,"system"]),...K.questions.stress_questions.map(q=>["ws",q,"stress"]),...(WK?[...WK.questions.type_questions.map(q=>["wb",q,"type"]),...WK.questions.stress_questions.map(q=>["wb",q,"stress"])]:[])];
+  const rel=q=>q.relevant_expr||(q.origin!=="odk"?q.relevant:"");
+  const mustTxt=q=>{if(q.role!=="inform") return '<span class="muted">record</span>'; const M=q.must_ask||{}; const parts=[];
+    if(M.base!=null) parts.push("base "+M.base); (M.rules||[]).forEach(r=>parts.push(`<code>${esc(r.if)}</code> → ${esc(r.score)}${r.mode==="set"?" (sets)":""}`));
+    if(q.routes) parts.push("routes to "+q.routes.join(", ")); if(q.work_map) parts.push("scored by work-type fit"); if(q.demand_iv) parts.push("scored by fit of "+q.demand_iv.join(", "));
+    if(!parts.length) parts.push("from the atlas match"); return parts.join("<br>");};
+  m.innerHTML=`<div class="ccwrap"><div class="block"><h2>Commons Connect forms, structured</h2>
+    <p>${esc(CCD._about)}</p><p class="note">Built from ${esc(CCD.built_from)}. Each form lists its questions with type, the condition for showing it (ODK relevance, converted to the atlas expression language), its role, the atlas questions it matches and its must-ask rule. <b>same</b>: the same question, the answer is passed to the atlas; <b>derived</b>: the atlas answer is read off this one (through a mapping or bands); <b>overlap</b>: related ground, not read across.</p></div>
+    <div class="block"><h3>Atlas questions and where Commons Connect asks them</h3><div class="tbl"><table><thead><tr><th>Atlas question</th><th>Kind</th><th>Commons Connect questions</th></tr></thead><tbody>
+      ${atl.map(([a,q,k])=>`<tr><td><span class="mono">${esc(q.id)}</span><br><span class="note">${esc(q.text)}</span></td><td>${a==="ws"?"watershed":"waterbody"} ${k}</td><td>${(idx[a+":"+q.id]||[]).map(([f,cq,am])=>`${esc(f.title)}: <span class="mono">${esc(cq.name)}</span> (${am.how}${cq.origin==="atlas"?", added from the atlas":""})`).join("<br>")||'<span class="muted">none</span>'}</td></tr>`).join("")}</tbody></table></div></div>
+    ${CCD.sections.map(s=>`<h2 style="margin-top:12px">${esc(s.label)}</h2><p class="note">${esc(s.about)}</p>${CCD.forms.filter(f=>f.section===s.id).map(f=>`<details class="block"><summary><b>${esc(f.title)}</b> <span class="muted">${f.questions.length} questions, ${f.questions.filter(q=>q.role==="inform").length} scored</span> ${f.kind?`<span class="chip">${f.kind}</span>`:""}</summary>
+      <p class="note">${f.about?esc(f.about)+" ":""}ODK template: ${f.odk_file?`<span class="mono">${esc(f.odk_file)}</span>${f.odk_version?` (version ${esc(f.odk_version)})`:""}`:"none (Word draft)"} · Word document: <span class="mono">${esc(f.doc||"–")}</span></p>
+      <div class="tbl"><table><thead><tr><th>Question</th><th>Type</th><th>Shown when</th><th>Atlas match</th><th>Must-ask rule</th></tr></thead><tbody>${f.questions.map(q=>`<tr><td><span class="mono">${esc(q.name)}</span>${q.origin==="atlas"?' <span class="chip">added from the atlas</span>':""}<br>${esc(q.label||"")}${(q.options||[]).length?`<details><summary class="note">${q.options.length} options</summary><span class="note">${q.options.map(o=>esc(o.label)).join(" · ")}</span></details>`:""}</td><td>${esc(q.type)}${q.required?"<br><span class=note>required</span>":""}</td><td>${rel(q)?`<code>${esc(rel(q))}</code>`:"always"}</td><td>${(q.atlas_match||[]).map(a=>`<span class="mono">${esc(a.id)}</span> (${a.how})${a.map?`<br><span class="note">${Object.entries(a.map).map(([k,v])=>esc(k)+" → "+esc(v)).join("; ")}</span>`:""}${a.bins?`<br><span class="note">bands ${a.bins.map(([u,o])=>(u==null?"else":"< "+u)+" → "+o).join("; ")}</span>`:""}${a.note?`<br><span class="note">${esc(a.note)}</span>`:""}`).join("<br>")||"–"}</td><td>${mustTxt(q)}</td></tr>`).join("")}</tbody></table></div></details>`).join("")}`).join("")}
+    <div class="filters"><button class="btn ghost" id="ccdl">Download commons_connect.json</button></div></div>`;
+  $("#ccdl").onclick=()=>saveFile("commons_connect.json",JSON.stringify(CCD,null,1));}
+function ccRenderMethod(m){
+  const P=CCP(), L=ccForm("landscape"), added=L.questions.filter(q=>q.origin==="atlas"), merged=L.questions.filter(q=>q.origin!=="atlas"&&(q.atlas_match||[]).some(a=>a.how!=="overlap"));
+  m.innerHTML=`<div class="ccwrap"><div class="block"><h2>How the Commons Connect section works</h2>
+    <h3>The visit, in order</h3><ol><li><b>Landscape</b> (new, before resource mapping; from <i>Landscape Description Forms</i>): the atlas shows the system mix, the production systems present and the stresses it finds likely or uncertain. The landscape questions follow, section by section (socio-economic, agriculture, livestock, forests, fisheries, and settlement growth and floods added from the atlas), with the questions likely to change the inference first and the rest collapsed.</li>
+      <li><b>Resource mapping</b> through the transect walk: settlements, waterbodies (each mapped waterbody with its atlas type and stresses), wells, crops and forest patches.</li>
+      <li><b>Planning</b>: groundwater recharge, surface waterbodies, irrigation on farms, agroforestry and orchards, livelihoods and forests, each with its new-works and maintenance forms. Work types are ranked by how well they suit this landscape and whether they respond to a stress found here.</li></ol>
+    <h3>Landscape form and the atlas questions</h3><p>${merged.length} questions of the landscape form are merged with an atlas question (the answer is passed to the atlas, through a mapping when the options differ) and ${added.length} atlas questions the form did not have were added to it: ${added.map(q=>`<span class="mono">${esc(q.atlas_match[0].id)}</span>`).join(", ")}. The Forms tab lists every match.</p>
+    <h3>Must-ask score</h3><p>${esc(P.about)}</p>
+    <ul><li><b>Stress questions.</b> ${esc(P.stress_question)}</li><li><b>System questions.</b> ${esc(P.system_question)}</li><li><b>Waterbody type questions.</b> ${esc(P.type_question)}</li><li><b>Planning.</b> ${esc(P.planning)}</li>
+      <li><b>Match weights.</b> ${Object.entries(P.match_weight).map(([k,v])=>`${k} ${v}`).join(", ")}. A question with no base, rule or match has a base score of ${P.default_base}.</li>
+      <li><b>Bands.</b> ${P.bands.map(b=>`${esc(b.label)} at ${b.min} or more`).join(", ")}. Must-ask and useful questions are shown; the rest are collapsed.</li>
+      <li><b>Conditions.</b> ${esc(P.env)}</li></ul>
+    <h3>Answers</h3><p>Answers are kept in this browser. Answers that match an atlas question are applied at once, so the system mix, the stresses, the scores and the suggested work types change as the visit goes on. The same answers appear in the Watersheds and Waterbodies atlases. Save them as JSON to use with <code>python -m seft.cli assess</code> or <code>wb-assess</code>.</p>
+    <p class="note">The scores are also written by <code>python -m seft.cli priority</code> (seft/priority.py), from the data alone, to <code>out/priority/&lt;district&gt;.csv</code>.</p></div></div>`;}
+
 /* ---------- boot ---------- */
 (async()=>{
   renderTabs(); $("#main").innerHTML=`<div class="loading">Loading the atlas…</div>`;
-  try{ IDX=await loadData("index"); K=IDX.knowledge; indexKnowledge(); render(); }
+  try{ [IDX,CCD]=await Promise.all([loadData("index"),loadData("commons_connect").catch(()=>null)]); K=IDX.knowledge; indexKnowledge(); render(); }
   catch(e){ $("#main").innerHTML=`<div class="loading"><p><b>The atlas data did not load.</b></p><p>The page looks for <code>data/index.json</code> (or <code>data/index.js</code> when opened directly from disk) in the folder that holds this page. Build it with <code>python -m seft.cli run</code> followed by <code>python -m seft.webdata</code>, or serve the folder with <code>python -m http.server -d web 8000</code> and open http://localhost:8000.</p><p class="note">${esc(e.message||e)}</p></div>`; }
 })();
 </script>

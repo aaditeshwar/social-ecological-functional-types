@@ -132,6 +132,34 @@ Pooled percentile thresholds are computed across every MWS in this run (unless `
 
 The atlas lets a field team answer the questions in `knowledge/questions.json` for an MWS and re-assess the stresses in the browser. Save them from the Explore or Data tab as `community_answers.json`. Running `python -m seft.cli run --answers community_answers.json` writes the same posteriors and schemes into `out/csv/` and `web/data/`.
 
+### Commons Connect and must-ask scores
+
+The atlas has a third section, **Commons Connect**, that walks through a field visit for one micro-watershed (state and
+district, tehsil, MWS): the landscape, then resource mapping (settlements, waterbodies, wells, crops, forest patches),
+then planning of new works and maintenance (groundwater recharge, surface waterbodies, irrigation on farms,
+agroforestry and orchards, livelihoods, forests). It shows what the atlas infers first and ranks every question by a
+**must-ask score** (0–100): how likely the answer is to change the inference, because a rule is near its threshold,
+the data are missing or uncertain, the rule is held with low confidence, or an answer could move a system across its
+presence line. Must-ask (60+) and useful (30–59) questions are shown; the rest are collapsed. Answers that match an
+atlas question are passed to the atlas at once, so the mix, the stresses, the scores and the ranked work types update
+as the visit goes on. The same scores rank the community questions in both atlases' Explore panes.
+
+```bash
+python -m seft.cli cc-build --forms <folder with the Commons Connect .xlsx templates>   # -> knowledge/commons_connect.json
+python -m seft.cli refresh-knowledge                                                   # -> web/data/commons_connect.{json,js}
+python -m seft.cli priority [--district pune]                                          # -> out/priority/<district>.csv
+```
+
+* `knowledge/commons_connect.json` is the structured local version of the forms: the 12 ODK templates (English labels,
+  options, relevance converted to the atlas expression language, required flags) and the Word drafts that have no
+  template yet (the landscape form and the two forest forms). Each question has a `role` (`inform`, scored; `record`,
+  such as names, beneficiary details, dimensions and photos), `atlas_match` (the atlas questions it covers: `same`,
+  `derived` through a mapping or bands, or `overlap`), `must_ask` (base score and conditions), `prefill` (the answer
+  the atlas expects, for the field worker to confirm) and, in planning forms, `work_map` (work types to interventions).
+  Every atlas question is asked in some form; the landscape form gets the ones its Word draft lacks.
+* `seft/priority.py` computes the scores; the page computes the same in the browser (all 577,296 scores of the
+  watershed and landscape questions agree, data alone). `priority` writes one row per MWS and question.
+
 ### `groundtruth`
 
 Scores atlas rules and Signal_Verification sheet rules against labelled micro-watersheds.
@@ -264,6 +292,7 @@ data/
   raw/                downloaded API data (created by fetch; not shipped)
 out/csv/              result tables (mws_<district>.csv, villages_<district>.csv, *_all.csv)
 out/groundtruth/      confusion matrices and detail from the groundtruth command
+out/priority/         must-ask scores per MWS and question (priority command)
 out/web/              atlas bundles before they are copied to web/data (gitignored)
 web/
   index.html          the atlas
@@ -326,6 +355,12 @@ Every `expr` / `share` / `trigger` / `condition` in the knowledge files is evalu
 ### 10. Atlas — `web/index.html`
 
 See [How the frontend works](#how-the-frontend-works). After `run`, this is the only file a reader opens.
+
+### 10b. Commons Connect — `seft/odk.py`, `seft/commons_connect.py`, `seft/priority.py`
+
+`odk.py` reads an ODK XLSForm. `commons_connect.py` holds the form list, the landscape and forest forms written out
+from the Word drafts, and the annotations (roles, atlas matches, must-ask rules, prefills, work types) that `cc-build`
+adds to the parsed templates. `priority.py` scores atlas and Commons Connect questions (see Commons Connect above).
 
 ### 11. Knowledge checks and rescore — `seft/validate.py`, `seft/rescore.py`
 

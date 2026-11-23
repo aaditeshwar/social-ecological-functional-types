@@ -78,8 +78,17 @@ def build(src=None, dest=None, csv_src=None, merge=False):
             if not f.name.endswith('_all.csv'):
                 shutil.copy2(f, dest / 'csv' / f.name)
     _combine_csv(dest / 'csv', [d['slug'] for d in index['districts']], merge)
+    write_cc(dest)
     print(f'wrote {len(names)} bundles to {dest}: {", ".join(d["district"] for d in index["districts"])}')
     print(f'open {dest.parent / "index.html"} in a browser, or: python -m http.server -d {dest.parent} 8000')
+
+def write_cc(dest, kd=None):
+    """web/data/commons_connect.{json,js}: the Commons Connect forms for the page's Commons Connect tab."""
+    cc = Path(kd or ROOT / 'knowledge') / 'commons_connect.json'
+    if not cc.exists(): return False
+    text = json.dumps(json.loads(cc.read_text(encoding='utf-8')), separators=(',', ':'), ensure_ascii=False)
+    (Path(dest) / 'commons_connect.json').write_text(text, encoding='utf-8'); write_js('commons_connect', text, Path(dest))
+    return True
 
 def refresh_knowledge(dest=None, kd=None):
     """Replace the knowledge embedded in web/data/index.json and web/data/waterbody/index.json with the current
@@ -102,6 +111,7 @@ def refresh_knowledge(dest=None, kd=None):
         index['scheme_names'] = _sn(_knowledge(kd))
         text = json.dumps(index, separators=(',', ':'), ensure_ascii=False)
         (wd / 'index.json').write_text(text, encoding='utf-8'); write_js('wb_index', text, wd); done.append('waterbody')
+    if write_cc(dest, kd): done.append('Commons Connect')
     print('knowledge refreshed in', ', '.join(done) or 'nothing (no index.json found)')
 
 def main(argv=None):

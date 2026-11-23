@@ -6,6 +6,8 @@
     python -m seft.cli audit           # which datasets are missing or incomplete
     python -m seft.cli validate        # check the knowledge JSONs after editing
     python -m seft.cli refresh-knowledge   # put edited text-only knowledge (interventions, notes) into web/data
+    python -m seft.cli cc-build --forms <folder>   # Commons Connect ODK templates -> knowledge/commons_connect.json
+    python -m seft.cli priority [--district pune]  # must-ask scores of the community questions -> out/priority
     python -m seft.cli run             # indicators, systems, stresses, schemes -> out/csv, out/web and web/data
     python -m seft.cli all             # fetch, validate and run in one go
     python -m seft.cli groundtruth --truth FILE
@@ -153,6 +155,10 @@ def main(argv=None):
         if name == 'wb-all': p.add_argument('--force', action='store_true')
     p = sub.add_parser('wb-census', help='compare waterbody patterns with the Water Body Census fields -> out/waterbody/census'); wloc(p)
     p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'census'))
+    p = sub.add_parser('cc-build', help='structured Commons Connect forms from the ODK templates -> knowledge/commons_connect.json')
+    p.add_argument('--forms', required=True, help='folder with the Commons Connect .xlsx templates')
+    p = sub.add_parser('priority', help='must-ask scores of the atlas and Commons Connect questions, by MWS -> out/priority')
+    p.add_argument('--district', action='append', help='district slug (repeatable); default all in web/data')
     sub.add_parser('refresh-knowledge', help='put the current knowledge files (e.g. interventions) into web/data without re-scoring')
     p = sub.add_parser('wb-assess', help='re-assess waterbodies with community answers saved from the page -> out/waterbody/answers'); wloc(p)
     p.add_argument('--answers', required=True, help='community answers JSON saved from the waterbody atlas')
@@ -181,6 +187,10 @@ def main(argv=None):
     elif a.cmd == 'wb-census': cmd_wb_census(a)
     elif a.cmd == 'wb-assess': cmd_wb_assess(a)
     elif a.cmd == 'refresh-knowledge': cmd_refresh_knowledge(a)
+    elif a.cmd == 'cc-build':
+        from .commons_connect import build; build(a.forms)
+    elif a.cmd == 'priority':
+        from .priority import main as pmain; pmain(a.district)
     elif a.cmd == 'wb-all':
         cmd_wb_fetch(a)
         if not cmd_wb_validate(a): sys.exit(1)

@@ -156,7 +156,59 @@ def validate(kd=None):
         for st in sorted(stresses - covered): errs.append(f'rule {st}: no intervention addresses it')
         cov_wb = {a for x in IV['interventions'] for a in x.get('addresses_wb', [])}
         for st in sorted(wb_rules - cov_wb): errs.append(f'waterbody rule {st}: no intervention addresses it')
+    n_cc = _validate_cc(kd, K, errs)
     for e in errs: print('ERROR', e)
     print(f"{len(errs)} problems; {len(var)} variables, {len(arch)} archetypes, {len(nodes)} graph nodes, "
-          f"{len(K['causal_graph']['edges'])} edges, {len(sig)} signals, {len(stresses)} rules under {sum(len(p['observed_stresses']) for p in T['production_systems'])} observed stresses in {len(T['production_systems'])} production systems, {len(K['schemes']['schemes'])} schemes, {len(qids)} questions, {n_iv} interventions, {len(src)} sources")
+          f"{len(K['causal_graph']['edges'])} edges, {len(sig)} signals, {len(stresses)} rules under {sum(len(p['observed_stresses']) for p in T['production_systems'])} observed stresses in {len(T['production_systems'])} production systems, {len(K['schemes']['schemes'])} schemes, {len(qids)} questions, {n_iv} interventions, {len(src)} sources, {n_cc} Commons Connect questions")
     return not errs
+
+def _validate_cc(kd, K, errs):
+    """knowledge/commons_connect.json: atlas matches, mappings, rules, prefills, routes and work types."""
+    import ast
+    f = kd / 'commons_connect.json'
+    if not f.exists(): return 0
+    CC = load_json(f)
+    WQ = load_json(kd / 'waterbody' / 'questions.json')
+    aq = {('ws', q['id']): q for q in K['questions']['system_questions'] + K['questions']['stress_questions']}
+    aq.update({('wb', q['id']): q for q in WQ['type_questions'] + WQ['stress_questions']})
+    IV = load_json(kd / 'interventions.json') if (kd / 'interventions.json').exists() else {'interventions': []}
+    ivs = {x['id'] for x in IV['interventions']}
+    def expr_ok(e, w):
+        if isinstance(e, (int, float)): return
+        try: ast.parse(e, mode='eval')
+        except SyntaxError: errs.append(f'{w}: bad expression {e!r}')
+    n = 0
+    for F in CC['forms']:
+        names = {q['name'] for q in F['questions']}
+        for q in F['questions']:
+            n += 1; w = f"commons_connect {F['id']}.{q['name']}"; opts = {o['id'] for o in q.get('options') or []}
+            if q.get('role') not in ('inform', 'record'): errs.append(f'{w}: role must be inform or record')
+            for m in q.get('atlas_match') or []:
+                a = aq.get((m['atlas'], m['id']))
+                if not a: errs.append(f"{w}: unknown atlas question {m['atlas']}:{m['id']}"); continue
+                if m['how'] not in CC['priority']['match_weight']: errs.append(f"{w}: unknown match {m['how']}")
+                aopts = {o['id'] for o in a['options']}
+                for k, v in (m.get('map') or {}).items():
+                    if opts and k not in opts: errs.append(f'{w}: map key {k!r} is not an option')
+                    if v not in aopts: errs.append(f"{w}: map value {v!r} is not an option of {m['id']}")
+                for up, v in m.get('bins') or []:
+                    if v not in aopts: errs.append(f"{w}: band value {v!r} is not an option of {m['id']}")
+                if m.get('value'): expr_ok(m['value'], w)
+            M = q.get('must_ask') or {}
+            for r in M.get('rules') or []: expr_ok(r['if'], w); expr_ok(r['score'], w)
+            for r in q.get('prefill') or []:
+                expr_ok(r['if'], w)
+                for v in ([r['value']] if 'value' in r else r.get('values', [])):
+                    if v not in opts: errs.append(f'{w}: prefill {v!r} is not an option')
+            for c in q.get('routes') or []:
+                if c not in names: errs.append(f'{w}: routes to unknown question {c}')
+            for e in (q.get('relevant_expr'), q.get('relevant') if q.get('origin') != 'odk' else None):
+                if e: expr_ok(e, w)
+            for k, v in (q.get('work_map') or {}).items():
+                for i in v:
+                    if i not in ivs: errs.append(f'{w}: work type {k!r} -> unknown intervention {i}')
+            for i in q.get('demand_iv') or []:
+                if i not in ivs: errs.append(f'{w}: unknown intervention {i}')
+    asked = {(m['atlas'], m['id']) for F in CC['forms'] for q in F['questions'] for m in q.get('atlas_match') or [] if m['how'] != 'overlap'}
+    for k in sorted(set(aq) - asked): errs.append(f'commons_connect: atlas question {k[0]}:{k[1]} is not asked in any form (same or derived)')
+    return n

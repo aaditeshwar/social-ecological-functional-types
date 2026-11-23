@@ -30,7 +30,7 @@
    "not suited": "The landscape works against it (reason given); consider other interventions first."
   }
  },
- "site_rules_about": "Site rules from the CoRE Stack 'Water structures — suitability rules' spreadsheet: for each parameter, the accepted (ideal), partially accepted (works with caution) and not accepted range. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement from the toolkit paper (Table 1). Where the two disagree (for example the catchment of check dams), both are shown: the paper follows the technical manuals for large structures, the spreadsheet the small structures CSOs most often plan.",
+ "site_rules_about": "Site rules from the CoRE Stack 'Water structures — suitability rules' spreadsheet, checked against the CGWB and MGNREGA technical manuals: for each parameter, the accepted (ideal), partially accepted (works with caution) and not accepted range. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
  "interventions": [
   {
    "id": "loose_boulder_check",
@@ -285,8 +285,8 @@
    "side": "supply",
    "category": "drainage_line",
    "what": "Masonry or concrete weirs across seasonal streams that store water in the stream bed through the monsoon and recharge the aquifer; downstream wells and fields benefit (the paper estimates the downstream cropping area that a check dam protects).",
-   "where": "Drainage line, stream order 3 and higher (paper); the spreadsheet accepts orders 1–3 with 10–40 ha catchments",
-   "site_spec": "Earthen dams, check dams, nadis and bandharas: stream order 3+, catchment > 500 ha (paper, Table 1)",
+   "where": "Drainage line: seasonal streams of order 2 to 4, catchments of about 40 to 500 ha",
+   "site_spec": "Check dams, cement nala bunds and anicuts: across a seasonal stream of order 2 to 4 with a catchment of 40 to 500 ha, a gentle bed slope (under about 5%), and a stable, impervious foundation with permeable weathered rock or alluvium upstream so that stored water recharges the aquifer. Larger catchments need a designed spillway and become a percolation tank or small dam.",
    "site_rules": [
     {
      "parameter": "Slope",
@@ -298,16 +298,16 @@
     {
      "parameter": "Stream order",
      "unit": "—",
-     "accepted": "1, 2, 3",
-     "partial": "4, 5, 6",
-     "not_accepted": "> 6"
+     "accepted": "2, 3, 4",
+     "partial": "5",
+     "not_accepted": "1 or > 5"
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
-     "accepted": "10–40 ha",
-     "partial": "40–100 ha",
-     "not_accepted": "< 10 or > 100 ha"
+     "accepted": "40–500 ha",
+     "partial": "500–1000 ha",
+     "not_accepted": "< 40 or > 1000 ha"
     },
     {
      "parameter": "Distance to drainage line",
