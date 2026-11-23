@@ -44,11 +44,6 @@ FORMS = [
          group='groundwater_recharge', kind='maintenance', unit='work',
          doc='Propose Maintenance On Existing Water Recharge Structure.docx',
          odk='Propose_Maintenance_on_Existing_Water_Recharge_Structures_V1.1.1.xlsx'),
-    dict(id='surface_new', title='New surface waterbody (farm or community pond)', section='planning',
-         group='surface_waterbody', kind='new', unit='work', doc='Propose New Irrigation Work.docx',
-         odk='NRM_form_Agri_Screen_V1.0.0.xlsx', alias_of='irrigation_new',
-         about='Commons Connect has no separate form for new surface waterbodies: farm and community ponds are proposed '
-               'through the new irrigation work form, and percolation tanks and check dams through the recharge form.'),
     dict(id='surface_maintenance', title='Maintenance of surface water structures', section='planning',
          group='surface_waterbody', kind='maintenance', unit='work', doc='Propose Maintenance on Surface Water structure.docx',
          odk='NRM_form_NRM_form_Waterbody_Screen_V1.0.0.xlsx'),
@@ -73,7 +68,7 @@ FORMS = [
          unit='work', doc='Planning ForestQuestionnaire.docx', odk=None, about='Word draft, not yet an ODK form.'),
 ]
 PLAN_GROUPS = [
-    ('groundwater_recharge', 'Groundwater recharge'), ('surface_waterbody', 'Surface waterbodies'),
+    ('groundwater_recharge', 'Groundwater recharge'), ('surface_waterbody', 'Surface waterbodies (maintenance; new ones are proposed as recharge or irrigation works)'),
     ('irrigation', 'Irrigation on farms'), ('agroforestry', 'Agroforestry and orchards'),
     ('livelihood', 'Livelihoods (cattle and goat sheds, fisheries)'), ('forest', 'Forests')]
 
@@ -564,13 +559,12 @@ FOREST_WORK = {'anr': ['forest_regeneration'], 'fire': ['fire_management'], 'cut
                'sacred': ['forest_regeneration'], 'native': ['forest_regeneration'], 'ntfp': ['forest_regeneration'], 'patrol': ['forest_regeneration'],
                'bamboo': ['agroforestry', 'forest_regeneration']}
 WORK_Q = {  # (form, question) -> intervention map for its options
-    ('recharge_new', 'TYPE_OF_WORK_ID'): 'work', ('irrigation_new', 'TYPE_OF_WORK_ID'): 'work', ('surface_new', 'TYPE_OF_WORK_ID'): 'work',
+    ('recharge_new', 'TYPE_OF_WORK_ID'): 'work', ('irrigation_new', 'TYPE_OF_WORK_ID'): 'work',
     ('recharge_maintenance', 'select_one_recharge_structure'): 'work', ('surface_maintenance', 'TYPE_OF_WORK'): 'maint',
     ('surface_maintenance_rs', 'TYPE_OF_WORK'): 'maint', ('irrigation_maintenance', 'select_one_irrigation_structure'): 'maint',
 }
 PLAN_INFORM = {   # inform questions of the planning forms (everything else in them is a record)
     'irrigation_new': {'select_multiple_cropping_kharif': 50, 'select_one_cropping_pattern': 40, 'departments_converged': 45},
-    'surface_new': {'select_multiple_cropping_kharif': 50, 'select_one_cropping_pattern': 40, 'departments_converged': 45},
     'recharge_new': {'departments_converged': 45},
     'recharge_maintenance': {'past_repair': 55},
     'agrohorticulture': {'select_one_y_n': 80, 'select_multiple_species': 60, 'land_type': 50, 'land_ownership': 55, 'current_land_use': 55,
@@ -670,9 +664,6 @@ def build(forms_dir, out=None, log=print):
                                                    (['dug_well_recharge'] if o['id'] == 'Well' else ['conveyance_pipelines', 'pim_wua'] if o['id'] == 'Canal'
                                                     else ['contour_graded_bunds'] if o['id'] == 'Farm bund' else list(dict.fromkeys(MAINT + WORK.get(o['id'], [])))))
                                          for o in q.get('options', [])}
-                        if F['id'] == 'surface_new':
-                            q['options'] = [o for o in q['options'] if o['id'] in ('Farm pond', 'Community Pond')]
-                            q['work_map'] = {k: v for k, v in q['work_map'].items() if k in ('Farm pond', 'Community Pond')}
                         missing = [o['id'] for o in q['options'] if not q['work_map'].get(o['id'])]
                         if missing: log(f"  {F['id']}.{q['name']}: no intervention for {missing}")
                         q['must_ask'] = M(None, why='scored by how well the work types suit this landscape and the stresses found')
