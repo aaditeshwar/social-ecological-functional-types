@@ -2,7 +2,8 @@
 import math
 from collections import defaultdict
 import numpy as np
-from .util import ROOT, load_json
+from pathlib import Path
+from .util import ROOT, load_json, knowledge_dir as default_knowledge_dir
 from .load import load_district
 from .indicators import load_variables, compute
 from .context import load_contexts, assign, rain_factors
@@ -25,7 +26,7 @@ def run(locations=None, knowledge_dir=None, log=print, answers=None, pools=None,
     pooling over this run; used to score new locations with the same thresholds as the atlas.
     keep: optional callable(record) -> bool; records it rejects are dropped before scoring."""
     answers = answers or {}
-    kd = knowledge_dir or ROOT / 'knowledge'
+    kd = Path(knowledge_dir) if knowledge_dir is not None else default_knowledge_dir()
     cfg = locations or load_json(ROOT / 'config' / 'locations.json')
     V = load_variables(kd / 'variables.json'); C = load_contexts(kd / 'contexts.json')
     A = load_archetypes(kd / 'archetypes.json'); G = load_graph(kd / 'causal_graph.json'); SC = load_schemes(kd / 'schemes.json')

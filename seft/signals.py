@@ -9,10 +9,10 @@ grade >= 0.5. Expression signals are yes/no and grade 0 or 1. Missing data -> un
 import math
 import numpy as np
 from .expr import evaluate, NAN
-from .util import ROOT, load_json
+from .util import knowledge_dir, load_json
 
 def load_signals(path=None):
-    return load_json(path or ROOT / 'knowledge' / 'signals.json')
+    return load_json(path or knowledge_dir() / 'signals.json')
 
 def _num(x):
     return isinstance(x, (int, float)) and not isinstance(x, bool) and not math.isnan(x)

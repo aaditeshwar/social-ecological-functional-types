@@ -79,7 +79,7 @@ def _mean(xs):
     xs = [x for x in xs or [] if isinstance(x, (int, float))]
     return round(sum(xs) / len(xs), 2) if xs else None
 
-def score_all(cfg, log=print):
+def score_all(cfg, log=print, pools=None):
     """Build and score every waterbody of the locations. Returns (bodies, stats, types, K, pools)."""
     K = load_knowledge()
     B, stats, types = build_all(cfg, log=log)
@@ -90,7 +90,8 @@ def score_all(cfg, log=print):
     attach(B, ctx, prof)
     ref = year_reference(B, scope)
     for b in B: b['vars'] = compute(b, prof, drought, ref)
-    pools = pool_thresholds([base_env(b, b['vars']) for b in B if b['type'] in scope], K)
+    if pools is None:
+        pools = pool_thresholds([base_env(b, b['vars']) for b in B if b['type'] in scope], K)
     for b in B:
         if b['type'] in scope: b['signals'], b['roles'], b['rules'] = score(b, b['vars'], K, pools)
         else: b['signals'], b['roles'], b['rules'] = {}, {}, {}

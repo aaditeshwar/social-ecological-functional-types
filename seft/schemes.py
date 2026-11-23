@@ -1,9 +1,9 @@
 """Match schemes (knowledge/schemes.json) to an MWS's triggered stresses and archetypes."""
 from .expr import evaluate
-from .util import ROOT, load_json
+from .util import knowledge_dir, load_json
 
 def load_schemes(path=None):
-    return load_json(path or ROOT / 'knowledge' / 'schemes.json')
+    return load_json(path or knowledge_dir() / 'schemes.json')
 
 def eligible(env, spec, state):
     """Schemes whose state and eligibility condition fit the MWS, before looking at stresses."""

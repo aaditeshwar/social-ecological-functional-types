@@ -2,12 +2,12 @@
 import math
 import numpy as np
 from .expr import evaluate, names_in, Namespace, NAN, ExprError
-from .util import ROOT, load_json
+from .util import knowledge_dir, load_json
 
 MIN_COVERAGE = 0.2
 
 def load_variables(path=None):
-    spec = load_json(path or ROOT / 'knowledge' / 'variables.json')
+    spec = load_json(path or knowledge_dir() / 'variables.json')
     return spec['variables']
 
 def _order(vars_):

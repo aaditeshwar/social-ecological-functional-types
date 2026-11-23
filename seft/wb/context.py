@@ -6,13 +6,12 @@ context is exactly what the watershed atlas would show. Each waterbody then take
 the context dimensions (ctx_*), the archetype shares (share_*) and the MWS variables (mws_*).
 Villages are reached through the MWS (seft/wb/villages.py).
 """
-from ..util import ROOT, load_json
+from ..util import ROOT, load_json, atlas_mws_pools
 
 def mws_context(cfg, log=print):
     from ..pipeline import run
-    ip = ROOT / 'web' / 'data' / 'index.json'
-    pools = load_json(ip).get('pools') if ip.exists() else None
-    if not pools: log('  no atlas pools in web/data/index.json; pooled percentiles come from these tehsils')
+    pools = atlas_mws_pools()
+    if not pools: log('  no published MWS pools; pooled percentiles come from these tehsils')
     recs, _, _, _ = run(cfg, log=lambda m: None, pools=pools)
     out = {}
     for r in recs:

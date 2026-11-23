@@ -1,9 +1,9 @@
 """Assign each MWS to one class per context dimension (knowledge/contexts.json)."""
 from .expr import evaluate, Namespace
-from .util import ROOT, load_json
+from .util import knowledge_dir, load_json
 
 def load_contexts(path=None):
-    return load_json(path or ROOT / 'knowledge' / 'contexts.json')
+    return load_json(path or knowledge_dir() / 'contexts.json')
 
 def assign(env, spec):
     ctx = Namespace()

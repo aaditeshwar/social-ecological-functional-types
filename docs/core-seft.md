@@ -1,0 +1,107 @@
+# core-seft
+
+`core-seft` scores **districts**, **tehsils**, **micro-watersheds (MWS)** and **waterbodies** from CoRE Stack data. It returns the same public summary the Explore pages show: notes, mix, landscape context, villages, matched schemes, **intervention suggestions** (suited / possible), evidence, and (for an MWS or waterbody) **atlas and Commons Connect questions ranked by must-ask score**. The payload is meant to sit inside field apps such as Commons Connect (planning a visit) or Know Your Landscape (an entity briefing).
+
+Two clocks:
+
+* **Library** (`core-seft` on PyPI / this repo) — fetch, cache, `analyse` contract.
+* **Knowledge pack** (`knowledge/*.json`) — signals, thresholds, notes, questions, published percentile pools.
+
+The atlas CLI in this repository stays as the maintainer product. Apps import `core_seft`.
+
+## Install
+
+From this repository (editable):
+
+```bash
+python -m pip install -e .
+```
+
+Set a CoRE Stack API key (needed only when a district is not already cached):
+
+```bash
+export CORE_STACK_API_KEY=...                 # bash
+$env:CORE_STACK_API_KEY = "..."               # PowerShell
+```
+
+Choose a cache folder. The default is `~/core-seft-data`. Against this repo’s sample districts, point at the repo `data/` folder:
+
+```python
+from core_seft import Session
+s = Session(data_dir="data")                  # repo cache
+# s = Session(data_dir="~/core-seft-data")    # library default
+```
+
+On Windows use `python -m pip` rather than `pip` if Application Control blocks `pip.exe`.
+
+## Analyse
+
+```python
+from core_seft import Session
+
+s = Session(data_dir="data", api_key=None)    # api_key default: CORE_STACK_API_KEY
+s.refresh_knowledge()                         # optional; ships a default pack
+
+r = s.analyse("district", state="Jharkhand", district="Godda")
+r = s.analyse("tehsil", state="Jharkhand", district="Godda", tehsil="Basantrai")
+r = s.analyse("mws", state="Jharkhand", district="Godda", uid="12_313813")
+r = s.analyse("waterbody", state="Jharkhand", district="Godda", uid="9628377")
+r = s.analyse("mws", state="Jharkhand", district="Godda", uid="12_313813",
+              answers={"sys_irrigated_share": "low"})
+print(r.mix["dominant"], [i["name"] for i in r.interventions[:5]])
+```
+
+Module-level `analyse(...)` is the same after `core_seft.configure(data_dir=..., api_key=...)`.
+
+Every call needs **state and district** (CoRE Stack spelling). Tehsil is required for `kind="tehsil"`; uid for MWS and waterbody. `analyse` never searches India for a uid.
+
+`fetch=True` (default): if that **district** is not cached, download all of its tehsils, then score. `fetch=False` raises `CacheMiss` instead of hitting the network. A waterbody query may also fetch GeoServer layers for that district. District queries do not fetch waterbody layers unless `include="waterbody"`.
+
+## Result fields
+
+Every kind includes `kind`, `state`, `district`, `library_version`, `knowledge_version`, `identity`, `notes`, `evidence`, `questions`, `answers_applied`, `interventions`.
+
+| Field | MWS / waterbody | District / tehsil |
+|---|---|---|
+| `identity` | Area, canals, villages count; waterbody also has type label, description, coordinates, stream order | Counts and area |
+| `context` | Classes with labels (rainfall, aquifer, terrain, …); waterbody copies the **home MWS** | Distribution of classes |
+| `mix` | System shares, labels, dominant, present | Area-weighted mean shares |
+| `production_systems` | Production systems the atlas finds present | — |
+| `villages` | Census cluster (name, population, overlap), ranked like Explore | — |
+| `schemes` | Matched schemes with names, level, components, because | Schemes that match often (count / share) |
+| `interventions` | Suited then possible; stresses addressed, `what`, `where`, landscape, caution, schemes | Interventions suited in many MWS (count / share) |
+| `questions` | Atlas questions with `show_if` true, ranked by **must-ask** (`score` 0–100, `band` must/useful/skip, `why`) | `[]` |
+| `commons_connect` | Commons Connect inform questions (landscape + resource mapping + planning on an MWS; waterbody form on a waterbody), same must-ask scores as the field-visit tab | — |
+| `must_ask_summary` | Counts of must / useful / skip for atlas and Commons Connect | — |
+| `diff` | After `answers`: status / posterior / schemes / interventions that changed | — |
+
+Must-ask scores use the same rules as `seft.priority` and the Explore / Commons Connect tabs (`knowledge/commons_connect.json` → `priority`). Bands: **must** ≥ 60, **useful** ≥ 30, **skip** below that. `detail="summary"` omits Commons Connect questions in the skip band; `detail="full"` keeps them. Apps should treat skip-band atlas questions as collapsed, as the page does.
+
+`r.to_dict()` is JSON-safe. `detail="full"` adds not-applicable rules and every indicator.
+
+## Knowledge packs
+
+`s.knowledge_version` and `s.library_version` are stamped on every result. `s.refresh_knowledge()` copies the bundled pack into `data_dir/knowledge/`. `s.refresh_knowledge("1.4.0")` tries the matching GitHub Release zip.
+
+Pools (percentile thresholds) always come from the pack, never from the caller’s one district.
+
+How notes and questions are authored: [knowledge/README.md](../knowledge/README.md) and [knowledge/waterbody/README.md](../knowledge/waterbody/README.md).
+
+## Names
+
+State, district and tehsil strings must match CoRE Stack `get_active_locations` (including hyphens such as `Mulshi-Paud`).
+
+## Sample notebooks
+
+Under `notebooks/` (repo only, not required on `pip install`):
+
+1. `01_analyse_mws.ipynb`
+2. `02_analyse_waterbody.ipynb`
+3. `03_district_and_tehsil.ipynb`
+4. `04_fetch_and_knowledge.ipynb`
+
+They use a cached district (Godda in this repo). Keep `CORE_STACK_API_KEY` in the environment, never in the notebook file.
+
+## Plan
+
+The library contract and implementation phases: [core-seft-plan.md](core-seft-plan.md).

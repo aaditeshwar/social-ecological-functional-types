@@ -174,7 +174,8 @@ def build_tehsil(state, district, tehsil, types, log=print):
 
 def build_all(cfg=None, kdir=None, log=print):
     cfg = cfg or load_json(ROOT / 'config' / 'waterbody' / 'locations.json')
-    types = load_json((kdir or ROOT / 'knowledge' / 'waterbody') / 'types.json')
+    from ..util import knowledge_dir
+    types = load_json((kdir or knowledge_dir() / 'waterbody') / 'types.json')
     out, stats = [], {}
     for s, d, t in iter_locations(cfg):
         b, st = build_tehsil(s, d, t, types, log=log); out.extend(b); stats[f'{d}/{t}'] = st

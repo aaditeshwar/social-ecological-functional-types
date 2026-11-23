@@ -212,6 +212,212 @@ def ws_scores(m, b, K, CC):
     for qid, (s, _) in out.items(): env['ask_' + qid] = s
     return out, env
 
+# ---------------------------------------------------------------- from a live pipeline / waterbody record (core_seft.analyse)
+STATUS_CODE = {
+    'triggered': 2, 'not triggered': 1, 'not applicable': 0,
+    'unknown': -1, 'insufficient data': -1,
+}
+
+
+def _scalar_env(env):
+    """Copy scalars (and context classes) off a pipeline env, dropping Namespace / nested values."""
+    out = {}
+    for k, v in dict(env or {}).items():
+        if k == 'ctx' or isinstance(v, (dict, list)):
+            continue
+        out[k] = v
+    ctx = (env or {}).get('ctx')
+    if ctx is not None and hasattr(ctx, 'items'):
+        for d, c in dict(ctx).items():
+            out[d] = c or ''
+    return out
+
+
+def st_from_stress(stress, G, A):
+    """{rule id: {code, inten, post}} from pipeline.score / reassess."""
+    from .assess import prior as mws_prior
+    conf = {s['id']: s.get('confidence', 'medium') for s in G['stresses']}
+    st = {}
+    for sid, res in (stress or {}).items():
+        post = res.get('posterior')
+        if post is None and res.get('status') != 'not applicable':
+            post = mws_prior(res, conf.get(sid), A)
+        st[sid] = {
+            'code': STATUS_CODE.get(res.get('status'), -1),
+            'inten': res.get('intensity'),
+            'post': post,
+        }
+    return st, conf
+
+
+def st_from_wb_rules(rules, K, A):
+    """Same shape as st_from_stress, from seft.wb.score / assess."""
+    from .wb.assess import prior as wb_prior
+    conf = {r['id']: r.get('confidence', 'medium') for r in K['rules']['rules']}
+    st = {}
+    for rid, res in (rules or {}).items():
+        post = res.get('post') if res.get('post') is not None else res.get('posterior')
+        if post is None and res.get('status') != 'not applicable':
+            post = wb_prior(res.get('status'), res.get('intensity'), conf.get(rid), A)
+        st[rid] = {
+            'code': STATUS_CODE.get(res.get('status'), -1),
+            'inten': res.get('intensity'),
+            'post': post,
+        }
+    return st, conf
+
+
+def _fill_inference_env(env, st, conf, A, P, scores):
+    for sid, x in st.items():
+        k = key(sid)
+        env['p_' + k] = math.nan if x['post'] is None else x['post']
+        env['pos_' + k] = math.nan if x['post'] is None else (1 if x['post'] >= A['positive_at'] else 0)
+        env['urg_' + k] = math.nan if x['post'] is None else rule_score(
+            x, conf.get(sid), P['urgency_lrs'], A, P['stress_weights'])
+    for qid, (s, _) in scores.items():
+        env['ask_' + qid] = s
+    return env
+
+
+def cc_env_from_mws(r, T, st, conf, A, P, scores):
+    """Commons Connect landscape / planning environment for one scored MWS."""
+    env = _scalar_env(r.get('env'))
+    for k, v in (r.get('ind') or {}).items():
+        if k not in env and not isinstance(v, (dict, list)):
+            env[k] = v
+    env['district'] = r.get('district'); env['state'] = r.get('state')
+    ctx = r.get('ctx') or {}
+    if hasattr(ctx, 'items'):
+        for d, c in dict(ctx).items():
+            env[d] = c or ''
+    for k, v in ((r.get('mix') or {}).get('shares') or {}).items():
+        env['share_' + k] = v
+    sig = r.get('signals') or {}
+    for ps in (T or {}).get('production_systems') or []:
+        g = sig.get(ps['signal'])
+        on = None if not g else g.get('on')
+        env['ps_' + ps['id']] = math.nan if on is None else (1 if on else 0)
+    return _fill_inference_env(env, st, conf, A, P, scores)
+
+
+def atlas_scores_from_mws(r, Q, spec, G, P, answers=None):
+    """{question id: (score, why)} for watershed atlas questions, from a live record (not a web bundle)."""
+    from .assess import system_overrides
+    A = Q['assessment']
+    st, conf = st_from_stress(r.get('stress'), G, A)
+    env = _scalar_env(r.get('env'))
+    env['district'] = r.get('district'); env['state'] = r.get('state')
+    ctx = r.get('ctx') or {}
+    if hasattr(ctx, 'items'):
+        for d, c in dict(ctx).items():
+            env[d] = c or ''
+    for k, v in ((r.get('mix') or {}).get('shares') or {}).items():
+        env['share_' + k] = v
+    sets, shifts = system_overrides(Q, answers if answers is not None else r.get('answers'))
+    out = {}
+    for q in Q.get('system_questions', []):
+        if q.get('show_if') and _true(q['show_if'], env) is not True:
+            out[q['id']] = (0, 'not asked here (show_if)'); continue
+        s1 = system_q_score(q, env, spec, P, sets, shifts)
+        s2, rid = stress_q_score(q, st, conf, A, P)
+        out[q['id']] = (rnd(max(s1, s2)), 'changes the system mix' if s1 >= s2 else f'informs {rid}')
+    for q in Q.get('stress_questions', []):
+        s, rid = stress_q_score(q, st, conf, A, P)
+        out[q['id']] = (rnd(s), f'informs {rid}' if rid else 'its stresses do not apply here')
+    return out, st, conf
+
+
+def type_q_score(q, b, types, P, current, type_data, extra_sets=None):
+    """Must-ask score of a waterbody type question (same formula as the page's wAskWb)."""
+    applies = q.get('applies_to')
+    if applies and current not in applies and type_data not in applies:
+        return 0, 'does not apply to this type'
+    from .wb.build import assign_type
+    ts = []
+    for o in q.get('options') or []:
+        sset = dict(extra_sets or {})
+        sset.update(o.get('set') or {})
+        ts.append(assign_type(b, types, sset or None))
+    n = sum(1 for t in ts if t != current)
+    Wt = P['type_weights']
+    s = rnd(100 * ((Wt['any'] if n else 0) + Wt['share'] * (n / len(ts) if ts else 0)))
+    why = f'{n} of {len(ts)} answers would change the type' if n else 'no answer changes the type'
+    return s, why
+
+
+def atlas_scores_from_wb(b, K, P, answers=None):
+    """{question id: (score, why)} for waterbody type and stress questions."""
+    from .wb.assess import collect
+    A = K['questions']['assessment']
+    st, conf = st_from_wb_rules(b.get('rules'), K, A)
+    sets, _, _, _ = collect(answers or {}, K)
+    current = b.get('type'); type_data = b.get('type_data') or current
+    out = {}
+    for q in K['questions'].get('type_questions', []):
+        out[q['id']] = type_q_score(q, b, K['types'], P, current, type_data, sets)
+    for q in K['questions'].get('stress_questions', []):
+        s, rid = stress_q_score(q, st, conf, A, P)
+        out[q['id']] = (rnd(s), f'informs {rid}' if rid else 'its rules do not apply here')
+    return out, st, conf
+
+
+def cc_env_from_wb(b, K, st, conf, A, P, scores, mws_env=None):
+    env = dict(mws_env or {})
+    for k, v in (b.get('vars') or {}).items():
+        if not isinstance(v, (dict, list)):
+            env[k] = v
+    env['wtype'] = b.get('type')
+    env['area_ha'] = b.get('area_ha')
+    for rid, x in st.items():
+        k = key(rid)
+        env['wp_' + k] = math.nan if x['post'] is None else x['post']
+        env['wpos_' + k] = math.nan if x['post'] is None else (1 if x['post'] >= A['positive_at'] else 0)
+    for qid, (s, _) in scores.items():
+        env['wask_' + qid] = s
+    return env
+
+
+def plan_iv_score(iv, env, pos, pos_wb, P):
+    """Commons Connect planning score for one intervention (page ccPlanHtml)."""
+    from .interventions import fit
+    f = fit(iv, env)
+    hit = [s for s in (iv.get('addresses') or []) if s in pos]
+    hit += [s for s in (iv.get('addresses_wb') or []) if s in (pos_wb or ())]
+    PS = P['planning_scores']
+    if f == 'suited':
+        return PS['suited_stress'] if hit else PS['suited']
+    if f == 'possible':
+        return PS['possible_stress'] if hit else PS['possible']
+    return PS['not_suited']
+
+
+def plan_question(q, IV, env, pos, pos_wb, P):
+    """Copy a Commons Connect question with must_ask.base from work_map / demand_iv when present."""
+    q = dict(q)
+    M = dict(q.get('must_ask') or {})
+    spec = {x['id']: x for x in (IV or {}).get('interventions') or []}
+    if q.get('work_map'):
+        best = 0
+        for o in q.get('options') or []:
+            for iid in (q['work_map'] or {}).get(o['id']) or []:
+                iv = spec.get(iid)
+                if iv:
+                    best = max(best, plan_iv_score(iv, env, pos, pos_wb, P))
+        M['base'] = best
+        M.setdefault('why', 'the best-suited work type here')
+        q['must_ask'] = M
+    elif q.get('demand_iv'):
+        best = 0
+        for iid in q['demand_iv']:
+            iv = spec.get(iid)
+            if iv:
+                best = max(best, plan_iv_score(iv, env, pos, pos_wb, P))
+        M['base'] = best
+        M.setdefault('why', 'how well the mapped interventions suit this landscape')
+        q['must_ask'] = M
+    return q
+
+
 def load_k():
     kd = ROOT / 'knowledge'
     return {k: load_json(kd / f'{k}.json') for k in ('questions', 'causal_graph', 'archetypes', 'contexts', 'taxonomy')}

@@ -4,25 +4,25 @@ Rule status for each waterbody: 'not applicable' (type not in applies_to, or gat
 'not triggered', or 'insufficient data' (not triggered, but a signal in the trigger had no value).
 """
 import math, re
-from ..util import ROOT, load_json
+from ..util import ROOT, load_json, knowledge_dir
 from ..expr import evaluate
 from ..signals import grade
 
 KDIR = ROOT / 'knowledge' / 'waterbody'
 
 def load_knowledge(kdir=None):
-    kdir = kdir or KDIR
+    kdir = kdir or (knowledge_dir() / 'waterbody')
     K = {n: load_json(kdir / f'{n}.json') for n in ('types', 'signals', 'roles', 'rules')}
     opt = {'schemes': {'schemes': [], 'links': {}}, 'variables': {'variables': [], 'type_fields': []},
            'questions': {'type_questions': [], 'stress_questions': []}, 'sources': {'sources': []}}
     for n, empty in opt.items():
         K[n] = load_json(kdir / f'{n}.json') if (kdir / f'{n}.json').exists() else empty
     # interventions: the catalogue shared with the watershed atlas (knowledge/interventions.json)
-    K['interventions'] = load_json(ROOT / 'knowledge' / 'interventions.json')
+    K['interventions'] = load_json(knowledge_dir() / 'interventions.json')
     # sources: the waterbody bibliography plus the watershed entries it cites (knowledge/sources.json)
     own = {x['id'] for x in K['sources']['sources']}
     cited = set(_cited(K))
-    ws = load_json(ROOT / 'knowledge' / 'sources.json')['sources']
+    ws = load_json(knowledge_dir() / 'sources.json')['sources']
     K['sources'] = dict(K['sources'], sources=K['sources']['sources'] + [x for x in ws if x['id'] in cited and x['id'] not in own])
     return K
 

@@ -9,13 +9,13 @@ The page (web/index.html) evaluates the same expressions in the browser, so that
 """
 import math
 from .expr import evaluate
-from .util import ROOT, load_json
+from .util import knowledge_dir, load_json
 
 DIMS = ('rainfall', 'aquifer', 'terrain', 'gw_category', 'canal', 'cropping')
 FIT_RANK = {'suited': 2, 'possible': 1, 'not suited': 0}
 
 def load_interventions(path=None):
-    return load_json(path or ROOT / 'knowledge' / 'interventions.json')
+    return load_json(path or knowledge_dir() / 'interventions.json')
 
 def fit_env(env, ctx=None, shares=None):
     """Variables with None turned into NaN (so a missing value makes a comparison unknown, not an error), plus the

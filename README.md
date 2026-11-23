@@ -11,6 +11,18 @@ This repository turns CoRE Stack micro-watershed (MWS) and village data into:
 All logic and metadata sit in `knowledge/*.json`, so domain experts can review and edit them without touching code.
 The repository ships with results for eight test districts, so the atlas opens straight away.
 
+## Documentation in this repo
+
+* [knowledge/README.md](knowledge/README.md) — how to edit watershed indicators, contexts, archetypes, signals, rules, schemes and community questions.
+* [knowledge/waterbody/README.md](knowledge/waterbody/README.md) — the same for the waterbody atlas (types, variables, signals, roles, rules).
+* [config/README.md](config/README.md) — `locations.json`, `datasets.json` and `counts.json`.
+* [config/groundtruth/](config/groundtruth/) — labelled MWS (`final_ground_truth.json`), pathway map (`pathways.json`), [changes made](config/groundtruth/changes.md) and [pathway-by-pathway notes](config/groundtruth/suggestions.md).
+* [docs/core_stack_api_issues.md](docs/core_stack_api_issues.md) — CoRE Stack API caveats (CS-01 …) that affect watershed results.
+* [docs/core_stack_waterbody_api_issues.md](docs/core_stack_waterbody_api_issues.md) — waterbody GeoServer layers (WB-01 …).
+* [docs/waterbody_census_comparison.md](docs/waterbody_census_comparison.md) — how the Water Body Census fields were compared with the rules (they are never inputs).
+* [docs/core-seft-plan.md](docs/core-seft-plan.md) — plan for the `core-seft` library (analyse district / tehsil / MWS / waterbody).
+* [docs/core-seft.md](docs/core-seft.md) — user README for the `core-seft` library (install, `analyse`, knowledge packs, notebooks).
+
 ## Quick start: open the atlas
 
 Open `web/index.html` in a browser. It works directly from disk, or you can serve it with
