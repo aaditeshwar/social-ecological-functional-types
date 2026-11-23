@@ -11,6 +11,18 @@ This repository turns CoRE Stack micro-watershed (MWS) and village data into:
 All logic and metadata sit in `knowledge/*.json`, so domain experts can review and edit them without touching code.
 The repository ships with results for eight test districts, so the atlas opens straight away.
 
+## Documentation in this repo
+
+* [knowledge/README.md](knowledge/README.md) — how to edit watershed indicators, contexts, archetypes, signals, rules, schemes and community questions.
+* [knowledge/waterbody/README.md](knowledge/waterbody/README.md) — the same for the waterbody atlas (types, variables, signals, roles, rules).
+* [config/README.md](config/README.md) — `locations.json`, `datasets.json` and `counts.json`.
+* [config/groundtruth/](config/groundtruth/) — labelled MWS (`final_ground_truth.json`), pathway map (`pathways.json`), [changes made](config/groundtruth/changes.md) and [pathway-by-pathway notes](config/groundtruth/suggestions.md).
+* [docs/core_stack_api_issues.md](docs/core_stack_api_issues.md) — CoRE Stack API caveats (CS-01 …) that affect watershed results.
+* [docs/core_stack_waterbody_api_issues.md](docs/core_stack_waterbody_api_issues.md) — waterbody GeoServer layers (WB-01 …).
+* [docs/waterbody_census_comparison.md](docs/waterbody_census_comparison.md) — how the Water Body Census fields were compared with the rules (they are never inputs).
+* [docs/core-seft-plan.md](docs/core-seft-plan.md) — plan for the `core-seft` library (analyse district / tehsil / MWS / waterbody).
+* [docs/core-seft.md](docs/core-seft.md) — user README for the `core-seft` library (install, `analyse`, knowledge packs, notebooks).
+
 ## Quick start: open the atlas
 
 Open `web/index.html` in a browser. It works directly from disk, or you can serve it with
@@ -132,6 +144,35 @@ Pooled percentile thresholds are computed across every MWS in this run (unless `
 
 The atlas lets a field team answer the questions in `knowledge/questions.json` for an MWS and re-assess the stresses in the browser. Save them from the Explore or Data tab as `community_answers.json`. Running `python -m seft.cli run --answers community_answers.json` writes the same posteriors and schemes into `out/csv/` and `web/data/`.
 
+### Commons Connect and must-ask scores
+
+The atlas has a third section, **Commons Connect**, that walks through a field visit for one micro-watershed (state and
+district, tehsil, MWS): the landscape, then resource mapping (settlements, waterbodies, wells, crops, forest patches),
+then planning of new works and maintenance (groundwater recharge, surface waterbodies, irrigation on farms,
+agroforestry and orchards, livelihoods, forests). The micro-watershed is picked on the same map and pickers as
+the Watersheds atlas. It shows what the atlas infers first and ranks every question by a
+**must-ask score** (0–100): how likely the answer is to change the inference, because a rule is near its threshold,
+the data are missing or uncertain, the rule is held with low confidence, or an answer could move a system across its
+presence line. Must-ask (60+) and useful (30–59) questions are shown; the rest are collapsed. Answers that match an
+atlas question are passed to the atlas at once, so the mix, the stresses, the scores and the ranked work types update
+as the visit goes on. The same scores rank the community questions in both atlases' Explore panes.
+
+```bash
+python -m seft.cli cc-build --forms <folder with the Commons Connect .xlsx templates>   # -> knowledge/commons_connect.json
+python -m seft.cli refresh-knowledge                                                   # -> web/data/commons_connect.{json,js}
+python -m seft.cli priority [--district pune]                                          # -> out/priority/<district>.csv
+```
+
+* `knowledge/commons_connect.json` is the structured local version of the forms: the 12 ODK templates (English labels,
+  options, relevance converted to the atlas expression language, required flags) and the Word drafts that have no
+  template yet (the landscape form and the two forest forms). Each question has a `role` (`inform`, scored; `record`,
+  such as names, beneficiary details, dimensions and photos), `atlas_match` (the atlas questions it covers: `same`,
+  `derived` through a mapping or bands, or `overlap`), `must_ask` (base score and conditions), `prefill` (the answer
+  the atlas expects, for the field worker to confirm) and, in planning forms, `work_map` (work types to interventions).
+  Every atlas question is asked in some form; the landscape form gets the ones its Word draft lacks.
+* `seft/priority.py` computes the scores; the page computes the same in the browser (all 577,296 scores of the
+  watershed and landscape questions agree, data alone). `priority` writes one row per MWS and question.
+
 ### `groundtruth`
 
 Scores atlas rules and Signal_Verification sheet rules against labelled micro-watersheds.
@@ -160,7 +201,71 @@ Steps:
 3. **Score both rule sets.** Atlas rules use the pooled thresholds from `web/data/index.json` so they match the live atlas (`--pools run` pools over the ground-truth MWS instead). Sheet rules (`knowledge/sheet_rules.json`, built by `tools/build_sheet_rules.py`, evaluated by `seft/sheet.py`) treat signals as 0/1, `or` as a sum and `and` as a product. An atlas pathway is present when any of its rules is triggered; unknown predictions are left out of accuracy.
 4. **Report.** Metrics (balanced accuracy, F1), sample firing rates, atlas OR/AND sheet combinations, and a confidence-tier table (how often the label is positive when both, one or neither rule set fires). `python tools/groundtruth_whatif.py` scores candidate rule changes without applying them.
 
+## Waterbody atlas
+
+The waterbody atlas uses the same operations as the watershed atlas, on its own locations file
+(`config/waterbody/locations.json`, by default the 73 tehsils of the eight original districts). Each waterbody is
+the unit; its landscape context comes from the watershed pipeline through the MWS it lies in, and its villages
+are the villages intersecting that MWS.
+
+```bash
+python -m seft.cli wb-add --state Maharashtra --district Yavatmal --tehsils "Darwha,Pusad"
+python -m seft.cli wb-fetch            # API datasets (as fetch) + GeoServer waterbody and zone-of-influence layers
+python -m seft.cli wb-audit            # what is missing per tehsil
+python -m seft.cli wb-validate         # check knowledge/waterbody/*.json
+python -m seft.cli wb-run [--merge]    # build and score -> out/waterbody/, web/data/waterbody/
+python -m seft.cli wb-all              # wb-fetch, wb-validate, wb-run
+python -m seft.cli wb-census           # compare with the Water Body Census fields -> out/waterbody/census/
+```
+
+* **`wb-add`** writes to `config/waterbody/locations.json` (or `--locations`), exactly like `add`.
+* **`wb-fetch`** runs `fetch` for the same tehsils (cached datasets are skipped), then downloads
+  `swb:surface_waterbodies_{district}_{tehsil}` and `swb:waterbodies_zoi_{district}_{tehsil}` from
+  `CORE_STACK_GEOSERVER` into `data/raw/<state>/<district>/<tehsil>/swb_layers.json.gz` (attributes, yearly
+  series, centroid, bounding box and a simplified polygon per waterbody; centre, radius and yearly cropping per
+  zone of influence). GeoServer is on port 8443, so run it where that port is reachable.
+* **`wb-audit`** lists, per tehsil, the cached layers, waterbody and zone counts, whether zones carry `wb_id`
+  (WB-02) or must be matched by location, old layers without drainage fields (WB-10), and missing API datasets.
+* **`wb-run`** (`seft/wb/run.py`):
+  1. merges fragments of one waterbody (same `area_ored` and yearly series, polygons within about 30 m; WB-01),
+     drops waterbodies under 0.05 ha, joins each zone of influence on `wb_id` or, where the zone layer lacks
+     it, by location (centre distance and radius for size), and assigns a type (`knowledge/waterbody/types.json`);
+  2. runs the watershed pipeline for the same tehsils, with the atlas's pooled thresholds from
+     `web/data/index.json`, and gives each waterbody its home MWS's context dimensions, archetype shares and
+     variables;
+  3. adds village fishery and irrigation-source shares (Mission Antyodaya) and MWS drought years from the cached
+     API files, computes the waterbody variables, and scores signals, roles and rules (`knowledge/waterbody/`);
+  4. writes `out/waterbody/csv/wb_<district>.csv` (one row per waterbody; rule columns: blank = not applicable,
+     0 = not triggered, NA = insufficient data, otherwise the intensity), `out/waterbody/web/index.json`
+     (knowledge, districts, firing rates, pooled thresholds) and `out/waterbody/web/w_<district>.json`, and copies
+     the bundles and tables to `web/data/waterbody/` (`--merge` keeps districts this run does not cover;
+     `--no-web` skips the copy).
+     Each waterbody also gets a **status**: `regular` (wet in 3 or more of the 8 years and not new), `rarely_wet`
+     (wet in 1 or 2 years; rules needing several wet years do not apply) or `new` (first wet in 2022 or later and
+     wet every year since, mostly recently dug farm ponds). New waterbodies are counted per home MWS as **recent
+     ponds** (`mws_recent_ponds` in the CSV, `recent_ponds` in the bundle's MWS table), a positive sign of where
+     pond-building schemes have reached. The `schemes` column lists the schemes linked to the triggered rules
+     (`knowledge/waterbody/schemes.json`, filtered by state and type).
+* **`wb-assess --answers waterbody_answers.json`** (`seft/wb/assess.py`) applies community answers saved from the
+  page: type answers (ownership, inflow) reassign the type and re-score every rule; stress answers multiply each
+  rule's odds by their likelihood ratios. Writes `out/waterbody/answers/assessed.csv`.
+* **`wb-census`** (`seft/wb/census.py`) scores the same waterbodies and compares them with the Water Body Census
+  fields that CoRE Stack matched to them, as `groundtruth` does for watersheds. It writes
+  `out/waterbody/census/report.md`, `detail.csv` and `comparison.json`. The census fields are never inputs.
+  Decisions taken from it are in `docs/waterbody_census_comparison.md`.
+
 ## How the frontend works
+
+The page has two atlases, switched at the top: **Watersheds** (described below) and **Waterbodies**. The waterbody
+atlas loads `web/data/waterbody/index.json` and `w_<district>.json` (or `wb_index.js` / `wb_w_<district>.js` from
+disk) and draws each district's MWS and tehsil outlines from the watershed bundle `d_<district>`. Its tabs: Explore
+(map coloured by type, status, recent ponds, any rule or role; district, MWS and waterbody records with the fill
+series, how the type was assigned, roles, rules with their signals, community questions that re-compute the type and
+re-assess the stresses, and schemes), Knowledge graph, Waterbody types, Observed stresses (with the signal library,
+roles and each rule's questions and likelihood ratios), Community questions, Schemes, Methodology and Data. The page
+scores a waterbody again after a type answer with a JavaScript mirror of `seft/wb/build.py` and `seft/wb/score.py`;
+for that the bundles carry each waterbody's variables (`e`, index `env_ids`) and type fields (`tf`), and the MWS table
+the home-MWS values the rules read (`mws_ids`). Add `?atlas=wb` to open it directly.
 
 `web/index.html` is a single-page atlas. It does not read `knowledge/` or `data/raw/` itself. Everything it needs is written into `web/data/` by `run` (via `seft/webdata.py`).
 
@@ -200,6 +305,7 @@ data/
   raw/                downloaded API data (created by fetch; not shipped)
 out/csv/              result tables (mws_<district>.csv, villages_<district>.csv, *_all.csv)
 out/groundtruth/      confusion matrices and detail from the groundtruth command
+out/priority/         must-ask scores per MWS and question (priority command)
 out/web/              atlas bundles before they are copied to web/data (gitignored)
 web/
   index.html          the atlas
@@ -263,6 +369,12 @@ Every `expr` / `share` / `trigger` / `condition` in the knowledge files is evalu
 
 See [How the frontend works](#how-the-frontend-works). After `run`, this is the only file a reader opens.
 
+### 10b. Commons Connect — `seft/odk.py`, `seft/commons_connect.py`, `seft/priority.py`
+
+`odk.py` reads an ODK XLSForm. `commons_connect.py` holds the form list, the landscape and forest forms written out
+from the Word drafts, and the annotations (roles, atlas matches, must-ask rules, prefills, work types) that `cc-build`
+adds to the parsed templates. `priority.py` scores atlas and Commons Connect questions (see Commons Connect above).
+
 ### 11. Knowledge checks and rescore — `seft/validate.py`, `seft/rescore.py`
 
 `validate.py` walks every expression and id in `knowledge/` (variables, context classes, helpers, shares, signals, graph edges, scheme conditions, question targets, source ids). Run it after editing JSON, before `run`.
@@ -289,7 +401,10 @@ responses if needed. Without network access, `python -m seft.rescore` re-scores 
 
 ## Editing the knowledge
 
-See `knowledge/README.md`. Run `python -m seft.cli validate` after every edit, then `run`.
+See `knowledge/README.md`. Run `python -m seft.cli validate` after every edit, then `run`. Interventions for both
+atlases are in `knowledge/interventions.json` (supply and demand side, with site rules, landscape fit, schemes,
+civil-society practice and sources); after editing only their text, `python -m seft.cli refresh-knowledge` updates the
+page without re-scoring.
 Without the raw API cache, `python -m seft.rescore` re-scores the shipped atlas from its stored indicators
 (refreshed 16 Nov 2026). A variable added after that stays missing until the locations are fetched again.
 

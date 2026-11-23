@@ -26,14 +26,14 @@ For each tehsil:
 Rerunning skips datasets already cached as complete unless --force.
 """
 import datetime, gzip, json, os, re, time
-from .util import ROOT, load_json, dump_json, raw_dir, gs_slug
+from .util import ROOT, load_json, dump_json, raw_dir, gs_slug, geom_path
 from .ingest import parse_response
 from .geo import encode_geom
 
 API_BASE = os.environ.get('CORE_STACK_API_BASE', 'https://geoserver.core-stack.org').rstrip('/')
 API_VERSION = os.environ.get('CORE_STACK_API_VERSION', 'v2').strip('/')
 GEOSERVER = os.environ.get('CORE_STACK_GEOSERVER', 'https://geoserver.core-stack.org:8443/geoserver').rstrip('/')
-GEOM_PATH = ROOT / 'data' / 'geo' / 'geometry_raw.json'
+GEOM_PATH = ROOT / 'data' / 'geo' / 'geometry_raw.json'  # default; fetch_all uses geom_path() so a library data_dir applies
 
 # MWS-level datasets that legitimately have fewer rows than there are MWS
 SPARSE = {'surfacewaterbodies_annual', 'canal', 'green_credit', 'croppingdrought_kharif',
@@ -251,7 +251,8 @@ def fetch_all(cfg, force=False, only=None, log=print):
     ds_cfg = load_json(ROOT / 'config' / 'datasets.json')['datasets']
     if only:
         ds_cfg = {k: v for k, v in ds_cfg.items() if k in only}
-    geo = load_json(GEOM_PATH) if GEOM_PATH.exists() else {}
+    gpath = geom_path()
+    geo = load_json(gpath) if gpath.exists() else {}
     for dist in cfg['districts']:
         for t in dist['tehsils']:
             log(f"{dist['state']} / {dist['district']} / {t}")
@@ -260,7 +261,7 @@ def fetch_all(cfg, force=False, only=None, log=print):
             if force or key not in geo:
                 try:
                     geo[key], crop_feats = fetch_geometry(dist['district'], t)
-                    dump_json(geo, GEOM_PATH)
+                    dump_json(geo, gpath)
                     log(f"    geometry: {len(geo[key]['mws'])} MWS, {len(geo[key]['vill'])} villages")
                 except Exception as e:
                     log(f'    geometry: GeoServer failed ({e}); MWS counts cannot be checked')

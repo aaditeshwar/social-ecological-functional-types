@@ -1,0 +1,388 @@
+{
+ "n": 6134,
+ "how_full": {
+  "field": "filled_up_storage_name",
+  "groups": {
+   "Full": {
+    "n": 1122,
+    "wb.inflow_shortfall": [
+     821,
+     6
+    ],
+    "median_fill": 40
+   },
+   "Upto 3/4": {
+    "n": 1632,
+    "wb.inflow_shortfall": [
+     1119,
+     11
+    ],
+    "median_fill": 41
+   },
+   "Upto 1/2": {
+    "n": 1151,
+    "wb.inflow_shortfall": [
+     751,
+     14
+    ],
+    "median_fill": 33
+   },
+   "Upto 1/4": {
+    "n": 354,
+    "wb.inflow_shortfall": [
+     200,
+     20
+    ],
+    "median_fill": 31
+   },
+   "Nil/Negligible filled up": {
+    "n": 176,
+    "wb.inflow_shortfall": [
+     122,
+     9
+    ],
+    "median_fill": 42
+   }
+  }
+ },
+ "fill_frequency": {
+  "field": "filled_up_storage_space_name",
+  "groups": {
+   "Filled up every year": {
+    "n": 1801,
+    "wb.inflow_shortfall": [
+     1269,
+     8
+    ],
+    "wb.drought_failure": [
+     334,
+     25
+    ]
+   },
+   "Usually filled up": {
+    "n": 1592,
+    "wb.inflow_shortfall": [
+     1061,
+     12
+    ],
+    "wb.drought_failure": [
+     642,
+     12
+    ]
+   },
+   "Rarely filled up": {
+    "n": 893,
+    "wb.inflow_shortfall": [
+     579,
+     15
+    ],
+    "wb.drought_failure": [
+     358,
+     9
+    ]
+   },
+   "Never filled up": {
+    "n": 149,
+    "wb.inflow_shortfall": [
+     104,
+     6
+    ],
+    "wb.drought_failure": [
+     68,
+     19
+    ]
+   }
+  }
+ },
+ "in_use": {
+  "field": "ref_water_body_in_use_id_name",
+  "groups": {
+   "in use": {
+    "n": 5471,
+    "wb.siltation": [
+     2783,
+     20
+    ],
+    "wb.inflow_shortfall": [
+     3833,
+     9
+    ],
+    "wb.sudden_loss": [
+     3056,
+     9
+    ]
+   },
+   "not in use": {
+    "n": 663,
+    "wb.siltation": [
+     284,
+     28
+    ],
+    "wb.inflow_shortfall": [
+     437,
+     15
+    ],
+    "wb.sudden_loss": [
+     339,
+     2
+    ]
+   }
+  }
+ },
+ "encroached": {
+  "field": "ref_selection_id_water_body_encroached_name",
+  "groups": {
+   "encroached": {
+    "n": 87,
+    "wb.siltation": [
+     44,
+     32
+    ]
+   },
+   "not encroached": {
+    "n": 6047,
+    "wb.siltation": [
+     3023,
+     21
+    ]
+   }
+  }
+ },
+ "under_repair": {
+  "field": "ref_water_body_under_repair_renovation_restoration_id_name",
+  "groups": {
+   "under repair": {
+    "n": 137,
+    "wb.sudden_loss": [
+     90,
+     19
+    ]
+   },
+   "not under repair": {
+    "n": 5997,
+    "wb.sudden_loss": [
+     3305,
+     8
+    ]
+   }
+  }
+ },
+ "storage_loss": {
+  "field": "storage present / original",
+  "groups": {
+   "below 80%": {
+    "n": 2299,
+    "wb.inflow_shortfall": [
+     1543,
+     13
+    ],
+    "wb.siltation": [
+     912,
+     21
+    ]
+   },
+   "80% or more": {
+    "n": 2002,
+    "wb.inflow_shortfall": [
+     1388,
+     7
+    ],
+    "wb.siltation": [
+     1021,
+     16
+    ]
+   }
+  }
+ },
+ "wua": {
+  "field": "ref_selection_id_wua_exists_name",
+  "groups": {
+   "Yes": {
+    "n": 286,
+    "wb.irrigation_underuse": [
+     107,
+     19
+    ]
+   },
+   "No": {
+    "n": 3067,
+    "wb.irrigation_underuse": [
+     1026,
+     40
+    ]
+   },
+   "Not Known": {
+    "n": 1966,
+    "wb.irrigation_underuse": [
+     639,
+     37
+    ]
+   }
+  }
+ },
+ "pisciculture": {
+  "field": "use: Pisciculture",
+  "groups": {
+   "pisciculture": {
+    "n": 2227,
+    "wb.fishery_opportunity": [
+     286,
+     78
+    ]
+   },
+   "other uses": {
+    "n": 3907,
+    "wb.fishery_opportunity": [
+     368,
+     73
+    ]
+   }
+  }
+ },
+ "use_vs_roles": {
+  "Irrigation": {
+   "n": 2316,
+   "role_irrigation": [
+    0.64,
+    0.47
+   ],
+   "role_drought_protection": [
+    0.51,
+    0.47
+   ],
+   "role_fishery": [
+    0.42,
+    0.37
+   ],
+   "role_livestock": [
+    0.01,
+    0.15
+   ],
+   "role_recharge_domestic": [
+    0.27,
+    0.38
+   ]
+  },
+  "Pisciculture": {
+   "n": 2227,
+   "role_irrigation": [
+    0.69,
+    0.44
+   ],
+   "role_drought_protection": [
+    0.39,
+    0.54
+   ],
+   "role_fishery": [
+    0.51,
+    0.33
+   ],
+   "role_livestock": [
+    0.01,
+    0.16
+   ],
+   "role_recharge_domestic": [
+    0.31,
+    0.35
+   ]
+  },
+  "Ground water recharge": {
+   "n": 3627,
+   "role_irrigation": [
+    0.47,
+    0.62
+   ],
+   "role_drought_protection": [
+    0.51,
+    0.45
+   ],
+   "role_fishery": [
+    0.36,
+    0.45
+   ],
+   "role_livestock": [
+    0.12,
+    0.07
+   ],
+   "role_recharge_domestic": [
+    0.36,
+    0.31
+   ]
+  },
+  "Domestic/Drinking": {
+   "n": 499,
+   "role_irrigation": [
+    0.58,
+    0.53
+   ],
+   "role_drought_protection": [
+    0.48,
+    0.48
+   ],
+   "role_fishery": [
+    0.39,
+    0.39
+   ],
+   "role_livestock": [
+    0.05,
+    0.11
+   ],
+   "role_recharge_domestic": [
+    0.33,
+    0.34
+   ]
+  }
+ },
+ "type": {
+  "Water consv schemes/percolation tanks/check-dams": {
+   "headwater_pond": 477,
+   "farm_pond": 325,
+   "onstream_tank": 267,
+   "small_onstream_pond": 221,
+   "river_reach": 209,
+   "canal_fed": 88,
+   "village_pond": 85
+  },
+  "Tank": {
+   "farm_pond": 462,
+   "headwater_pond": 370,
+   "village_pond": 220,
+   "onstream_tank": 186,
+   "canal_fed": 178,
+   "river_reach": 79,
+   "small_onstream_pond": 59
+  },
+  "Lakes": {
+   "farm_pond": 15,
+   "village_pond": 4,
+   "headwater_pond": 3,
+   "river_reach": 1,
+   "canal_fed": 1
+  },
+  "Reservoirs": {
+   "village_pond": 8,
+   "farm_pond": 4,
+   "headwater_pond": 3,
+   "river_reach": 3,
+   "onstream_tank": 2,
+   "canal_fed": 1
+  },
+  "Ponds": {
+   "farm_pond": 1556,
+   "village_pond": 536,
+   "headwater_pond": 252,
+   "canal_fed": 233,
+   "river_reach": 95,
+   "onstream_tank": 82,
+   "small_onstream_pond": 82
+  },
+  "Others": {
+   "farm_pond": 10,
+   "headwater_pond": 6,
+   "river_reach": 3,
+   "small_onstream_pond": 3,
+   "canal_fed": 3,
+   "onstream_tank": 2
+  }
+ }
+}

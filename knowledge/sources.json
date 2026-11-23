@@ -264,6 +264,111 @@
    "citation": "Ministry of Mines (2024). Pradhan Mantri Khanij Kshetra Kalyan Yojana (PMKKKY) guidelines, implemented through District Mineral Foundations.",
    "url": "https://mines.gov.in",
    "used_for": "Scheme for mining-affected areas; drinking water and pollution control are high-priority sectors."
+  },
+  {
+   "id": "corestack_toolkit2026",
+   "citation": "A toolkit of hydrological datasets and analytics pipelines to assist with low impact development initiatives for water security in rural areas. Draft paper, 26 March 2026 (CoRE Stack team).",
+   "used_for": "Ridge-to-valley placement of works by stream order and slope (Table 1); site-selection scores for farm ponds and recharge structures (catchment area, natural depression, distance to drainage line); site-level water balance of planned structures; demand-side crop evapotranspiration (Table 6); landscape impact of supply and demand plans (Table 8)."
+  },
+  {
+   "id": "structure_rules",
+   "citation": "CoRE Stack. Water structures — suitability rules (WaterStructure_Suitability_Rules.xlsx): accepted, partially accepted and not accepted ranges of slope, stream order, catchment area, distance to drainage line and land use for 24 structures.",
+   "used_for": "Site rules of each structure in interventions.json."
+  },
+  {
+   "id": "mgnrega_samarthya2024",
+   "citation": "Ministry of Rural Development (2024). Samarthya technical manual for natural resource management works under MGNREGA.",
+   "url": "https://nrega.nic.in",
+   "used_for": "Design and placement of drainage-line and area-treatment works."
+  },
+  {
+   "id": "cazri_watershed2024",
+   "citation": "ICAR-Central Arid Zone Research Institute (2024). Watershed management for development of hot arid zone of India.",
+   "url": "https://www.cazri.res.in",
+   "used_for": "Traditional runoff harvesting (khadins, nadis) in arid and semi-arid Rajasthan."
+  },
+  {
+   "id": "crida_farmponds",
+   "citation": "ICAR-Central Research Institute for Dryland Agriculture. Rainwater harvesting and reuse through farm ponds: experiences, issues and strategies.",
+   "url": "https://www.icar-crida.res.in",
+   "used_for": "Farm pond siting, protective irrigation and lining."
+  },
+  {
+   "id": "fao56",
+   "citation": "Allen RG, Pereira LS, Raes D, Smith M (1998). Crop evapotranspiration: guidelines for computing crop water requirements. FAO Irrigation and Drainage Paper 56.",
+   "url": "https://www.fao.org/4/x0490e/x0490e00.htm",
+   "used_for": "Crop coefficients and crop evapotranspiration used to compare crop water demand."
+  },
+  {
+   "id": "prasad2022",
+   "citation": "Prasad P, Damani OP, Sohoni M (2022). How can resource-level thresholds guide sustainable intensification of agriculture at farm level? A system dynamics study of farm-pond based intensification. Agricultural Water Management 264: 107385.",
+   "url": "https://doi.org/10.1016/j.agwat.2021.107385",
+   "used_for": "Farm ponds filled from groundwater speed depletion; caution on lined ponds."
+  },
+  {
+   "id": "wable2022",
+   "citation": "Wable PS, Garg KK, Nune R, et al. (2022). Impact of agricultural water management interventions on upstream–downstream trade-offs in the upper Cauvery catchment, southern India: a modelling study. Irrigation and Drainage 71(2): 472–494.",
+   "used_for": "Upstream structures reduce inflow downstream; plan at catchment scale."
+  },
+  {
+   "id": "grafton2018",
+   "citation": "Grafton RQ, Williams J, Perry CJ, et al. (2018). The paradox of irrigation efficiency. Science 361(6404): 748–750.",
+   "url": "https://doi.org/10.1126/science.aat9314",
+   "used_for": "Efficient irrigation often raises total consumption unless area is capped."
+  },
+  {
+   "id": "fes_budgeting2025",
+   "citation": "Foundation for Ecological Security, India Observatory (2025). Crop water budgeting.",
+   "url": "https://indiaobservatory.org.in",
+   "used_for": "Village crop-water budgeting."
+  },
+  {
+   "id": "atal_demand2021",
+   "citation": "Atal Bhujal Yojana, Haryana (2021). Strategy for implementing demand side management measures.",
+   "url": "https://ataljal.mowr.gov.in",
+   "used_for": "Demand-side measures: crop diversification, micro-irrigation, water security plans."
+  },
+  {
+   "id": "mojs_croppattern2021",
+   "citation": "Ministry of Jal Shakti (2021). Linking of crop pattern with ground water availability.",
+   "url": "https://jalshakti-dowr.gov.in",
+   "used_for": "Aligning cropping with groundwater availability."
+  },
+  {
+   "id": "wetland_rules2017",
+   "citation": "Ministry of Environment, Forest and Climate Change (2017). Wetlands (Conservation and Management) Rules, 2017.",
+   "url": "https://moef.gov.in",
+   "used_for": "Notification and protection of waterbodies from encroachment."
+  },
+  {
+   "id": "wbc2023",
+   "citation": "Ministry of Jal Shakti, Department of Water Resources, River Development and Ganga Rejuvenation (2023). Water Bodies: First Census, 2017-18. All India and State Reports.",
+   "url": "https://jalshakti-dowr.gov.in",
+   "used_for": "Classes of waterbodies (ponds, tanks, lakes, reservoirs, check dams), ownership (public / private), use, filling frequency, encroachment and repair status; the fields used to check the rule patterns."
+  },
+  {
+   "id": "rrr_guidelines2022",
+   "citation": "Ministry of Jal Shakti (2022) Guidelines for Repair, Renovation and Restoration of Water Bodies under PMKSY-HKKP (2021-26).",
+   "url": "https://wrd.nagaland.gov.in/wp-content/uploads/2023/04/RRR_PMKSY_Guidelines_2022.pdf",
+   "used_for": "The interventions for storage loss (desilting, bund and waste-weir repair, supply-channel restoration, catchment treatment) and the size range of tanks the scheme covers."
+  },
+  {
+   "id": "amrit_sarovar_pib2025",
+   "citation": "Press Information Bureau (2025) Mission Amrit Sarovar: progress and Phase II. PRID 2114884.",
+   "url": "https://pib.gov.in/PressReleasePage.aspx?PRID=2114884",
+   "used_for": "Pond rejuvenation through user groups who remove silt after each monsoon."
+  },
+  {
+   "id": "mosse2003",
+   "citation": "Mosse D (2003) The Rule of Water: Statecraft, Ecology and Collective Action in South India. Oxford University Press, New Delhi.",
+   "url": "https://global.oup.com",
+   "used_for": "Tank systems depend on inlet channels, sluices and shared rules; their decline follows the weakening of collective management, encroachment and loss of supply channels."
+  },
+  {
+   "id": "wb_census_check",
+   "citation": "This atlas: comparison of the waterbody rules with the Water Body Census fields that CoRE Stack matched to the waterbodies (docs/waterbody_census_comparison.md, 22 November 2026).",
+   "url": "https://github.com/aaditeshwar/social-ecological-functional-types/blob/waterbody-atlas/docs/waterbody_census_comparison.md",
+   "used_for": "Six tuning changes and the direction of several likelihood ratios: waterbodies recorded as rarely full trigger inflow shortfall more often, those under repair trigger sudden loss more, those with a water user association trigger irrigation underuse less, encroached ones trigger siltation more."
   }
  ]
 }

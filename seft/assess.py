@@ -3,11 +3,11 @@
 answers: {question_id: option_id}. The same logic runs in the web atlas, so results match.
 """
 import math
-from .util import ROOT, load_json
+from .util import knowledge_dir, load_json
 from .expr import evaluate
 
 def load_questions(path=None):
-    return load_json(path or ROOT / 'knowledge' / 'questions.json')
+    return load_json(path or knowledge_dir() / 'questions.json')
 
 def _opts(Q, answers):
     allq = {q['id']: q for q in Q['system_questions'] + Q['stress_questions']}

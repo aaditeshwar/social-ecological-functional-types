@@ -78,8 +78,41 @@ def build(src=None, dest=None, csv_src=None, merge=False):
             if not f.name.endswith('_all.csv'):
                 shutil.copy2(f, dest / 'csv' / f.name)
     _combine_csv(dest / 'csv', [d['slug'] for d in index['districts']], merge)
+    write_cc(dest)
     print(f'wrote {len(names)} bundles to {dest}: {", ".join(d["district"] for d in index["districts"])}')
     print(f'open {dest.parent / "index.html"} in a browser, or: python -m http.server -d {dest.parent} 8000')
+
+def write_cc(dest, kd=None):
+    """web/data/commons_connect.{json,js}: the Commons Connect forms for the page's Commons Connect tab."""
+    cc = Path(kd or ROOT / 'knowledge') / 'commons_connect.json'
+    if not cc.exists(): return False
+    text = json.dumps(json.loads(cc.read_text(encoding='utf-8')), separators=(',', ':'), ensure_ascii=False)
+    (Path(dest) / 'commons_connect.json').write_text(text, encoding='utf-8'); write_js('commons_connect', text, Path(dest))
+    return True
+
+def refresh_knowledge(dest=None, kd=None):
+    """Replace the knowledge embedded in web/data/index.json and web/data/waterbody/index.json with the current
+    knowledge files, keeping every result. For changes that do not alter scoring (interventions, notes, sources,
+    scheme text); after changing signals, rules, questions or types, run `run` / `wb-run` instead."""
+    from .export import _knowledge, _scheme_names, _wb_rule_labels
+    dest = Path(dest or ROOT / 'web' / 'data'); kd = Path(kd or ROOT / 'knowledge')
+    done = []
+    if (dest / 'index.json').exists():
+        index = json.loads((dest / 'index.json').read_text(encoding='utf-8'))
+        K = _knowledge(kd); index['knowledge'] = K; index['scheme_names'] = _scheme_names(K); index['wb_rule_labels'] = _wb_rule_labels()
+        text = json.dumps(index, separators=(',', ':'), ensure_ascii=False)
+        (dest / 'index.json').write_text(text, encoding='utf-8'); write_js('index', text, dest); done.append('watershed')
+    wd = dest / 'waterbody'
+    if (wd / 'index.json').exists():
+        from .wb.score import load_knowledge
+        index = json.loads((wd / 'index.json').read_text(encoding='utf-8'))
+        K = load_knowledge(); index['knowledge'] = K
+        from .export import _scheme_names as _sn
+        index['scheme_names'] = _sn(_knowledge(kd))
+        text = json.dumps(index, separators=(',', ':'), ensure_ascii=False)
+        (wd / 'index.json').write_text(text, encoding='utf-8'); write_js('wb_index', text, wd); done.append('waterbody')
+    if write_cc(dest, kd): done.append('Commons Connect')
+    print('knowledge refreshed in', ', '.join(done) or 'nothing (no index.json found)')
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog='seft.webdata', description=__doc__.split('\n')[0])

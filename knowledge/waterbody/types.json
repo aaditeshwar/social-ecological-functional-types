@@ -1,0 +1,131 @@
+{
+ "note": "Waterbody types. Each merged waterbody gets the first type whose 'when' is true, in the order listed. Expressions use the type fields (variables.json type_fields): area_ha, wb_type, on_drainage, stream_order, n_mws, has_drainage_fields, catchment_ratio, and the fields in 'derived', evaluated first. inflow and ownership are unknown from data and are set only by community answers (questions.json type_questions), so without answers the types are exactly those from data.",
+ "min_area_ha": 0.05,
+ "types": [
+  {
+   "id": "unclassified",
+   "label": "Cannot be typed (old layer)",
+   "in_scope": false,
+   "when": "not has_drainage_fields",
+   "description": "The layer lacks drainage, stream order and type fields (WB-10).",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "reservoir",
+   "label": "Reservoir (out of scope)",
+   "in_scope": false,
+   "when": "(area_ha >= 50 or n_mws >= 3) and wb_type != 'river'",
+   "description": "Very large waterbodies, or ones spanning three or more MWS: dam reservoirs and similar. Outside the scope of village-level analysis.",
+   "sources": [
+    "wbc2023",
+    "expert_judgement"
+   ],
+   "why": "The 50 ha cut-off and the three-MWS rule are expert judgement: such waterbodies are managed by irrigation departments rather than villages."
+  },
+  {
+   "id": "large_river",
+   "label": "Large river (out of scope)",
+   "in_scope": false,
+   "when": "(area_ha >= 50 or n_mws >= 3) and wb_type == 'river'",
+   "description": "Long or wide river stretches spanning three or more MWS or 50 ha. Outside the scope of village-level analysis.",
+   "sources": [
+    "expert_judgement"
+   ]
+  },
+  {
+   "id": "river_reach",
+   "label": "River reach",
+   "in_scope": true,
+   "when": "wb_type == 'river'",
+   "description": "A wet stretch of a river. Its water depends on upstream flow rather than local storage.",
+   "sources": [
+    "core_stack_swb"
+   ]
+  },
+  {
+   "id": "canal_fed",
+   "label": "Canal-fed waterbody",
+   "in_scope": true,
+   "when": "wb_type == 'canal' or inflow == 'canal'",
+   "description": "A waterbody on or fed by a canal. Its water depends on canal releases.",
+   "sources": [
+    "core_stack_swb",
+    "wbc2023"
+   ]
+  },
+  {
+   "id": "onstream_tank",
+   "label": "On-stream tank",
+   "in_scope": true,
+   "when": "fed_by_stream and stream_order >= 3 and area_ha >= 1",
+   "description": "A tank of 1 ha or more on a stream of order 3 or higher, often part of a cascade. Typically irrigation storage. On-stream means on a mapped drainage line, or, from 0.5 ha, with a catchment 20 or more times the waterbody's area.",
+   "sources": [
+    "core_stack_swb",
+    "mosse2003",
+    "palanisami_tanks",
+    "wb_census_check"
+   ],
+   "why": "Stream order 3 or more and 1 ha or more separates system tanks fed by a stream from small check-dam ponds; expert judgement checked against the census tank class."
+  },
+  {
+   "id": "small_onstream_pond",
+   "label": "Small on-stream pond",
+   "in_scope": true,
+   "when": "fed_by_stream and stream_order >= 3",
+   "description": "A pond under 1 ha on a stream of order 3 or higher. On-stream means on a mapped drainage line, or, from 0.5 ha, with a catchment 20 or more times the waterbody's area.",
+   "sources": [
+    "core_stack_swb",
+    "wbc2023"
+   ]
+  },
+  {
+   "id": "headwater_pond",
+   "label": "Headwater pond / check dam",
+   "in_scope": true,
+   "when": "fed_by_stream",
+   "description": "On a first- or second-order stream: runoff harvesting and recharge structures. On-stream means on a mapped drainage line, or, from 0.5 ha, with a catchment 20 or more times the waterbody's area.",
+   "sources": [
+    "core_stack_swb",
+    "wbc2023"
+   ]
+  },
+  {
+   "id": "village_pond",
+   "label": "Village pond",
+   "in_scope": true,
+   "when": "ownership != 'private' and (area_ha >= 0.5 or ownership == 'common')",
+   "description": "Off the drainage network, 0.5 ha or more: community ponds fed by local runoff.",
+   "sources": [
+    "wbc2023",
+    "expert_judgement"
+   ],
+   "why": "0.5 ha separates community ponds from farm ponds, which are mostly smaller than 0.5 ha; expert judgement. A community answer on ownership overrides the size rule."
+  },
+  {
+   "id": "farm_pond",
+   "label": "Farm pond",
+   "in_scope": true,
+   "when": "true",
+   "description": "Off the drainage network and under 0.5 ha: individual or small group ponds.",
+   "sources": [
+    "wbc2023",
+    "expert_judgement"
+   ],
+   "why": "Small ponds off the drainage network are taken as farm ponds; the census records most such ponds as privately owned."
+  }
+ ],
+ "derived": [
+  {
+   "id": "on_stream",
+   "expr": "on_drainage or (catchment_ratio >= 20 and area_ha >= 0.5)",
+   "note": "On a mapped drainage line, or, for waterbodies of 0.5 ha or more, a catchment 20 or more times its area, which catches channel-fed tanks off the mapped drainage line (added 22 Nov 2026 after the census comparison)."
+  },
+  {
+   "id": "fed_by_stream",
+   "expr": "(on_stream or inflow == 'stream') and inflow != 'runoff' and inflow != 'canal'",
+   "note": "Fed by a stream or nala: on_stream from the data, unless a community answer says its water comes from field runoff or a canal; or a stream according to the answer."
+  }
+ ]
+}

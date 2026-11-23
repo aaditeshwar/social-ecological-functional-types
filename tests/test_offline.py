@@ -240,10 +240,11 @@ def main():
         out = run('audit', '--locations', loc)
         assert '1 of 1 tehsils complete' in out, 'audit should report the back-filled tehsil as complete'
         run('validate')
+        before = len(json.loads((work / 'web' / 'data' / 'index.json').read_text())['districts'])
         run('run', '--locations', loc, '--merge')
         idx = json.loads((work / 'web' / 'data' / 'index.json').read_text())
         names = [d['district'] for d in idx['districts']]
-        assert DISTRICT in names and len(names) == 9, names
+        assert DISTRICT in names and len(names) == before + 1, names
         b = json.loads((work / 'web' / 'data' / 'd_testpur.json').read_text())
         assert len(b['mws']) == len(MWS) and (work / 'web' / 'data' / 'd_testpur.js').exists()
         raw = work / 'data' / 'raw' / 'teststate' / 'testpur' / 'demo'

@@ -8,14 +8,14 @@ counts as 0 (no amplification). A triggered rule is severe at intensity >= sever
 """
 import math
 from .expr import evaluate, NAN
-from .util import ROOT, load_json
+from .util import knowledge_dir, load_json
 from .signals import pooled_percentiles, evaluate_signals   # noqa: F401  (re-exported)
 
 def load_graph(path=None):
-    return load_json(path or ROOT / 'knowledge' / 'causal_graph.json')
+    return load_json(path or knowledge_dir() / 'causal_graph.json')
 
 def load_taxonomy(path=None):
-    return load_json(path or ROOT / 'knowledge' / 'taxonomy.json')
+    return load_json(path or knowledge_dir() / 'taxonomy.json')
 
 def _ok(x):
     return x is not None and not (isinstance(x, float) and math.isnan(x))

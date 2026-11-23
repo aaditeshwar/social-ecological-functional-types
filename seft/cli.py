@@ -5,11 +5,24 @@
     python -m seft.cli fetch           # API data + GeoServer geometry for every location (needs CORE_STACK_API_KEY)
     python -m seft.cli audit           # which datasets are missing or incomplete
     python -m seft.cli validate        # check the knowledge JSONs after editing
+    python -m seft.cli refresh-knowledge   # put edited text-only knowledge (interventions, notes) into web/data
+    python -m seft.cli cc-build --forms <folder>   # Commons Connect ODK templates -> knowledge/commons_connect.json
+    python -m seft.cli priority [--district pune]  # must-ask scores of the community questions -> out/priority
     python -m seft.cli run             # indicators, systems, stresses, schemes -> out/csv, out/web and web/data
     python -m seft.cli all             # fetch, validate and run in one go
     python -m seft.cli groundtruth --truth FILE
                                        # fetch ground-truth tehsils, score atlas and sheet rules, write
                                        # confusion matrices to out/groundtruth/
+
+Waterbody atlas (same operations, on config/waterbody/locations.json):
+    python -m seft.cli wb-add --state ... --district ... --tehsils "..."
+    python -m seft.cli wb-fetch        # API data (as fetch) + GeoServer waterbody and zone-of-influence layers
+    python -m seft.cli wb-audit        # missing layers and datasets
+    python -m seft.cli wb-validate     # check knowledge/waterbody/*.json
+    python -m seft.cli wb-run          # -> out/waterbody/csv/wb_<district>.csv, out/waterbody/web, web/data/waterbody
+    python -m seft.cli wb-all          # wb-fetch, wb-validate and wb-run
+    python -m seft.cli wb-census       # compare with the Water Body Census fields -> out/waterbody/census/
+    python -m seft.cli wb-assess --answers community_answers.json   # re-assess with answers saved from the page
 
 Common options: --locations FILE (default config/locations.json). For run: --answers FILE (community
 answers saved from the atlas), --merge (keep districts already in the atlas that this run does not cover).
@@ -19,6 +32,7 @@ from pathlib import Path
 from .util import ROOT, load_json, dump_json, raw_dir, iter_locations
 
 DEFAULT_LOC = str(ROOT / 'config' / 'locations.json')
+WB_LOC = str(ROOT / 'config' / 'waterbody' / 'locations.json')
 
 def cmd_add(a):
     p = Path(a.locations)
@@ -72,6 +86,34 @@ def cmd_run(a):
         from .webdata import build
         build(out / 'web', ROOT / 'web' / 'data', out / 'csv', merge=a.merge)
 
+def cmd_wb_fetch(a):
+    from .wb.layers import fetch_all_layers
+    fetch_all_layers(load_json(a.locations), force=a.force)
+
+def cmd_wb_audit(a):
+    from .wb.audit import report
+    report(load_json(a.locations))
+
+def cmd_wb_validate(a):
+    from .wb.validate import validate
+    return validate()
+
+def cmd_wb_run(a):
+    from .wb.run import main as wb_run
+    wb_run(a.locations, a.out, merge=a.merge, web=not a.no_web)
+
+def cmd_wb_census(a):
+    from .wb.census import main as wb_census
+    wb_census(a.locations, a.out)
+
+def cmd_refresh_knowledge(a):
+    from .webdata import refresh_knowledge
+    refresh_knowledge()
+
+def cmd_wb_assess(a):
+    from .wb.assess import main as wb_assess
+    wb_assess(a.answers, a.locations, a.out)
+
 def cmd_groundtruth(a):
     from .groundtruth import main as gt
     gt(a.truth, refresh_locations=a.refresh_locations, force=a.force, fetch=not a.no_fetch, pools_from=a.pools,
@@ -96,6 +138,31 @@ def main(argv=None):
         p.add_argument('--no-web', action='store_true', help='only write CSV tables')
         if name == 'all':
             p.add_argument('--force', action='store_true'); p.add_argument('--only', help=argparse.SUPPRESS)
+    # waterbody atlas: same operations, on config/waterbody/locations.json
+    def wloc(p): p.add_argument('--locations', default=WB_LOC, help='locations JSON (default config/waterbody/locations.json)')
+    p = sub.add_parser('wb-add', help='add a district and its tehsils to the waterbody locations'); wloc(p)
+    p.add_argument('--state', required=True); p.add_argument('--district', required=True); p.add_argument('--tehsils')
+    p = sub.add_parser('wb-fetch', help='download API data and the GeoServer waterbody layers'); wloc(p)
+    p.add_argument('--force', action='store_true', help='re-download what is already cached')
+    p = sub.add_parser('wb-audit', help='list missing layers and datasets for the waterbody atlas'); wloc(p)
+    p = sub.add_parser('wb-validate', help='check the waterbody knowledge JSONs')
+    for name in ('wb-run', 'wb-all'):
+        p = sub.add_parser(name, help='waterbody atlas: build, score -> out/waterbody and web/data/waterbody' if name == 'wb-run'
+                           else 'wb-fetch + wb-validate + wb-run'); wloc(p)
+        p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody'))
+        p.add_argument('--merge', action='store_true', help='keep atlas districts that this run does not cover')
+        p.add_argument('--no-web', action='store_true', help='only write CSV tables and out/waterbody/web')
+        if name == 'wb-all': p.add_argument('--force', action='store_true')
+    p = sub.add_parser('wb-census', help='compare waterbody patterns with the Water Body Census fields -> out/waterbody/census'); wloc(p)
+    p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'census'))
+    p = sub.add_parser('cc-build', help='structured Commons Connect forms from the ODK templates -> knowledge/commons_connect.json')
+    p.add_argument('--forms', required=True, help='folder with the Commons Connect .xlsx templates')
+    p = sub.add_parser('priority', help='must-ask scores of the atlas and Commons Connect questions, by MWS -> out/priority')
+    p.add_argument('--district', action='append', help='district slug (repeatable); default all in web/data')
+    sub.add_parser('refresh-knowledge', help='put the current knowledge files (e.g. interventions) into web/data without re-scoring')
+    p = sub.add_parser('wb-assess', help='re-assess waterbodies with community answers saved from the page -> out/waterbody/answers'); wloc(p)
+    p.add_argument('--answers', required=True, help='community answers JSON saved from the waterbody atlas')
+    p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'answers'))
     p = sub.add_parser('groundtruth', help='score atlas and sheet rules against ground-truth MWS')
     p.add_argument('--truth', default=str(ROOT / 'config' / 'groundtruth' / 'final_ground_truth.json'))
     p.add_argument('--refresh-locations', action='store_true', help='re-download get_active_locations')
@@ -112,6 +179,22 @@ def main(argv=None):
     elif a.cmd == 'validate': sys.exit(0 if cmd_validate(a) else 1)
     elif a.cmd == 'run': cmd_run(a)
     elif a.cmd == 'groundtruth': cmd_groundtruth(a)
+    elif a.cmd == 'wb-add': cmd_add(a)
+    elif a.cmd == 'wb-fetch': cmd_wb_fetch(a)
+    elif a.cmd == 'wb-audit': cmd_wb_audit(a)
+    elif a.cmd == 'wb-validate': sys.exit(0 if cmd_wb_validate(a) else 1)
+    elif a.cmd == 'wb-run': cmd_wb_run(a)
+    elif a.cmd == 'wb-census': cmd_wb_census(a)
+    elif a.cmd == 'wb-assess': cmd_wb_assess(a)
+    elif a.cmd == 'refresh-knowledge': cmd_refresh_knowledge(a)
+    elif a.cmd == 'cc-build':
+        from .commons_connect import build; build(a.forms)
+    elif a.cmd == 'priority':
+        from .priority import main as pmain; pmain(a.district)
+    elif a.cmd == 'wb-all':
+        cmd_wb_fetch(a)
+        if not cmd_wb_validate(a): sys.exit(1)
+        cmd_wb_run(a)
     elif a.cmd == 'all':
         cmd_fetch(a)
         if not cmd_validate(a): sys.exit(1)

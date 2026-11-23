@@ -59,6 +59,8 @@ Missing data is treated as unknown. An `or` can still be true if another part is
 | `causal_graph.json` | `nodes`, `edges` (sign, mechanism, confidence, `condition`, sources), `stresses` (the finer rules). | Each rule has id `<group>.<rule>` (or a plain id), `group`, `sheet_pathway`, `signals` by role, `systems`, `trigger`, `intensity`, `severe_at`, `confidence`, `rationale`, `interpretation`, `public_note`. |
 | `schemes.json` | Schemes: `level`, `state`, `addresses` (stress ids), `archetypes`, optional `condition`, `caution`, `status`. | A scheme matches when it addresses a stress that is present, fits the state and condition, and, if it lists archetypes, one of them holds at least 15% of the MWS. |
 | `questions.json` | `system_questions` and `stress_questions`, and `assessment` (priors, confidence shrink, bands). | Each option has likelihood ratios for stresses (`lr`), and optionally `set` (override a weight) or `shift` (move share between archetypes). |
+| `interventions.json` | Supply- and demand-side interventions, shared with the waterbody atlas: `side`, `category`, `what`, `where`, `site_spec` (ridge-to-valley placement from the CoRE Stack toolkit paper), `site_rules` (accepted / partially accepted / not accepted slope, stream order, catchment, distance to drainage and land use from the structure-suitability spreadsheet), `landscape`, `archetypes`, `suits` / `avoid` (landscape fit test), `caution`, `addresses` (stress ids), `addresses_wb` and `wb_types` (waterbody rules and types), `schemes`, `practice`, `sources`. | For each MWS, interventions that respond to a present stress are listed as suited (`suits` holds), not suited (`avoid` holds) or possible. Expressions read variables, `share_<archetype>` and the context classes as `terrain`, `aquifer`, `rainfall`, `gw_category`, `canal`, `cropping`. |
+| `commons_connect.json` | Built by `python -m seft.cli cc-build --forms <folder>` from the Commons Connect ODK templates; edit the annotations in `seft/commons_connect.py` and rebuild. `forms` (section landscape / resource_mapping / planning, questions with `role`, `atlas_match`, `must_ask`, `prefill`, `routes`, `work_map`), `priority` (weights and bands of the must-ask score). | `must_ask.rules` are expressions over the watershed variables, `share_<archetype>`, context classes, `ps_<production system>`, `p_` / `pos_` / `urg_<rule>` (dots as `__`) and `ask_<atlas question>`; in the waterbody form also `wtype`, `wp_` / `wpos_<rule>` and `wask_<question>`. |
 | `sources.json` | Bibliography: `id`, `citation`, `url`, `used_for`. | Every `sources` list in the other files refers to these ids. |
 
 ## Signals and rules
@@ -90,6 +92,11 @@ Missing data is treated as unknown. An `or` can still be true if another part is
   `taxonomy.json` (by group or rule id), add graph edges if the
   mechanism is new, list it in the `key_stresses` of the relevant archetypes, add scheme `addresses`, and add
   questions for it.
+* **A new intervention:** add an entry to `interventions.json` with the stresses (`addresses`) and waterbody rules
+  (`addresses_wb`) it responds to and a fit test; `validate` checks every id, scheme and source and that every stress
+  and waterbody rule has at least one intervention. Text-only edits reach the page with
+  `python -m seft.cli refresh-knowledge`; the MWS tables get the `interventions_suited` / `interventions_possible`
+  columns on the next `run` (and the waterbody tables on the next `wb-run`).
 * **A new scheme:** add an entry to `schemes.json`. For a state scheme, `state` must match the state name in
   `config/locations.json`.
 * **A new archetype:** add a share rule and any helper weights. Make sure the shares still split the MWS

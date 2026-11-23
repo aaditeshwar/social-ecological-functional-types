@@ -2,7 +2,8 @@
 import math
 from collections import defaultdict
 import numpy as np
-from .util import ROOT, load_json
+from pathlib import Path
+from .util import ROOT, load_json, knowledge_dir as default_knowledge_dir
 from .load import load_district
 from .indicators import load_variables, compute
 from .context import load_contexts, assign, rain_factors
@@ -11,6 +12,13 @@ from .stresses import load_graph, load_taxonomy, evaluate_stresses, hierarchy
 from .signals import load_signals, pooled_percentiles, threshold_table
 from .schemes import load_schemes, match, eligible
 from .assess import load_questions, system_overrides, reassess
+from .interventions import load_interventions, suggest, fit_env
+
+_IV = None
+def _iv():
+    global _IV
+    if _IV is None: _IV = load_interventions()
+    return _IV
 
 def run(locations=None, knowledge_dir=None, log=print, answers=None, pools=None, keep=None):
     """answers: optional {mws_uid: {question_id: option_id}} from community meetings.
@@ -18,7 +26,7 @@ def run(locations=None, knowledge_dir=None, log=print, answers=None, pools=None,
     pooling over this run; used to score new locations with the same thresholds as the atlas.
     keep: optional callable(record) -> bool; records it rejects are dropped before scoring."""
     answers = answers or {}
-    kd = knowledge_dir or ROOT / 'knowledge'
+    kd = Path(knowledge_dir) if knowledge_dir is not None else default_knowledge_dir()
     cfg = locations or load_json(ROOT / 'config' / 'locations.json')
     V = load_variables(kd / 'variables.json'); C = load_contexts(kd / 'contexts.json')
     A = load_archetypes(kd / 'archetypes.json'); G = load_graph(kd / 'causal_graph.json'); SC = load_schemes(kd / 'schemes.json')
@@ -71,4 +79,6 @@ def score(r, G, Q, S, T, SC, pools):
     r['pathways'] = hierarchy(r['stress'], sig, G, T)
     r['schemes'] = match(r['env'], r['stress'], r['mix'], SC, r['state'])
     r['eligible'] = eligible(r['env'], SC, r['state'])
+    pos = {k for k, v in r['stress'].items() if v.get('positive', v.get('status') == 'triggered')}
+    r['interventions'] = suggest(fit_env(r['env'], r['ctx'], r['mix']['shares']), pos, _iv())
     return r

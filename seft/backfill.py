@@ -4,10 +4,11 @@ the API copy in the cache is missing or incomplete."""
 import json, datetime
 from pathlib import Path
 from collections import defaultdict
-from .util import ROOT, load_json, dump_json, raw_dir, gs_slug, iter_locations
+from .util import ROOT, load_json, dump_json, raw_dir, gs_slug, iter_locations, data_root
 
-def apply(path=ROOT / 'data' / 'geo' / 'geoserver_backfill.json', cfg=None):
-    if not Path(path).exists():
+def apply(path=None, cfg=None):
+    path = Path(path or data_root() / 'geo' / 'geoserver_backfill.json')
+    if not path.exists():
         return []
     B = load_json(path)
     names = {gs_slug(d) + '_' + gs_slug(t): (s, d, t) for s, d, t in iter_locations(cfg)}

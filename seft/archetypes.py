@@ -8,10 +8,10 @@ if they sum to more than 1 all shares are divided by the sum.
 """
 import math
 from .expr import evaluate, NAN
-from .util import ROOT, load_json
+from .util import knowledge_dir, load_json
 
 def load_archetypes(path=None):
-    return load_json(path or ROOT / 'knowledge' / 'archetypes.json')
+    return load_json(path or knowledge_dir() / 'archetypes.json')
 
 def _num(v):
     return 0.0 if v is None or isinstance(v, str) or (isinstance(v, float) and math.isnan(v)) else max(float(v), 0.0)
