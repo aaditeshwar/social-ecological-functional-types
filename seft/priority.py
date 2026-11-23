@@ -233,37 +233,44 @@ def _scalar_env(env):
     return out
 
 
-def st_from_stress(stress, G, A):
-    """{rule id: {code, inten, post}} from pipeline.score / reassess."""
-    from .assess import prior as mws_prior
+def _odds_post(p0, lr):
+    o = p0 / (1 - p0) * lr
+    return o / (1 + o)
+
+
+def st_from_stress(stress, G, A, Q=None, answers=None):
+    """{rule id: {code, inten, post}} from pipeline.score / reassess.
+    The probability is recomputed unrounded from the prior and the answers' likelihood ratios (as the page does):
+    the pipeline rounds posteriors to 3 places, which can move a rule across the positive line in the flip test."""
+    from .assess import prior as mws_prior, _opts
     conf = {s['id']: s.get('confidence', 'medium') for s in G['stresses']}
+    lrs = {}
+    if Q is not None:
+        for q, o in _opts(Q, answers):
+            for e in o.get('stress') or []: lrs[e['id']] = lrs.get(e['id'], 1.0) * e['lr']
     st = {}
     for sid, res in (stress or {}).items():
-        post = res.get('posterior')
-        if post is None and res.get('status') != 'not applicable':
-            post = mws_prior(res, conf.get(sid), A)
-        st[sid] = {
-            'code': STATUS_CODE.get(res.get('status'), -1),
-            'inten': res.get('intensity'),
-            'post': post,
-        }
+        if Q is not None:
+            p0 = mws_prior(res, conf.get(sid), A)
+            post = None if p0 is None else _odds_post(p0, lrs.get(sid, 1.0))
+        else:
+            post = res.get('posterior')
+            if post is None and res.get('status') != 'not applicable':
+                post = mws_prior(res, conf.get(sid), A)
+        st[sid] = {'code': STATUS_CODE.get(res.get('status'), -1), 'inten': res.get('intensity'), 'post': post}
     return st, conf
 
 
-def st_from_wb_rules(rules, K, A):
-    """Same shape as st_from_stress, from seft.wb.score / assess."""
-    from .wb.assess import prior as wb_prior
+def st_from_wb_rules(rules, K, A, answers=None):
+    """Same shape as st_from_stress, from seft.wb.score / assess; probabilities recomputed unrounded."""
+    from .wb.assess import prior as wb_prior, collect
     conf = {r['id']: r.get('confidence', 'medium') for r in K['rules']['rules']}
+    lrs = collect(answers or {}, K)[1]
     st = {}
     for rid, res in (rules or {}).items():
-        post = res.get('post') if res.get('post') is not None else res.get('posterior')
-        if post is None and res.get('status') != 'not applicable':
-            post = wb_prior(res.get('status'), res.get('intensity'), conf.get(rid), A)
-        st[rid] = {
-            'code': STATUS_CODE.get(res.get('status'), -1),
-            'inten': res.get('intensity'),
-            'post': post,
-        }
+        p0 = None if res.get('status') == 'not applicable' else wb_prior(res.get('status'), res.get('intensity'), conf.get(rid), A)
+        post = None if p0 is None else _odds_post(p0, lrs.get(rid, 1.0))
+        st[rid] = {'code': STATUS_CODE.get(res.get('status'), -1), 'inten': res.get('intensity'), 'post': post}
     return st, conf
 
 
@@ -304,7 +311,7 @@ def atlas_scores_from_mws(r, Q, spec, G, P, answers=None):
     """{question id: (score, why)} for watershed atlas questions, from a live record (not a web bundle)."""
     from .assess import system_overrides
     A = Q['assessment']
-    st, conf = st_from_stress(r.get('stress'), G, A)
+    st, conf = st_from_stress(r.get('stress'), G, A, Q, answers if answers is not None else r.get('answers'))
     env = _scalar_env(r.get('env'))
     env['district'] = r.get('district'); env['state'] = r.get('state')
     ctx = r.get('ctx') or {}
@@ -349,7 +356,7 @@ def atlas_scores_from_wb(b, K, P, answers=None):
     """{question id: (score, why)} for waterbody type and stress questions."""
     from .wb.assess import collect
     A = K['questions']['assessment']
-    st, conf = st_from_wb_rules(b.get('rules'), K, A)
+    st, conf = st_from_wb_rules(b.get('rules'), K, A, answers)
     sets, _, _, _ = collect(answers or {}, K)
     current = b.get('type'); type_data = b.get('type_data') or current
     out = {}
