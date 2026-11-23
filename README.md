@@ -137,7 +137,8 @@ The atlas lets a field team answer the questions in `knowledge/questions.json` f
 The atlas has a third section, **Commons Connect**, that walks through a field visit for one micro-watershed (state and
 district, tehsil, MWS): the landscape, then resource mapping (settlements, waterbodies, wells, crops, forest patches),
 then planning of new works and maintenance (groundwater recharge, surface waterbodies, irrigation on farms,
-agroforestry and orchards, livelihoods, forests). It shows what the atlas infers first and ranks every question by a
+agroforestry and orchards, livelihoods, forests). The micro-watershed is picked on the same map and pickers as
+the Watersheds atlas. It shows what the atlas infers first and ranks every question by a
 **must-ask score** (0–100): how likely the answer is to change the inference, because a rule is near its threshold,
 the data are missing or uncertain, the rule is held with low confidence, or an answer could move a system across its
 presence line. Must-ask (60+) and useful (30–59) questions are shown; the rest are collapsed. Answers that match an
