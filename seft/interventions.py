@@ -12,6 +12,8 @@ from .expr import evaluate
 from .util import knowledge_dir, load_json
 
 DIMS = ('rainfall', 'aquifer', 'terrain', 'gw_category', 'canal', 'cropping')
+# variables supplied only by community answers (knowledge/interventions.json fit.community_vars); unknown by default
+COMMUNITY_VARS = ('wl_post_monsoon',)
 FIT_RANK = {'suited': 2, 'possible': 1, 'not suited': 0}
 
 def load_interventions(path=None):
@@ -23,6 +25,7 @@ def fit_env(env, ctx=None, shares=None):
     e = {k: (math.nan if v is None else v) for k, v in env.items() if not isinstance(v, (dict, list))}
     for d in DIMS: e[d] = (ctx or {}).get(d) or ''
     for k, v in (shares or {}).items(): e['share_' + k] = math.nan if v is None else v
+    for k in COMMUNITY_VARS: e.setdefault(k, math.nan)
     return e
 
 def _true(expr, env):

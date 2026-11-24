@@ -1266,6 +1266,60 @@
      "section": "s2"
     },
     {
+     "name": "ls_wl_post",
+     "type": "select_one",
+     "label": "After the monsoon (October–November), how far below the ground is the water in open wells?",
+     "role": "inform",
+     "origin": "added",
+     "options": [
+      {
+       "id": "lt3",
+       "label": "Less than 3 m (within about 10 feet)"
+      },
+      {
+       "id": "3to8",
+       "label": "3–8 m (about 10–25 feet)"
+      },
+      {
+       "id": "gt8",
+       "label": "More than 8 m (over about 25 feet)"
+      },
+      {
+       "id": "none",
+       "label": "There are no open wells nearby"
+      },
+      {
+       "id": "dk",
+       "label": "Don't know"
+      }
+     ],
+     "must_ask": {
+      "base": 30,
+      "rules": [
+       {
+        "if": "aquifer == 'hard_rock' or nz(soge_stage) >= 70",
+        "score": 60,
+        "why": "recharge works are likely to be planned here, and they need room in the aquifer"
+       },
+       {
+        "if": "nz(pos_groundwater__over_extraction) == 1 or nz(pos_groundwater__water_balance_deficit) == 1 or nz(pos_groundwater__recharge_opportunity) == 1",
+        "score": 75,
+        "why": "groundwater stress is likely: recharge works are likely to be planned, and they need room in the aquifer"
+       }
+      ]
+     },
+     "note": "Not yet a CoRE Stack layer. The answer goes to the landscape fit of recharge works: percolation tanks, check dams, dug-well recharge and recharge pits and shafts are not suited where the water is within 3 m after the monsoon, and recharge shafts suit best where it is deeper than 8 m (CGWB, Gujarat IWMP manual).",
+     "sets_var": {
+      "var": "wl_post_monsoon",
+      "values": {
+       "lt3": 2,
+       "3to8": 5,
+       "gt8": 10
+      }
+     },
+     "section": "s2"
+    },
+    {
      "name": "ls_gw_new_wells_rabi",
      "type": "select_one",
      "label": "In the last 5 years, has the area under rabi or summer crops changed, and where did the water for it come from?",
@@ -11283,6 +11337,48 @@
      "hidden": true,
      "role": "record",
      "origin": "odk"
+    },
+    {
+     "name": "site_soil",
+     "type": "select_one",
+     "label": "Soil at the proposed site",
+     "role": "inform",
+     "origin": "added",
+     "options": [
+      {
+       "id": "Black",
+       "label": "Black"
+      },
+      {
+       "id": "Red",
+       "label": "Red"
+      },
+      {
+       "id": "Laterite",
+       "label": "Laterite"
+      },
+      {
+       "id": "Alluvial",
+       "label": "Alluvial"
+      },
+      {
+       "id": "Sandy",
+       "label": "Sandy"
+      },
+      {
+       "id": "Clay",
+       "label": "Clay"
+      },
+      {
+       "id": "Rocky",
+       "label": "Rocky"
+      }
+     ],
+     "must_ask": {
+      "base": 70,
+      "why": "checked against the soil site rule of the chosen work type"
+     },
+     "note": "Added: soil is not yet a CoRE Stack layer. The classes are those the Commons Connect forms use for desilting and plantations."
     }
    ]
   },
@@ -16518,6 +16614,48 @@
      "required": false,
      "role": "record",
      "origin": "odk"
+    },
+    {
+     "name": "site_soil",
+     "type": "select_one",
+     "label": "Soil at the proposed site",
+     "role": "inform",
+     "origin": "added",
+     "options": [
+      {
+       "id": "Black",
+       "label": "Black"
+      },
+      {
+       "id": "Red",
+       "label": "Red"
+      },
+      {
+       "id": "Laterite",
+       "label": "Laterite"
+      },
+      {
+       "id": "Alluvial",
+       "label": "Alluvial"
+      },
+      {
+       "id": "Sandy",
+       "label": "Sandy"
+      },
+      {
+       "id": "Clay",
+       "label": "Clay"
+      },
+      {
+       "id": "Rocky",
+       "label": "Rocky"
+      }
+     ],
+     "must_ask": {
+      "base": 70,
+      "why": "checked against the soil site rule of the chosen work type"
+     },
+     "note": "Added: soil is not yet a CoRE Stack layer. The classes are those the Commons Connect forms use for desilting and plantations."
     }
    ]
   },

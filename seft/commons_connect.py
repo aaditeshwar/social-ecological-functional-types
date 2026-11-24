@@ -104,7 +104,7 @@ def P(*rules):
     return [{'if': c, ('values' if isinstance(v, list) else 'value'): v, 'why': w} for c, v, w in rules]
 
 def L(id, text, type='select_one', options=None, relevant=None, atlas=None, must=None, prefill=None, routes=None,
-      note=None, from_atlas=None, origin='doc'):
+      note=None, from_atlas=None, origin='doc', sets_var=None, relevant_expr=None):
     q = {'name': id, 'type': type, 'label': text, 'role': 'inform', 'origin': origin}
     if options is not None: q['options'] = options
     if relevant: q['relevant'] = relevant
@@ -114,6 +114,7 @@ def L(id, text, type='select_one', options=None, relevant=None, atlas=None, must
     if prefill: q['prefill'] = prefill
     if routes: q['routes'] = routes
     if note: q['note'] = note
+    if sets_var: q['sets_var'] = sets_var
     return q
 
 def A(atlas_id, relevant=None, must=None, prefill=None, note=None, atlas='ws'):
@@ -229,6 +230,14 @@ LANDSCAPE = [
       atlas=am('soil_fertiliser', 'overlap'), must=M(35)),
     L('ls_2_10', 'Is poor access to markets or infrastructure contributing to this problem?', 'select_one', YND,
       relevant="'price' in ls_2_2", must=M(30), note='If yes, note the main difficulty.'),
+    L('ls_wl_post', 'After the monsoon (October–November), how far below the ground is the water in open wells?', 'select_one', O(
+        ('lt3', 'Less than 3 m (within about 10 feet)'), ('3to8', '3–8 m (about 10–25 feet)'), ('gt8', 'More than 8 m (over about 25 feet)'),
+        ('none', 'There are no open wells nearby'), ('dk', "Don't know")),
+      origin='added',
+      must=M(30, [("aquifer == 'hard_rock' or nz(soge_stage) >= 70", 60, 'recharge works are likely to be planned here, and they need room in the aquifer'),
+                  (POS('groundwater.over_extraction', 'groundwater.water_balance_deficit', 'groundwater.recharge_opportunity'), 75, 'groundwater stress is likely: recharge works are likely to be planned, and they need room in the aquifer')]),
+      note='Not yet a CoRE Stack layer. The answer goes to the landscape fit of recharge works: percolation tanks, check dams, dug-well recharge and recharge pits and shafts are not suited where the water is within 3 m after the monsoon, and recharge shafts suit best where it is deeper than 8 m (CGWB, Gujarat IWMP manual).',
+      sets_var={'var': 'wl_post_monsoon', 'values': {'lt3': 2, '3to8': 5, 'gt8': 10}}),
     A('gw_new_wells_rabi', relevant="ls_2_1 != 'no'"), A('kharif_dry_spells', relevant="ls_2_1 != 'no'"),
     A('kharif_unsown', relevant="ls_2_1 != 'no'"), A('tank_encroach', relevant="ls_2_1 != 'no'"),
     A('recharge_sites'), A('erosion_gullies', relevant="ls_2_1 != 'no'"), A('soil_fertiliser', relevant="ls_2_1 != 'no'"),
@@ -677,6 +686,11 @@ def build(forms_dir, out=None, log=print):
                     if a.get('prefill'): q['prefill'] = a['prefill']
                 q['origin'] = 'odk'
                 qs.append(q)
+            if F['id'] in ('recharge_new', 'irrigation_new'):
+                qs.append(L('site_soil', 'Soil at the proposed site', 'select_one', O(('Black', 'Black'), ('Red', 'Red'), ('Laterite', 'Laterite'),
+                    ('Alluvial', 'Alluvial'), ('Sandy', 'Sandy'), ('Clay', 'Clay'), ('Rocky', 'Rocky')), origin='added',
+                    relevant_expr=None, must=M(70, why='checked against the soil site rule of the chosen work type'),
+                    note='Added: soil is not yet a CoRE Stack layer. The classes are those the Commons Connect forms use for desilting and plantations.'))
             if F['id'] == 'waterbody':
                 for qid in WB_ADDED:
                     if any(m['id'] == qid for x in qs for m in x.get('atlas_match', []) if m['how'] == 'same'): continue

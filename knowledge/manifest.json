@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "date": "2026-11-24",
   "min_library": "0.1.0",
   "about": "Pack version for core-seft. File-level versions in the JSON knowledge files remain an internal changelog.",

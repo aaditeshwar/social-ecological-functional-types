@@ -2204,7 +2204,11 @@ function ivEnvWs(m,d,shares){
   K.contexts.dimensions.forEach((x,i)=>{if(IV_DIMS.includes(x.id)) e[x.id]=m.c[i]||"";});
   IV_DIMS.forEach(k=>{if(!(k in e)) e[k]="";});
   K.archetypes.archetypes.forEach((a,i)=>e["share_"+a.id]=(shares||m.m)[i]);
-  e.state=d.state; e.district=d.district; return e;}
+  e.state=d.state; e.district=d.district; Object.assign(e,ivCommunity(m.u)); return e;}
+/* variables only the community supplies (interventions.json fit.community_vars), from Commons Connect landscape answers */
+function ivCommunity(u){const out={}; ((K.interventions&&K.interventions.fit&&K.interventions.fit.community_vars)?Object.keys(K.interventions.fit.community_vars):["wl_post_monsoon"]).forEach(k=>out[k]=null);
+  if(!CCD||typeof CCANS==="undefined"||!CCANS[u]) return out; const L=CCD.forms.find(f=>f.id==="landscape"), A=CCANS[u].landscape||{};
+  L.questions.forEach(q=>{if(q.sets_var&&A[q.name]!=null&&q.sets_var.values[A[q.name]]!=null) out[q.sets_var.var]=q.sets_var.values[A[q.name]];}); return out;}
 function ivTrue(expr,env){if(!expr) return false; const r=PyEval.safe(expr,env); return r===true||r===1;}
 function ivFit(iv,env){if(!env) return "possible"; if(ivTrue(iv.avoid,env)) return "not suited"; if(ivTrue(iv.suits,env)) return "suited"; return "possible";}
 const IV_RANK={suited:2,possible:1,"not suited":0};
@@ -2549,7 +2553,9 @@ function ccPlanHtml(mm,d,R,env,askK,A,wbR,ctx){
         ${F.about?`<p class="note">${esc(F.about)}</p>`:""}
         ${rows.length?`<div class="tbl"><table><thead><tr><th>Work type</th><th>Score</th><th>Interventions and fit here</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td>${prChip([r.best,""],false,true)}</td><td>${r.ivs.map((id,i)=>{const [s,f,hit]=r.sc[i]; return IVX[id]?`${esc(IVX[id].name)} <span class="pill ${IV_FIT[f].cls}">${IV_FIT[f].label}</span>${hit.length?` <span class="note">responds to ${esc(hit.map(hitLab).join(", "))}</span>`:""}`:esc(id)}).join("<br>")}</td></tr>`).join("")}</tbody></table></div>`:""}
         ${cand.length?`<p class="note"><b>Candidates from the waterbody atlas:</b> ${cand.map(x=>`#${x.w.id} (${esc((WTYPE[x.R.type]||{}).label||x.R.type)}, ${x.w.a} ha)`).join(", ")}</p>`:""}
-        ${list.map((ans,i)=>`<div class="ccsub"><div class="eyebrow">Proposal ${i+1}</div>${ccFormHtml(F,qs,ans,env,askK,`plan.${F.id}.${i}`,ctx)}</div>`).join("")}
+        ${list.map((ans,i)=>{const ch=wq&&ans[wq.name]?(wq.work_map[ans[wq.name]]||[]).filter(id=>IVX[id]&&IVX[id].site_rules&&IVX[id].site_rules.length):[];
+          return `<div class="ccsub"><div class="eyebrow">Proposal ${i+1}</div>${ccFormHtml(F,qs,ans,env,askK,`plan.${F.id}.${i}`,ctx)}
+          ${ch.map(id=>`<details class="cclow" open><summary>Site rules to check on the ground: ${esc(IVX[id].name)} (${IV_FIT[ivScore(id)[1]].label})</summary>${ivSiteTable(IVX[id])}</details>`).join("")}</div>`;}).join("")}
         <div class="filters"><button class="btn ghost" data-add="plan.${F.id}">Add another proposal</button></div></details>`;}).join("");}).join("")
     +`<p class="note">${esc(CCP().planning)}</p>`;}
 function ccBindVisit(mm,d,b,wb){
