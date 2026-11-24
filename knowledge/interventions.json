@@ -33,7 +33,7 @@
    "wl_post_monsoon": "Depth to the water level in open wells after the monsoon (m), from the Commons Connect landscape question ls_wl_post; unknown until answered, and then an unknown value changes no verdict."
   }
  },
- "site_rules_about": "Site rules start from the CoRE Stack 'Water structures — suitability rules' spreadsheet and were checked on 24 November 2026 against the CGWB Manual on Artificial Recharge (2007), the Gujarat IWMP technical manual (2011), the IMSD guidelines (NRSA 1995), NIH (Saha et al. 2018), ICAR-CRIDA's farm pond bulletin (2012), PRADAN's INRM handbook and the Tripura soil and moisture conservation guidelines. For each parameter: the accepted, partially accepted and not accepted range, and its basis: verified (a source agrees), revised (changed to what the sources give), added (a parameter the spreadsheet lacked) or spreadsheet (no published source found). Site rules are the layers read at the site itself: slope, stream order, catchment area, distance to the nearest drainage line, land use and soil (soil is not yet a CoRE Stack layer: the field worker records it with the Commons Connect soil classes). Rainfall, aquifer, groundwater stage and depth to water belong to the landscape fit ('suits' and 'avoid'); depth to water is asked of the community until a layer exists. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
+ "site_rules_about": "Site rules start from the CoRE Stack 'Water structures — suitability rules' spreadsheet and were checked on 24 November 2026 against the CGWB Manual on Artificial Recharge (2007), the Gujarat IWMP technical manual (2011), the IMSD guidelines (NRSA 1995), NIH (Saha et al. 2018), ICAR-CRIDA's farm pond bulletin (2012), PRADAN's INRM handbook and the Tripura soil and moisture conservation guidelines. For each parameter: the accepted, partially accepted and not accepted range, and its basis: verified (a source agrees), revised (changed to what the sources give), added (a parameter the spreadsheet lacked) or spreadsheet (no published source found). Site rules are the layers read at the site itself: slope, stream order, catchment area, distance to the nearest drainage line, land use and soil (soil is not yet a CoRE Stack layer: the field worker records it with the Commons Connect soil classes). Rainfall, aquifer, groundwater stage and depth to water belong to the landscape fit ('suits' and 'avoid'); depth to water is asked of the community until a layer exists. Stream order is the CoRE Stack stream order raster: every 30 m pixel carries the Strahler order of the drainage line it drains into, so it is defined off the drainage lines too (plains beside a river carry the river's high order; land beside a gully carries 1). For drainage-line structures it is read on the line, where it equals the line's Strahler order; for area treatments and ponds on farmland it places the land in the ridge-to-valley sequence. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
  "interventions": [
   {
    "id": "loose_boulder_check",
@@ -66,7 +66,8 @@
      "sources": [
       "gswma_manual2011",
       "structure_rules"
-     ]
+     ],
+     "note": "Read on the drainage-line pixel where the structure goes (distance to drainage line about 0), where the raster value is the Strahler order of that line itself."
     },
     {
      "parameter": "Catchment area",
@@ -179,7 +180,7 @@
      "sources": [
       "cgwb_manual2007"
      ],
-     "note": "CGWB: gully plugs are built across first-order streams."
+     "note": "CGWB: gully plugs are built across first-order streams. Read on the drainage-line pixel where the structure goes (distance to drainage line about 0), where the raster value is the Strahler order of that line itself."
     },
     {
      "parameter": "Catchment area",
@@ -279,13 +280,14 @@
     {
      "parameter": "Stream order",
      "unit": "—",
-     "accepted": "2–6",
-     "partial": "—",
-     "not_accepted": "—",
-     "basis": "spreadsheet",
+     "accepted": "2, 3",
+     "partial": "4",
+     "not_accepted": "1 or > 4",
+     "basis": "revised",
      "sources": [
-      "structure_rules"
-     ]
+      "gswma_manual2011"
+     ],
+     "note": "Gabions go across streams 10–20 m wide with 30–150 ha catchments (Gujarat), which in a 30 m drainage network are second- and third-order lines; the spreadsheet allowed 2–6. Read on the drainage-line pixel where the structure goes (distance to drainage line about 0), where the raster value is the Strahler order of that line itself."
     },
     {
      "parameter": "Catchment area",
@@ -356,7 +358,7 @@
    ],
    "practice": [],
    "caution": null,
-   "site_check": "Catchment revised against the Gujarat IWMP manual; the other rows are from the spreadsheet (no other source gives them)."
+   "site_check": "Catchment revised against the Gujarat IWMP manual and stream order made consistent with it; the other rows are from the spreadsheet."
   },
   {
    "id": "check_dam",
@@ -392,7 +394,7 @@
       "imsd1995",
       "cgwb_manual2007"
      ],
-     "note": "Up to third order (NIH); IMSD allows 1–4; first-order channels take gully plugs and boulder checks."
+     "note": "Up to third order (NIH); IMSD allows 1–4; first-order channels take gully plugs and boulder checks. Read on the drainage-line pixel where the structure goes (distance to drainage line about 0), where the raster value is the Strahler order of that line itself."
     },
     {
      "parameter": "Catchment area",
@@ -531,7 +533,8 @@
       "cgwb_manual2007",
       "gswma_manual2011",
       "imsd1995"
-     ]
+     ],
+     "note": "Read on the drainage-line pixel where the structure goes (distance to drainage line about 0), where the raster value is the Strahler order of that line itself."
     },
     {
      "parameter": "Catchment area",
@@ -736,7 +739,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land itself: the Strahler order of the drainage line its runoff reaches. Low values (1–3) are upper catchment land draining to gullies and small nalas, where area treatment belongs; the slope rule does most of the work."
     },
     {
      "parameter": "Catchment area",
@@ -853,7 +857,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land itself: the Strahler order of the drainage line its runoff reaches. Low values (1–3) are upper catchment land draining to gullies and small nalas, where area treatment belongs; the slope rule does most of the work."
     },
     {
      "parameter": "Catchment area",
@@ -958,7 +963,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land itself: the Strahler order of the drainage line its runoff reaches. Low values (1–3) are upper catchment land draining to gullies and small nalas, where area treatment belongs; the slope rule does most of the work."
     },
     {
      "parameter": "Catchment area",
@@ -1052,7 +1058,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land itself: the Strahler order of the drainage line its runoff reaches. Low values (1–3) are upper catchment land draining to gullies and small nalas, where area treatment belongs; the slope rule does most of the work."
     },
     {
      "parameter": "Catchment area",
@@ -1256,7 +1263,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land itself: the Strahler order of the drainage line its runoff reaches. Low values (1–3) are upper catchment land draining to gullies and small nalas, where area treatment belongs; the slope rule does most of the work."
     },
     {
      "parameter": "Catchment area",
@@ -1386,7 +1394,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land: the order of the drainage line its runoff reaches; settlements and plains usually drain to second-order or larger channels."
     },
     {
      "parameter": "Catchment area",
@@ -1515,15 +1524,16 @@
     {
      "parameter": "Stream order",
      "unit": "—",
-     "accepted": "Off-stream or 1",
-     "partial": "2",
-     "not_accepted": "> 2",
-     "basis": "revised",
+     "accepted": "2–6",
+     "partial": "1",
+     "not_accepted": "—",
+     "basis": "spreadsheet",
      "sources": [
+      "structure_rules",
       "imsd1995",
       "crida_farmpond2012"
      ],
-     "note": "A farm pond sits at the lowest corner of the field and takes field runoff; on a larger stream it fills with silt and its bund is breached. The spreadsheet allowed orders 2–6."
+     "note": "Raster value of the field: farm ponds belong on farmland in mid and lower slopes and plains, whatever order of channel the field drains to (value 1 is upper-slope land draining to first-order gullies, with little runoff). The pond itself must not sit in a channel: IMSD's 'first order' refers to the pond's own micro-catchment, which is the catchment rule (1–5 ha), not the raster value. Reverted from 'off-stream or 1', which read the value as the order of a channel at the pond."
     },
     {
      "parameter": "Catchment area",
@@ -1618,7 +1628,7 @@
     "crida_farmpond2012",
     "gswma_manual2011"
    ],
-   "site_check": "Revised against CRIDA (Reddy et al. 2012) and IMSD."
+   "site_check": "Revised against CRIDA (Reddy et al. 2012) and IMSD; stream order read as the stream order raster (value of the field), as in the spreadsheet."
   },
   {
    "id": "five_percent_model",
@@ -1650,7 +1660,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land. Note: PRADAN places the 30x40 model on uplands above the 5% model on medium uplands, so the 30x40 model would be expected at lower raster values than the 5% model; the spreadsheet has the reverse (kept until checked)."
     },
     {
      "parameter": "Catchment area",
@@ -1747,7 +1758,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land. Note: PRADAN places the 30x40 model on uplands above the 5% model on medium uplands, so the 30x40 model would be expected at lower raster values than the 5% model; the spreadsheet has the reverse (kept until checked)."
     },
     {
      "parameter": "Catchment area",
@@ -1844,7 +1856,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land: the order of the drainage line its runoff reaches; settlements and plains usually drain to second-order or larger channels."
     },
     {
      "parameter": "Catchment area",
@@ -2054,7 +2067,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "Raster value of the land: the order of the drainage line its runoff reaches; settlements and plains usually drain to second-order or larger channels."
     },
     {
      "parameter": "Catchment area",
