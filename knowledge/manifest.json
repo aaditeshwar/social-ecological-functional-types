@@ -1,7 +1,13 @@
 {
-  "version": "0.1.0",
-  "date": "2026-11-23",
+  "version": "0.1.1",
+  "date": "2026-11-24",
   "min_library": "0.1.0",
   "about": "Pack version for core-seft. File-level versions in the JSON knowledge files remain an internal changelog.",
-  "datasets_required": ["lulc_vector", "croppingintensity_annual", "hydrological_annual", "terrain", "aquifer_vector"]
+  "datasets_required": [
+    "lulc_vector",
+    "croppingintensity_annual",
+    "hydrological_annual",
+    "terrain",
+    "aquifer_vector"
+  ]
 }

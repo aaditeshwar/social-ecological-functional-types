@@ -1,7 +1,7 @@
 {
  "_about": "Interventions for water security and ecological restoration, shared by the watershed and waterbody atlases. Supply-side interventions add water (harvest, store, recharge, restore land that lets rain soak in); demand-side interventions reduce or reallocate use (crops, irrigation methods, rules and institutions). Each entry gives where it is built ('where', with the site rules of the CoRE Stack structure-suitability spreadsheet and the ridge-to-valley table of the watershed-development toolkit paper), the landscapes it suits ('landscape', 'archetypes'), a landscape fit test evaluated for each micro-watershed ('suits', 'avoid'), the watershed stresses and waterbody rules it responds to ('addresses', 'addresses_wb', limited to 'wb_types'), schemes that fund it, examples from civil society practice, and sources. Site rules apply to a specific site and need field checks; the fit test only says whether the micro-watershed's landscape is the kind where the intervention usually works.",
  "version": 1,
- "verified": "2026-11-23",
+ "verified": "2026-11-24",
  "sides": {
   "supply": "Adds water or keeps it in the landscape: harvesting, storage, recharge, soil and land restoration.",
   "demand": "Reduces or reallocates water use: crops, irrigation methods, rules, institutions and planning."
@@ -30,7 +30,7 @@
    "not suited": "The landscape works against it (reason given); consider other interventions first."
   }
  },
- "site_rules_about": "Site rules from the CoRE Stack 'Water structures — suitability rules' spreadsheet, checked against the CGWB and MGNREGA technical manuals: for each parameter, the accepted (ideal), partially accepted (works with caution) and not accepted range. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
+ "site_rules_about": "Site rules start from the CoRE Stack 'Water structures — suitability rules' spreadsheet and were checked on 24 November 2026 against the CGWB Manual on Artificial Recharge (2007), the Gujarat IWMP technical manual (2011), the IMSD guidelines (NRSA 1995), NIH (Saha et al. 2018), ICAR-CRIDA's farm pond bulletin (2012), PRADAN's INRM handbook and the Tripura soil and moisture conservation guidelines. For each parameter: the accepted, partially accepted and not accepted range, and its basis: verified (a source agrees), revised (changed to what the sources give), added (a parameter the spreadsheet lacked) or spreadsheet (no published source found). Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
  "interventions": [
   {
    "id": "loose_boulder_check",
@@ -44,37 +44,60 @@
     {
      "parameter": "Slope",
      "unit": "%",
-     "accepted": "1–10%",
-     "partial": "6–20%",
-     "not_accepted": "> 20%"
+     "accepted": "3–20%",
+     "partial": "1–3%",
+     "not_accepted": "> 20%",
+     "basis": "revised",
+     "sources": [
+      "gswma_manual2011"
+     ],
+     "note": "Bed slope below 20%; the spreadsheet ranges (1–10% accepted, 6–20% partial) overlapped."
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "1, 2, 3",
      "partial": "4",
-     "not_accepted": "> 4"
+     "not_accepted": "> 4",
+     "basis": "verified",
+     "sources": [
+      "gswma_manual2011",
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
-     "accepted": "2–10 ha",
-     "partial": "—",
-     "not_accepted": "< 2 or > 10 ha"
+     "accepted": "2–50 ha",
+     "partial": "< 2 ha (a gully plug is enough)",
+     "not_accepted": "> 50 ha",
+     "basis": "revised",
+     "sources": [
+      "gswma_manual2011"
+     ],
+     "note": "Gujarat: drainage lines under 50 ha, each structure with an independent catchment of 1–2 ha; height up to 1 m."
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Croplands, barren, shrub/scrub, trees/forest",
      "partial": "—",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Hilly and undulating land with gullies: forest-fringe, pastoral and upland rainfed micro-watersheds; also above tanks that are silting up.",
@@ -115,10 +138,12 @@
     "corestack_toolkit2026",
     "structure_rules",
     "mgnrega_samarthya2024",
-    "pmksy_wdc"
+    "pmksy_wdc",
+    "gswma_manual2011"
    ],
    "practice": [],
-   "caution": null
+   "caution": null,
+   "site_check": "Revised against the Gujarat IWMP manual: catchment widened to 50 ha and the slope ranges made consistent."
   },
   {
    "id": "earthen_gully_plug",
@@ -127,42 +152,66 @@
    "category": "drainage_line",
    "what": "Earthen or brushwood plugs in small, steep gullies to stop gully head-cutting and hold silt; usually combined with vegetation on the plug.",
    "where": "Drainage line, stream order 1, steep upper slopes",
-   "site_spec": "Stream order 2, catchment 50–500 ha for earthen gully plugs (paper, Table 1)",
+   "site_spec": "Earthen gully plugs: across first-order gullies on upper slopes, gully catchments up to 2 ha (medium gullies up to 20 ha), gully bed slopes of about 4–15%; under 2 m deep and 5 m wide",
    "site_rules": [
     {
      "parameter": "Slope",
      "unit": "%",
-     "accepted": "10–20%",
-     "partial": "—",
-     "not_accepted": "< 10 or > 20%"
+     "accepted": "4–15%",
+     "partial": "15–20% or 2–4%",
+     "not_accepted": "< 2 or > 20%",
+     "basis": "revised",
+     "sources": [
+      "gswma_manual2011"
+     ],
+     "note": "Gully bed slopes in the Gujarat design table: brushwood 0–5%, earthen 4.5–10.5%, sandbag and masonry 7.5–15%."
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "1",
-     "partial": "2, 3",
-     "not_accepted": "> 3"
+     "partial": "2",
+     "not_accepted": "> 2",
+     "basis": "revised",
+     "sources": [
+      "cgwb_manual2007"
+     ],
+     "note": "CGWB: gully plugs are built across first-order streams."
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "≤ 2 ha",
-     "partial": "2–10 ha",
-     "not_accepted": "> 10 ha"
+     "partial": "2–20 ha (medium gully)",
+     "not_accepted": "> 20 ha",
+     "basis": "revised",
+     "sources": [
+      "gswma_manual2011",
+      "pradan_inrm"
+     ],
+     "note": "Small gullies drain up to 2 ha and medium ones 2–20 ha; PRADAN: only gullies under 2 m deep and 5 m wide."
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Trees/forest, shrub/scrub, barren",
      "partial": "—",
-     "not_accepted": "Croplands; Built-up; water in any season"
+     "not_accepted": "Croplands; Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Steep, uncultivated slopes under scrub, forest or barren land: forest-fringe and commons-dominated micro-watersheds.",
@@ -195,10 +244,14 @@
    "sources": [
     "corestack_toolkit2026",
     "structure_rules",
-    "mgnrega_samarthya2024"
+    "mgnrega_samarthya2024",
+    "gswma_manual2011",
+    "cgwb_manual2007",
+    "pradan_inrm"
    ],
    "practice": [],
-   "caution": null
+   "caution": null,
+   "site_check": "Revised against the CGWB and Gujarat manuals and PRADAN."
   },
   {
    "id": "gabion_rockfill",
@@ -207,42 +260,63 @@
    "category": "drainage_line",
    "what": "Boulders packed in wire mesh (gabions) or loose rock-fill across second-order streams; flexible, they hold silt and raise local water tables where flows are too strong for loose boulders.",
    "where": "Drainage line, stream order 2",
-   "site_spec": "Gabions / rock-fill dams: stream order 2, catchment 50–500 ha (paper, Table 1)",
+   "site_spec": "Gabions / rock-fill dams: second-order streams 10–20 m wide with catchments of 30–150 ha; 1–2 m high, keyed into stable banks",
    "site_rules": [
     {
      "parameter": "Slope",
      "unit": "%",
      "accepted": "5–15%",
      "partial": "—",
-     "not_accepted": "> 15%"
+     "not_accepted": "> 15%",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "2–6",
      "partial": "—",
-     "not_accepted": "—"
+     "not_accepted": "—",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
-     "accepted": "40–250 ha",
-     "partial": "—",
-     "not_accepted": "< 40 or > 250 ha"
+     "accepted": "30–150 ha",
+     "partial": "150–250 ha",
+     "not_accepted": "< 30 or > 250 ha",
+     "basis": "revised",
+     "sources": [
+      "gswma_manual2011"
+     ],
+     "note": "Gujarat: gabions for 30–150 ha catchments, 1–2 m high across streams 10–20 m wide."
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Barren, shrub/scrub",
      "partial": "Croplands",
-     "not_accepted": "Trees/forest; Built-up; water in any season"
+     "not_accepted": "Trees/forest; Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Undulating to hilly land with second-order streams in scrub or barren catchments; where stone is available locally.",
@@ -274,10 +348,12 @@
    "sources": [
     "corestack_toolkit2026",
     "structure_rules",
-    "mgnrega_samarthya2024"
+    "mgnrega_samarthya2024",
+    "gswma_manual2011"
    ],
    "practice": [],
-   "caution": null
+   "caution": null,
+   "site_check": "Catchment revised against the Gujarat IWMP manual; the other rows are from the spreadsheet (no other source gives them)."
   },
   {
    "id": "check_dam",
@@ -285,43 +361,84 @@
    "side": "supply",
    "category": "drainage_line",
    "what": "Masonry or concrete weirs across seasonal streams that store water in the stream bed through the monsoon and recharge the aquifer; downstream wells and fields benefit (the paper estimates the downstream cropping area that a check dam protects).",
-   "where": "Drainage line: seasonal streams of order 2 to 4, catchments of about 40 to 500 ha",
-   "site_spec": "Check dams, cement nala bunds and anicuts: across a seasonal stream of order 2 to 4 with a catchment of 40 to 500 ha, a gentle bed slope (under about 5%), and a stable, impervious foundation with permeable weathered rock or alluvium upstream so that stored water recharges the aquifer. Larger catchments need a designed spillway and become a percolation tank or small dam.",
+   "where": "Drainage line: seasonal streams of order 2 to 3, catchments of about 40 to 500 ha",
+   "site_spec": "Check dams, cement nala bunds and anicuts: across a seasonal stream of order 2 to 3 with a catchment of 40 to 500 ha, a gentle bed slope (under about 5%), and a stable, impervious foundation with permeable weathered rock or alluvium upstream so that stored water recharges the aquifer. Larger catchments need a designed spillway and become a percolation tank or small dam",
    "site_rules": [
     {
      "parameter": "Slope",
      "unit": "%",
      "accepted": "≤ 15%",
      "partial": "—",
-     "not_accepted": "> 15%"
+     "not_accepted": "> 15%",
+     "basis": "verified",
+     "sources": [
+      "imsd1995",
+      "saha2018"
+     ],
+     "note": "A gentle bed slope stores more water behind a low wall."
     },
     {
      "parameter": "Stream order",
      "unit": "—",
-     "accepted": "2, 3, 4",
-     "partial": "5",
-     "not_accepted": "1 or > 5"
+     "accepted": "2, 3",
+     "partial": "1 or 4",
+     "not_accepted": "> 4",
+     "basis": "revised",
+     "sources": [
+      "saha2018",
+      "imsd1995",
+      "cgwb_manual2007"
+     ],
+     "note": "Up to third order (NIH); IMSD allows 1–4; first-order channels take gully plugs and boulder checks."
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "40–500 ha",
-     "partial": "500–1000 ha",
-     "not_accepted": "< 40 or > 1000 ha"
+     "partial": "25–40 ha or 500–1000 ha (masonry check dams with a designed spillway)",
+     "not_accepted": "< 25 or > 1000 ha",
+     "basis": "revised",
+     "sources": [
+      "cgwb_manual2007",
+      "gswma_manual2011",
+      "imsd1995",
+      "saha2018"
+     ],
+     "note": "CGWB: 40–100 ha for check dams and cement nala bunds; IMSD and NIH: above 25 ha; Gujarat: masonry check dams normally 500–1000 ha."
+    },
+    {
+     "parameter": "Rainfall",
+     "unit": "mm/yr",
+     "accepted": "< 1000 mm",
+     "partial": "1000–1500 mm",
+     "not_accepted": "—",
+     "basis": "added",
+     "sources": [
+      "cgwb_manual2007",
+      "imsd1995"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
      "partial": "Barren, shrub/scrub",
-     "not_accepted": "Trees/forest; Built-up; water in any season"
+     "not_accepted": "Trees/forest; Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Hard-rock (basalt, granite, gneiss) micro-watersheds with seasonal streams and well-irrigated farms downstream; most useful where the weathered zone can take recharge. Least useful on flat alluvial plains with shallow water tables.",
@@ -369,8 +486,13 @@
     "structure_rules",
     "cgwb_recharge2020",
     "wable2022",
-    "mgnrega_samarthya2024"
-   ]
+    "mgnrega_samarthya2024",
+    "imsd1995",
+    "saha2018",
+    "cgwb_manual2007",
+    "gswma_manual2011"
+   ],
+   "site_check": "Checked against CGWB, IMSD, NIH (Saha et al. 2018) and the Gujarat IWMP manual. Stream order narrowed to 2–3 and the lower catchment bound brought to 25 ha."
   },
   {
    "id": "percolation_tank",
@@ -383,37 +505,78 @@
     {
      "parameter": "Slope",
      "unit": "%",
-     "accepted": "3–6%",
-     "partial": "—",
-     "not_accepted": "< 3 or > 6%"
+     "accepted": "3–5%",
+     "partial": "1–3% or 5–10%",
+     "not_accepted": "> 10%",
+     "basis": "revised",
+     "sources": [
+      "cgwb_manual2007",
+      "gswma_manual2011",
+      "imsd1995"
+     ],
+     "note": "Land slope at the tank site; IMSD allows percolation ponds up to 10%."
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "2, 3",
-     "partial": "4",
-     "not_accepted": "—"
+     "partial": "1 or 4",
+     "not_accepted": "> 4",
+     "basis": "revised",
+     "sources": [
+      "cgwb_manual2007",
+      "gswma_manual2011",
+      "imsd1995"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
-     "accepted": "10–40 ha",
-     "partial": "40–100 ha",
-     "not_accepted": "< 10 or > 100 ha"
+     "accepted": "250–800 ha",
+     "partial": "25–250 ha (small percolation ponds) or 800–1000 ha",
+     "not_accepted": "< 25 or > 1000 ha",
+     "basis": "revised",
+     "sources": [
+      "cgwb_manual2007",
+      "gswma_manual2011",
+      "imsd1995"
+     ],
+     "note": "CGWB: 2.5–4 km² for small and 5–8 km² for large tanks; IMSD sites percolation ponds from 25 ha."
+    },
+    {
+     "parameter": "Depth to water table (post-monsoon)",
+     "unit": "m",
+     "accepted": "> 3 m",
+     "partial": "—",
+     "not_accepted": "< 3 m",
+     "basis": "added",
+     "sources": [
+      "cgwb_manual2007",
+      "gswma_manual2011"
+     ],
+     "note": "There must be room in the aquifer for recharge; shallower water tables waterlog."
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
      "partial": "Barren, shrub/scrub",
-     "not_accepted": "Trees/forest; Built-up; water in any season"
+     "not_accepted": "Trees/forest; Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Hard-rock areas with a weathered or fractured zone and falling water levels, in semi-arid and dry sub-humid climates; gently sloping cropland with wells downstream.",
@@ -449,10 +612,14 @@
    ],
    "sources": [
     "structure_rules",
-    "cgwb_recharge2020"
+    "cgwb_recharge2020",
+    "cgwb_manual2007",
+    "gswma_manual2011",
+    "imsd1995"
    ],
    "practice": [],
-   "site_spec": null
+   "site_spec": "Percolation tanks: on second- or third-order streams with catchments of about 2.5–8 km² (250–800 ha), land slope 3–5%, permeable weathered or fractured rock or alluvium beneath the tank, and a water table deeper than 3 m after the monsoon; the tank should normally empty by February (CGWB)",
+   "site_check": "Revised against the CGWB manual and the Gujarat IWMP manual, which agree: the spreadsheet catchment (10–40 ha) is that of a small pond, not a percolation tank."
   },
   {
    "id": "subsurface_dyke",
@@ -539,42 +706,66 @@
    "category": "area_treatment",
    "what": "Trenches dug along the contour on uncultivated slopes; they stop sheet runoff, hold soil and moisture for grass and saplings, and recharge the aquifer below.",
    "where": "Ridges and upper slopes, non-cultivated land",
-   "site_spec": "Ridges and steep slopes of 10–25% (paper, Table 1)",
+   "site_spec": "Ridges and steep slopes of 10–25%, non-cultivated land",
    "site_rules": [
     {
      "parameter": "Slope",
      "unit": "%",
-     "accepted": "1–10%",
-     "partial": "—",
-     "not_accepted": "< 1 or > 10%"
+     "accepted": "10–25%",
+     "partial": "8–10% or > 25%",
+     "not_accepted": "< 8%",
+     "basis": "revised",
+     "sources": [
+      "gswma_manual2011",
+      "tripura_smc",
+      "imsd1995",
+      "pradan_inrm"
+     ],
+     "note": "Gujarat: not below 10% (use contour bunds) or above 25%; Tripura: 10–30%; PRADAN: trenches above 8%. The spreadsheet range (1–10%) is that of bunds."
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "1, 2, 3",
      "partial": "4",
-     "not_accepted": "> 4"
+     "not_accepted": "> 4",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "2–10 ha",
      "partial": "10–20 ha",
-     "not_accepted": "< 2 or > 20 ha"
+     "not_accepted": "< 2 or > 20 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Barren, shrub/scrub, trees/forest",
      "partial": "Croplands; single kharif, single non-kharif, double and triple cropping",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Ridges and upper slopes under scrub, open forest or barren commons; the first step of ridge-to-valley treatment in hard-rock watersheds.",
@@ -619,8 +810,13 @@
     "corestack_toolkit2026",
     "structure_rules",
     "mgnrega_samarthya2024",
-    "pmksy_wdc"
-   ]
+    "pmksy_wdc",
+    "gswma_manual2011",
+    "tripura_smc",
+    "imsd1995",
+    "pradan_inrm"
+   ],
+   "site_check": "Slope revised: every source puts contour trenches on 10–25% (up to 30%) slopes."
   },
   {
    "id": "sct",
@@ -635,36 +831,58 @@
      "parameter": "Slope",
      "unit": "%",
      "accepted": "10–25%",
-     "partial": "—",
-     "not_accepted": "< 10 or > 25%"
+     "partial": "8–10% or 25–30%",
+     "not_accepted": "< 8 or > 30%",
+     "basis": "verified",
+     "sources": [
+      "gswma_manual2011",
+      "tripura_smc",
+      "pradan_inrm"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "1, 2, 3",
      "partial": "4",
-     "not_accepted": "> 4"
+     "not_accepted": "> 4",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "≤ 2 ha",
      "partial": "2–10 ha",
-     "not_accepted": "> 10 ha"
+     "not_accepted": "> 10 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Barren, shrub/scrub, trees/forest",
      "partial": "Croplands; single kharif, single non-kharif, double and triple cropping",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Hill slopes and ridges in forest-fringe and pastoral micro-watersheds.",
@@ -698,10 +916,14 @@
    "sources": [
     "corestack_toolkit2026",
     "structure_rules",
-    "mgnrega_samarthya2024"
+    "mgnrega_samarthya2024",
+    "gswma_manual2011",
+    "tripura_smc",
+    "pradan_inrm"
    ],
    "practice": [],
-   "caution": null
+   "caution": null,
+   "site_check": "Slope confirmed by the Gujarat manual and the Tripura guidelines."
   },
   {
    "id": "wat",
@@ -717,35 +939,55 @@
      "unit": "%",
      "accepted": "0–6%",
      "partial": "—",
-     "not_accepted": "> 6%"
+     "not_accepted": "> 6%",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "1, 2, 3",
      "partial": "4",
-     "not_accepted": "> 4"
+     "not_accepted": "> 4",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "≤ 2 ha",
      "partial": "2–10 ha",
-     "not_accepted": "> 10 ha"
+     "not_accepted": "> 10 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Barren, shrub/scrub, trees/forest",
      "partial": "Croplands; single kharif, single non-kharif, double and triple cropping",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Micro-watersheds where hills meet farmland (both hill and plain or gentle-slope land present).",
@@ -775,7 +1017,8 @@
    ],
    "practice": [],
    "caution": null,
-   "wb_types": null
+   "wb_types": null,
+   "site_check": "No published source found for these numbers; kept from the spreadsheet."
   },
   {
    "id": "trench_cum_bund",
@@ -790,35 +1033,55 @@
      "unit": "%",
      "accepted": "0–6%",
      "partial": "—",
-     "not_accepted": "> 6%"
+     "not_accepted": "> 6%",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "1, 2, 3",
      "partial": "4",
-     "not_accepted": "> 4"
+     "not_accepted": "> 4",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "≤ 2 ha",
      "partial": "—",
-     "not_accepted": "—"
+     "not_accepted": "—",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
      "partial": "Barren, shrub/scrub, trees/forest",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Semi-arid hard-rock micro-watersheds with gentle slopes, fallows and well-irrigated fields below.",
@@ -851,7 +1114,8 @@
    ],
    "addresses_wb": [],
    "wb_types": null,
-   "site_spec": null
+   "site_spec": null,
+   "site_check": "No published source found for these numbers; kept from the spreadsheet."
   },
   {
    "id": "contour_graded_bunds",
@@ -867,28 +1131,59 @@
      "unit": "%",
      "accepted": "1–6%",
      "partial": "—",
-     "not_accepted": "< 1 or > 6%"
+     "not_accepted": "< 1 or > 6%",
+     "basis": "verified",
+     "sources": [
+      "imsd1995",
+      "gswma_manual2011",
+      "pradan_inrm"
+     ],
+     "note": "IMSD: contour bunding below 6%; Gujarat: not above 10%; PRADAN: field bunding below 3%."
     },
     {
      "parameter": "Slope (graded bund)",
      "unit": "%",
      "accepted": "1–10%",
      "partial": "—",
-     "not_accepted": "< 1 or > 10%"
+     "not_accepted": "< 1 or > 10%",
+     "basis": "verified",
+     "sources": [
+      "gswma_manual2011"
+     ]
+    },
+    {
+     "parameter": "Rainfall",
+     "unit": "mm/yr",
+     "accepted": "< 800 mm (contour bunds)",
+     "partial": "800–1000 mm",
+     "not_accepted": "> 1000 mm: graded bunds only",
+     "basis": "added",
+     "sources": [
+      "cgwb_manual2007"
+     ],
+     "note": "CGWB: contour bunds where rainfall is normally below 800 mm, and not on poorly drained clays; graded bunds drain excess water in wetter areas."
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "≤ 2 ha",
      "partial": "—",
-     "not_accepted": "> 2 ha"
+     "not_accepted": "> 2 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use (farm bund)",
      "unit": "—",
      "accepted": "Single kharif, single non-kharif, double, triple cropping",
      "partial": "Shrub/scrub, barren",
-     "not_accepted": "Trees/forest; Built-up; water in any season"
+     "not_accepted": "Trees/forest; Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Rainfed cropland on gentle slopes: contour bunds in semi-arid areas, graded bunds in sub-humid and humid areas and on black clay soils.",
@@ -915,12 +1210,17 @@
    "sources": [
     "corestack_toolkit2026",
     "structure_rules",
-    "mgnrega_samarthya2024"
+    "mgnrega_samarthya2024",
+    "imsd1995",
+    "gswma_manual2011",
+    "pradan_inrm",
+    "cgwb_manual2007"
    ],
    "practice": [],
    "caution": null,
    "addresses_wb": [],
-   "wb_types": null
+   "wb_types": null,
+   "site_check": "Slopes confirmed (IMSD, Gujarat, PRADAN); rainfall limit added from CGWB."
   },
   {
    "id": "stone_bunding",
@@ -936,35 +1236,55 @@
      "unit": "%",
      "accepted": "1–10%",
      "partial": "—",
-     "not_accepted": "> 10%"
+     "not_accepted": "> 10%",
+     "basis": "verified",
+     "sources": [
+      "gswma_manual2011"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "1",
      "partial": "2, 3",
-     "not_accepted": "> 3"
+     "not_accepted": "> 3",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "≤ 1 ha",
      "partial": "1–10 ha",
-     "not_accepted": "> 10 ha"
+     "not_accepted": "> 10 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
      "partial": "Barren, shrub/scrub, trees/forest",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Stony, sloping rainfed land and fallows: dryland and forest-fringe micro-watersheds where farmland is being abandoned.",
@@ -988,12 +1308,14 @@
    ],
    "sources": [
     "corestack_toolkit2026",
-    "structure_rules"
+    "structure_rules",
+    "gswma_manual2011"
    ],
    "practice": [],
    "caution": null,
    "addresses_wb": [],
-   "wb_types": null
+   "wb_types": null,
+   "site_check": "Slope consistent with the Gujarat contour bund limit (10%); other rows from the spreadsheet."
   },
   {
    "id": "bench_terracing",
@@ -1044,35 +1366,55 @@
      "unit": "%",
      "accepted": "0–6%",
      "partial": "—",
-     "not_accepted": "> 6%"
+     "not_accepted": "> 6%",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "2–6",
      "partial": "—",
-     "not_accepted": "—"
+     "not_accepted": "—",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "2–40 ha",
      "partial": "40–250 ha",
-     "not_accepted": "> 250 ha"
+     "not_accepted": "> 250 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
      "partial": "Trees/forest, built-up, barren, shrub/scrub",
-     "not_accepted": "Water in any season"
+     "not_accepted": "Water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Farmland below hills in humid and sub-humid areas, and canal commands or plains with waterlogging and flooding.",
@@ -1101,7 +1443,8 @@
    "avoid": null,
    "avoid_note": null,
    "addresses_wb": [],
-   "wb_types": null
+   "wb_types": null,
+   "site_check": "No published source found for these numbers; kept from the spreadsheet."
   },
   {
    "id": "in_situ_moisture",
@@ -1149,43 +1492,80 @@
    "side": "supply",
    "category": "storage",
    "what": "Dug ponds on a farmer's field that store runoff for one or two protective irrigations during kharif dry spells and for rabi nursery or vegetables. The paper scores sites by catchment area, natural depression and distance to an upstream drainage line, and projects the number of fillings and irrigation cycles.",
-   "where": "On farm, broad slopes up to 6%, near a drainage line",
-   "site_spec": "Farm pond (5% model), 30-40 model, tanks, khadins/johads: broad slopes 6–10% on farm, catchment < 2 ha (paper, Table 1)",
+   "where": "On farm, at the lowest corner of the field, slopes up to 5%, fed by field runoff",
+   "site_spec": "Farm ponds: at the lowest point of the field, on slopes up to 5%, with a catchment of 1–5 ha (up to 14 ha on red soils) and low-infiltration soils over 1 m deep; line the pond on sandy and red soils (CRIDA)",
    "site_rules": [
     {
      "parameter": "Slope",
      "unit": "%",
-     "accepted": "0–6%",
-     "partial": "—",
-     "not_accepted": "> 6%"
+     "accepted": "0–5%",
+     "partial": "5–10%",
+     "not_accepted": "> 10%",
+     "basis": "revised",
+     "sources": [
+      "imsd1995",
+      "crida_farmpond2012"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
-     "accepted": "2–6",
-     "partial": "—",
-     "not_accepted": "—"
+     "accepted": "Off-stream or 1",
+     "partial": "2",
+     "not_accepted": "> 2",
+     "basis": "revised",
+     "sources": [
+      "imsd1995",
+      "crida_farmpond2012"
+     ],
+     "note": "A farm pond sits at the lowest corner of the field and takes field runoff; on a larger stream it fills with silt and its bund is breached. The spreadsheet allowed orders 2–6."
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
-     "accepted": "1–2 ha",
-     "partial": "—",
-     "not_accepted": "< 1 or > 2 ha"
+     "accepted": "1–5 ha",
+     "partial": "5–14 ha (red soils)",
+     "not_accepted": "< 1 or > 14 ha",
+     "basis": "revised",
+     "sources": [
+      "crida_farmpond2012",
+      "imsd1995"
+     ],
+     "note": "CRIDA: 1–5 ha for black soils and 1–14 ha for red soils; IMSD: under 2 ha."
+    },
+    {
+     "parameter": "Soil",
+     "unit": "—",
+     "accepted": "Clay, clay loam, black soils (low infiltration) over 1 m deep",
+     "partial": "Red, sandy loam soils: line the pond",
+     "not_accepted": "Coarse sand, shallow or stony soils",
+     "basis": "added",
+     "sources": [
+      "crida_farmpond2012",
+      "gswma_manual2011"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Single kharif, single non-kharif, croplands, shrub/scrub, barren, double cropping",
      "partial": "—",
-     "not_accepted": "Trees/forest; triple cropping; Built-up; water in any season"
+     "not_accepted": "Trees/forest; triple cropping; Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Rainfed farms with dry spells in kharif, on gentle land with fine-textured soils that hold water; most useful where groundwater is scarce or saline. Pair with recharge works upstream (the paper's integrated planning delineates the upstream area that feeds a pond within the 120-day monsoon).",
@@ -1228,8 +1608,12 @@
     "corestack_toolkit2026",
     "structure_rules",
     "crida_farmponds",
-    "prasad2022"
-   ]
+    "prasad2022",
+    "imsd1995",
+    "crida_farmpond2012",
+    "gswma_manual2011"
+   ],
+   "site_check": "Revised against CRIDA (Reddy et al. 2012) and IMSD."
   },
   {
    "id": "five_percent_model",
@@ -1245,35 +1629,56 @@
      "unit": "%",
      "accepted": "0–6%",
      "partial": "—",
-     "not_accepted": "> 6%"
+     "not_accepted": "> 6%",
+     "basis": "verified",
+     "sources": [
+      "pradan_inrm"
+     ],
+     "note": "PRADAN: medium uplands with a unidirectional slope, patches of at least 4 ha."
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "1, 2, 3",
      "partial": "4",
-     "not_accepted": "> 4"
+     "not_accepted": "> 4",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "≤ 2 ha",
      "partial": "2–10 ha",
-     "not_accepted": "> 10 ha"
+     "not_accepted": "> 10 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping, barren, shrub/scrub, trees/forest",
      "partial": "—",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Rainfed rice uplands in the sub-humid east (Chhotanagpur plateau, Eastern Ghats): Jharkhand, Odisha, West Bengal.",
@@ -1300,11 +1705,13 @@
    "sources": [
     "corestack_toolkit2026",
     "structure_rules",
-    "mgnrega_samarthya2024"
+    "mgnrega_samarthya2024",
+    "pradan_inrm"
    ],
    "caution": null,
    "addresses_wb": [],
-   "wb_types": null
+   "wb_types": null,
+   "site_check": "Placement confirmed by PRADAN; numeric rows from the spreadsheet."
   },
   {
    "id": "model_30_40",
@@ -1312,43 +1719,63 @@
    "side": "supply",
    "category": "storage",
    "what": "Uplands divided into 30 × 40 ft plots, each with a small pit at its lowest corner and bunds around it; the whole slope is treated so that most rain infiltrates, reviving upland cultivation and tree crops.",
-   "where": "Upland slopes of 3–10%",
-   "site_spec": "30-40 model on broad slopes, catchment < 2 ha (paper, Table 1)",
+   "where": "Upland slopes of 3–8%",
+   "site_spec": "30x40 model on upland slopes of 3–8%, between staggered trenches above and field bunds below (PRADAN)",
    "site_rules": [
     {
      "parameter": "Slope",
      "unit": "%",
-     "accepted": "3–10%",
-     "partial": "—",
-     "not_accepted": "< 3 or > 10%"
+     "accepted": "3–8%",
+     "partial": "1–3% or 8–10%",
+     "not_accepted": "> 10%",
+     "basis": "revised",
+     "sources": [
+      "pradan_inrm"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "2–6",
      "partial": "—",
-     "not_accepted": "—"
+     "not_accepted": "—",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "1–10 ha",
      "partial": "—",
-     "not_accepted": "< 1 or > 10 ha"
+     "not_accepted": "< 1 or > 10 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Single kharif, single non-kharif, double, triple cropping, barren, shrub/scrub",
      "partial": "Trees/forest",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Degraded rainfed uplands in the sub-humid east and in dryland plateaus, especially land left fallow.",
@@ -1376,11 +1803,13 @@
    ],
    "sources": [
     "structure_rules",
-    "corestack_toolkit2026"
+    "corestack_toolkit2026",
+    "pradan_inrm"
    ],
    "caution": null,
    "addresses_wb": [],
-   "wb_types": null
+   "wb_types": null,
+   "site_check": "Slope revised against PRADAN (30x40 model on 3–8% uplands)."
   },
   {
    "id": "community_pond",
@@ -1395,35 +1824,55 @@
      "unit": "%",
      "accepted": "0–6%",
      "partial": "—",
-     "not_accepted": "> 6%"
+     "not_accepted": "> 6%",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "2–6",
      "partial": "—",
-     "not_accepted": "—"
+     "not_accepted": "—",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "10–40 ha",
      "partial": "40–100 ha",
-     "not_accepted": "< 10 or > 100 ha"
+     "not_accepted": "< 10 or > 100 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use",
      "unit": "—",
      "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
      "partial": "Barren, shrub/scrub, trees/forest",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     }
    ],
    "landscape": "Villages with few waterbodies that hold water into rabi, livestock and fishery needs, on gentle land; in the paper's Baragotha (Anugul) plan a community pond fills about 12 times a monsoon.",
@@ -1467,7 +1916,8 @@
     "structure_rules",
     "amrit_sarovar_pib2025"
    ],
-   "site_spec": null
+   "site_spec": null,
+   "site_check": "No published siting numbers found; kept from the spreadsheet. Mission Amrit Sarovar sets a water spread of at least 1 acre and about 10,000 m³ of storage, which a 10–40 ha catchment fills at 600 mm rainfall and 15% runoff."
   },
   {
    "id": "traditional_harvesting",
@@ -1571,35 +2021,68 @@
      "unit": "%",
      "accepted": "0–6%",
      "partial": "—",
-     "not_accepted": "> 6%"
+     "not_accepted": "> 6%",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Stream order",
      "unit": "—",
      "accepted": "2–6",
      "partial": "—",
-     "not_accepted": "—"
+     "not_accepted": "—",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Catchment area",
      "unit": "ha",
      "accepted": "2–10 ha",
      "partial": "—",
-     "not_accepted": "< 2 or > 10 ha"
+     "not_accepted": "< 2 or > 10 ha",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
      "accepted": "0–60 m",
      "partial": "60–150 m",
-     "not_accepted": "> 150 m"
+     "not_accepted": "> 150 m",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
     },
     {
      "parameter": "Land use (recharge pits)",
      "unit": "—",
      "accepted": "Croplands; single kharif, single non-kharif, double and triple cropping",
      "partial": "Barren, shrub/scrub, trees/forest",
-     "not_accepted": "Built-up; water in any season"
+     "not_accepted": "Built-up; water in any season",
+     "basis": "spreadsheet",
+     "sources": [
+      "structure_rules"
+     ]
+    },
+    {
+     "parameter": "Depth to water table",
+     "unit": "m",
+     "accepted": "> 8 m",
+     "partial": "3–8 m",
+     "not_accepted": "< 3 m",
+     "basis": "added",
+     "sources": [
+      "gswma_manual2011",
+      "cgwb_manual2007"
+     ],
+     "note": "Recharge where water levels are deep and permeable strata lie at shallow depth; shafts reach the aquifer below a clay layer."
     }
    ],
    "landscape": "Alluvial plains with a clay layer, settlements and waterlogged low spots; peri-urban villages with paved surfaces.",
@@ -1630,11 +2113,14 @@
    "sources": [
     "structure_rules",
     "cgwb_recharge2020",
-    "nih_ballia"
+    "nih_ballia",
+    "gswma_manual2011",
+    "cgwb_manual2007"
    ],
    "addresses_wb": [],
    "wb_types": null,
-   "site_spec": null
+   "site_spec": null,
+   "site_check": "Depth to water table added (Gujarat, CGWB); other rows from the spreadsheet."
   },
   {
    "id": "rooftop_rwh",

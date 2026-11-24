@@ -369,6 +369,48 @@
    "citation": "This atlas: comparison of the waterbody rules with the Water Body Census fields that CoRE Stack matched to the waterbodies (docs/waterbody_census_comparison.md, 22 November 2026).",
    "url": "https://github.com/aaditeshwar/social-ecological-functional-types/blob/waterbody-atlas/docs/waterbody_census_comparison.md",
    "used_for": "Six tuning changes and the direction of several likelihood ratios: waterbodies recorded as rarely full trigger inflow shortfall more often, those under repair trigger sudden loss more, those with a water user association trigger irrigation underuse less, encroached ones trigger siltation more."
+  },
+  {
+   "id": "cgwb_manual2007",
+   "citation": "Central Ground Water Board (2007). Manual on Artificial Recharge of Ground Water. Ministry of Water Resources, New Delhi.",
+   "url": "https://cgwb.gov.in/sites/default/files/MainLinks/Manual-Artificial-Recharge.pdf",
+   "used_for": "Site criteria for percolation tanks (catchment 2.5–4 km² small, 5–8 km² large; second or third order streams; land slope 3–5%; water table deeper than 3 m after the monsoon), check dams and cement nala bunds (catchment 40–100 ha, rainfall below 1000 mm, bed 5–15 m wide), gully plugs (first-order streams) and contour bunds (rainfall below 800 mm; not on poorly drained clays)."
+  },
+  {
+   "id": "gswma_manual2011",
+   "citation": "Gujarat State Watershed Management Agency (2011). Technical manual for the Integrated Watershed Management Programme (Annexure II), 18 June 2011.",
+   "url": "https://www.svnit.ac.in/Unnat_Bharat/PI/pdf/Water%20Management/Schemes%20by%20Government%20of%20India/IWMP%20Integrated%20Watershed%20Management%20Programme/Annexure%20II%20technical-manual-18-06-2011.pdf",
+   "used_for": "Site criteria: contour trenches on 10–25% slopes; contour bunds not above 10%; gully classes by catchment (small ≤ 2 ha, medium 2–20 ha); loose boulder checks on drainage lines under 50 ha with bed slope below 20% and height up to 1 m; gabions for 30–150 ha catchments; masonry check dams normally for 500–1000 ha; percolation tanks as in the CGWB manual; recharge where water levels are deeper than 8 m."
+  },
+  {
+   "id": "imsd1995",
+   "citation": "National Remote Sensing Agency (1995). Integrated Mission for Sustainable Development (IMSD): technical guidelines. Hyderabad. Site-selection table as reproduced in watershed planning courseware.",
+   "url": "https://www.slideshare.net/slideshow/planing-for-water-conservation-structures/86058095",
+   "used_for": "Remote-sensing site criteria: farm pond (slope 0–5%, low-permeability soil, catchment under 2 ha, first-order), check dam (slope under 15%, catchment over 25 ha, stream order 1–4), percolation pond (slope under 10%, permeable soil, catchment over 25 ha, stream order 1–4), contour bunding (slope under 6%), trenching (slope 10–25%)."
+  },
+  {
+   "id": "saha2018",
+   "citation": "Saha A, Patil M, Karwariya S, Pingale SM, Azmi S, Goyal VC, Rathore DS (2018). Identification of potential sites for water harvesting structures using geospatial techniques and multi-criteria decision analysis. Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci. XLII-5: 329–334.",
+   "url": "https://isprs-archives.copernicus.org/articles/XLII-5/329/2018/",
+   "used_for": "Check dams on lower-order streams (up to third order), flat to gentle slopes, catchments above 25 ha, low to medium permeability (IMSD criteria, Kanker, Chhattisgarh)."
+  },
+  {
+   "id": "crida_farmpond2012",
+   "citation": "Reddy KS, Kumar M, Rao KV, Maruthi V, Reddy BMK, et al. (2012). Farm Ponds: A Climate Resilient Technology for Rainfed Agriculture. Planning, Design and Construction. Technical Bulletin 3/2012, ICAR-CRIDA, Hyderabad.",
+   "url": "https://krishi.icar.gov.in/jspui/bitstream/123456789/33298/1/Farm%20pond%20technology%20for%20semi-arid%20Alfisol%20region%20of%20Telengana%20in%20Andhra%20Pradesh.pdf",
+   "used_for": "Farm ponds at the lowest point of the field; catchments of 1–5 ha (black soils) to 1–14 ha (red soils); low-infiltration soils over 1 m deep; lining for sandy and red soils; depth 2.5–3.5 m."
+  },
+  {
+   "id": "pradan_inrm",
+   "citation": "PRADAN. Integrated Natural Resource Management: a handbook for the land and water based livelihoods (INRM), preliminary pages and chapters.",
+   "url": "https://www.pradan.net/wp-content/uploads/2017/02/inrm_eng_prelim_pages-1.pdf",
+   "used_for": "Ridge-to-valley placement by land slope: staggered trenches above 8%, 30x40 model at 3–8%, field bunding and water harvesting below 3%; 5% model on medium uplands with a unidirectional slope; gully plugs only in gullies under 2 m deep and 5 m wide."
+  },
+  {
+   "id": "tripura_smc",
+   "citation": "Tripura Forest Department. Guidelines for soil and moisture conservation works.",
+   "url": "https://forest.tripura.gov.in/sites/default/files/documents/Guidelines%20for%20Soil%20and%20Moisture%20Conservation.pdf",
+   "used_for": "Staggered contour trenches on 10–30% slopes under open forest or scrub; small forest check dams for catchments under 5–20 ha."
   }
  ]
 }
