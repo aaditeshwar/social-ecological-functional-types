@@ -551,12 +551,12 @@ WB_ADDED = ['wbt_inflow', 'wbq_inlet', 'wbq_diverted', 'wbq_encroach', 'wbq_leak
 WORK = {
     'Farm pond': ['farm_pond', 'pond_lining'], 'Community Pond': ['community_pond', 'traditional_harvesting'],
     'Well': ['solar_pumps_safeguards', 'protective_irrigation'], 'Canal': ['diversion_based_irrigation', 'conveyance_pipelines'],
-    'Farm bund': ['contour_graded_bunds'], 'Check dam': ['check_dam'], 'Percolation tank': ['percolation_tank'],
+    'Farm bund': ['farm_bunds'], 'Check dam': ['check_dam'], 'Percolation tank': ['percolation_tank'],
     'Earthen gully plug': ['earthen_gully_plug'], 'Drainage/soakage channels': ['diversion_drain'], 'Recharge pits': ['recharge_pits_shafts'],
     'Sokage pits': ['recharge_pits_shafts'], 'Soakage pits': ['recharge_pits_shafts'], 'Trench cum bund network': ['trench_cum_bund'],
     'Continuous contour trenches (CCT)': ['cct'], 'Staggered Contour trenches(SCT)': ['sct'], 'Water absorption trenches(WAT)': ['wat'],
     'Loose boulder structure': ['loose_boulder_check'], 'Rock fill dam': ['gabion_rockfill'], 'Stone bunding': ['stone_bunding'],
-    'Diversion drains': ['diversion_drain'], 'Bunding:Contour bunds/ graded bunds': ['contour_graded_bunds'],
+    'Diversion drains': ['diversion_drain'], 'Bunding:Contour bunds/ graded bunds': ['contour_bunds', 'graded_bunds'],
     '5% model structure': ['five_percent_model'], '5% Model structure': ['five_percent_model'],
     '30-40 model structure': ['model_30_40'], '30-40 Model structure': ['model_30_40'],
     'Underground dyke': ['subsurface_dyke'], 'Recharge shaft': ['recharge_pits_shafts'], 'Injection well': ['dug_well_recharge'],
@@ -671,7 +671,7 @@ def build(forms_dir, out=None, log=print):
                     if wk:
                         q['work_map'] = {o['id']: (WORK.get(o['id'], []) if wk == 'work' else
                                                    (['dug_well_recharge'] if o['id'] == 'Well' else ['conveyance_pipelines', 'pim_wua'] if o['id'] == 'Canal'
-                                                    else ['contour_graded_bunds'] if o['id'] == 'Farm bund' else list(dict.fromkeys(MAINT + WORK.get(o['id'], [])))))
+                                                    else ['farm_bunds'] if o['id'] == 'Farm bund' else list(dict.fromkeys(MAINT + WORK.get(o['id'], [])))))
                                          for o in q.get('options', [])}
                         missing = [o['id'] for o in q['options'] if not q['work_map'].get(o['id'])]
                         if missing: log(f"  {F['id']}.{q['name']}: no intervention for {missing}")

@@ -1159,16 +1159,16 @@
    "site_check": "No published source found for these numbers."
   },
   {
-   "id": "contour_graded_bunds",
-   "name": "Contour, graded and field bunds",
+   "id": "contour_bunds",
+   "name": "Contour bunds",
    "side": "supply",
    "category": "soil_moisture",
-   "what": "Earthen bunds on farm boundaries along the contour (in low rainfall and permeable soils, to hold water) or with a slight grade (in higher rainfall and clayey soils, to drain excess safely); they keep soil and moisture on the field.",
-   "where": "On farm, broad slopes of 1–10%",
-   "site_spec": "Broad slopes 6–10% on farm boundaries: contour bunding, graded bunding, ditching (paper, Table 1)",
+   "what": "Earthen bunds along the contour on sloping farmland; they hold runoff on the field so that it soaks in, and keep soil and moisture on the field.",
+   "where": "On farm, gentle slopes of 1–6%",
+   "site_spec": "Gentle slopes of 1–6% on farmland, along the contour (IMSD, Gujarat IWMP manual)",
    "site_rules": [
     {
-     "parameter": "Slope (contour bund)",
+     "parameter": "Slope",
      "unit": "%",
      "accepted": "1–6%",
      "partial": "—",
@@ -1182,15 +1182,16 @@
      "note": "IMSD: contour bunding below 6%; Gujarat: not above 10%; PRADAN: field bunding below 3%."
     },
     {
-     "parameter": "Slope (graded bund)",
-     "unit": "%",
-     "accepted": "1–10%",
-     "partial": "—",
-     "not_accepted": "< 1 or > 10%",
-     "basis": "source",
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4",
+     "basis": "not sourced",
      "sources": [
-      "gswma_manual2011"
-     ]
+      "structure_rules"
+     ],
+     "note": "Raster value of the land itself: the Strahler order of the drainage line its runoff reaches. Low values (1–3) are upper catchment land draining to gullies and small nalas, where area treatment belongs; the slope rule does most of the work."
     },
     {
      "parameter": "Catchment area",
@@ -1216,11 +1217,11 @@
      "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
-     "parameter": "Land use (farm bund)",
+     "parameter": "Land use",
      "unit": "—",
-     "accepted": "Single kharif, single non-kharif, double, triple cropping",
-     "partial": "Shrub/scrub, barren",
-     "not_accepted": "Trees/forest; Built-up; water in any season",
+     "accepted": "Single kharif, single non-kharif, double, triple cropping; croplands; barren lands; shrub/scrub; trees/forest",
+     "partial": "—",
+     "not_accepted": "Built-up; water in any season",
      "basis": "not sourced",
      "sources": [
       "structure_rules"
@@ -1229,8 +1230,8 @@
     {
      "parameter": "Hydrologic soil group",
      "unit": "A–D",
-     "accepted": "A, B, C (contour bunds)",
-     "partial": "D: graded bunds only",
+     "accepted": "A, B, C",
+     "partial": "D (graded bunds instead)",
      "not_accepted": "—",
      "basis": "source",
      "sources": [
@@ -1242,12 +1243,12 @@
      "note": "Contour bunds hold water on the field and are not suited to poorly drained clays (CGWB); on group D soils graded bunds lead the excess away."
     }
    ],
-   "landscape": "Rainfed cropland on gentle slopes: contour bunds in semi-arid areas, graded bunds in sub-humid and humid areas and on black clay soils. Contour bunds where rainfall is normally below 800 mm and the soil drains well; graded bunds, which lead excess water away, in wetter areas and on poorly drained clays (CGWB).",
+   "landscape": "Rainfed cropland on gentle slopes where rainfall is normally below 800 mm and the soil drains well (CGWB). In wetter areas graded bunds, which lead the excess away, are used instead.",
    "archetypes": [
     "rainfed_dryland",
     "rainfed_rice_subhumid"
    ],
-   "suits": "nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid) >= 0.2 and f_slopy >= 0.1",
+   "suits": "nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid) >= 0.2 and f_slopy >= 0.1 and nz(rain_norm) < 800",
    "avoid": "f_crop < 0.1",
    "avoid_note": "Little cropland.",
    "addresses": [
@@ -1265,10 +1266,128 @@
    ],
    "sources": [
     "corestack_toolkit2026",
-    "structure_rules",
     "mgnrega_samarthya2024",
     "imsd1995",
     "gswma_manual2011",
+    "pradan_inrm",
+    "structure_rules",
+    "cgwb_manual2007",
+    "hysogs250m",
+    "usda_neh630_ch7"
+   ],
+   "practice": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_check": "Sources: IMSD, Gujarat IWMP manual, PRADAN, CGWB; soil as the hydrologic soil group (HYSOGs250m)."
+  },
+  {
+   "id": "graded_bunds",
+   "name": "Graded bunds",
+   "side": "supply",
+   "category": "soil_moisture",
+   "what": "Earthen bunds laid with a slight grade along the slope, so that excess runoff drains slowly to a grassed waterway or safe outlet instead of standing on the field; they keep soil on the field in wetter areas and on clays.",
+   "where": "On farm, slopes of 1–10%",
+   "site_spec": "Slopes of 1–10% on farmland, with a grassed waterway or safe outlet for the excess (Gujarat IWMP manual)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "1–10%",
+     "partial": "—",
+     "not_accepted": "< 1 or > 10%",
+     "basis": "source",
+     "sources": [
+      "gswma_manual2011"
+     ]
+    },
+    {
+     "parameter": "Stream order",
+     "unit": "—",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4",
+     "basis": "not sourced",
+     "sources": [
+      "structure_rules"
+     ],
+     "note": "Raster value of the land itself: the Strahler order of the drainage line its runoff reaches. Low values (1–3) are upper catchment land draining to gullies and small nalas, where area treatment belongs; the slope rule does most of the work."
+    },
+    {
+     "parameter": "Catchment area",
+     "unit": "ha",
+     "accepted": "≤ 2 ha",
+     "partial": "—",
+     "not_accepted": "> 2 ha",
+     "basis": "not sourced",
+     "sources": [
+      "structure_rules"
+     ]
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
+     "sources": [
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Single kharif, single non-kharif, double, triple cropping; croplands; barren lands; shrub/scrub; trees/forest",
+     "partial": "—",
+     "not_accepted": "Built-up; water in any season",
+     "basis": "not sourced",
+     "sources": [
+      "structure_rules"
+     ]
+    },
+    {
+     "parameter": "Hydrologic soil group",
+     "unit": "A–D",
+     "accepted": "A, B, C, D",
+     "partial": "—",
+     "not_accepted": "—",
+     "basis": "source",
+     "sources": [
+      "cgwb_manual2007",
+      "hysogs250m",
+      "usda_neh630_ch7"
+     ],
+     "note": "Graded bunds lead excess water away to a waterway, so they also suit slowly permeable group D soils, where contour bunds would waterlog (CGWB)."
+    }
+   ],
+   "landscape": "Rainfed cropland on slopes where rainfall is normally 800 mm or more, and on slowly permeable clays, where contour bunds would waterlog the field (CGWB).",
+   "archetypes": [
+    "rainfed_dryland",
+    "rainfed_rice_subhumid"
+   ],
+   "suits": "nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid) >= 0.2 and f_slopy >= 0.1 and rain_norm >= 800",
+   "avoid": "f_crop < 0.1",
+   "avoid_note": "Little cropland.",
+   "addresses": [
+    "soil.erosion",
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "soil.nutrient_deficiency",
+    "productivity.declining_intensity"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "nmsa_rad",
+    "mh_pocra"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "mgnrega_samarthya2024",
+    "gswma_manual2011",
+    "structure_rules",
     "pradan_inrm",
     "cgwb_manual2007",
     "hysogs250m",
@@ -1278,7 +1397,85 @@
    "caution": null,
    "addresses_wb": [],
    "wb_types": null,
-   "site_check": "Sources: IMSD, Gujarat IWMP manual, PRADAN, CGWB. Rainfall decides contour or graded bunds (landscape). Soil as the hydrologic soil group (HYSOGs250m)."
+   "site_check": "Sources: Gujarat IWMP manual, CGWB; soil as the hydrologic soil group (HYSOGs250m)."
+  },
+  {
+   "id": "farm_bunds",
+   "name": "Farm (field) bunds",
+   "side": "supply",
+   "category": "soil_moisture",
+   "what": "Low earthen bunds around field boundaries on flat cropland, including paddy bunds, that hold rainwater and silt on the field and mark the plot; they raise soil moisture and, in rice, keep standing water in the field.",
+   "where": "On farm, flat land below 3% slope",
+   "site_spec": "Field boundaries on flat cropland below 3% slope (PRADAN: field bunding below 3%)",
+   "site_rules": [
+    {
+     "parameter": "Slope",
+     "unit": "%",
+     "accepted": "0–3%",
+     "partial": "3–6% (contour bunds instead)",
+     "not_accepted": "> 6%",
+     "basis": "source",
+     "sources": [
+      "pradan_inrm"
+     ],
+     "note": "PRADAN: field bunding below 3%; on gentler slopes above that, contour or graded bunds."
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
+     "sources": [
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
+    },
+    {
+     "parameter": "Land use",
+     "unit": "—",
+     "accepted": "Single kharif, single non-kharif, double, triple cropping",
+     "partial": "Shrub/scrub, barren",
+     "not_accepted": "Trees/forest; Built-up; water in any season",
+     "basis": "not sourced",
+     "sources": [
+      "structure_rules"
+     ]
+    }
+   ],
+   "landscape": "Flat rainfed cropland, especially rainfed rice in sub-humid areas, where neither contour nor graded bunds apply.",
+   "archetypes": [
+    "rainfed_rice_subhumid",
+    "rainfed_dryland"
+   ],
+   "suits": "nz(share_rainfed_dryland) + nz(share_rainfed_rice_subhumid) >= 0.2 and nz(f_plain) >= 0.5",
+   "avoid": "f_crop < 0.1",
+   "avoid_note": "Little cropland.",
+   "addresses": [
+    "soil.erosion",
+    "drought.kharif_drought",
+    "drought.unstable_sowing",
+    "soil.nutrient_deficiency",
+    "productivity.declining_intensity"
+   ],
+   "schemes": [
+    "mgnrega_nrm",
+    "pmksy_wdc",
+    "nmsa_rad",
+    "mh_pocra"
+   ],
+   "sources": [
+    "corestack_toolkit2026",
+    "mgnrega_samarthya2024",
+    "pradan_inrm",
+    "structure_rules"
+   ],
+   "practice": [],
+   "caution": null,
+   "addresses_wb": [],
+   "wb_types": null,
+   "site_check": "Slope from PRADAN; land use from the CoRE Stack rules workbook; distance to drainage line proposed."
   },
   {
    "id": "stone_bunding",

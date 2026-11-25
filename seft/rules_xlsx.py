@@ -23,18 +23,15 @@ def main(src, out=None, log=print):
         a,b=ws0.cell(r,1).value,ws0.cell(r,2).value
         if a: cur=a.strip()
         if b: orig.append((cur,b.strip(),*(ws0.cell(r,c).value for c in range(3,7))))
-    MAP={'Check Dam':'check_dam','Farm Pond':'farm_pond','Farm Bund':'contour_graded_bunds','30-40 Model Structure':'model_30_40',
+    MAP={'Check Dam':'check_dam','Farm Pond':'farm_pond','Farm Bund':'farm_bunds','30-40 Model Structure':'model_30_40',
      'Soakage Pits':'recharge_pits_shafts','Rock Fill Dam':'gabion_rockfill','Diversion Drains':'diversion_drain','Drainage Soakage Channels':'diversion_drain',
-     'Percolation Tank':'percolation_tank','Recharge Pits':'recharge_pits_shafts','Community Pond':'community_pond','Contour Bund':'contour_graded_bunds',
-     'Graded Bund':'contour_graded_bunds','Stone Bunding':'stone_bunding','Earthen Gully Plug':'earthen_gully_plug','Trench cum Bund Network':'trench_cum_bund',
+     'Percolation Tank':'percolation_tank','Recharge Pits':'recharge_pits_shafts','Community Pond':'community_pond','Contour Bund':'contour_bunds',
+     'Graded Bund':'graded_bunds','Stone Bunding':'stone_bunding','Earthen Gully Plug':'earthen_gully_plug','Trench cum Bund Network':'trench_cum_bund',
      'Loose Boulder Structure':'loose_boulder_check','Continuous Contour Trenches (CCT)':'cct','Staggered Contour Trenches (SCT)':'sct',
      'Water Absorption Trenches (WAT)':'wat','5% Model Structure':'five_percent_model'}
     PMAP={'Slope':'Slope','Stream Order':'Stream order','Catchment Area':'Catchment area','Drainage Distance':'Distance to drainage line','LULC':'Land use'}
     def ours(iid,struct,p):
         rows=IV[iid]['site_rules']; want=PMAP.get(p,p)
-        if iid=='contour_graded_bunds':
-            if want=='Slope': want='Slope (contour bund)' if struct=='Contour Bund' else 'Slope (graded bund)'
-            if want=='Land use': want='Land use (farm bund)'
         if iid=='recharge_pits_shafts' and want=='Land use': want='Land use (recharge pits)'
         return next((r for r in rows if r['parameter']==want),None)
     norm=lambda x: re.sub(r'\s+','',str(x or '')).replace('–','-').replace('hectares','ha').lower()
@@ -53,13 +50,8 @@ def main(src, out=None, log=print):
         if iid:   # rows we added (soil, distance where the sheet had none)
             for r in IV[iid]['site_rules']:
                 if r['parameter'] in used or r['basis'] not in ('source','proposed'): continue
-                if iid=='contour_graded_bunds' and ((st=='Contour Bund' and 'graded' in r['parameter']) or (st=='Graded Bund' and 'contour bund' in r['parameter']) or (st!='Farm Bund' and 'farm bund' in r['parameter'])): continue
-                if iid=='contour_graded_bunds' and st=='Farm Bund' and r['parameter'].startswith('Slope'): continue
                 if iid=='recharge_pits_shafts' and r['parameter'].startswith('Land use'): continue
                 if iid=='diversion_drain': continue
-                if st=='Graded Bund' and r['parameter']=='Hydrologic soil group':
-                    rows.append(dict(st=st,p=r['parameter'],unit=r.get('unit',''),a='A, B, C, D',pa='—',n='—',basis=r['basis'],src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),
-                                     note='Graded bunds lead excess water away to a waterway, so they also suit slowly permeable group D soils, where contour bunds would waterlog (CGWB).')); continue
                 rows.append(dict(st=st,p=r['parameter'],unit=r.get('unit',''),a=r['accepted'],pa=r['partial'],n=r['not_accepted'],basis=r['basis'],src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),note=r.get('note','')))
     wb=openpyxl.Workbook(); ws=wb.active; ws.title='RULES'
     navy=PatternFill('solid',fgColor='1F3864'); blue=PatternFill('solid',fgColor='2E75B6')

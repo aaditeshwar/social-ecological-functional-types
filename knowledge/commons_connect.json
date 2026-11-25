@@ -10593,7 +10593,8 @@
        "diversion_drain"
       ],
       "Bunding:Contour bunds/ graded bunds": [
-       "contour_graded_bunds"
+       "contour_bunds",
+       "graded_bunds"
       ],
       "5% model structure": [
        "five_percent_model"
@@ -11629,7 +11630,8 @@
        "diversion_drain"
       ],
       "Bunding:Contour bunds/ graded bunds": [
-       "contour_graded_bunds"
+       "contour_bunds",
+       "graded_bunds"
       ],
       "5% model structure": [
        "five_percent_model"
@@ -16236,7 +16238,7 @@
        "conveyance_pipelines"
       ],
       "Farm bund": [
-       "contour_graded_bunds"
+       "farm_bunds"
       ]
      },
      "must_ask": {
@@ -16791,7 +16793,7 @@
        "pim_wua"
       ],
       "Farm bund": [
-       "contour_graded_bunds"
+       "farm_bunds"
       ]
      },
      "must_ask": {
