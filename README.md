@@ -206,9 +206,8 @@ python -m seft.cli priority [--district pune]                                   
 
 `python -m seft.cli rules-xlsx --v1 WaterStructure_Suitability_Rules.xlsx` writes the site rules of
 `knowledge/interventions.json` back into the layout of the CoRE Stack suitability-rules workbook
-(`out/WaterStructure_Suitability_Rules_v2.xlsx`): the v1 structures and parameters with the current values, each
-row's basis (verified, revised, added, proposed, spreadsheet, not reviewed), the change from v1, sources and notes;
-a CHANGES sheet; SOURCES; ABOUT. Site layers only (slope, stream order raster, catchment, distance to drainage
+(`out/WaterStructure_Suitability_Rules_v2.xlsx`): the workbook's structures and parameters with the current
+values, each row's basis (source, proposed, not sourced, not reviewed), sources and notes; SOURCES; ABOUT. Site layers only (slope, stream order raster, catchment, distance to drainage
 line, land use, soil); landscape rules stay in the interventions file.
 
 ### `groundtruth`

@@ -8,7 +8,7 @@
     python -m seft.cli validate        # check the knowledge JSONs after editing
     python -m seft.cli refresh-knowledge   # put edited text-only knowledge (interventions, notes) into web/data
     python -m seft.cli cc-build --forms <folder>   # Commons Connect ODK templates -> knowledge/commons_connect.json
-    python -m seft.cli rules-xlsx --v1 FILE.xlsx   # site rules -> suitability-rules workbook (v2) in out/
+    python -m seft.cli rules-xlsx --v1 FILE.xlsx   # site rules -> suitability-rules workbook in out/
     python -m seft.cli priority [--district pune]  # must-ask scores of the community questions -> out/priority
     python -m seft.cli run             # indicators, systems, stresses, schemes -> out/csv, out/web and web/data
     python -m seft.cli all             # fetch, validate and run in one go
@@ -213,8 +213,8 @@ def main(argv=None):
     p.add_argument('--all', action='store_true', help="compare every district of the locations file, not only the 'groundtruth' ones")
     p = sub.add_parser('cc-build', help='structured Commons Connect forms from the ODK templates -> knowledge/commons_connect.json')
     p.add_argument('--forms', required=True, help='folder with the Commons Connect .xlsx templates')
-    p = sub.add_parser('rules-xlsx', help='site rules of the interventions -> the suitability-rules workbook layout (v2)')
-    p.add_argument('--v1', required=True, help='the v1 WaterStructure_Suitability_Rules.xlsx')
+    p = sub.add_parser('rules-xlsx', help='site rules of the interventions -> the suitability-rules workbook layout')
+    p.add_argument('--v1', required=True, help='a WaterStructure_Suitability_Rules.xlsx giving the structures, parameters and layout')
     p.add_argument('--out', default=str(ROOT / 'out' / 'WaterStructure_Suitability_Rules_v2.xlsx'))
     p = sub.add_parser('priority', help='must-ask scores of the atlas and Commons Connect questions, by MWS -> out/priority')
     p.add_argument('--district', action='append', help='district slug (repeatable); default all in web/data')

@@ -1,10 +1,10 @@
 """`python -m seft.cli rules-xlsx --v1 WaterStructure_Suitability_Rules.xlsx [--out FILE]`: the site rules of
 knowledge/interventions.json written back into the layout of the CoRE Stack suitability-rules workbook.
 
-Sheets: RULES (v1 structures and parameters with the current values, their basis, the change from v1, sources and
-notes), CHANGES (only the rows that changed or were added), SOURCES, ABOUT. Site layers only; landscape rules
+Sheets: RULES (the workbook's structures and parameters with the current values, their basis, sources and notes),
+SOURCES, ABOUT. Site layers only; landscape rules
 (suits / avoid) stay in the interventions file. Structures the catalogue does not cover (Well, Canal, Large Water
-Body) are carried over from v1 as 'not reviewed'.
+Body) are taken from the input workbook as 'not reviewed'.
 """
 import json, re
 from pathlib import Path
@@ -45,29 +45,27 @@ def main(src, out=None, log=print):
         for s,p,unit,a,pa,n in [o for o in orig if o[0]==st]:
             r=ours(iid,st,p) if iid else None
             if r is None:
-                rows.append(dict(st=st,p=p,unit=unit,a=a,pa=pa,n=n,basis='not reviewed' if not iid else 'spreadsheet',chg='',src='',note='Structure not in the interventions catalogue yet.' if not iid else '')); continue
+                rows.append(dict(st=st,p=p,unit=unit,a=a,pa=pa,n=n,basis='not reviewed' if not iid else 'not sourced',src='',note='Structure not in the interventions catalogue yet.' if not iid else '')); continue
             used.add(r['parameter'])
-            if r['basis']=='spreadsheet':
-                rows.append(dict(st=st,p=p,unit=unit,a=a,pa=pa,n=n,basis='spreadsheet',chg='',src='; '.join(S[x]['citation'].split('.')[0] for x in r.get('sources',[]) if x in S and x!='structure_rules'),note=r.get('note',''))); continue
-            same=all(norm(x)==norm(y) for x,y in ((a,r['accepted']),(pa,r['partial']),(n,r['not_accepted'])))
-            chg='' if same else f"was: {a} | {pa} | {n}"
-            rows.append(dict(st=st,p=p,unit=unit,a=r['accepted'],pa=r['partial'],n=r['not_accepted'],basis=r['basis'],chg=chg,src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),note=r.get('note','')))
+            if r['basis']=='not sourced':
+                rows.append(dict(st=st,p=p,unit=unit,a=a,pa=pa,n=n,basis='not sourced',src='',note=r.get('note',''))); continue
+            rows.append(dict(st=st,p=p,unit=unit,a=r['accepted'],pa=r['partial'],n=r['not_accepted'],basis=r['basis'],src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),note=r.get('note','')))
         if iid:   # rows we added (soil, distance where the sheet had none)
             for r in IV[iid]['site_rules']:
-                if r['parameter'] in used or r['basis'] not in ('added','proposed','revised','verified'): continue
+                if r['parameter'] in used or r['basis'] not in ('source','proposed'): continue
                 if iid=='contour_graded_bunds' and ((st=='Contour Bund' and 'graded' in r['parameter']) or (st=='Graded Bund' and 'contour bund' in r['parameter']) or (st!='Farm Bund' and 'farm bund' in r['parameter'])): continue
                 if iid=='contour_graded_bunds' and st=='Farm Bund' and r['parameter'].startswith('Slope'): continue
                 if iid=='recharge_pits_shafts' and r['parameter'].startswith('Land use'): continue
                 if iid=='diversion_drain': continue
-                rows.append(dict(st=st,p=r['parameter'].replace(' (Commons Connect classes)',''),unit=r.get('unit',''),a=r['accepted'],pa=r['partial'],n=r['not_accepted'],basis=r['basis'],chg='new row',src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),note=r.get('note','')))
+                rows.append(dict(st=st,p=r['parameter'].replace(' (Commons Connect classes)',''),unit=r.get('unit',''),a=r['accepted'],pa=r['partial'],n=r['not_accepted'],basis=r['basis'],src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),note=r.get('note','')))
     wb=openpyxl.Workbook(); ws=wb.active; ws.title='RULES'
     navy=PatternFill('solid',fgColor='1F3864'); blue=PatternFill('solid',fgColor='2E75B6')
-    fills={'D':'C6EFCE','E':'FFEB9C','F':'FFC7CE'}; bfill={'revised':'FCE4D6','proposed':'E2EFDA','added':'DDEBF7','verified':'FFFFFF','spreadsheet':'F2F2F2','not reviewed':'F2F2F2'}
+    fills={'D':'C6EFCE','E':'FFEB9C','F':'FFC7CE'}; bfill={'source':'FFFFFF','proposed':'E2EFDA','not sourced':'F2F2F2','not reviewed':'F2F2F2'}
     thin=Side(style='thin',color='BFBFBF'); B=Border(left=thin,right=thin,top=thin,bottom=thin)
-    H=['Structure','Parameter','Unit','✔  Accepted','▲  Partially Accepted','✖  Not Accepted','Basis','Change from v1','Sources','Notes']
-    ws['A1']='WATER STRUCTURES — SUITABILITY RULES (site layers), v2, 25 November 2026'; ws['A1'].font=Font(bold=True,size=13,color='FFFFFF'); ws['A1'].fill=navy; ws.merge_cells('A1:J1')
+    H=['Structure','Parameter','Unit','✔  Accepted','▲  Partially Accepted','✖  Not Accepted','Basis','Sources','Notes']
+    ws['A1']='WATER STRUCTURES — SUITABILITY RULES (site layers), 25 November 2026'; ws['A1'].font=Font(bold=True,size=13,color='FFFFFF'); ws['A1'].fill=navy; ws.merge_cells('A1:I1')
     ws['A2']='  ✔ ACCEPTED  —  Ideal site conditions        ▲ PARTIALLY ACCEPTED  —  Works with caution        ✖ NOT ACCEPTED  —  Unsuitable.   Site layers only (slope, stream order raster, catchment, distance to drainage line, land use, soil); landscape rules (rainfall, aquifer, groundwater stage, depth to water) are in the atlas.'
-    ws.merge_cells('A2:J2'); ws['A2'].alignment=Alignment(wrap_text=True); ws.row_dimensions[2].height=30
+    ws.merge_cells('A2:I2'); ws['A2'].alignment=Alignment(wrap_text=True); ws.row_dimensions[2].height=30
     for i,h in enumerate(H,1):
         c=ws.cell(3,i,h); c.font=Font(bold=True,color='FFFFFF'); c.fill=blue; c.alignment=Alignment(wrap_text=True,vertical='center'); c.border=B
     r0=4; prev=None; start=None
@@ -76,25 +74,16 @@ def main(src, out=None, log=print):
             if r0-1>start: ws.merge_cells(start_row=start,start_column=1,end_row=r0-1,end_column=1)
             r0+=1
         if x['st']!=prev: start=r0; ws.cell(r0,1,x['st']).font=Font(bold=True)
-        vals=[None,x['p'],x['unit'],x['a'],x['pa'],x['n'],x['basis'],x['chg'],x['src'],x['note']]
+        vals=[None,x['p'],x['unit'],x['a'],x['pa'],x['n'],x['basis'],x['src'],x['note']]
         for i,v in enumerate(vals,1):
             c=ws.cell(r0,i) if i==1 else ws.cell(r0,i,v); c.alignment=Alignment(wrap_text=True,vertical='top'); c.border=B
             L=get_column_letter(i)
             if L in fills: c.fill=PatternFill('solid',fgColor=fills[L])
-            if L=='G': c.fill=PatternFill('solid',fgColor=bfill.get(x['basis'],'FFFFFF')); c.font=Font(bold=x['basis'] in ('revised','proposed','added'))
-            if L=='H' and x['chg']: c.font=Font(color='C00000')
+            if L=='G': c.fill=PatternFill('solid',fgColor=bfill.get(x['basis'],'FFFFFF')); c.font=Font(bold=x['basis']=='proposed')
         prev=x['st']; r0+=1
     if r0-1>start: ws.merge_cells(start_row=start,start_column=1,end_row=r0-1,end_column=1)
-    for L,w in zip('ABCDEFGHIJ',(22,22,9,30,30,28,12,30,40,60)): ws.column_dimensions[L].width=w
+    for L,w in zip('ABCDEFGHI',(22,22,9,30,30,28,12,40,60)): ws.column_dimensions[L].width=w
     ws.freeze_panes='C4'
-    # CHANGES sheet
-    cs=wb.create_sheet('CHANGES'); cs.append(['Structure','Parameter','Basis','v1 (accepted | partial | not accepted)','v2 accepted','v2 partial','v2 not accepted','Sources','Why'])
-    for c in cs[1]: c.font=Font(bold=True,color='FFFFFF'); c.fill=blue
-    for x in rows:
-        if x['chg']: cs.append([x['st'],x['p'],x['basis'],x['chg'].replace('was: ',''),x['a'],x['pa'],x['n'],x['src'],x['note']])
-    for L,w in zip('ABCDEFGHI',(22,22,10,36,26,26,24,40,70)): cs.column_dimensions[L].width=w
-    for row in cs.iter_rows(min_row=2):
-        for c in row: c.alignment=Alignment(wrap_text=True,vertical='top')
     # SOURCES
     ss=wb.create_sheet('SOURCES'); ss.append(['Id','Citation','Link','Used for'])
     for c in ss[1]: c.font=Font(bold=True,color='FFFFFF'); c.fill=blue
@@ -106,15 +95,15 @@ def main(src, out=None, log=print):
         for c in row: c.alignment=Alignment(wrap_text=True,vertical='top')
     # ABOUT
     ab=wb.create_sheet('ABOUT')
-    txt=["Version 2 of the CoRE Stack water structures suitability rules, checked on 24–25 November 2026 against published manuals and papers (SOURCES sheet).",
-    "Basis: verified = a source agrees with v1; revised = changed to what the sources give; added = a parameter v1 lacked; proposed = reasoned from the sources where none gives a number (review before use); spreadsheet = unchanged, no published source found; not reviewed = structure not yet in the interventions catalogue.",
+    txt=["CoRE Stack water structures suitability rules (site layers), 25 November 2026, with the published manuals and papers behind them (SOURCES sheet).",
+    "Basis: source = a published manual or paper gives the value; proposed = reasoned from the sources where none gives a number (review before use); not sourced = no published source found; not reviewed = structure not yet in the interventions catalogue.",
     "Stream order is the CoRE Stack stream order raster: every 30 m pixel carries the Strahler order of the drainage line it drains into. For structures built across a drainage line (check dams, gully plugs, boulder checks, gabions, percolation tanks) read it on the line, where it is the line's own order. For area treatments and ponds on farmland it places the land in the ridge-to-valley sequence.",
     "Soil is not yet a CoRE Stack layer; the classes are those of the Commons Connect forms (Black, Red, Laterite, Alluvial, Sandy, Clay, Rocky), recorded by the field worker.",
     "Landscape rules (rainfall, aquifer type, groundwater stage, depth to water after the monsoon) are not in this sheet: they decide whether an intervention suits the micro-watershed and are kept in knowledge/interventions.json (suits / avoid) in the social-ecological-functional-types repository. Depth to water is asked of the community until a layer exists.",
-    "Generated from knowledge/interventions.json; v1 rows for Well, Canal and Large Water Body are carried over unchanged."]
+    "Generated from knowledge/interventions.json by `python -m seft.cli rules-xlsx`; Well, Canal and Large Water Body are taken from the input workbook as they are."]
     for i,t in enumerate(txt,1):
         c=ab.cell(i,1,t); c.alignment=Alignment(wrap_text=True,vertical='top')
     ab.column_dimensions['A'].width=130
     wb.save(out)
-    log(f"wrote {out}: {len(rows)} rows, {sum(1 for x in rows if x['chg'])} changed from v1")
+    log(f"wrote {out}: {len(rows)} rows")
     return out
