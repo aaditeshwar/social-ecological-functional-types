@@ -1566,6 +1566,7 @@
      "not_accepted": "—",
      "basis": "not sourced",
      "sources": [
+      "structure_rules",
       "imsd1995",
       "crida_farmpond2012"
      ],
