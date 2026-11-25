@@ -38,7 +38,7 @@ def load_json(p):
 
 def dump_json(o, p, compact=True):
     Path(p).parent.mkdir(parents=True, exist_ok=True)
-    with open(p, 'w') as f:
+    with open(p, 'w', encoding='utf-8') as f:
         json.dump(o, f, separators=(',', ':') if compact else None, indent=None if compact else 1, ensure_ascii=False)
 
 def raw_dir(state, district, tehsil):

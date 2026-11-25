@@ -321,16 +321,16 @@ def write_report(rows, detail, res, mapping, items, by, combos=None, tiers=None,
     out.mkdir(parents=True, exist_ok=True)
     keys = ['pathway', 'label', 'rules', 'n', 'TP', 'FP', 'FN', 'TN', 'unknown', 'no data',
             'accuracy', 'balanced_accuracy', 'f1', 'precision', 'recall', 'specificity']
-    with open(out / 'confusion.csv', 'w', newline='') as f:
+    with open(out / 'confusion.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, keys, extrasaction='ignore'); w.writeheader(); w.writerows(rows)
     dk = []
     for d in detail:
         for k in d:
             if k not in dk: dk.append(k)
-    with open(out / 'detail.csv', 'w', newline='') as f:
+    with open(out / 'detail.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, dk); w.writeheader(); w.writerows(detail)
     if combos:
-        with open(out / 'combinations.csv', 'w', newline='') as f:
+        with open(out / 'combinations.csv', 'w', newline='', encoding='utf-8') as f:
             w = csv.DictWriter(f, keys, extrasaction='ignore'); w.writeheader(); w.writerows(combos)
     dump_json({'confusion': rows, 'combinations': combos or [], 'confidence_tiers': tiers or [],
                'sample_rates': rates or {}, 'detail': detail, 'resolution': res}, out / 'results.json')
