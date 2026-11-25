@@ -172,7 +172,8 @@ class Session:
         p = Path(self.data_dir) / 'index.json'
         doc = load_json(p) if p.exists() else {'districts': []}
         rest = [d for d in doc.get('districts', []) if not (d.get('state') == state and d.get('district') == district)]
-        rest.append({'state': state, 'district': district, 'tehsils': tehsils})
+        rest.append({'state': state, 'district': district, 'tehsils': tehsils, 'roles': ['coverage'],
+                     'note': 'cached on demand by core-seft; scored with the published pools'})
         from seft.util import dump_json
         dump_json({'districts': rest}, p, compact=False)
 

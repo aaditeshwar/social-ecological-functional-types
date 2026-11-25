@@ -2247,7 +2247,7 @@ function ivPlanBlock(list,opts){
 /* ---------- Interventions tab (both atlases) ---------- */
 function ivSiteTable(iv){
   if(!iv.site_rules.length) return "";
-  const BL={verified:"verified",revised:"revised",added:"added",spreadsheet:"spreadsheet only"};
+  const BL={verified:"verified",revised:"revised",added:"added",proposed:"proposed",spreadsheet:"spreadsheet only"};
   return `<div class="tbl"><table><thead><tr><th>Site parameter</th><th>Accepted</th><th>Partially accepted</th><th>Not accepted</th><th>Basis</th></tr></thead><tbody>${iv.site_rules.map(r=>`<tr><td>${esc(r.parameter)}${r.unit&&r.unit!=="—"?` <span class="muted">(${esc(r.unit)})</span>`:""}</td><td>${esc(r.accepted)}</td><td>${esc(r.partial)}</td><td>${esc(r.not_accepted)}</td><td><span class="pill">${esc(BL[r.basis]||r.basis||"")}</span>${r.sources&&r.sources.length?`<br><span class="note">${srcLinks(r.sources)}</span>`:""}${r.note?`<br><span class="note">${esc(r.note)}</span>`:""}</td></tr>`).join("")}</tbody></table></div>${iv.site_check?`<p class="note"><b>Site rules checked:</b> ${esc(iv.site_check)}</p>`:""}`;}
 function ivBlock(iv,mode){
   const C=ivCat(), arch=iv.archetypes.map(a=>ARCH[a]?ARCH[a].label:a);

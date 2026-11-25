@@ -33,7 +33,7 @@
    "wl_post_monsoon": "Depth to the water level in open wells after the monsoon (m), from the Commons Connect landscape question ls_wl_post; unknown until answered, and then an unknown value changes no verdict."
   }
  },
- "site_rules_about": "Site rules start from the CoRE Stack 'Water structures — suitability rules' spreadsheet and were checked on 24 November 2026 against the CGWB Manual on Artificial Recharge (2007), the Gujarat IWMP technical manual (2011), the IMSD guidelines (NRSA 1995), NIH (Saha et al. 2018), ICAR-CRIDA's farm pond bulletin (2012), PRADAN's INRM handbook and the Tripura soil and moisture conservation guidelines. For each parameter: the accepted, partially accepted and not accepted range, and its basis: verified (a source agrees), revised (changed to what the sources give), added (a parameter the spreadsheet lacked) or spreadsheet (no published source found). Site rules are the layers read at the site itself: slope, stream order, catchment area, distance to the nearest drainage line, land use and soil (soil is not yet a CoRE Stack layer: the field worker records it with the Commons Connect soil classes). Rainfall, aquifer, groundwater stage and depth to water belong to the landscape fit ('suits' and 'avoid'); depth to water is asked of the community until a layer exists. Stream order is the CoRE Stack stream order raster: every 30 m pixel carries the Strahler order of the drainage line it drains into, so it is defined off the drainage lines too (plains beside a river carry the river's high order; land beside a gully carries 1). For drainage-line structures it is read on the line, where it equals the line's Strahler order; for area treatments and ponds on farmland it places the land in the ridge-to-valley sequence. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
+ "site_rules_about": "Site rules start from the CoRE Stack 'Water structures — suitability rules' spreadsheet and were checked on 24 November 2026 against the CGWB Manual on Artificial Recharge (2007), the Gujarat IWMP technical manual (2011), the IMSD guidelines (NRSA 1995), NIH (Saha et al. 2018), ICAR-CRIDA's farm pond bulletin (2012), PRADAN's INRM handbook and the Tripura soil and moisture conservation guidelines. For each parameter: the accepted, partially accepted and not accepted range, and its basis: verified (a source agrees), revised (changed to what the sources give), added (a parameter the spreadsheet lacked) proposed (reasoned from the sources where none gives a number) or spreadsheet (no published source found). Site rules are the layers read at the site itself: slope, stream order, catchment area, distance to the nearest drainage line, land use and soil (soil is not yet a CoRE Stack layer: the field worker records it with the Commons Connect soil classes). Rainfall, aquifer, groundwater stage and depth to water belong to the landscape fit ('suits' and 'avoid'); depth to water is asked of the community until a layer exists. Stream order is the CoRE Stack stream order raster: every 30 m pixel carries the Strahler order of the drainage line it drains into, so it is defined off the drainage lines too (plains beside a river carry the river's high order; land beside a gully carries 1). For drainage-line structures it is read on the line, where it equals the line's Strahler order; for area treatments and ponds on farmland it places the land in the ridge-to-valley sequence. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
  "interventions": [
   {
    "id": "loose_boulder_check",
@@ -84,13 +84,15 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "0–30 m",
+     "partial": "30–60 m",
+     "not_accepted": "> 60 m",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "commons_connect_ictd2024",
+      "gadkari2022"
+     ],
+     "note": "Built across the drainage line, so the site is the line itself: within one 30 m pixel of the mapped line, allowing one more pixel for the offset between the mapped line and the real channel. Gadkari and Kadam weight check dams to within 5–10 m of the channel on a finer network; the Commons Connect paper: water bodies on drainage lines or in their proximity get a reliable surplus runoff."
     },
     {
      "parameter": "Land use",
@@ -143,7 +145,9 @@
     "structure_rules",
     "mgnrega_samarthya2024",
     "pmksy_wdc",
-    "gswma_manual2011"
+    "gswma_manual2011",
+    "commons_connect_ictd2024",
+    "gadkari2022"
    ],
    "practice": [],
    "caution": null,
@@ -198,13 +202,15 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "0–30 m",
+     "partial": "30–60 m",
+     "not_accepted": "> 60 m",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "commons_connect_ictd2024",
+      "gadkari2022"
+     ],
+     "note": "Built across the drainage line, so the site is the line itself: within one 30 m pixel of the mapped line, allowing one more pixel for the offset between the mapped line and the real channel. Gadkari and Kadam weight check dams to within 5–10 m of the channel on a finer network; the Commons Connect paper: water bodies on drainage lines or in their proximity get a reliable surplus runoff."
     },
     {
      "parameter": "Land use",
@@ -251,7 +257,9 @@
     "mgnrega_samarthya2024",
     "gswma_manual2011",
     "cgwb_manual2007",
-    "pradan_inrm"
+    "pradan_inrm",
+    "commons_connect_ictd2024",
+    "gadkari2022"
    ],
    "practice": [],
    "caution": null,
@@ -304,13 +312,15 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "0–30 m",
+     "partial": "30–60 m",
+     "not_accepted": "> 60 m",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "commons_connect_ictd2024",
+      "gadkari2022"
+     ],
+     "note": "Built across the drainage line, so the site is the line itself: within one 30 m pixel of the mapped line, allowing one more pixel for the offset between the mapped line and the real channel. Gadkari and Kadam weight check dams to within 5–10 m of the channel on a finer network; the Commons Connect paper: water bodies on drainage lines or in their proximity get a reliable surplus runoff."
     },
     {
      "parameter": "Land use",
@@ -354,7 +364,9 @@
     "corestack_toolkit2026",
     "structure_rules",
     "mgnrega_samarthya2024",
-    "gswma_manual2011"
+    "gswma_manual2011",
+    "commons_connect_ictd2024",
+    "gadkari2022"
    ],
    "practice": [],
    "caution": null,
@@ -414,13 +426,15 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "0–30 m",
+     "partial": "30–60 m",
+     "not_accepted": "> 60 m",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "commons_connect_ictd2024",
+      "gadkari2022"
+     ],
+     "note": "Built across the drainage line, so the site is the line itself: within one 30 m pixel of the mapped line, allowing one more pixel for the offset between the mapped line and the real channel. Gadkari and Kadam weight check dams to within 5–10 m of the channel on a finer network; the Commons Connect paper: water bodies on drainage lines or in their proximity get a reliable surplus runoff."
     },
     {
      "parameter": "Land use",
@@ -496,7 +510,9 @@
     "imsd1995",
     "saha2018",
     "cgwb_manual2007",
-    "gswma_manual2011"
+    "gswma_manual2011",
+    "commons_connect_ictd2024",
+    "gadkari2022"
    ],
    "site_check": "Checked against CGWB, IMSD, NIH (Saha et al. 2018) and the Gujarat IWMP manual: stream order narrowed to 2–3 and the lower catchment bound brought to 25 ha. Rainfall is part of the landscape fit, not the site rules."
   },
@@ -556,10 +572,12 @@
      "accepted": "0–60 m",
      "partial": "60–150 m",
      "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "basis": "verified",
      "sources": [
+      "cgwb_manual2007",
       "structure_rules"
-     ]
+     ],
+     "note": "On a second- or third-order stream (CGWB); the water spread extends beside the line, so the spreadsheet range holds."
     },
     {
      "parameter": "Land use",
@@ -756,13 +774,14 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
      "parameter": "Land use",
@@ -874,13 +893,14 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
      "parameter": "Land use",
@@ -980,13 +1000,14 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
      "parameter": "Land use",
@@ -1023,7 +1044,8 @@
    ],
    "sources": [
     "corestack_toolkit2026",
-    "structure_rules"
+    "structure_rules",
+    "pradan_inrm"
    ],
    "practice": [],
    "caution": null,
@@ -1075,13 +1097,14 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
      "parameter": "Land use",
@@ -1121,7 +1144,8 @@
    ],
    "sources": [
     "corestack_toolkit2026",
-    "structure_rules"
+    "structure_rules",
+    "pradan_inrm"
    ],
    "addresses_wb": [],
    "wb_types": null,
@@ -1172,6 +1196,18 @@
      "sources": [
       "structure_rules"
      ]
+    },
+    {
+     "parameter": "Distance to drainage line",
+     "unit": "m",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
+     "sources": [
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
      "parameter": "Land use (farm bund)",
@@ -1280,13 +1316,14 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
      "parameter": "Land use",
@@ -1322,7 +1359,8 @@
    "sources": [
     "corestack_toolkit2026",
     "structure_rules",
-    "gswma_manual2011"
+    "gswma_manual2011",
+    "pradan_inrm"
    ],
    "practice": [],
    "caution": null,
@@ -1417,7 +1455,8 @@
      "basis": "spreadsheet",
      "sources": [
       "structure_rules"
-     ]
+     ],
+     "note": "The drain leads intercepted runoff to a safe outlet on a drainage line; the spreadsheet range is kept."
     },
     {
      "parameter": "Land use",
@@ -1551,13 +1590,15 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "0–150 m",
+     "partial": "150–300 m",
+     "not_accepted": "> 300 m",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "commons_connect_ictd2024",
+      "crida_farmpond2012"
+     ],
+     "note": "Close enough to a drainage line or swale that an inlet can lead runoff in: the Commons Connect paper found ponds on flat land with no inlet (Mohanpur) left nearly empty. CRIDA: at the lowest point of the field. A pond in the channel of a third-order or larger line is a check dam site instead (stream order rule)."
     },
     {
      "parameter": "Land use",
@@ -1626,7 +1667,8 @@
     "prasad2022",
     "imsd1995",
     "crida_farmpond2012",
-    "gswma_manual2011"
+    "gswma_manual2011",
+    "commons_connect_ictd2024"
    ],
    "site_check": "Revised against CRIDA (Reddy et al. 2012) and IMSD; stream order read as the stream order raster (value of the field), as in the spreadsheet."
   },
@@ -1654,14 +1696,15 @@
     {
      "parameter": "Stream order",
      "unit": "—",
-     "accepted": "1, 2, 3",
-     "partial": "4",
-     "not_accepted": "> 4",
-     "basis": "spreadsheet",
+     "accepted": "2–6",
+     "partial": "—",
+     "not_accepted": "—",
+     "basis": "revised",
      "sources": [
+      "pradan_inrm",
       "structure_rules"
      ],
-     "note": "Raster value of the land. Note: PRADAN places the 30x40 model on uplands above the 5% model on medium uplands, so the 30x40 model would be expected at lower raster values than the 5% model; the spreadsheet has the reverse (kept until checked)."
+     "note": "Raster value of the land. PRADAN places the 30x40 model on uplands, above the 5% model on medium uplands, so the 5% model takes the higher raster values; the spreadsheet had the two swapped."
     },
     {
      "parameter": "Catchment area",
@@ -1677,13 +1720,14 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
      "parameter": "Land use",
@@ -1727,7 +1771,7 @@
    "caution": null,
    "addresses_wb": [],
    "wb_types": null,
-   "site_check": "Placement confirmed by PRADAN; numeric rows from the spreadsheet."
+   "site_check": "Placement confirmed by PRADAN; numeric rows from the spreadsheet. Stream order swapped between the 30x40 and 5% models (PRADAN toposequence)."
   },
   {
    "id": "model_30_40",
@@ -1752,14 +1796,15 @@
     {
      "parameter": "Stream order",
      "unit": "—",
-     "accepted": "2–6",
-     "partial": "—",
-     "not_accepted": "—",
-     "basis": "spreadsheet",
+     "accepted": "1, 2, 3",
+     "partial": "4",
+     "not_accepted": "> 4",
+     "basis": "revised",
      "sources": [
+      "pradan_inrm",
       "structure_rules"
      ],
-     "note": "Raster value of the land. Note: PRADAN places the 30x40 model on uplands above the 5% model on medium uplands, so the 30x40 model would be expected at lower raster values than the 5% model; the spreadsheet has the reverse (kept until checked)."
+     "note": "Raster value of the land. PRADAN places the 30x40 model on uplands, above the 5% model on medium uplands, so the 30x40 model takes the lower raster values; the spreadsheet had the two swapped."
     },
     {
      "parameter": "Catchment area",
@@ -1775,13 +1820,14 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "> 30 m (between drainage lines)",
+     "partial": "—",
+     "not_accepted": "≤ 30 m (on a drainage line)",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "pradan_inrm"
+     ],
+     "note": "Area treatment belongs on the slopes between drainage lines and intercepts overland flow; a drainage line within one pixel is treated with gully plugs and checks instead (ridge-to-valley sequence, PRADAN). Proposed: no published distance found."
     },
     {
      "parameter": "Land use",
@@ -1826,7 +1872,7 @@
    "caution": null,
    "addresses_wb": [],
    "wb_types": null,
-   "site_check": "Slope revised against PRADAN (30x40 model on 3–8% uplands)."
+   "site_check": "Slope revised against PRADAN (30x40 model on 3–8% uplands). Stream order swapped between the 30x40 and 5% models (PRADAN toposequence)."
   },
   {
    "id": "community_pond",
@@ -1873,13 +1919,14 @@
     {
      "parameter": "Distance to drainage line",
      "unit": "m",
-     "accepted": "0–60 m",
-     "partial": "60–150 m",
-     "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "accepted": "0–150 m",
+     "partial": "150–500 m",
+     "not_accepted": "> 500 m",
+     "basis": "proposed",
      "sources": [
-      "structure_rules"
-     ]
+      "commons_connect_ictd2024"
+     ],
+     "note": "Village tanks sit in depressions fed by a nala or village runoff; beyond about 500 m from any drainage line they depend on direct rain alone. Proposed: no published distance found."
     },
     {
      "parameter": "Land use",
@@ -1945,7 +1992,8 @@
     "corestack_toolkit2026",
     "structure_rules",
     "amrit_sarovar_pib2025",
-    "crida_farmpond2012"
+    "crida_farmpond2012",
+    "commons_connect_ictd2024"
    ],
    "site_spec": null,
    "site_check": "No published siting numbers found; kept from the spreadsheet. Mission Amrit Sarovar sets a water spread of at least 1 acre and about 10,000 m³ of storage, which a 10–40 ha catchment fills at 600 mm rainfall and 15% runoff."
@@ -2087,10 +2135,12 @@
      "accepted": "0–60 m",
      "partial": "60–150 m",
      "not_accepted": "> 150 m",
-     "basis": "spreadsheet",
+     "basis": "verified",
      "sources": [
-      "structure_rules"
-     ]
+      "structure_rules",
+      "cgwb_manual2007"
+     ],
+     "note": "Recharge shafts are dug in nala beds and ponds (CGWB), pits beside the flow; the spreadsheet range is kept."
     },
     {
      "parameter": "Land use (recharge pits)",

@@ -81,6 +81,8 @@ Must-ask scores use the same rules as `seft.priority` and the Explore / Commons 
 
 ## Knowledge packs
 
+Districts fetched on demand are listed in `data_dir/index.json` with the role `coverage`: they are scored with the published pools in the knowledge pack (`pools.json`, whose `provenance` names the districts the pools were computed over) and never change them. The atlas's own location roles (`pools`, `groundtruth`, `coverage`) are described in the README (Location roles).
+
 `s.knowledge_version` and `s.library_version` are stamped on every result. `s.refresh_knowledge()` copies the bundled pack into `data_dir/knowledge/`. `s.refresh_knowledge("1.4.0")` tries the matching GitHub Release zip.
 
 Pools (percentile thresholds) always come from the pack, never from the caller’s one district.

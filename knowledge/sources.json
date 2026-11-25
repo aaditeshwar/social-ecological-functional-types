@@ -411,6 +411,18 @@
    "citation": "Tripura Forest Department. Guidelines for soil and moisture conservation works.",
    "url": "https://forest.tripura.gov.in/sites/default/files/documents/Guidelines%20for%20Soil%20and%20Moisture%20Conservation.pdf",
    "used_for": "Staggered contour trenches on 10–30% slopes under open forest or scrub; small forest check dams for catchments under 5–20 ha."
+  },
+  {
+   "id": "commons_connect_ictd2024",
+   "citation": "Mehta SA, Dutt A, Tannirkulam A, Singh AP, Verma A, Singh A, Sreenidhi A, Nandi A, et al., Seth A (2024). Initial observations from field testing of a digital participatory tool to improve water security in rural India (Commons Connect). ACM COMPASS / ICTD 2024.",
+   "url": "https://www.cse.iitd.ac.in/~aseth/commons-connect-ictd2024.pdf",
+   "used_for": "Where Commons Connect is used; drainage lines and stream orders as site layers (\"construction of water bodies on the drainage lines or in its proximity ensures a reliable source of surplus runoff\"); field failures that site rules guard against: a check dam with too small a catchment (Pindwara), farm ponds on flat land with no inlet (Mohanpur), wells in areas of low groundwater discharge (Angul) or on hard rock (Masalia)."
+  },
+  {
+   "id": "gadkari2022",
+   "citation": "Gadkari D, Kadam R (2022). Identification of suitable sites for select water conservation structures for Chambali watershed, Purandhar taluka, Pune, India. Transactions of the Institute of Indian Geographers 44(2).",
+   "url": "https://iigeo.org/IIG%20journals%20Vol%2036%20year%202014%20to%2046%20year%202024/vol%2044-2/Paper_5_Deepali.pdf",
+   "used_for": "Check dams weighted to within 5–10 m of the stream channel; percolation tanks and contour trenches sited without a channel buffer, on barren land."
   }
  ]
 }

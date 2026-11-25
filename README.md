@@ -38,8 +38,8 @@ python -m pip install -r requirements.txt
 export CORE_STACK_API_KEY=...            # your CoRE Stack key; never commit it
 export CORE_STACK_API_VERSION=v2          # optional; v2 is the default and serves every dataset
 
-# 1. say where (names exactly as the CoRE Stack API lists them)
-python -m seft.cli add --state Maharashtra --district Yavatmal --tehsils "Darwha,Pusad,Arni,Digras"
+# 1. say where (names exactly as the CoRE Stack API lists them) and what for (--role, below)
+python -m seft.cli add --state Maharashtra --district Yavatmal --tehsils "Darwha,Pusad,Arni,Digras" --role coverage
 
 # 2. download, check, analyse
 python -m seft.cli fetch                 # API data + GeoServer geometry; cached datasets are skipped
@@ -53,19 +53,48 @@ On Windows, use `python -m pip` rather than `pip`. Windows Application Control o
 Open `web/index.html` again: new districts appear on the India map and in the district list.
 No HTML changes are needed.
 
-Which locations a run covers depends on how you add them:
+### Location roles
 
-* **One combined run (recommended).** Add the new districts to `config/locations.json` and run everything.
-  Pooled percentile thresholds are then computed across all locations together. This needs the raw data
-  of every district, so the first `fetch` also downloads the eight test districts: 73 tehsils × 18
-  datasets, which takes roughly 20–30 minutes.
-* **Only the new districts.** Keep them in their own file and merge them into the existing atlas:
+Every district in a locations file carries `roles`, which say what it is for:
+
+| Role | Meaning | Districts now |
+|---|---|---|
+| `pools` | The sample for the percentile pools: the thresholds of every pooled signal are percentiles over these MWS (watersheds) or waterbodies (waterbodies). | The eight original districts (Pune, Amaravati, Ananthapur, Srikakulam, Godda, Koraput, Udaipur, Ballia), in both `config/locations.json` and `config/waterbody/locations.json`. |
+| `groundtruth` | Compared with independent labels. Watersheds: the tehsils of `final_ground_truth.json`, in `config/groundtruth/locations.json` (rebuilt by `groundtruth`). Waterbodies: the Water Body Census fields matched by CoRE Stack (`wb-census`). | 29 ground-truth districts (watersheds); the eight original districts for the census comparison (run on 22 Nov 2026). |
+| `coverage` | Extra districts fetched to extend the atlas, or cached on demand by `core_seft` (listed in `data/index.json`). Scored with the published pools; never used to compute them. | Chittoor, Hazaribagh. |
+
+`knowledge/pools.json` records under `provenance` which districts its MWS and waterbody pools were computed
+over. **The published pools (24 Nov 2026) were computed over all ten districts**, because the run that added
+Chittoor and Hazaribagh pooled over every district before roles existed. `run --update-pools` (and
+`wb-run --update-pools`) recompute them over the eight `pools` districts only.
+
+```bash
+python -m seft.cli add --state ... --district ... --tehsils "..." --role coverage      # default
+python -m seft.cli add --state ... --district ... --tehsils "..." --role pools          # joins the pools sample
+python -m seft.cli add --state ... --district ... --tehsils "..." --role groundtruth    # -> config/groundtruth/locations.json
+python -m seft.cli wb-add --state ... --district ... --tehsils "..." --role pools,groundtruth
+```
+
+Adding a role to a district already listed keeps its other roles (a `coverage` district given `pools` becomes
+`pools` only).
+
+Which thresholds a run uses:
+
+* **By default `run` and `wb-run` score with the published pools** in `knowledge/pools.json`, whichever districts
+  are in the run. A new `coverage` district therefore gets exactly the thresholds of the atlas:
   ```bash
   python -m seft.cli add --locations config/yavatmal.json --state Maharashtra --district Yavatmal --tehsils "..."
   python -m seft.cli all --locations config/yavatmal.json --merge
   ```
   `--merge` keeps the districts already in `web/data/`, and `mws_all.csv` and `villages_all.csv` are rebuilt to
-  include every district. The new districts' percentile thresholds are pooled over the new run only.
+  include every district.
+* **`--update-pools`** recomputes the pools over the `pools` districts of the locations file (their raw data
+  must be cached), writes them and their provenance to `knowledge/pools.json`, and scores every district of the
+  run with them. Use it after adding or removing a `pools` district, with a locations file that holds every
+  district (`python -m seft.cli run --update-pools`), so that no district keeps the old thresholds. With
+  `--merge`, districts kept from the atlas were scored with the previous pools; the command says so. Bump
+  `knowledge/manifest.json` before releasing a knowledge pack with new pools.
+* If `knowledge/pools.json` has no pools yet, the first run computes them over the `pools` districts.
 
 The same flow, with the files each step writes:
 
@@ -138,7 +167,7 @@ Turns the cache and the knowledge files into tables and the atlas. `python -m se
   * `out/web/d_<slug>.json` — one bundle per district: encoded MWS polygons, tehsil outlines, compact MWS records (indicators, mix, stresses, signals, schemes, village ids) and village rows with coordinates.
   * `web/data/` — the same bundles as both `.json` (for `http://`) and `.js` (for `file://`), plus `web/data/csv/` copies of the tables. This is what `web/index.html` loads. `--no-web` skips the atlas and writes only CSV. `--merge` keeps district bundles already in `web/data/` that this run did not produce, and rebuilds `mws_all.csv` / `villages_all.csv` over every district in the atlas.
 
-Pooled percentile thresholds are computed across every MWS in this run (unless `rescore` / `groundtruth` pass in the atlas's stored pools). After `run`, open `web/index.html`; new districts appear on the India map with no HTML changes.
+Thresholds are the published pools in `knowledge/pools.json` unless `--update-pools` recomputes them over the `pools` districts (see Location roles). After `run`, open `web/index.html`; new districts appear on the India map with no HTML changes.
 
 ### Community answers
 
@@ -172,6 +201,15 @@ python -m seft.cli priority [--district pune]                                   
   Every atlas question is asked in some form; the landscape form gets the ones its Word draft lacks.
 * `seft/priority.py` computes the scores; the page computes the same in the browser (all 577,296 scores of the
   watershed and landscape questions agree, data alone). `priority` writes one row per MWS and question.
+
+### `rules-xlsx`
+
+`python -m seft.cli rules-xlsx --v1 WaterStructure_Suitability_Rules.xlsx` writes the site rules of
+`knowledge/interventions.json` back into the layout of the CoRE Stack suitability-rules workbook
+(`out/WaterStructure_Suitability_Rules_v2.xlsx`): the v1 structures and parameters with the current values, each
+row's basis (verified, revised, added, proposed, spreadsheet, not reviewed), the change from v1, sources and notes;
+a CHANGES sheet; SOURCES; ABOUT. Site layers only (slope, stream order raster, catchment, distance to drainage
+line, land use, soil); landscape rules stay in the interventions file.
 
 ### `groundtruth`
 
@@ -218,7 +256,10 @@ python -m seft.cli wb-all              # wb-fetch, wb-validate, wb-run
 python -m seft.cli wb-census           # compare with the Water Body Census fields -> out/waterbody/census/
 ```
 
-* **`wb-add`** writes to `config/waterbody/locations.json` (or `--locations`), exactly like `add`.
+* **`wb-add`** writes to `config/waterbody/locations.json` (or `--locations`), exactly like `add`, with `--role`
+  (`pools`, `groundtruth` for the census comparison, `coverage`).
+* **`wb-run`** scores with the published waterbody pools; `--update-pools` recomputes them over the `pools`
+  districts and writes `knowledge/pools.json`.
 * **`wb-fetch`** runs `fetch` for the same tehsils (cached datasets are skipped), then downloads
   `swb:surface_waterbodies_{district}_{tehsil}` and `swb:waterbodies_zoi_{district}_{tehsil}` from
   `CORE_STACK_GEOSERVER` into `data/raw/<state>/<district>/<tehsil>/swb_layers.json.gz` (attributes, yearly
@@ -249,8 +290,10 @@ python -m seft.cli wb-census           # compare with the Water Body Census fiel
 * **`wb-assess --answers waterbody_answers.json`** (`seft/wb/assess.py`) applies community answers saved from the
   page: type answers (ownership, inflow) reassign the type and re-score every rule; stress answers multiply each
   rule's odds by their likelihood ratios. Writes `out/waterbody/answers/assessed.csv`.
-* **`wb-census`** (`seft/wb/census.py`) scores the same waterbodies and compares them with the Water Body Census
-  fields that CoRE Stack matched to them, as `groundtruth` does for watersheds. It writes
+* **`wb-census`** (`seft/wb/census.py`) scores the `groundtruth` districts of the waterbody locations file (`--all`
+  for every district) with the published pools and compares them with the Water Body Census fields that CoRE
+  Stack matched to them, as `groundtruth` does for watersheds. The comparison of 22 Nov 2026 covered the eight
+  original districts. It writes
   `out/waterbody/census/report.md`, `detail.csv` and `comparison.json`. The census fields are never inputs.
   Decisions taken from it are in `docs/waterbody_census_comparison.md`.
 
@@ -306,6 +349,7 @@ data/
 out/csv/              result tables (mws_<district>.csv, villages_<district>.csv, *_all.csv)
 out/groundtruth/      confusion matrices and detail from the groundtruth command
 out/priority/         must-ask scores per MWS and question (priority command)
+out/WaterStructure_Suitability_Rules_v2.xlsx   site rules in the workbook layout (rules-xlsx command)
 out/web/              atlas bundles before they are copied to web/data (gitignored)
 web/
   index.html          the atlas

@@ -1,12 +1,14 @@
 """Command line entry point. Run from the repository root.
 
-    python -m seft.cli add --state Maharashtra --district Yavatmal --tehsils "Darwha,Pusad"
-                                       # add a district (and tehsils) to config/locations.json
+    python -m seft.cli add --state Maharashtra --district Yavatmal --tehsils "Darwha,Pusad" [--role coverage]
+                                       # add a district (and tehsils) to config/locations.json; --role pools,
+                                       # groundtruth or coverage (default) says what it is for
     python -m seft.cli fetch           # API data + GeoServer geometry for every location (needs CORE_STACK_API_KEY)
     python -m seft.cli audit           # which datasets are missing or incomplete
     python -m seft.cli validate        # check the knowledge JSONs after editing
     python -m seft.cli refresh-knowledge   # put edited text-only knowledge (interventions, notes) into web/data
     python -m seft.cli cc-build --forms <folder>   # Commons Connect ODK templates -> knowledge/commons_connect.json
+    python -m seft.cli rules-xlsx --v1 FILE.xlsx   # site rules -> suitability-rules workbook (v2) in out/
     python -m seft.cli priority [--district pune]  # must-ask scores of the community questions -> out/priority
     python -m seft.cli run             # indicators, systems, stresses, schemes -> out/csv, out/web and web/data
     python -m seft.cli all             # fetch, validate and run in one go
@@ -24,8 +26,16 @@ Waterbody atlas (same operations, on config/waterbody/locations.json):
     python -m seft.cli wb-census       # compare with the Water Body Census fields -> out/waterbody/census/
     python -m seft.cli wb-assess --answers community_answers.json   # re-assess with answers saved from the page
 
-Common options: --locations FILE (default config/locations.json). For run: --answers FILE (community
-answers saved from the atlas), --merge (keep districts already in the atlas that this run does not cover).
+Common options: --locations FILE (default config/locations.json). For run and wb-run: --answers FILE
+(community answers saved from the atlas), --merge (keep districts already in the atlas that this run does not
+cover), --update-pools (recompute the percentile pools over the 'pools' districts; otherwise the published
+pools in knowledge/pools.json are used).
+
+Location roles (each district in a locations file has 'roles'):
+    pools        the sample for the percentile pools (the eight original districts)
+    groundtruth  compared with labels: config/groundtruth/locations.json (final_ground_truth.json) for watersheds,
+                 the Water Body Census fields (wb-census) for waterbodies
+    coverage     extra districts, fetched for the atlas or cached on demand, scored with the published pools
 """
 import argparse, sys
 from pathlib import Path
@@ -34,8 +44,19 @@ from .util import ROOT, load_json, dump_json, raw_dir, iter_locations
 DEFAULT_LOC = str(ROOT / 'config' / 'locations.json')
 WB_LOC = str(ROOT / 'config' / 'waterbody' / 'locations.json')
 
+def _roles(a):
+    from .util import ROLES
+    roles = [r.strip() for r in (a.role or 'coverage').split(',') if r.strip()]
+    bad = [r for r in roles if r not in ROLES]
+    if bad: raise SystemExit(f"Unknown role(s) {', '.join(bad)}; use {', '.join(ROLES)} (comma-separated for several).")
+    return roles
+
 def cmd_add(a):
-    p = Path(a.locations)
+    roles = _roles(a)
+    loc = a.locations
+    if roles == ['groundtruth'] and a.cmd == 'add' and loc == DEFAULT_LOC:
+        loc = str(ROOT / 'config' / 'groundtruth' / 'locations.json')   # watershed ground-truth tehsils live here
+    p = Path(loc)
     cfg = load_json(p) if p.exists() else {'districts': []}
     tehsils = [t.strip() for t in (a.tehsils or '').split(',') if t.strip()]
     if not tehsils:
@@ -43,12 +64,20 @@ def cmd_add(a):
                          '(get_active_locations).')
     d = next((x for x in cfg['districts'] if x['district'] == a.district and x['state'] == a.state), None)
     if d is None:
-        d = {'state': a.state, 'district': a.district, 'tehsils': []}; cfg['districts'].append(d)
+        d = {'state': a.state, 'district': a.district, 'tehsils': [], 'roles': []}; cfg['districts'].append(d)
     added = [t for t in tehsils if t not in d['tehsils']]
     d['tehsils'] += added
+    old = d.get('roles') or []
+    new = set(old) | set(roles)
+    if new - {'coverage'}: new.discard('coverage')     # a pools or ground-truth district is no longer only coverage
+    d['roles'] = [r for r in ('pools', 'groundtruth', 'coverage') if r in new]
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(__import__('json').dumps(cfg, indent=1, ensure_ascii=False) + '\n')
-    print(f"{a.district}, {a.state}: added {len(added)} tehsil(s) to {p} ({len(d['tehsils'])} in total)")
+    print(f"{a.district}, {a.state}: added {len(added)} tehsil(s) to {p} ({len(d['tehsils'])} in total); roles: {', '.join(d['roles'])}")
+    if 'pools' in d['roles'] and 'pools' not in old:
+        run = 'wb-run' if a.cmd == 'wb-add' else 'run'
+        print(f"This district is now part of the pools sample: after fetching, `python -m seft.cli {run} --update-pools` "
+              f"recomputes the percentile pools (thresholds change for every district).")
     if len(d['tehsils']) < 4:
         print('Note: the pilot used districts with at least 4 populated tehsils; fewer tehsils give thinner district summaries.')
 
@@ -75,7 +104,23 @@ def cmd_run(a):
     from .export import write_csv, write_web, _knowledge
     answers = load_json(a.answers) if a.answers else None
     if answers and 'answers' in answers: answers = answers['answers']
-    recs, vill, cl, meta = run(cfg, kd, answers=answers)
+    from .util import with_role, pools_doc, write_pools
+    import datetime
+    pub = pools_doc().get('mws')
+    pool_d = {(d['state'], d['district']) for d in with_role(cfg, 'pools')['districts']}
+    if a.update_pools or not pub:
+        if not pool_d: raise SystemExit("No district in the locations file has the 'pools' role.")
+        print(f"pooling the signal thresholds over the 'pools' districts: {', '.join(d for _, d in sorted(pool_d))}")
+        recs, vill, cl, meta = run(cfg, kd, answers=answers, pool_filter=lambda r: (r['state'], r['district']) in pool_d)
+        write_pools('mws', meta['pools'], {'districts': [d for _, d in sorted(pool_d)],
+                    'n_mws': sum(1 for r in recs if (r['state'], r['district']) in pool_d),
+                    'computed': f'{datetime.date.today()}, run --update-pools'})
+        print('wrote the MWS pools to knowledge/pools.json (bump knowledge/manifest.json before releasing a pack)')
+        if a.merge: print('Note: districts kept from the atlas by --merge were scored with the previous pools; '
+                          'run them again (or run every district without --merge) so that all use the new pools.')
+    else:
+        print('scoring with the published pools (knowledge/pools.json); --update-pools to recompute them')
+        recs, vill, cl, meta = run(cfg, kd, answers=answers, pools=pub)
     for r in recs: r['n_villages'] = len(cl[r['district']].get(r['uid'], []))
     K = _knowledge(kd)
     out = Path(a.out)
@@ -100,11 +145,11 @@ def cmd_wb_validate(a):
 
 def cmd_wb_run(a):
     from .wb.run import main as wb_run
-    wb_run(a.locations, a.out, merge=a.merge, web=not a.no_web)
+    wb_run(a.locations, a.out, merge=a.merge, web=not a.no_web, update_pools=a.update_pools)
 
 def cmd_wb_census(a):
     from .wb.census import main as wb_census
-    wb_census(a.locations, a.out)
+    wb_census(a.locations, a.out, all_districts=a.all)
 
 def cmd_refresh_knowledge(a):
     from .webdata import refresh_knowledge
@@ -123,8 +168,12 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog='python -m seft.cli', description=__doc__.split('\n')[0])
     sub = ap.add_subparsers(dest='cmd', required=True)
     def loc(p): p.add_argument('--locations', default=DEFAULT_LOC, help='locations JSON (default config/locations.json)')
+    ROLE_HELP = ("what the district is for: pools (sample for the percentile pools), groundtruth (compared with labels: "
+                 "final_ground_truth.json for watersheds, the Water Body Census for waterbodies), coverage (extra districts, "
+                 "scored with the published pools; the default). Comma-separated for several.")
     p = sub.add_parser('add', help='add a district and its tehsils to a locations file'); loc(p)
     p.add_argument('--state', required=True); p.add_argument('--district', required=True); p.add_argument('--tehsils')
+    p.add_argument('--role', help=ROLE_HELP + ' --role groundtruth alone writes to config/groundtruth/locations.json.')
     p = sub.add_parser('fetch', help='download API data and geometry'); loc(p)
     p.add_argument('--force', action='store_true', help='re-download datasets already cached')
     p.add_argument('--only', help='comma-separated dataset names to fetch')
@@ -135,6 +184,9 @@ def main(argv=None):
         p.add_argument('--knowledge', default=str(ROOT / 'knowledge')); p.add_argument('--out', default=str(ROOT / 'out'))
         p.add_argument('--answers', help='community answers JSON saved from the atlas')
         p.add_argument('--merge', action='store_true', help='keep atlas districts that this run does not cover')
+        p.add_argument('--update-pools', action='store_true',
+                       help="recompute the percentile pools over the 'pools' districts (all must be in this run) and write "
+                            "knowledge/pools.json; without it the published pools are used")
         p.add_argument('--no-web', action='store_true', help='only write CSV tables')
         if name == 'all':
             p.add_argument('--force', action='store_true'); p.add_argument('--only', help=argparse.SUPPRESS)
@@ -142,6 +194,7 @@ def main(argv=None):
     def wloc(p): p.add_argument('--locations', default=WB_LOC, help='locations JSON (default config/waterbody/locations.json)')
     p = sub.add_parser('wb-add', help='add a district and its tehsils to the waterbody locations'); wloc(p)
     p.add_argument('--state', required=True); p.add_argument('--district', required=True); p.add_argument('--tehsils')
+    p.add_argument('--role', help=ROLE_HELP)
     p = sub.add_parser('wb-fetch', help='download API data and the GeoServer waterbody layers'); wloc(p)
     p.add_argument('--force', action='store_true', help='re-download what is already cached')
     p = sub.add_parser('wb-audit', help='list missing layers and datasets for the waterbody atlas'); wloc(p)
@@ -151,12 +204,18 @@ def main(argv=None):
                            else 'wb-fetch + wb-validate + wb-run'); wloc(p)
         p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody'))
         p.add_argument('--merge', action='store_true', help='keep atlas districts that this run does not cover')
+        p.add_argument('--update-pools', action='store_true',
+                       help="recompute the waterbody pools over the 'pools' districts and write knowledge/pools.json")
         p.add_argument('--no-web', action='store_true', help='only write CSV tables and out/waterbody/web')
         if name == 'wb-all': p.add_argument('--force', action='store_true')
     p = sub.add_parser('wb-census', help='compare waterbody patterns with the Water Body Census fields -> out/waterbody/census'); wloc(p)
     p.add_argument('--out', default=str(ROOT / 'out' / 'waterbody' / 'census'))
+    p.add_argument('--all', action='store_true', help="compare every district of the locations file, not only the 'groundtruth' ones")
     p = sub.add_parser('cc-build', help='structured Commons Connect forms from the ODK templates -> knowledge/commons_connect.json')
     p.add_argument('--forms', required=True, help='folder with the Commons Connect .xlsx templates')
+    p = sub.add_parser('rules-xlsx', help='site rules of the interventions -> the suitability-rules workbook layout (v2)')
+    p.add_argument('--v1', required=True, help='the v1 WaterStructure_Suitability_Rules.xlsx')
+    p.add_argument('--out', default=str(ROOT / 'out' / 'WaterStructure_Suitability_Rules_v2.xlsx'))
     p = sub.add_parser('priority', help='must-ask scores of the atlas and Commons Connect questions, by MWS -> out/priority')
     p.add_argument('--district', action='append', help='district slug (repeatable); default all in web/data')
     sub.add_parser('refresh-knowledge', help='put the current knowledge files (e.g. interventions) into web/data without re-scoring')
@@ -189,6 +248,8 @@ def main(argv=None):
     elif a.cmd == 'refresh-knowledge': cmd_refresh_knowledge(a)
     elif a.cmd == 'cc-build':
         from .commons_connect import build; build(a.forms)
+    elif a.cmd == 'rules-xlsx':
+        from .rules_xlsx import main as rx; rx(a.v1, a.out)
     elif a.cmd == 'priority':
         from .priority import main as pmain; pmain(a.district)
     elif a.cmd == 'wb-all':

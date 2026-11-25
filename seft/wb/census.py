@@ -128,9 +128,17 @@ def _report(R, n, K):
     L += ['', 'Tuning decisions taken from this check are listed in docs/waterbody_census_comparison.md.', '']
     return '\n'.join(L)
 
-def main(cfg_path=None, out=None, log=print):
+def main(cfg_path=None, out=None, all_districts=False, log=print):
+    """Compares the 'groundtruth' districts of the waterbody locations file (all districts with all_districts),
+    scored with the published waterbody pools."""
+    from ..util import with_role, pools_doc
     cfg = load_json(cfg_path or ROOT / 'config' / 'waterbody' / 'locations.json')
-    B, stats, types, K, pools = score_all(cfg, log=log)
+    if not all_districts:
+        cfg = with_role(cfg, 'groundtruth')
+        if not cfg['districts']: raise SystemExit("No district has the 'groundtruth' role; use --all or wb-add --role groundtruth.")
+    log('  census comparison over: ' + ', '.join(d['district'] for d in cfg['districts']))
+    pub = pools_doc().get('waterbody')
+    B, stats, types, K, pools = score_all(cfg, log=log, pools={k: {t: tuple(x) for t, x in v.items()} for k, v in pub.items()} if pub else None)
     K['types'] = types
     scope = {t['id'] for t in types['types'] if t['in_scope']}
     C = census_fields(cfg)
