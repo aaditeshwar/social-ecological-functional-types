@@ -423,6 +423,18 @@
    "citation": "Gadkari D, Kadam R (2022). Identification of suitable sites for select water conservation structures for Chambali watershed, Purandhar taluka, Pune, India. Transactions of the Institute of Indian Geographers 44(2).",
    "url": "https://iigeo.org/IIG%20journals%20Vol%2036%20year%202014%20to%2046%20year%202024/vol%2044-2/Paper_5_Deepali.pdf",
    "used_for": "Check dams weighted to within 5–10 m of the stream channel; percolation tanks and contour trenches sited without a channel buffer, on barren land."
+  },
+  {
+   "id": "hysogs250m",
+   "citation": "Ross CW, Prihodko L, Anchang J, Kumar S, Ji W, Hanan NP (2018). Global Hydrologic Soil Groups (HYSOGs250m) for Curve Number-Based Runoff Modeling. ORNL DAAC, Oak Ridge, Tennessee, USA.",
+   "url": "https://doi.org/10.3334/ORNLDAAC/1566",
+   "used_for": "Hydrologic soil groups A–D at 250 m, the CoRE Stack soil layer used for runoff (curve number) and, in the site rules, for infiltration."
+  },
+  {
+   "id": "usda_neh630_ch7",
+   "citation": "USDA Natural Resources Conservation Service (2009). National Engineering Handbook, Part 630 Hydrology, Chapter 7: Hydrologic Soil Groups.",
+   "url": "https://directives.sc.egov.usda.gov/OpenNonWebContent.aspx?content=22526.wba",
+   "used_for": "Definition of hydrologic soil groups by infiltration and transmission rate: A high (sands, gravels), B moderate, C slow, D very slow (clays with high swelling, shallow soils over nearly impervious material)."
   }
  ]
 }

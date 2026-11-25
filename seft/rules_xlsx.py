@@ -57,14 +57,17 @@ def main(src, out=None, log=print):
                 if iid=='contour_graded_bunds' and st=='Farm Bund' and r['parameter'].startswith('Slope'): continue
                 if iid=='recharge_pits_shafts' and r['parameter'].startswith('Land use'): continue
                 if iid=='diversion_drain': continue
-                rows.append(dict(st=st,p=r['parameter'].replace(' (Commons Connect classes)',''),unit=r.get('unit',''),a=r['accepted'],pa=r['partial'],n=r['not_accepted'],basis=r['basis'],src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),note=r.get('note','')))
+                if st=='Graded Bund' and r['parameter']=='Hydrologic soil group':
+                    rows.append(dict(st=st,p=r['parameter'],unit=r.get('unit',''),a='A, B, C, D',pa='—',n='—',basis=r['basis'],src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),
+                                     note='Graded bunds lead excess water away to a waterway, so they also suit slowly permeable group D soils, where contour bunds would waterlog (CGWB).')); continue
+                rows.append(dict(st=st,p=r['parameter'],unit=r.get('unit',''),a=r['accepted'],pa=r['partial'],n=r['not_accepted'],basis=r['basis'],src='; '.join(S[x]['citation'].split(').')[0]+')' for x in r.get('sources',[]) if x in S and x!='structure_rules'),note=r.get('note','')))
     wb=openpyxl.Workbook(); ws=wb.active; ws.title='RULES'
     navy=PatternFill('solid',fgColor='1F3864'); blue=PatternFill('solid',fgColor='2E75B6')
     fills={'D':'C6EFCE','E':'FFEB9C','F':'FFC7CE'}; bfill={'source':'FFFFFF','proposed':'E2EFDA','not sourced':'F2F2F2','not reviewed':'F2F2F2'}
     thin=Side(style='thin',color='BFBFBF'); B=Border(left=thin,right=thin,top=thin,bottom=thin)
     H=['Structure','Parameter','Unit','✔  Accepted','▲  Partially Accepted','✖  Not Accepted','Basis','Sources','Notes']
     ws['A1']='WATER STRUCTURES — SUITABILITY RULES (site layers), 25 November 2026'; ws['A1'].font=Font(bold=True,size=13,color='FFFFFF'); ws['A1'].fill=navy; ws.merge_cells('A1:I1')
-    ws['A2']='  ✔ ACCEPTED  —  Ideal site conditions        ▲ PARTIALLY ACCEPTED  —  Works with caution        ✖ NOT ACCEPTED  —  Unsuitable.   Site layers only (slope, stream order raster, catchment, distance to drainage line, land use, soil); landscape rules (rainfall, aquifer, groundwater stage, depth to water) are in the atlas.'
+    ws['A2']='  ✔ ACCEPTED  —  Ideal site conditions        ▲ PARTIALLY ACCEPTED  —  Works with caution        ✖ NOT ACCEPTED  —  Unsuitable.   Site layers only (slope, stream order raster, catchment, distance to drainage line, land use, hydrologic soil group); landscape rules (rainfall, aquifer, groundwater stage, depth to water) are in the atlas.'
     ws.merge_cells('A2:I2'); ws['A2'].alignment=Alignment(wrap_text=True); ws.row_dimensions[2].height=30
     for i,h in enumerate(H,1):
         c=ws.cell(3,i,h); c.font=Font(bold=True,color='FFFFFF'); c.fill=blue; c.alignment=Alignment(wrap_text=True,vertical='center'); c.border=B
@@ -98,7 +101,7 @@ def main(src, out=None, log=print):
     txt=["CoRE Stack water structures suitability rules (site layers), 25 November 2026, with the published manuals and papers behind them (SOURCES sheet).",
     "Basis: source = a published manual or paper gives the value; proposed = reasoned from the sources where none gives a number (review before use); not sourced = no published source found; not reviewed = structure not yet in the interventions catalogue.",
     "Stream order is the CoRE Stack stream order raster: every 30 m pixel carries the Strahler order of the drainage line it drains into. For structures built across a drainage line (check dams, gully plugs, boulder checks, gabions, percolation tanks) read it on the line, where it is the line's own order. For area treatments and ponds on farmland it places the land in the ridge-to-valley sequence.",
-    "Soil is not yet a CoRE Stack layer; the classes are those of the Commons Connect forms (Black, Red, Laterite, Alluvial, Sandy, Clay, Rocky), recorded by the field worker.",
+    "Soil is read as the hydrologic soil group (A–D) of the HYSOGs250m layer that the CoRE Stack uses for runoff: A high infiltration (sands, gravels), B moderate, C slow, D very slow (clays with high swelling, shallow soils). The soil type recorded in Commons Connect forms is kept separately as field data.",
     "Landscape rules (rainfall, aquifer type, groundwater stage, depth to water after the monsoon) are not in this sheet: they decide whether an intervention suits the micro-watershed and are kept in knowledge/interventions.json (suits / avoid) in the social-ecological-functional-types repository. Depth to water is asked of the community until a layer exists.",
     "Generated from knowledge/interventions.json by `python -m seft.cli rules-xlsx`; Well, Canal and Large Water Body are taken from the input workbook as they are."]
     for i,t in enumerate(txt,1):

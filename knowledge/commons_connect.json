@@ -11376,9 +11376,9 @@
      ],
      "must_ask": {
       "base": 70,
-      "why": "checked against the soil site rule of the chosen work type"
+      "why": "field record of the soil at the site"
      },
-     "note": "Added: soil is not yet a CoRE Stack layer. The classes are those the Commons Connect forms use for desilting and plantations."
+     "note": "Added. The classes are those the Commons Connect forms use for desilting and plantations. Kept as field data; the site rules read soil as the hydrologic soil group."
     }
    ]
   },
@@ -16653,9 +16653,9 @@
      ],
      "must_ask": {
       "base": 70,
-      "why": "checked against the soil site rule of the chosen work type"
+      "why": "field record of the soil at the site"
      },
-     "note": "Added: soil is not yet a CoRE Stack layer. The classes are those the Commons Connect forms use for desilting and plantations."
+     "note": "Added. The classes are those the Commons Connect forms use for desilting and plantations. Kept as field data; the site rules read soil as the hydrologic soil group."
     }
    ]
   },

@@ -689,8 +689,8 @@ def build(forms_dir, out=None, log=print):
             if F['id'] in ('recharge_new', 'irrigation_new'):
                 qs.append(L('site_soil', 'Soil at the proposed site', 'select_one', O(('Black', 'Black'), ('Red', 'Red'), ('Laterite', 'Laterite'),
                     ('Alluvial', 'Alluvial'), ('Sandy', 'Sandy'), ('Clay', 'Clay'), ('Rocky', 'Rocky')), origin='added',
-                    relevant_expr=None, must=M(70, why='checked against the soil site rule of the chosen work type'),
-                    note='Added: soil is not yet a CoRE Stack layer. The classes are those the Commons Connect forms use for desilting and plantations.'))
+                    relevant_expr=None, must=M(70, why='field record of the soil at the site'),
+                    note='Added. The classes are those the Commons Connect forms use for desilting and plantations. Kept as field data; the site rules read soil as the hydrologic soil group.'))
             if F['id'] == 'waterbody':
                 for qid in WB_ADDED:
                     if any(m['id'] == qid for x in qs for m in x.get('atlas_match', []) if m['how'] == 'same'): continue

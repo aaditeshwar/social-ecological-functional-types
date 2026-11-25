@@ -33,7 +33,7 @@
    "wl_post_monsoon": "Depth to the water level in open wells after the monsoon (m), from the Commons Connect landscape question ls_wl_post; unknown until answered, and then an unknown value changes no verdict."
   }
  },
- "site_rules_about": "Site rules from the CoRE Stack 'Water structures — suitability rules' workbook, with each value's basis: source (a published manual or paper gives it: the CGWB Manual on Artificial Recharge (2007), the Gujarat IWMP technical manual (2011), the IMSD guidelines (NRSA 1995), NIH (Saha et al. 2018), ICAR-CRIDA's farm pond bulletin (2012), PRADAN's INRM handbook, the Tripura soil and moisture conservation guidelines, the Commons Connect paper), proposed (reasoned from the sources where none gives a number; review before use) or not sourced (no published source found). Site rules are the layers read at the site itself: slope, stream order, catchment area, distance to the nearest drainage line, land use and soil (soil is not yet a CoRE Stack layer: the field worker records it with the Commons Connect soil classes). Rainfall, aquifer, groundwater stage and depth to water belong to the landscape fit ('suits' and 'avoid'); depth to water is asked of the community until a layer exists. Stream order is the CoRE Stack stream order raster: every 30 m pixel carries the Strahler order of the drainage line it drains into, so it is defined off the drainage lines too (plains beside a river carry the river's high order; land beside a gully carries 1). For drainage-line structures it is read on the line, where it equals the line's Strahler order; for area treatments and ponds on farmland it places the land in the ridge-to-valley sequence. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
+ "site_rules_about": "Site rules from the CoRE Stack 'Water structures — suitability rules' workbook, with each value's basis: source (a published manual or paper gives it: the CGWB Manual on Artificial Recharge (2007), the Gujarat IWMP technical manual (2011), the IMSD guidelines (NRSA 1995), NIH (Saha et al. 2018), ICAR-CRIDA's farm pond bulletin (2012), PRADAN's INRM handbook, the Tripura soil and moisture conservation guidelines, the Commons Connect paper), proposed (reasoned from the sources where none gives a number; review before use) or not sourced (no published source found). Site rules are the layers read at the site itself: slope, stream order, catchment area, distance to the nearest drainage line, land use and soil, read as the hydrologic soil group (A–D, from the HYSOGs250m layer the CoRE Stack uses for runoff: A high infiltration, sands; B moderate; C slow; D very slow, clays and shallow soils). The soil type recorded in Commons Connect is kept separately as field data. Rainfall, aquifer, groundwater stage and depth to water belong to the landscape fit ('suits' and 'avoid'); depth to water is asked of the community until a layer exists. Stream order is the CoRE Stack stream order raster: every 30 m pixel carries the Strahler order of the drainage line it drains into, so it is defined off the drainage lines too (plains beside a river carry the river's high order; land beside a gully carries 1). For drainage-line structures it is read on the line, where it equals the line's Strahler order; for area treatments and ponds on farmland it places the land in the ridge-to-valley sequence. Slope in %, catchment in hectares, distance to the nearest drainage line in metres, land use as the CoRE Stack land-use classes. 'site_spec' gives the ridge-to-valley placement.",
  "interventions": [
   {
    "id": "loose_boulder_check",
@@ -447,17 +447,19 @@
      ]
     },
     {
-     "parameter": "Soil (Commons Connect classes)",
-     "unit": "—",
-     "accepted": "Red, Laterite, Alluvial over a sound foundation",
-     "partial": "Black, Sandy",
-     "not_accepted": "Rocky with open fractures under the wall",
+     "parameter": "Hydrologic soil group",
+     "unit": "A–D",
+     "accepted": "B, C",
+     "partial": "A, D",
+     "not_accepted": "—",
      "basis": "source",
      "sources": [
       "saha2018",
-      "cgwb_manual2007"
+      "cgwb_manual2007",
+      "hysogs250m",
+      "usda_neh630_ch7"
      ],
-     "note": "Low to medium permeability under the wall holds the water; permeable strata upstream let it recharge (NIH; CGWB)."
+     "note": "Low to medium permeability under the wall holds the water (NIH: low to medium permeability); some permeability upstream lets it recharge (CGWB)."
     }
    ],
    "landscape": "Hard-rock (basalt, granite, gneiss) micro-watersheds with seasonal streams and well-irrigated farms downstream; most useful where the weathered zone can take recharge. Least useful on flat alluvial plains with shallow water tables. As a recharge structure it suits areas with less than about 1000 mm of rain a year (CGWB); in wetter areas it is possible but mainly stores water for irrigation.",
@@ -511,9 +513,11 @@
     "cgwb_manual2007",
     "gswma_manual2011",
     "commons_connect_ictd2024",
-    "gadkari2022"
+    "gadkari2022",
+    "hysogs250m",
+    "usda_neh630_ch7"
    ],
-   "site_check": "Sources: CGWB, IMSD, NIH (Saha et al. 2018), Gujarat IWMP manual. Rainfall is part of the landscape fit, not the site rules."
+   "site_check": "Sources: CGWB, IMSD, NIH (Saha et al. 2018), Gujarat IWMP manual. Rainfall is part of the landscape fit, not the site rules. Soil as the hydrologic soil group (HYSOGs250m)."
   },
   {
    "id": "percolation_tank",
@@ -589,17 +593,19 @@
      ]
     },
     {
-     "parameter": "Soil (Commons Connect classes)",
-     "unit": "—",
-     "accepted": "Red, Laterite, Alluvial (coarse), Sandy over weathered or fractured rock",
-     "partial": "Black (slow to percolate)",
-     "not_accepted": "Clay, Rocky without fractures",
+     "parameter": "Hydrologic soil group",
+     "unit": "A–D",
+     "accepted": "A, B",
+     "partial": "C",
+     "not_accepted": "D",
      "basis": "source",
      "sources": [
       "cgwb_manual2007",
-      "imsd1995"
+      "imsd1995",
+      "hysogs250m",
+      "usda_neh630_ch7"
      ],
-     "note": "The tank bed must be permeable so that stored water reaches the aquifer (CGWB; IMSD: permeable soils)."
+     "note": "The tank bed must let stored water through to the aquifer (CGWB; IMSD: permeable soils): groups A and B; group D clays seal the bed."
     }
    ],
    "landscape": "Hard-rock areas with a weathered or fractured zone and falling water levels, in semi-arid and dry sub-humid climates; gently sloping cropland with wells downstream. Not where the water level after the monsoon is within 3 m of the ground: there is no room in the aquifer and the land waterlogs (CGWB; asked of the community, since the CoRE Stack has no depth-to-water layer yet).",
@@ -638,11 +644,13 @@
     "cgwb_recharge2020",
     "cgwb_manual2007",
     "gswma_manual2011",
-    "imsd1995"
+    "imsd1995",
+    "hysogs250m",
+    "usda_neh630_ch7"
    ],
    "practice": [],
    "site_spec": "Percolation tanks: on second- or third-order streams with catchments of about 2.5–8 km² (250–800 ha), land slope 3–5%, permeable weathered or fractured rock or alluvium beneath the tank, and a water table deeper than 3 m after the monsoon; the tank should normally empty by February (CGWB)",
-   "site_check": "Sources: CGWB and Gujarat IWMP manuals, which agree, and IMSD. Depth to water is part of the landscape fit, asked of the community."
+   "site_check": "Sources: CGWB and Gujarat IWMP manuals, which agree, and IMSD. Depth to water is part of the landscape fit, asked of the community. Soil as the hydrologic soil group (HYSOGs250m)."
   },
   {
    "id": "subsurface_dyke",
@@ -1219,17 +1227,19 @@
      ]
     },
     {
-     "parameter": "Soil (Commons Connect classes)",
-     "unit": "—",
-     "accepted": "Red, Laterite, Alluvial, Sandy (contour bunds)",
-     "partial": "Black, Clay: graded bunds only",
-     "not_accepted": "Rocky, very shallow soils: stone bunds instead",
+     "parameter": "Hydrologic soil group",
+     "unit": "A–D",
+     "accepted": "A, B, C (contour bunds)",
+     "partial": "D: graded bunds only",
+     "not_accepted": "—",
      "basis": "source",
      "sources": [
       "cgwb_manual2007",
-      "gswma_manual2011"
+      "gswma_manual2011",
+      "hysogs250m",
+      "usda_neh630_ch7"
      ],
-     "note": "Contour bunds hold water on the field and are not suited to poorly drained clays (CGWB)."
+     "note": "Contour bunds hold water on the field and are not suited to poorly drained clays (CGWB); on group D soils graded bunds lead the excess away."
     }
    ],
    "landscape": "Rainfed cropland on gentle slopes: contour bunds in semi-arid areas, graded bunds in sub-humid and humid areas and on black clay soils. Contour bunds where rainfall is normally below 800 mm and the soil drains well; graded bunds, which lead excess water away, in wetter areas and on poorly drained clays (CGWB).",
@@ -1260,13 +1270,15 @@
     "imsd1995",
     "gswma_manual2011",
     "pradan_inrm",
-    "cgwb_manual2007"
+    "cgwb_manual2007",
+    "hysogs250m",
+    "usda_neh630_ch7"
    ],
    "practice": [],
    "caution": null,
    "addresses_wb": [],
    "wb_types": null,
-   "site_check": "Sources: IMSD, Gujarat IWMP manual, PRADAN, CGWB. Rainfall decides contour or graded bunds (landscape)."
+   "site_check": "Sources: IMSD, Gujarat IWMP manual, PRADAN, CGWB. Rainfall decides contour or graded bunds (landscape). Soil as the hydrologic soil group (HYSOGs250m)."
   },
   {
    "id": "stone_bunding",
@@ -1610,16 +1622,18 @@
      ]
     },
     {
-     "parameter": "Soil (Commons Connect classes)",
-     "unit": "—",
-     "accepted": "Black, Clay, Alluvial (fine)",
-     "partial": "Red, Laterite: line the pond",
-     "not_accepted": "Sandy, Rocky",
+     "parameter": "Hydrologic soil group",
+     "unit": "A–D",
+     "accepted": "C, D",
+     "partial": "B (line the pond)",
+     "not_accepted": "A",
      "basis": "source",
      "sources": [
-      "crida_farmpond2012"
+      "crida_farmpond2012",
+      "hysogs250m",
+      "usda_neh630_ch7"
      ],
-     "note": "Low-infiltration soils over 1 m deep hold water; sandy and red soils lose 40–50% to seepage unless lined (CRIDA)."
+     "note": "Ponds hold water where infiltration is slow (groups C and D: clays, black soils); on group B soils seepage is high unless the pond is lined, and group A sands lose most of the water (CRIDA)."
     }
    ],
    "landscape": "Rainfed farms with dry spells in kharif, on gentle land with fine-textured soils that hold water; most useful where groundwater is scarce or saline. Pair with recharge works upstream (the paper's integrated planning delineates the upstream area that feeds a pond within the 120-day monsoon).",
@@ -1666,9 +1680,11 @@
     "imsd1995",
     "crida_farmpond2012",
     "gswma_manual2011",
-    "commons_connect_ictd2024"
+    "commons_connect_ictd2024",
+    "hysogs250m",
+    "usda_neh630_ch7"
    ],
-   "site_check": "Sources: CRIDA (Reddy et al. 2012), IMSD, the Commons Connect paper."
+   "site_check": "Sources: CRIDA (Reddy et al. 2012), IMSD, the Commons Connect paper. Soil as the hydrologic soil group (HYSOGs250m)."
   },
   {
    "id": "five_percent_model",
@@ -1936,14 +1952,16 @@
      ]
     },
     {
-     "parameter": "Soil (Commons Connect classes)",
-     "unit": "—",
-     "accepted": "Black, Clay, Alluvial (fine)",
-     "partial": "Red, Laterite",
-     "not_accepted": "Sandy, Rocky",
+     "parameter": "Hydrologic soil group",
+     "unit": "A–D",
+     "accepted": "C, D",
+     "partial": "B (line or puddle the bed)",
+     "not_accepted": "A",
      "basis": "source",
      "sources": [
-      "crida_farmpond2012"
+      "crida_farmpond2012",
+      "hysogs250m",
+      "usda_neh630_ch7"
      ],
      "note": "Same seepage reasoning as for farm ponds (CRIDA)."
     }
@@ -1989,10 +2007,12 @@
     "structure_rules",
     "amrit_sarovar_pib2025",
     "crida_farmpond2012",
-    "commons_connect_ictd2024"
+    "commons_connect_ictd2024",
+    "hysogs250m",
+    "usda_neh630_ch7"
    ],
    "site_spec": null,
-   "site_check": "No published siting numbers found. Mission Amrit Sarovar sets a water spread of at least 1 acre and about 10,000 m³ of storage, which a 10–40 ha catchment fills at 600 mm rainfall and 15% runoff."
+   "site_check": "No published siting numbers found. Mission Amrit Sarovar sets a water spread of at least 1 acre and about 10,000 m³ of storage, which a 10–40 ha catchment fills at 600 mm rainfall and 15% runoff. Soil as the hydrologic soil group (HYSOGs250m)."
   },
   {
    "id": "traditional_harvesting",
@@ -2149,17 +2169,19 @@
      ]
     },
     {
-     "parameter": "Soil (Commons Connect classes)",
-     "unit": "—",
-     "accepted": "Sandy, Alluvial (coarse) at shallow depth",
-     "partial": "Red, Laterite",
-     "not_accepted": "Clay or Black without a permeable layer within reach",
+     "parameter": "Hydrologic soil group",
+     "unit": "A–D",
+     "accepted": "A, B",
+     "partial": "C (shafts that reach a permeable layer below)",
+     "not_accepted": "D",
      "basis": "source",
      "sources": [
       "gswma_manual2011",
-      "cgwb_manual2007"
+      "cgwb_manual2007",
+      "hysogs250m",
+      "usda_neh630_ch7"
      ],
-     "note": "Pits need permeable strata near the surface; shafts are dug through a clay layer to reach them (Gujarat; CGWB)."
+     "note": "Pits need permeable soil near the surface; shafts are dug through a slowly permeable layer to reach one (Gujarat; CGWB)."
     }
    ],
    "landscape": "Alluvial plains with a clay layer, settlements and waterlogged low spots; peri-urban villages with paved surfaces. Not where the water level after the monsoon is within 3 m of the ground: there is no room in the aquifer and the land waterlogs (CGWB; asked of the community, since the CoRE Stack has no depth-to-water layer yet) Shafts suit most where the water level after the monsoon is deeper than 8 m (Gujarat IWMP manual).",
@@ -2192,12 +2214,14 @@
     "cgwb_recharge2020",
     "nih_ballia",
     "gswma_manual2011",
-    "cgwb_manual2007"
+    "cgwb_manual2007",
+    "hysogs250m",
+    "usda_neh630_ch7"
    ],
    "addresses_wb": [],
    "wb_types": null,
    "site_spec": null,
-   "site_check": "Soil and distance from the Gujarat and CGWB manuals; depth to water is part of the landscape fit, asked of the community; other rows have no published source."
+   "site_check": "Soil and distance from the Gujarat and CGWB manuals; depth to water is part of the landscape fit, asked of the community; other rows have no published source. Soil as the hydrologic soil group (HYSOGs250m)."
   },
   {
    "id": "rooftop_rwh",
