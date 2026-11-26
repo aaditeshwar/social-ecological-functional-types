@@ -1,7 +1,7 @@
 {
   "version": "0.1.8",
   "date": "2026-11-25",
-  "min_library": "0.1.0",
+  "min_library": "0.1.1",
   "about": "Pack version for core-seft. File-level versions in the JSON knowledge files remain an internal changelog.",
   "datasets_required": [
     "lulc_vector",
