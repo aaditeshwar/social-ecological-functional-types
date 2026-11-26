@@ -44,8 +44,8 @@ class Session:
         self.api_key = api_key or os.environ.get('CORE_STACK_API_KEY')
         self._knowledge_override = Path(knowledge_dir).expanduser() if knowledge_dir else None
         self.log = log if log is not None else (lambda *a, **k: None)
-        self._mws = {}          # (state, district) -> (records, villages, clusters, meta)
-        self._wb = {}           # (state, district) -> bodies
+        self._mws = {}          # (state, district, tehsils_tuple) -> (records, villages, clusters, meta)
+        self._wb = {}           # (state, district, tehsils_tuple) -> bodies
         self._kn = None         # loaded knowledge objects
         self._tokens = []
 
@@ -151,35 +151,125 @@ class Session:
                 out.append((s, d, t, 'swb_layers'))
         return out
 
-    def fetch_district(self, state, district, include=None):
-        """Download every tehsil of this district into data_dir. Waterbody layers when include='waterbody'."""
+    def _cached_tehsils(self, state, district):
+        """Official tehsil labels that already have lulc_vector.json under data_dir."""
+        from seft.util import slug
+        d = Path(self.data_dir) / 'raw' / slug(state) / slug(district)
+        if not d.is_dir():
+            return []
+        out = []
+        for p in sorted(d.iterdir()):
+            f = p / 'lulc_vector.json'
+            if not f.exists():
+                continue
+            try:
+                t = load_json(f).get('tehsil')
+            except Exception:
+                t = None
+            out.append(t or p.name)
+        return out
+
+    def _tehsil_has_mws(self, state, district, tehsil, uid):
+        p = raw_dir(state, district, tehsil) / 'lulc_vector.json'
+        if not p.exists():
+            return False
+        want = str(uid)
+        for r in load_json(p).get('rows') or []:
+            u = r.get('uid') or r.get('UID') or (r.get('metadata') or {}).get('uid')
+            if str(u) == want:
+                return True
+        return False
+
+    def _tehsil_has_wb(self, state, district, tehsil, uid):
+        p = raw_dir(state, district, tehsil) / LAYERS_FILE
+        if not p.exists():
+            return False
+        import gzip, json
+        want = str(uid)
+        with gzip.open(p, 'rt', encoding='utf-8') as f:
+            doc = json.load(f)
+        for w in doc.get('waterbodies') or []:
+            if want in (str(w.get('wb_id') or ''), str(w.get('UID') or '')):
+                return True
+        return False
+
+    def _tehsils_for_query(self, kind, state, district, tehsil=None, uid=None, fetch=True):
+        """Tehsils to load/fetch for this analyse call. Grain is tehsil except kind=district."""
+        if kind == 'district':
+            return self._tehsils(state, district)
+        if kind == 'tehsil':
+            known = self._tehsils(state, district)
+            if tehsil not in known:
+                raise UnknownEntity(f'tehsil {tehsil!r} is not in {state}/{district}')
+            return [tehsil]
+        if tehsil:
+            return [tehsil]
+        hits = []
+        for t in self._cached_tehsils(state, district):
+            if kind == 'mws' and self._tehsil_has_mws(state, district, t, uid):
+                hits.append(t)
+            elif kind == 'waterbody' and self._tehsil_has_wb(state, district, t, uid):
+                hits.append(t)
+        if hits:
+            return sorted(hits)
+        if not fetch:
+            raise CacheMiss(
+                f'no cached tehsil in {state}/{district} contains {kind} {uid}. '
+                f'Pass fetch=True and tehsil=... to download that tehsil, or fetch_district().'
+            )
+        raise UnknownEntity(
+            f'{kind} {uid} is not in the {state}/{district} cache. '
+            f'Pass tehsil= so only that tehsil is downloaded.'
+        )
+
+    def fetch_tehsils(self, state, district, tehsils, include=None):
+        """Download the named tehsils into data_dir. Waterbody layers when include='waterbody'."""
         self._activate()
         if not self.api_key:
             raise CacheMiss('Set CORE_STACK_API_KEY or pass api_key= to Session before fetching.')
         os.environ['CORE_STACK_API_KEY'] = self.api_key
-        cfg = self._cfg(state, district)
-        from seft.fetch import fetch_all
-        fetch_all(cfg, log=self.log)
-        if include == 'waterbody':
+        tehsils = list(tehsils)
+        cfg = self._cfg(state, district, tehsils)
+        miss = self._missing(cfg, layers=(include == 'waterbody'))
+        if any(m[3] == 'lulc_vector' for m in miss):
+            from seft.fetch import fetch_all
+            fetch_all(cfg, log=self.log)
+        if include == 'waterbody' and self._missing(cfg, layers=True):
             from seft.wb.layers import fetch_all_layers
             fetch_all_layers(cfg, api=False, log=self.log)
-        self._write_index(state, district, cfg['districts'][0]['tehsils'])
-        self._mws.pop((state, district), None)
-        self._wb.pop((state, district), None)
+        self._write_index(state, district, tehsils)
+        self._invalidate(state, district)
         return cfg
+
+    def fetch_district(self, state, district, include=None):
+        """Download every tehsil of this district into data_dir. Waterbody layers when include='waterbody'."""
+        self._activate()
+        return self.fetch_tehsils(state, district, self._tehsils(state, district), include=include)
+
+    def _invalidate(self, state, district):
+        self._mws = {k: v for k, v in self._mws.items() if k[:2] != (state, district)}
+        self._wb = {k: v for k, v in self._wb.items() if k[:2] != (state, district)}
 
     def _write_index(self, state, district, tehsils):
         p = Path(self.data_dir) / 'index.json'
         doc = load_json(p) if p.exists() else {'districts': []}
         rest = [d for d in doc.get('districts', []) if not (d.get('state') == state and d.get('district') == district)]
-        rest.append({'state': state, 'district': district, 'tehsils': tehsils, 'roles': ['coverage'],
+        have = []
+        for d in doc.get('districts', []):
+            if d.get('state') == state and d.get('district') == district:
+                have = list(d.get('tehsils') or [])
+                break
+        for t in tehsils:
+            if t not in have:
+                have.append(t)
+        rest.append({'state': state, 'district': district, 'tehsils': have, 'roles': ['coverage'],
                      'note': 'cached on demand by core-seft; scored with the published pools'})
         from seft.util import dump_json
         dump_json({'districts': rest}, p, compact=False)
 
-    def _ensure(self, state, district, fetch=True, layers=False):
+    def _ensure(self, state, district, tehsils, fetch=True, layers=False):
         self._activate()
-        cfg = self._cfg(state, district)
+        cfg = self._cfg(state, district, list(tehsils))
         miss = self._missing(cfg, layers=layers)
         if not miss:
             return cfg
@@ -187,24 +277,24 @@ class Session:
         if need_fetch and not fetch:
             bits = ', '.join(f'{d}/{t} ({what})' for _, d, t, what in miss[:8])
             raise CacheMiss(
-                f'district cache incomplete for {state}/{district}: {bits}. '
-                f'Pass fetch=True (the default) or call fetch_district().'
+                f'tehsil cache incomplete for {state}/{district}: {bits}. '
+                f'Pass fetch=True (the default) or call fetch_tehsils() / fetch_district().'
             )
-        if any(m[3] == 'lulc_vector' for m in miss):
-            self.fetch_district(state, district, include='waterbody' if layers else None)
-        elif layers:
-            self.fetch_district(state, district, include='waterbody')
+        self.fetch_tehsils(state, district, tehsils, include='waterbody' if layers else None)
         still = [m for m in self._missing(cfg, layers=False) if m[3] == 'lulc_vector']
         if still:
             bits = ', '.join(f'{d}/{t}' for _, d, t, _ in still[:8])
             raise CacheMiss(f'lulc_vector still missing after fetch for {state}/{district}: {bits}')
         return cfg
 
-    def _score_mws(self, state, district, fetch=True):
-        key = (state, district)
+    def _scope_key(self, state, district, tehsils):
+        return (state, district, tuple(sorted(tehsils)))
+
+    def _score_mws(self, state, district, tehsils, fetch=True):
+        key = self._scope_key(state, district, tehsils)
         if key in self._mws:
             return self._mws[key]
-        cfg = self._ensure(state, district, fetch=fetch, layers=False)
+        cfg = self._ensure(state, district, tehsils, fetch=fetch, layers=False)
         pools = atlas_mws_pools()
         recs, vill, cl, meta = run(cfg, knowledge_dir=self.knowledge_dir, log=self.log, pools=pools)
         for r in recs:
@@ -235,12 +325,13 @@ class Session:
         mix_before = before['mix'] if before['mix'] != r['mix'] else None
         return r, mix_before, mws_diff(before, r)
 
-    def _wb_section(self, state, district, recs, fetch, include):
-        cfg = self._cfg(state, district)
+    def _wb_section(self, state, district, tehsils, recs, fetch, include):
+        cfg = self._cfg(state, district, tehsils)
         have = not self._missing(cfg, layers=True)
         if not have and include != 'waterbody':
             return None
-        bodies = self._score_wb(state, district, fetch=fetch if include == 'waterbody' else False)
+        bodies = self._score_wb(state, district, tehsils,
+                                fetch=fetch if include == 'waterbody' else False)
         if not bodies:
             return None
         from collections import Counter
@@ -258,12 +349,12 @@ class Session:
             'rules': rates(bodies, K, scope),
         }
 
-    def _score_wb(self, state, district, fetch=True):
-        key = (state, district)
+    def _score_wb(self, state, district, tehsils, fetch=True):
+        key = self._scope_key(state, district, tehsils)
         if key in self._wb:
             return self._wb[key]
-        cfg = self._ensure(state, district, fetch=fetch, layers=True)
-        recs, _, _, _ = self._score_mws(state, district, fetch=fetch)
+        cfg = self._ensure(state, district, tehsils, fetch=fetch, layers=True)
+        recs, _, _, _ = self._score_mws(state, district, tehsils, fetch=fetch)
         from seft.wb.build import build_all
         from seft.wb.context import attach
         from seft.wb.villages import build_profiles
@@ -320,8 +411,9 @@ class Session:
         self._activate()
         kn = self._knowledge()
         versions = self._versions()
+        tehsils = self._tehsils_for_query(kind, state, district, tehsil=tehsil, uid=uid, fetch=fetch)
         if kind in ('district', 'tehsil', 'mws'):
-            recs, vill, cl, meta = self._score_mws(state, district, fetch=fetch)
+            recs, vill, cl, meta = self._score_mws(state, district, tehsils, fetch=fetch)
         if kind == 'mws':
             r = self._find_mws(recs, uid, state, district)
             mix_before = diff = None
@@ -335,17 +427,15 @@ class Session:
                                answers=answers, mix_before=mix_before, diff=diff, detail=detail,
                                A=kn['A'], C=kn['C'], CC=kn.get('CC'), villages=vrows)
         if kind in ('district', 'tehsil'):
-            if kind == 'tehsil' and tehsil not in self._tehsils(state, district):
-                raise UnknownEntity(f'tehsil {tehsil!r} is not in {state}/{district}')
             wb = None
             try:
-                wb = self._wb_section(state, district, recs, fetch, include)
+                wb = self._wb_section(state, district, tehsils, recs, fetch, include)
             except CacheMiss:
                 wb = None
             return rollup(recs, kn['G'], kn['T'], kn['SC'], kn['IV'], versions,
                           kind, state, district, tehsil=tehsil if kind == 'tehsil' else None,
                           waterbodies=wb)
-        bodies = self._score_wb(state, district, fetch=fetch)
+        bodies = self._score_wb(state, district, tehsils, fetch=fetch)
         b = self._find_wb(bodies, uid, state, district)
         from seft.wb.assess import assess
         from seft.wb.score import load_knowledge
@@ -356,7 +446,7 @@ class Session:
         b['type'] = R['type']
         b['type_data'] = R['type_data']
         b['rules'] = R['rules']
-        recs, _, _, _ = self._score_mws(state, district, fetch=fetch)
+        recs, _, _, _ = self._score_mws(state, district, tehsils, fetch=fetch)
         home = None
         if b.get('home_mws'):
             try:

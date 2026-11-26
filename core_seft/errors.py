@@ -6,7 +6,7 @@ class CoreSeftError(Exception):
 
 
 class CacheMiss(CoreSeftError):
-    """District cache is incomplete and fetch was False, or fetch could not fill lulc_vector."""
+    """Tehsil (or district) cache is incomplete and fetch was False, or fetch could not fill lulc_vector."""
 
 
 class UnknownEntity(CoreSeftError):

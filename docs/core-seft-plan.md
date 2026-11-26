@@ -13,7 +13,7 @@ An app (Commons Connect, a notebook, a state dashboard) creates a session with a
 * One function to analyse a **district**, **tehsil**, **micro-watershed (MWS)** or **waterbody**.
 * Return public notes, the data and signals used, system mix, context, schemes, **intervention suggestions** (suited / possible, with landscape fit), and (for MWS/waterbody) community questions.
 * Accept partial community answers and return a richer assessment (same rules as the atlas).
-* Fetch-on-miss **only at district grain**. Never pull a whole state or India from `analyse`.
+* Fetch-on-miss **at tehsil grain** (all tehsils of the district when `kind="district"`). Never pull a whole state or India from `analyse`.
 * Keep knowledge (rules, thresholds, notes, questions, published pools) versioned independently of library code.
 * Reuse this repo’s scorer. Do not fork the rule engine.
 
@@ -34,9 +34,9 @@ s.refresh_knowledge()                                   # optional; ships a defa
 
 r = s.analyse("district", state="Odisha", district="Koraput")
 r = s.analyse("tehsil", state="Odisha", district="Koraput", tehsil="Jaypur")
-r = s.analyse("mws", state="Odisha", district="Koraput", uid="...")
-r = s.analyse("waterbody", state="Odisha", district="Koraput", uid="...")
-r = s.analyse("mws", state="...", district="...", uid="...",
+r = s.analyse("mws", state="Odisha", district="Koraput", tehsil="Jaypur", uid="...")
+r = s.analyse("waterbody", state="Odisha", district="Koraput", tehsil="Jaypur", uid="...")
+r = s.analyse("mws", state="...", district="...", tehsil="...", uid="...",
               answers={"sys_irrigated_share": "less_than_model"})
 ```
 
@@ -46,22 +46,23 @@ Module-level `analyse(...)` is the same after `core_seft.configure(data_dir=...,
 |---|---|
 | `kind` | `district` \| `tehsil` \| `mws` \| `waterbody` |
 | `state`, `district` | CoRE Stack names, exact spelling |
-| `tehsil` | required for `kind="tehsil"` |
+| `tehsil` | required for `kind="tehsil"`; pass with `uid` for `mws` / `waterbody` so a miss downloads that tehsil |
 | `uid` | required for `mws` and `waterbody` |
 | `answers` | `{question_id: option_id}`; ignored for district/tehsil |
-| `fetch` | default `True`: if the district cache is incomplete, fetch that district then score. `False`: raise with a clear miss |
+| `fetch` | default `True`: if the needed tehsil(s) are incomplete, fetch and cache them then score. `False`: raise with a clear miss |
 
-Helpers (not used by `analyse` except district miss):
+Helpers (not used by `analyse` except on a cache miss):
 
-* `s.fetch_district(state, district)` — all tehsils of that district (API + geometry; waterbody layers when `kind` needs them or `include="waterbody"`).
+* `s.fetch_tehsils(state, district, tehsils)` — named tehsils (API + geometry; waterbody layers when `include="waterbody"`).
+* `s.fetch_district(state, district)` — all tehsils of that district.
 * `s.refresh_knowledge(version="latest")` — install a knowledge pack into `data_dir/knowledge/`.
 * `s.knowledge_version`, `s.library_version`.
 
 ### Fetch-on-miss
 
-* Cache key is **district** (all its tehsils under `data_dir/raw/<state>/<district>/...`).
-* `kind=tehsil|mws|waterbody` still fetches the **parent district** if needed.
-* Waterbody analysis needs watershed datasets **and** `swb_layers.json.gz`. A waterbody miss may fetch layers for that district even if MWS data are already cached.
+* Cache key is **tehsil** (`data_dir/raw/<state>/<district>/<tehsil>/...`). `kind="district"` fetches every tehsil of that district.
+* `kind=tehsil|mws|waterbody` fetches only the tehsil in scope (pass `tehsil=` for an uncached uid).
+* Waterbody analysis needs watershed datasets **and** `swb_layers.json.gz`. A waterbody miss may fetch layers for that tehsil even if MWS data are already cached.
 * Incomplete tehsils: try GeoServer back-fill as `seft.cli fetch` does; still-incomplete datasets are scored as unknown, not a hard fail, unless `lulc_vector` is missing (cannot build MWS records).
 
 ## Result envelope (every kind)
@@ -361,7 +362,7 @@ Notebooks use the same public API as Commons Connect would. Keep secrets in the 
 
 **2. MWS `analyse`.** Load one cached district, score with pack pools, return full MWS result including mix, context, schemes, interventions, questions. Answers path.
 
-**3. Fetch-on-miss.** If district incomplete and `fetch=True`, `fetch_all` for that district (need tehsil list: `get_active_locations` filtered to the named district).
+**3. Fetch-on-miss.** If the needed tehsil(s) are incomplete and `fetch=True`, `fetch_all` for those tehsils (`kind="district"` uses `get_active_locations` for the tehsil list).
 
 **4. District and tehsil.** Aggregate the district run; tehsil filters home tehsil.
 

@@ -133,6 +133,26 @@ class SessionOfflineTests(unittest.TestCase):
         s = Session(data_dir=tmp, knowledge_dir=str(REPO / 'knowledge'), log=lambda *a, **k: None)
         with self.assertRaises(CacheMiss):
             s.analyse('district', state='Jharkhand', district='Godda', fetch=False)
+        with self.assertRaises(CacheMiss):
+            s.analyse('tehsil', state='Jharkhand', district='Godda', tehsil='Basantrai', fetch=False)
+        with self.assertRaises(CacheMiss):
+            s.analyse('mws', state='Jharkhand', district='Godda', uid='12_313813', fetch=False)
+        from core_seft import UnknownEntity
+        with self.assertRaises(UnknownEntity):
+            s.analyse('mws', state='Jharkhand', district='Godda', uid='12_313813', fetch=True)
+
+    def test_mws_scope_is_tehsil_not_district(self):
+        from seft.util import raw_dir, set_data_root
+        set_data_root(REPO / 'data')
+        if not (raw_dir('Jharkhand', 'Godda', 'Basantrai') / 'lulc_vector.json').exists():
+            self.skipTest('Godda cache not present')
+        from core_seft import Session
+        s = Session(data_dir=str(REPO / 'data'), knowledge_dir=str(REPO / 'knowledge'),
+                    log=lambda *a, **k: None)
+        s._activate()
+        ts = s._tehsils_for_query('mws', 'Jharkhand', 'Godda', uid='12_313813', fetch=False)
+        self.assertIn('Basantrai', ts)
+        self.assertLess(len(ts), len(s._tehsils('Jharkhand', 'Godda')))
 
     def test_analyse_cached_godda_mws(self):
         from seft.util import raw_dir, set_data_root, ROOT
