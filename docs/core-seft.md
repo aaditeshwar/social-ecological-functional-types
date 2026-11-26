@@ -17,7 +17,7 @@ From this repository (editable):
 python -m pip install -e .
 ```
 
-Set a CoRE Stack API key (needed only when a district is not already cached):
+Set a CoRE Stack API key (needed only when the queried tehsil or district is not already cached):
 
 ```bash
 export CORE_STACK_API_KEY=...                 # bash
@@ -44,18 +44,18 @@ s.refresh_knowledge()                         # optional; ships a default pack
 
 r = s.analyse("district", state="Jharkhand", district="Godda")
 r = s.analyse("tehsil", state="Jharkhand", district="Godda", tehsil="Basantrai")
-r = s.analyse("mws", state="Jharkhand", district="Godda", uid="12_313813")
-r = s.analyse("waterbody", state="Jharkhand", district="Godda", uid="9628377")
-r = s.analyse("mws", state="Jharkhand", district="Godda", uid="12_313813",
+r = s.analyse("mws", state="Jharkhand", district="Godda", tehsil="Basantrai", uid="12_313813")
+r = s.analyse("waterbody", state="Jharkhand", district="Godda", tehsil="Basantrai", uid="9628377")
+r = s.analyse("mws", state="Jharkhand", district="Godda", tehsil="Basantrai", uid="12_313813",
               answers={"sys_irrigated_share": "low"})
 print(r.mix["dominant"], [i["name"] for i in r.interventions[:5]])
 ```
 
 Module-level `analyse(...)` is the same after `core_seft.configure(data_dir=..., api_key=...)`.
 
-Every call needs **state and district** (CoRE Stack spelling). Tehsil is required for `kind="tehsil"`; uid for MWS and waterbody. `analyse` never searches India for a uid.
+Every call needs **state and district** (CoRE Stack spelling). Tehsil is required for `kind="tehsil"`. For MWS and waterbody, pass **both** `tehsil=` and `uid=` — that is the call that downloads one tehsil on a miss. Omitting `tehsil=` still works if that uid is already in `data_dir`. `analyse` never searches India for a uid.
 
-`fetch=True` (default): if that **district** is not cached, download all of its tehsils, then score. `fetch=False` raises `CacheMiss` instead of hitting the network. A waterbody query may also fetch GeoServer layers for that district. District queries do not fetch waterbody layers unless `include="waterbody"`.
+`fetch=True` (default): download **and cache** any missing tehsils, then score. The grain is **tehsil** for `kind="tehsil"|"mws"|"waterbody"`, and **all tehsils of the district** for `kind="district"`. `fetch=False` raises `CacheMiss` instead of hitting the network. A waterbody query may also fetch GeoServer layers for that tehsil. District queries do not fetch waterbody layers unless `include="waterbody"`.
 
 ## Result fields
 
@@ -80,6 +80,8 @@ Must-ask scores use the same rules as `seft.priority` and the Explore / Commons 
 `r.to_dict()` is JSON-safe. `detail="full"` adds not-applicable rules and every indicator.
 
 ## Knowledge packs
+
+Tehsils fetched on demand are listed in `data_dir/index.json` under their district with the role `coverage`: they are scored with the published pools in the knowledge pack (`pools.json`, whose `provenance` names the districts the pools were computed over) and never change them. The atlas's own location roles (`pools`, `groundtruth`, `coverage`) are described in the README (Location roles).
 
 `s.knowledge_version` and `s.library_version` are stamped on every result. `s.refresh_knowledge()` copies the bundled pack into `data_dir/knowledge/`. `s.refresh_knowledge("1.4.0")` tries the matching GitHub Release zip.
 

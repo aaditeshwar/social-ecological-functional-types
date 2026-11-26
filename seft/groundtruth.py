@@ -74,7 +74,8 @@ def _cfg(triples):
     for s, d, t in triples:
         by.setdefault((s, d), [])
         if t not in by[(s, d)]: by[(s, d)].append(t)
-    return {'districts': [{'state': s, 'district': d, 'tehsils': ts} for (s, d), ts in by.items()]}
+    return {'note': 'Ground-truth tehsils from final_ground_truth.json (rebuilt by the groundtruth command).',
+            'districts': [{'state': s, 'district': d, 'tehsils': ts, 'roles': ['groundtruth']} for (s, d), ts in by.items()]}
 
 def _uids_in(state, district, tehsil):
     f = raw_dir(state, district, tehsil) / 'lulc_vector.json'
@@ -245,7 +246,7 @@ def combinations(items, by, mapping):
     return rows, tiers
 
 def sample_rates(mapping, log=print):
-    """Share of the atlas sample MWS (config/locations.json) where each rule set and combination fires.
+    """Share of the atlas sample MWS (the pools districts of config/locations.json) where each rule set and combination fires.
     Cached in out/groundtruth/sample_rates.json, keyed by a hash of the knowledge files."""
     import hashlib
     h = hashlib.sha1()
@@ -260,7 +261,8 @@ def sample_rates(mapping, log=print):
     from .sheet import load_sheet_rules, evaluate_sheet
     pools = load_json(ROOT / 'web' / 'data' / 'index.json').get('pools')
     log('  scoring the atlas sample for firing rates (cached afterwards) ...')
-    recs, _, _, _ = run(load_json(ROOT / 'config' / 'locations.json'), log=lambda *a: None, pools=pools)
+    from .util import with_role
+    recs, _, _, _ = run(with_role(load_json(ROOT / 'config' / 'locations.json'), 'pools'), log=lambda *a: None, pools=pools)
     SR = load_sheet_rules()
     for r in recs: r['sheet'] = evaluate_sheet(r['env'], SR)
     rates = {}
@@ -319,16 +321,16 @@ def write_report(rows, detail, res, mapping, items, by, combos=None, tiers=None,
     out.mkdir(parents=True, exist_ok=True)
     keys = ['pathway', 'label', 'rules', 'n', 'TP', 'FP', 'FN', 'TN', 'unknown', 'no data',
             'accuracy', 'balanced_accuracy', 'f1', 'precision', 'recall', 'specificity']
-    with open(out / 'confusion.csv', 'w', newline='') as f:
+    with open(out / 'confusion.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, keys, extrasaction='ignore'); w.writeheader(); w.writerows(rows)
     dk = []
     for d in detail:
         for k in d:
             if k not in dk: dk.append(k)
-    with open(out / 'detail.csv', 'w', newline='') as f:
+    with open(out / 'detail.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, dk); w.writeheader(); w.writerows(detail)
     if combos:
-        with open(out / 'combinations.csv', 'w', newline='') as f:
+        with open(out / 'combinations.csv', 'w', newline='', encoding='utf-8') as f:
             w = csv.DictWriter(f, keys, extrasaction='ignore'); w.writeheader(); w.writerows(combos)
     dump_json({'confusion': rows, 'combinations': combos or [], 'confidence_tiers': tiers or [],
                'sample_rates': rates or {}, 'detail': detail, 'resolution': res}, out / 'results.json')

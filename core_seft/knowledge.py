@@ -105,6 +105,7 @@ def dump_pools_from_atlas(web_data=None, dest=None):
     wip = web_data / 'waterbody' / 'index.json'
     if wip.exists():
         wb = json.loads(wip.read_text(encoding='utf-8')).get('pools') or {}
-    dest.write_text(json.dumps({'mws': mws, 'waterbody': wb}, separators=(',', ':'), ensure_ascii=False),
+    prov = (json.loads(dest.read_text(encoding='utf-8')).get('provenance') if dest.exists() else None) or {}
+    dest.write_text(json.dumps({'mws': mws, 'waterbody': wb, 'provenance': prov}, separators=(',', ':'), ensure_ascii=False),
                     encoding='utf-8')
     return dest

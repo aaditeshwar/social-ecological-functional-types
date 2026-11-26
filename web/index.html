@@ -1291,7 +1291,7 @@ const KSCHEMA=[
  {file:"questions.json",role:"Community MCQs and how answers change the systems and the stresses.",top:[["assessment","base_prior, confidence_shrink, positive_at, severe_at, bands and the rules in words"],["lr_scale","the likelihood-ratio scale used to write options"],["system_questions","questions that adjust the system mix"],["stress_questions","questions that inform stresses"]],
   list:"stress_questions",fields:[["id, text, rationale, origin","question, why it is asked, and whether it comes from CoRE insights"],["stresses / show_if","stress ids it informs, or the condition for showing a system question"],["options","list of {id, label, stress [{id, lr, severe}], set {weight: value}, shift [{from, to, fraction}]}"]]},
  {file:"interventions.json",role:"Supply- and demand-side interventions shared by both atlases: where they go, site rules, the landscapes they suit, what they respond to, schemes, practice and sources.",top:[["sides","supply and demand"],["categories","id → label of the intervention categories"],["fit","how landscape fit is judged, and its levels"],["site_rules_about","where the site rules come from"],["interventions","list of interventions (below)"]],
-  list:"interventions",fields:[["id, name, side, category","identity, supply or demand side, and category"],["what, where, site_spec","what it is, where it is built, and the ridge-to-valley placement from the toolkit paper"],["site_rules","[{parameter, unit, accepted, partial, not_accepted}] from the structure-suitability spreadsheet"],["landscape, archetypes","the landscapes and system archetypes where it fits best"],["suits, avoid, avoid_note","landscape fit test for a micro-watershed: suited, possible or not suited"],["caution","known risks (for example, ponds filled from borewells)"],["addresses, addresses_wb, wb_types","watershed stresses and waterbody rules it responds to; waterbody types it applies to"],["schemes, practice, sources","funding schemes, examples from civil society practice, and source ids"]]},
+  list:"interventions",fields:[["id, name, side, category","identity, supply or demand side, and category"],["site_rules[].basis, sources, note; site_check","the basis of each site rule: source, proposed or not sourced, with its sources"],["what, where, site_spec","what it is, where it is built, and the ridge-to-valley placement from the toolkit paper"],["site_rules","[{parameter, unit, accepted, partial, not_accepted}] from the structure-suitability spreadsheet"],["landscape, archetypes","the landscapes and system archetypes where it fits best"],["suits, avoid, avoid_note","landscape fit test for a micro-watershed: suited, possible or not suited"],["caution","known risks (for example, ponds filled from borewells)"],["addresses, addresses_wb, wb_types","watershed stresses and waterbody rules it responds to; waterbody types it applies to"],["schemes, practice, sources","funding schemes, examples from civil society practice, and source ids"]]},
  {file:"sources.json",role:"Bibliography. Every sources list in the other files holds ids from here.",top:[["sources","list of sources (below)"]],
   list:"sources",fields:[["id","referenced from other files"],["citation, url","reference"],["used_for","what the source supports"]]}
 ];
@@ -2204,7 +2204,11 @@ function ivEnvWs(m,d,shares){
   K.contexts.dimensions.forEach((x,i)=>{if(IV_DIMS.includes(x.id)) e[x.id]=m.c[i]||"";});
   IV_DIMS.forEach(k=>{if(!(k in e)) e[k]="";});
   K.archetypes.archetypes.forEach((a,i)=>e["share_"+a.id]=(shares||m.m)[i]);
-  e.state=d.state; e.district=d.district; return e;}
+  e.state=d.state; e.district=d.district; Object.assign(e,ivCommunity(m.u)); return e;}
+/* variables only the community supplies (interventions.json fit.community_vars), from Commons Connect landscape answers */
+function ivCommunity(u){const out={}; ((K.interventions&&K.interventions.fit&&K.interventions.fit.community_vars)?Object.keys(K.interventions.fit.community_vars):["wl_post_monsoon"]).forEach(k=>out[k]=null);
+  if(!CCD||typeof CCANS==="undefined"||!CCANS[u]) return out; const L=CCD.forms.find(f=>f.id==="landscape"), A=CCANS[u].landscape||{};
+  L.questions.forEach(q=>{if(q.sets_var&&A[q.name]!=null&&q.sets_var.values[A[q.name]]!=null) out[q.sets_var.var]=q.sets_var.values[A[q.name]];}); return out;}
 function ivTrue(expr,env){if(!expr) return false; const r=PyEval.safe(expr,env); return r===true||r===1;}
 function ivFit(iv,env){if(!env) return "possible"; if(ivTrue(iv.avoid,env)) return "not suited"; if(ivTrue(iv.suits,env)) return "suited"; return "possible";}
 const IV_RANK={suited:2,possible:1,"not suited":0};
@@ -2243,7 +2247,8 @@ function ivPlanBlock(list,opts){
 /* ---------- Interventions tab (both atlases) ---------- */
 function ivSiteTable(iv){
   if(!iv.site_rules.length) return "";
-  return `<div class="tbl"><table><thead><tr><th>Site parameter</th><th>Accepted</th><th>Partially accepted</th><th>Not accepted</th></tr></thead><tbody>${iv.site_rules.map(r=>`<tr><td>${esc(r.parameter)}${r.unit&&r.unit!=="—"?` <span class="muted">(${esc(r.unit)})</span>`:""}</td><td>${esc(r.accepted)}</td><td>${esc(r.partial)}</td><td>${esc(r.not_accepted)}</td></tr>`).join("")}</tbody></table></div>`;}
+  const BL={source:"source",proposed:"proposed","not sourced":"not sourced"};
+  return `<div class="tbl"><table><thead><tr><th>Site parameter</th><th>Accepted</th><th>Partially accepted</th><th>Not accepted</th><th>Basis</th></tr></thead><tbody>${iv.site_rules.map(r=>`<tr><td>${esc(r.parameter)}${r.unit&&r.unit!=="—"?` <span class="muted">(${esc(r.unit)})</span>`:""}</td><td>${esc(r.accepted)}</td><td>${esc(r.partial)}</td><td>${esc(r.not_accepted)}</td><td><span class="pill">${esc(BL[r.basis]||r.basis||"")}</span>${r.sources&&r.sources.length?`<br><span class="note">${srcLinks(r.sources)}</span>`:""}${r.note?`<br><span class="note">${esc(r.note)}</span>`:""}</td></tr>`).join("")}</tbody></table></div>${iv.site_check?`<p class="note"><b>Basis:</b> ${esc(iv.site_check)}</p>`:""}`;}
 function ivBlock(iv,mode){
   const C=ivCat(), arch=iv.archetypes.map(a=>ARCH[a]?ARCH[a].label:a);
   const resp=(iv.addresses||[]).map(x=>esc(ivStressLabel(x))), respW=(iv.addresses_wb||[]).map(x=>esc(ivWbLabel(x)));
@@ -2548,7 +2553,9 @@ function ccPlanHtml(mm,d,R,env,askK,A,wbR,ctx){
         ${F.about?`<p class="note">${esc(F.about)}</p>`:""}
         ${rows.length?`<div class="tbl"><table><thead><tr><th>Work type</th><th>Score</th><th>Interventions and fit here</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td>${prChip([r.best,""],false,true)}</td><td>${r.ivs.map((id,i)=>{const [s,f,hit]=r.sc[i]; return IVX[id]?`${esc(IVX[id].name)} <span class="pill ${IV_FIT[f].cls}">${IV_FIT[f].label}</span>${hit.length?` <span class="note">responds to ${esc(hit.map(hitLab).join(", "))}</span>`:""}`:esc(id)}).join("<br>")}</td></tr>`).join("")}</tbody></table></div>`:""}
         ${cand.length?`<p class="note"><b>Candidates from the waterbody atlas:</b> ${cand.map(x=>`#${x.w.id} (${esc((WTYPE[x.R.type]||{}).label||x.R.type)}, ${x.w.a} ha)`).join(", ")}</p>`:""}
-        ${list.map((ans,i)=>`<div class="ccsub"><div class="eyebrow">Proposal ${i+1}</div>${ccFormHtml(F,qs,ans,env,askK,`plan.${F.id}.${i}`,ctx)}</div>`).join("")}
+        ${list.map((ans,i)=>{const ch=wq&&ans[wq.name]?(wq.work_map[ans[wq.name]]||[]).filter(id=>IVX[id]&&IVX[id].site_rules&&IVX[id].site_rules.length):[];
+          return `<div class="ccsub"><div class="eyebrow">Proposal ${i+1}</div>${ccFormHtml(F,qs,ans,env,askK,`plan.${F.id}.${i}`,ctx)}
+          ${ch.map(id=>`<details class="cclow" open><summary>Site rules to check on the ground: ${esc(IVX[id].name)} (${IV_FIT[ivScore(id)[1]].label})</summary>${ivSiteTable(IVX[id])}</details>`).join("")}</div>`;}).join("")}
         <div class="filters"><button class="btn ghost" data-add="plan.${F.id}">Add another proposal</button></div></details>`;}).join("");}).join("")
     +`<p class="note">${esc(CCP().planning)}</p>`;}
 function ccBindVisit(mm,d,b,wb){

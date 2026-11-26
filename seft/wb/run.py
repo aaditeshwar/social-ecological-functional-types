@@ -79,7 +79,7 @@ def _mean(xs):
     xs = [x for x in xs or [] if isinstance(x, (int, float))]
     return round(sum(xs) / len(xs), 2) if xs else None
 
-def score_all(cfg, log=print, pools=None):
+def score_all(cfg, log=print, pools=None, pool_districts=None):
     """Build and score every waterbody of the locations. Returns (bodies, stats, types, K, pools)."""
     K = load_knowledge()
     B, stats, types = build_all(cfg, log=log)
@@ -91,7 +91,8 @@ def score_all(cfg, log=print, pools=None):
     ref = year_reference(B, scope)
     for b in B: b['vars'] = compute(b, prof, drought, ref)
     if pools is None:
-        pools = pool_thresholds([base_env(b, b['vars']) for b in B if b['type'] in scope], K)
+        pools = pool_thresholds([base_env(b, b['vars']) for b in B if b['type'] in scope
+                                 and (pool_districts is None or b['district'] in pool_districts)], K)
     for b in B:
         if b['type'] in scope: b['signals'], b['roles'], b['rules'] = score(b, b['vars'], K, pools)
         else: b['signals'], b['roles'], b['rules'] = {}, {}, {}
@@ -219,13 +220,29 @@ def build_web(src=None, dest=None, merge=False, log=print):
                 if f.name not in keep: f.unlink()
     log(f'  wrote {len(names)} bundles to {dest}: {", ".join(d["district"] for d in index["districts"])}')
 
-def main(cfg_path=None, out=None, merge=False, web=True, log=print):
+def main(cfg_path=None, out=None, merge=False, web=True, update_pools=False, log=print):
+    """update_pools: recompute the waterbody pools over the 'pools' districts of the locations file (all must be
+    in this run) and write them to knowledge/pools.json; otherwise score with the published pools."""
+    from ..util import with_role, pools_doc, write_pools, district_roles
+    import datetime
     cfg = load_json(cfg_path or ROOT / 'config' / 'waterbody' / 'locations.json')
     missing = [(d, t) for s, d, t in iter_locations(cfg) if not (raw_dir(s, d, t) / 'swb_layers.json.gz').exists()]
     if missing:
         names = ', '.join(f'{d}/{t}' for d, t in missing[:8]) + (' ...' if len(missing) > 8 else '')
         raise SystemExit(f'No waterbody layers for {len(missing)} tehsil(s): {names}\nRun `python -m seft.cli wb-fetch` first.')
-    B, stats, types, K, pools = score_all(cfg, log=log)
+    pub = pools_doc().get('waterbody')
+    pool_d = [d['district'] for d in with_role(cfg, 'pools')['districts']]
+    if update_pools or not pub:
+        if not pool_d: raise SystemExit("No district in the locations file has the 'pools' role.")
+        log(f"  pooling waterbody thresholds over the 'pools' districts: {', '.join(pool_d)}")
+        B, stats, types, K, pools = score_all(cfg, log=log, pool_districts=set(pool_d))
+        write_pools('waterbody', {k: {t: [_num(a), _num(c)] for t, (a, c) in v.items()} for k, v in pools.items()},
+                    {'districts': pool_d, 'computed': f'{datetime.date.today()}, wb-run --update-pools',
+                     'n_waterbodies': sum(1 for b in B if b['district'] in pool_d)})
+        log('  wrote the waterbody pools to knowledge/pools.json (bump knowledge/manifest.json before releasing a pack)')
+    else:
+        log('  scoring with the published waterbody pools (knowledge/pools.json); --update-pools to recompute')
+        B, stats, types, K, pools = score_all(cfg, log=log, pools={k: {t: tuple(x) for t, x in v.items()} for k, v in pub.items()})
     write_outputs(B, stats, types, K, pools, cfg, out, log=log)
     if web: build_web(Path(out or OUT) / 'web', merge=merge, log=log)
     return B

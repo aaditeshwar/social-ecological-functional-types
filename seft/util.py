@@ -38,7 +38,7 @@ def load_json(p):
 
 def dump_json(o, p, compact=True):
     Path(p).parent.mkdir(parents=True, exist_ok=True)
-    with open(p, 'w') as f:
+    with open(p, 'w', encoding='utf-8') as f:
         json.dump(o, f, separators=(',', ':') if compact else None, indent=None if compact else 1, ensure_ascii=False)
 
 def raw_dir(state, district, tehsil):
@@ -61,6 +61,29 @@ def atlas_wb_pools():
             return d['waterbody']
     ip = ROOT / 'web' / 'data' / 'waterbody' / 'index.json'
     return load_json(ip).get('pools') if ip.exists() else None
+
+ROLES = ('pools', 'groundtruth', 'coverage')
+
+def district_roles(d):
+    """Roles of a locations entry. Entries without 'roles' (older files) count as 'pools'."""
+    return list(d.get('roles') or ['pools'])
+
+def with_role(cfg, role):
+    """The locations entries that carry this role, as a locations document."""
+    return {'districts': [d for d in cfg['districts'] if role in district_roles(d)]}
+
+def pools_doc():
+    p = knowledge_dir() / 'pools.json'
+    return load_json(p) if p.exists() else {}
+
+def write_pools(part, pools, provenance):
+    """Replace one part ('mws' or 'waterbody') of knowledge/pools.json, with where it came from."""
+    p = knowledge_dir() / 'pools.json'
+    d = load_json(p) if p.exists() else {}
+    d[part] = pools
+    d.setdefault('provenance', {})[part] = provenance
+    p.write_text(json.dumps(d, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')
+    return p
 
 def iter_locations(cfg=None):
     cfg = cfg or load_json(ROOT / 'config' / 'locations.json')

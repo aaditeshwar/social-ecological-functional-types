@@ -129,7 +129,7 @@ def validate(kd=None):
         wb_types = {t['id'] for t in load_json(wbk / 'types.json')['types']} if (wbk / 'types.json').exists() else set()
         sch = {x['id'] for x in K['schemes']['schemes']}
         if (wbk / 'schemes.json').exists(): sch |= {x['id'] for x in load_json(wbk / 'schemes.json')['schemes']}
-        dims = {'rainfall', 'aquifer', 'terrain', 'gw_category', 'canal', 'cropping'}
+        dims = {'rainfall', 'aquifer', 'terrain', 'gw_category', 'canal', 'cropping'} | set((IV.get('fit') or {}).get('community_vars', {}))
         seen_iv = set()
         for x in IV['interventions']:
             w = f"intervention {x['id']}"; n_iv += 1
@@ -202,6 +202,11 @@ def _validate_cc(kd, K, errs):
                     if v not in opts: errs.append(f'{w}: prefill {v!r} is not an option')
             for c in q.get('routes') or []:
                 if c not in names: errs.append(f'{w}: routes to unknown question {c}')
+            sv = q.get('sets_var')
+            if sv:
+                if sv['var'] not in (IV.get('fit') or {}).get('community_vars', {}): errs.append(f"{w}: sets unknown community variable {sv['var']}")
+                for k in sv['values']:
+                    if k not in opts: errs.append(f'{w}: sets_var key {k!r} is not an option')
             for e in (q.get('relevant_expr'), q.get('relevant') if q.get('origin') != 'odk' else None):
                 if e: expr_ok(e, w)
             for k, v in (q.get('work_map') or {}).items():

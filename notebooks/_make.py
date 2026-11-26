@@ -89,7 +89,7 @@ print("questions", t.questions)''',
 ])
 
 write('04_fetch_and_knowledge.ipynb', [
-    '# Fetch-on-miss and knowledge version\n\n`fetch=False` raises `CacheMiss` when the district is not in `data_dir`. Keep `CORE_STACK_API_KEY` in the environment; do not put it in this file.',
+    '# Fetch-on-miss and knowledge version\n\n`fetch=False` raises `CacheMiss` when the needed tehsil (or, for a district query, any of its tehsils) is not in `data_dir`. Fetch grain is tehsil except `kind="district"`, which downloads every tehsil. Keep `CORE_STACK_API_KEY` in the environment; do not put it in this file.',
     '''from pathlib import Path
 import tempfile
 from core_seft import Session, CacheMiss

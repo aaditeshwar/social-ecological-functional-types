@@ -20,11 +20,13 @@ def _iv():
     if _IV is None: _IV = load_interventions()
     return _IV
 
-def run(locations=None, knowledge_dir=None, log=print, answers=None, pools=None, keep=None):
+def run(locations=None, knowledge_dir=None, log=print, answers=None, pools=None, keep=None, pool_filter=None):
     """answers: optional {mws_uid: {question_id: option_id}} from community meetings.
     pools: fixed pooled-percentile thresholds (e.g. the atlas's, from web/data/index.json) instead of
     pooling over this run; used to score new locations with the same thresholds as the atlas.
-    keep: optional callable(record) -> bool; records it rejects are dropped before scoring."""
+    keep: optional callable(record) -> bool; records it rejects are dropped before scoring.
+    pool_filter: optional callable(record) -> bool; when the pools are computed here, only these records are pooled
+    (the 'pools' districts of the locations file); the others are scored with the same thresholds."""
     answers = answers or {}
     kd = Path(knowledge_dir) if knowledge_dir is not None else default_knowledge_dir()
     cfg = locations or load_json(ROOT / 'config' / 'locations.json')
@@ -65,7 +67,7 @@ def run(locations=None, knowledge_dir=None, log=print, answers=None, pools=None,
         for k, v in r['mix']['shares'].items(): env['share_' + k] = v
     # pass 3: signals (pooled percentiles over the whole run), rules, pathways, schemes
     if keep: records = [r for r in records if keep(r)]
-    if pools is None: pools = pooled_percentiles(S, [r['env'] for r in records])
+    if pools is None: pools = pooled_percentiles(S, [r['env'] for r in records if pool_filter is None or pool_filter(r)])
     for r in records:
         score(r, G, Q, S, T, SC, pools)
     meta = {'rain_factors': factors, 'pools': pools, 'signal_thresholds': threshold_table(S, pools)}

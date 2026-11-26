@@ -44,7 +44,7 @@ def write_csv(records, villages, K, outdir):
             ['mix_raw_total', 'n_answers', 'schemes', 'interventions_suited', 'interventions_possible', 'canal_projects', 'n_villages'])
     for d, recs in list(by.items()) + [('all', records)]:
         p = outdir / f'mws_{slug(d)}.csv'
-        with open(p, 'w', newline='') as f:
+        with open(p, 'w', newline='', encoding='utf-8') as f:
             w = csv.writer(f); w.writerow(head)
             for r in recs:
                 w.writerow([r['uid'], r['state'], r['district'], r['tehsil'], ';'.join(r['tehsils']), round(r['area'], 2)] +
@@ -73,10 +73,10 @@ def write_csv(records, villages, K, outdir):
                          L.get('goat_total'), L.get('pig_total')])
         allv += rows
         p = outdir / f'villages_{slug(d)}.csv'
-        with open(p, 'w', newline='') as f:
+        with open(p, 'w', newline='', encoding='utf-8') as f:
             w = csv.writer(f); w.writerow(head_v); w.writerows(rows)
         files.append(p)
-    with open(outdir / 'villages_all.csv', 'w', newline='') as f:
+    with open(outdir / 'villages_all.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f); w.writerow(head_v); w.writerows(allv)
     files.append(outdir / 'villages_all.csv')
     return files

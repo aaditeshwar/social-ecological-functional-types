@@ -1,5 +1,10 @@
 {
- "note": "Districts selected for the first run. Names are exactly as returned by get_active_locations. 'slug' is the lowercase underscore form used in GeoServer layer names.",
+ "note": "Districts of the watershed atlas. Names exactly as returned by get_active_locations. Each district has 'roles' (see 'roles' below); add with `python -m seft.cli add --role ...`.",
+ "roles": {
+  "pools": "Sample for the percentile pools (thresholds of the pooled signals). Rescoring with --update-pools recomputes the pools over these districts only.",
+  "groundtruth": "Compared with independent labels: final_ground_truth.json for watersheds (config/groundtruth/locations.json); the Water Body Census fields matched by CoRE Stack for waterbodies (wb-census).",
+  "coverage": "Fetched to extend the atlas or cached on demand; scored with the published pools, never used to compute them."
+ },
  "districts": [
   {
    "state": "Maharashtra",
@@ -15,6 +20,9 @@
     "Khed",
     "Mawal",
     "Mulshi-Paud"
+   ],
+   "roles": [
+    "pools"
    ]
   },
   {
@@ -35,6 +43,9 @@
     "Nandgaon",
     "Teosa",
     "Warud"
+   ],
+   "roles": [
+    "pools"
    ]
   },
   {
@@ -49,6 +60,9 @@
     "Raptadu",
     "Talupula",
     "Tanakal"
+   ],
+   "roles": [
+    "pools"
    ]
   },
   {
@@ -71,6 +85,9 @@
     "Vajrapukotturu",
     "Vangara",
     "Viragattam"
+   ],
+   "roles": [
+    "pools"
    ]
   },
   {
@@ -86,6 +103,9 @@
     "Poreyahat",
     "Sundarpahari",
     "Thakur Gangti"
+   ],
+   "roles": [
+    "pools"
    ]
   },
   {
@@ -96,6 +116,9 @@
     "Koraput",
     "Nandapur",
     "Narayanpatana"
+   ],
+   "roles": [
+    "pools"
    ]
   },
   {
@@ -108,6 +131,9 @@
     "Salumber",
     "Sarara",
     "Semari"
+   ],
+   "roles": [
+    "pools"
    ]
   },
   {
@@ -120,6 +146,9 @@
     "Belthara Road",
     "Rasra",
     "Sikandarpur"
+   ],
+   "roles": [
+    "pools"
    ]
   },
   {
@@ -132,6 +161,9 @@
     "Somala",
     "Thamballapalle",
     "Vayalpad"
+   ],
+   "roles": [
+    "coverage"
    ]
   },
   {
@@ -145,6 +177,9 @@
     "Katkamcandi",
     "Padma",
     "Tatijharia"
+   ],
+   "roles": [
+    "coverage"
    ]
   }
  ]
