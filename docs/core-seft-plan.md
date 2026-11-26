@@ -167,7 +167,7 @@ Do this in the git repo. Source of truth is the `knowledge/` folder on `main`. T
 |---|---|---|---|
 | **Knowledge pack** | `knowledge/manifest.json` | `"version"` e.g. `"1.4.0"` | `analyse` stamps this as `knowledge_version`. The GitHub tag and zip **file name** must match this string. |
 | Pack vs library | `knowledge/manifest.json` | `"min_library"` e.g. `"0.1.0"` | Session refuses the pack if installed `core-seft` is older. |
-| **Library** | `pyproject.toml` (`[project] version`) and `core_seft/__init__.py` (`__version__`) | e.g. `"0.1.0"` | `analyse` stamps this as `library_version`. Bump only when fetch / `analyse` code changes. |
+| **Library** | `pyproject.toml` (`[project] version`) and `core_seft/__init__.py` (`__version__`) | e.g. `"0.1.0"` | `analyse` stamps this as `library_version`. Bump when fetch / `analyse` code changes; publish with [Publishing the library (PyPI)](#publishing-the-library-pypi). |
 | Per-file changelog | `"version"` inside `signals.json`, `taxonomy.json`, … | e.g. `"0.4"` | Humans and `validate` only. **Not** what apps pin. Do not keep these in lockstep with the pack. |
 
 Bump **only** `knowledge/manifest.json` `"version"` when you publish a pack. Use [semver](https://semver.org/) on that field:
@@ -296,6 +296,94 @@ s.refresh_knowledge()          # "latest": copy the pack bundled with this insta
 
 **Pools** always come from the pack, never recomputed from the user’s one district.
 
+## Publishing the library (PyPI)
+
+Packs change rules. The library changes fetch, cache, and the `analyse` contract. Publish **`core-seft`** to PyPI when those change. A library release does **not** replace a knowledge GitHub Release; the two clocks stay independent.
+
+The wheel always ships the `knowledge/` folder from the tagged commit (`[tool.setuptools.package-data]` in `pyproject.toml`). That bundled pack is what `s.refresh_knowledge()` (no version) copies. Pinning `s.refresh_knowledge("1.4.0")` still downloads the GitHub zip.
+
+**Do not commit** `dist/`, `*.egg-info`, or the built wheel / sdist.
+
+### When to bump
+
+Use [semver](https://semver.org/) on the **library** version (this is not the pack version):
+
+* **patch** (`0.1.0` → `0.1.1`) — fetch, cache, or scoring bugfix; `analyse` kwargs and result fields stay the same. Tehsil-grain fetch is this kind of change.
+* **minor** (`0.1.1` → `0.2.0`) — additive API (new helper, new optional field, new `kind`). Existing calls keep working.
+* **major** (`0.2.0` → `1.0.0`) — breaking `analyse` contract (removed or renamed fields, different miss/error behaviour that callers must handle).
+
+If a knowledge pack needs this library, set that pack’s `"min_library"` to this version. **Publish the wheel first**, then the pack: `Session` refuses a pack whose `min_library` is newer than the installed library. Do not set `"min_library"` above a version that is not yet on PyPI if apps will refresh that pack.
+
+### 1. Bump version strings and commit
+
+Edit **both** of these to the same string (example `0.1.1`):
+
+| File | Field |
+|---|---|
+| `pyproject.toml` | `[project] version` — this is what PyPI and `pip` show |
+| `core_seft/__init__.py` | `__version__` — this is what `analyse` stamps as `library_version` |
+
+Also bump `seft/__init__.py` `__version__` if you want the atlas CLI in the same wheel to report the same number. Tests that pass a versions dict into `present_*` can stay; tests that assert `r.library_version` against the live library must match the new string.
+
+```bash
+python -m unittest tests.test_core_seft
+```
+
+Commit on the branch you release from (usually `main`).
+
+### 2. Build and upload the wheel
+
+From the repo root, with a clean `dist/` (delete leftover `core-seft-0.1.0*` artifacts first):
+
+```bash
+python -m pip install --upgrade build twine
+python -m build
+python -m twine check dist/*
+python -m twine upload dist/*
+```
+
+On Windows use `python -m pip` / `python -m build` / `python -m twine` if Application Control blocks `pip.exe`.
+
+**Auth:** a PyPI API token for the `core-seft` project. Do not put the token in git or in this file.
+
+```bash
+export TWINE_USERNAME=__token__          # bash
+export TWINE_PASSWORD=pypi-...           # the token, including the pypi- prefix
+# PowerShell:
+# $env:TWINE_USERNAME = "__token__"
+# $env:TWINE_PASSWORD = "pypi-..."
+```
+
+PyPI versions cannot be reused. If the upload succeeds, that version is spent even if you then find a mistake — bump again.
+
+Optional dry run: `python -m twine upload --repository testpypi dist/*` then `python -m pip install -i https://test.pypi.org/simple/ core-seft==0.1.1`.
+
+v1 does not auto-publish wheels from CI.
+
+### 3. Tag and after publish
+
+This is a **library** tag, not a pack tag (`knowledge-1.4.0`).
+
+| Piece | Exact value for library `0.1.1` |
+|---|---|
+| Git tag | `v0.1.1` |
+| PyPI project | [`core-seft`](https://pypi.org/project/core-seft/) |
+| pip pin | `python -m pip install core-seft==0.1.1` |
+
+```bash
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+Confirm https://pypi.org/project/core-seft/0.1.1/ exists, then:
+
+```bash
+python -m pip install --upgrade core-seft
+python -c "import core_seft; print(core_seft.__version__)"
+```
+
+Apps already installed pick up the new fetch / `analyse` code only after they upgrade. They keep their `data_dir` cache. Knowledge still comes from the pack bundled in that wheel, or from `refresh_knowledge("…")`.
+
 ## What to reuse (no rule fork)
 
 | Need | Existing |
@@ -385,5 +473,5 @@ Notebooks use the same public API as Commons Connect would. Keep secrets in the 
 
 * `fetch_state`.
 * Splitting `geometry_raw.json` per district.
-* Publishing knowledge packs automatically from CI (manual tag is enough for v1).
+* Publishing knowledge packs or PyPI wheels automatically from CI (manual tag / `twine upload` is enough for v1).
 * A REST server; Commons Connect can import the library.
