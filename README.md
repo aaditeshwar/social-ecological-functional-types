@@ -342,8 +342,8 @@ python -m seft.cli impact-validate
 * In the atlas, a desilted waterbody shows its result, chart and public note; districts, tehsils and MWS show the
   average and the list of works. `core_seft` answers `analyse("waterbody-impact", ...)` with the same code.
 
-The registry `atecf_pilot` is a browser extract of the Pune and Amravati desilting layers used for the pilot;
-replace it with the full registry built locally.
+The pilot registry (a browser extract of the Pune and Amravati layers) was removed once the full registry
+could be built locally; the atlas files under web/data/waterbody/ keep its results until impact-run is rerun.
 
 ## How the frontend works
 
