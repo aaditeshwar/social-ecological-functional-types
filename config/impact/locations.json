@@ -19,7 +19,8 @@
     "Junnar",
     "Khed",
     "Mawal",
-    "Mulshi-Paud"
+    "Mulshi-Paud",
+    "Velhe"
    ],
    "roles": [
     "test"
@@ -46,6 +47,343 @@
    ],
    "roles": [
     "test"
+   ]
+  },
+  {
+   "state": "Madhya Pradesh",
+   "district": "Chhatarpur",
+   "tehsils": [
+    "Baramalehara",
+    "Bijawar",
+    "Gaurihar",
+    "Nowgong",
+    "Rajnagar"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Ahamadnagar",
+   "tehsils": [
+    "Parner"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Aurangabad",
+   "tehsils": [
+    "Fulambri",
+    "Paithan",
+    "Sillod"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Bid",
+   "tehsils": [
+    "Ambejogai",
+    "Ashti",
+    "Dharur",
+    "Georai",
+    "Majalgaon",
+    "Parli-Vai",
+    "Patoda",
+    "Shirur",
+    "Wadwani",
+    "Bid",
+    "Kej"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Chandrapur",
+   "tehsils": [
+    "Mul"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Gondia",
+   "tehsils": [
+    "Goregaon"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Hingoli",
+   "tehsils": [
+    "Anudha",
+    "Basmat",
+    "Hingoli",
+    "Kalamnuri",
+    "Sengaon"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Jalgaon",
+   "tehsils": [
+    "Amalner",
+    "Bhusawal",
+    "Bodwad",
+    "Jamner",
+    "Muktainag",
+    "Parola",
+    "Raver",
+    "Yaval"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Jalna",
+   "tehsils": [
+    "Ambad",
+    "Badnapur",
+    "Jalna",
+    "Partur",
+    "Ghan"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Nanded",
+   "tehsils": [
+    "Bhokar",
+    "Bioli",
+    "Deglur",
+    "Hadgaon",
+    "Kandhar",
+    "Loha",
+    "Mukhed",
+    "Nanded",
+    "Umri",
+    "Naigaon"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Nandurbar",
+   "tehsils": [
+    "Nandurbar",
+    "Shahada"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Nashik",
+   "tehsils": [
+    "Chandwad",
+    "Deola",
+    "Dindori",
+    "Igatpuri",
+    "Kalwan",
+    "Malegaon",
+    "Nandgaon",
+    "Nashik",
+    "Sinnar",
+    "Surgana",
+    "Trimbakeshwar",
+    "Yeola",
+    "Peint"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Palghar",
+   "tehsils": [
+    "Jawhar"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Parbhani",
+   "tehsils": [
+    "Gangakhed",
+    "Jintur",
+    "Manwat",
+    "Palam",
+    "Parbhani",
+    "Sonpeth",
+    "Sailu"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Sangli",
+   "tehsils": [
+    "Atpadi",
+    "Kawthe-Mahankal",
+    "Tasgaon",
+    "Walwa"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Satara",
+   "tehsils": [
+    "Mahabaleshwar",
+    "Satara"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Solapur",
+   "tehsils": [
+    "Akkalkot",
+    "Barshi",
+    "Karmala",
+    "Madha",
+    "Malshiras"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Thane",
+   "tehsils": [
+    "Shahapur"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Usmanabad",
+   "tehsils": [
+    "Kalamb",
+    "Lohara",
+    "Paranda",
+    "Tuljapur",
+    "Washi",
+    "Bhum",
+    "Umarga",
+    "Usmanabad"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Washim",
+   "tehsils": [
+    "Karanja-Lad",
+    "Mangurlpir",
+    "Manora",
+    "Washim"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Yavatmal",
+   "tehsils": [
+    "Arni",
+    "Darwha",
+    "Digras",
+    "Ghatanji",
+    "Kelapur",
+    "Ner",
+    "Yavatmal",
+    "Zarijaman"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Rajasthan",
+   "district": "Baran",
+   "tehsils": [
+    "Shahbad"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Rajasthan",
+   "district": "Sirohi",
+   "tehsils": [
+    "Abu Road",
+    "Pindwara"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Uttar Pradesh",
+   "district": "Chitrakoot",
+   "tehsils": [
+    "Karwi",
+    "Mau"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Odisha",
+   "district": "Bolangir (Balangir)",
+   "tehsils": [
+    "Balangir",
+    "Titlagarh"
+   ],
+   "roles": [
+    "coverage"
    ]
   }
  ]

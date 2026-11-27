@@ -1,72 +1,100 @@
 # Impact review
 
-112 records; 76 assessable single or first windows; 19 of them carry quality flags and are left out of averages.
+924 records; 488 assessable single or first windows; 84 of them carry quality flags and are left out of averages.
 
 | Verdict | n |
 | --- | --- |
-| no_change | 54 |
-| not_assessable | 35 |
-| inconclusive | 15 |
-| likely_loss | 5 |
-| likely_gain | 3 |
+| not_assessable | 431 |
+| no_change | 378 |
+| inconclusive | 57 |
+| likely_gain | 38 |
+| likely_loss | 20 |
 
 ## Not assessable
 
 | Reason | n |
 | --- | --- |
-| no year of water data after the work yet | 23 |
-| its type is out of the atlas scope | 12 |
+| no year of water data after the work yet | 252 |
+| its type is out of the atlas scope | 176 |
+| only 2 similar untreated waterbodies within 20 km (at least 5 needed) | 1 |
+| only 3 similar untreated waterbodies within 20 km (at least 5 needed) | 1 |
+| only 1 similar untreated waterbodies within 20 km (at least 5 needed) | 1 |
 
 ## Estimators (weeks of water, unflagged records)
 
 | Estimator | Mean | Same sign as DiD |
 | --- | --- | --- |
-| did | -0.56 | — |
-| did_rain | -1.14 | 81% |
-| prepost_rain | -5.45 | 65% |
-| counterfactual | -0.53 | 89% |
+| did | +1.11 | — |
+| did_rain | +0.88 | 85% |
+| prepost_rain | -2.46 | 64% |
+| counterfactual | +1.12 | 92% |
 
-Placebo DiD: mean +0.39, spread 5.62 weeks over 114 placebo windows.
+Placebo DiD: mean -0.01, spread 5.49 weeks over 713 placebo windows.
 
 ## By district
 
 | Unit | n | Mean DiD (95% range) | Likely gain / loss | Reference mean |
 | --- | --- | --- | --- | --- |
-| Pune | 36 | -0.57 (-2.70, +1.44) | 1 / 1 | -0.16 |
-| Amaravati | 21 | -0.54 (-5.26, +4.09) | 0 / 2 | +0.88 |
+| Bid | 62 | +4.02 (+2.11, +5.99) | 6 / 2 | +0.57 |
+| Chhatarpur | 52 | +2.51 (-0.31, +5.34) | 8 / 3 | -0.95 |
+| Pune | 36 | -0.48 (-2.55, +1.64) | 2 / 1 | -0.28 |
+| Nashik | 32 | +2.37 (+0.04, +4.68) | 1 / 2 | -0.07 |
+| Yavatmal | 31 | -0.25 (-2.77, +2.44) | 1 / 0 | -0.99 |
+| Aurangabad | 26 | -1.93 (-4.78, +0.91) | 2 / 2 | -0.43 |
+| Chitrakoot | 25 | +1.58 (-2.45, +5.79) | 3 / 2 | -1.27 |
+| Amaravati | 23 | -0.82 (-5.94, +3.88) | 0 / 1 | -0.40 |
+| Washim | 22 | +0.05 (-1.43, +1.74) | 1 / 0 | +0.56 |
+| Solapur | 20 | +5.11 (+1.69, +8.93) | 2 / 0 | +1.03 |
+| Parbhani | 19 | -0.03 (-1.75, +1.76) | 1 / 0 | -0.13 |
+| Sirohi | 13 | -2.24 (-10.46, +5.45) | 3 / 1 | -1.67 |
+| Jalna | 11 | -2.95 (-8.23, +1.63) | 0 / 3 | -0.58 |
+| Baran | 5 | +3.49 (-1.75, +7.95) | 0 / 0 | +0.05 |
+| Hingoli | 5 | -8.75 (-22.27, +0.01) | 0 / 0 | +1.08 |
+| Nanded | 5 | +3.93 (+1.24, +7.28) | 0 / 0 | -0.67 |
+| Sangli | 5 | -0.46 (-3.10, +2.15) | 0 / 0 | -1.25 |
+| Ahamadnagar | 4 | +1.76 (-1.02, +6.39) | 0 / 0 | +0.20 |
+| Usmanabad | 3 | +0.81 (-0.24, +1.48) | 0 / 0 | +0.90 |
+| Thane | 2 | +2.22 (+1.65, +2.79) | 0 / 0 | +0.45 |
+| Jalgaon | 1 | +2.10 (+2.10, +2.10) | 0 / 0 | -0.50 |
+| Gondia | 1 | -0.50 (-0.50, -0.50) | 0 / 0 | -0.03 |
+| Satara | 1 | -0.74 (-0.74, -0.74) | 0 / 0 | -1.39 |
 
 ## By type
 
 | Unit | n | Mean DiD (95% range) | Likely gain / loss | Reference mean |
 | --- | --- | --- | --- | --- |
-| onstream_tank | 28 | -1.08 (-3.41, +1.03) | 0 / 1 | -0.03 |
-| headwater_pond | 19 | +1.98 (-2.43, +6.45) | 1 / 1 | +0.78 |
-| village_pond | 5 | -5.31 (-17.41, +7.25) | 0 / 1 | +0.21 |
-| river_reach | 3 | -0.60 (-2.97, +0.90) | 0 / 0 | -0.56 |
-| small_onstream_pond | 1 | +3.68 (+3.68, +3.68) | 0 / 0 | +0.22 |
-| canal_fed | 1 | -14.67 (-14.67, -14.67) | 0 / 0 | -0.78 |
+| onstream_tank | 165 | +0.93 (-0.05, +2.04) | 8 / 6 | +0.10 |
+| headwater_pond | 162 | +1.29 (-0.04, +2.68) | 13 / 10 | -0.28 |
+| village_pond | 45 | +1.37 (-2.28, +4.92) | 5 / 0 | -0.92 |
+| river_reach | 11 | +1.49 (-4.80, +8.15) | 2 / 1 | -1.56 |
+| farm_pond | 9 | +1.63 (-3.87, +7.05) | 2 / 0 | -1.09 |
+| canal_fed | 7 | -1.47 (-5.98, +2.61) | 0 / 0 | -1.49 |
+| small_onstream_pond | 5 | +0.69 (-3.49, +4.21) | 0 / 0 | +0.00 |
 
 ## By ctx_rainfall
 
 | Unit | n | Mean DiD (95% range) | Likely gain / loss | Reference mean |
 | --- | --- | --- | --- | --- |
-| semi_arid | 57 | -0.56 (-2.82, +1.48) | 1 / 3 | +0.23 |
+| semi_arid | 307 | +1.52 (+0.55, +2.49) | 28 / 15 | -0.31 |
+| dry_subhumid | 89 | -0.14 (-1.73, +1.19) | 2 / 2 | -0.19 |
 
 ## By ctx_aquifer
 
 | Unit | n | Mean DiD (95% range) | Likely gain / loss | Reference mean |
 | --- | --- | --- | --- | --- |
-| hard_rock | 40 | -0.90 (-3.04, +1.06) | 1 / 2 | -0.09 |
-| alluvium | 16 | -0.35 (-6.57, +5.55) | 0 / 1 | +0.93 |
-| saline | 1 | +9.87 (+9.87, +9.87) | 0 / 0 | +1.68 |
+| hard_rock | 353 | +0.84 (-0.06, +1.67) | 25 / 16 | -0.18 |
+| alluvium | 49 | +3.02 (-0.32, +5.98) | 5 / 1 | -0.92 |
+| saline | 1 | +9.87 (+9.87, +9.87) | 0 / 0 | -0.39 |
 
 ## By dominant_system
 
 | Unit | n | Mean DiD (95% range) | Likely gain / loss | Reference mean |
 | --- | --- | --- | --- | --- |
-| rainfed_dryland | 41 | -0.74 (-3.00, +1.70) | 0 / 3 | +0.26 |
-| forest_fringe | 6 | -3.80 (-13.14, +4.25) | 0 / 0 | +0.05 |
-| groundwater_irrigated | 3 | +5.23 (-9.87, +18.91) | 0 / 0 | +1.32 |
-| canal_irrigated | 3 | +3.04 (-4.55, +13.40) | 1 / 0 | -0.62 |
-| tree_crops | 2 | -5.00 (-5.39, -4.62) | 0 / 0 | +0.13 |
-| pastoral | 2 | +3.20 (+1.00, +5.40) | 0 / 0 | -0.15 |
+| rainfed_dryland | 248 | +1.57 (+0.59, +2.54) | 19 / 9 | +0.00 |
+| groundwater_irrigated | 60 | +0.08 (-2.36, +2.49) | 1 / 5 | -0.80 |
+| forest_fringe | 44 | +0.13 (-2.67, +2.90) | 3 / 2 | -0.42 |
+| canal_irrigated | 20 | +1.10 (-3.56, +5.70) | 3 / 1 | -0.89 |
+| rainfed_rice_subhumid | 17 | -1.07 (-4.79, +2.77) | 1 / 0 | -1.05 |
+| tree_crops | 10 | +2.23 (-3.22, +8.72) | 3 / 0 | -0.87 |
+| pastoral | 4 | +4.53 (+0.65, +9.04) | 0 / 0 | +0.19 |
+| tank_irrigated | 1 | +3.04 (+3.04, +3.04) | 0 / 0 | +0.78 |

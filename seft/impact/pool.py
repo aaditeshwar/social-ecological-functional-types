@@ -11,6 +11,16 @@ from ..util import ROOT, raw_dir, slug, load_json
 
 CTX_KEYS = ('ctx_rainfall', 'ctx_aquifer', 'ctx_terrain', 'ctx_gw_category', 'ctx_canal', 'ctx_cropping', 'dominant_system')
 
+
+class _Ball:
+    """query_ball_point like scipy.spatial.cKDTree, using numpy only (App Control blocks scipy DLLs on some Windows)."""
+    def __init__(self, xy):
+        self.xy = np.asarray(xy, float)
+
+    def query_ball_point(self, pt, r):
+        d = self.xy - np.asarray(pt, float)
+        return np.flatnonzero((d * d).sum(axis=1) <= r * r).tolist()
+
 def mws_years(state, district, tehsil):
     """{mws uid: {'rain': {year: mm}, 'drought': {year: weeks}}} from hydrological_annual and croppingdrought_kharif."""
     out = {}
@@ -81,9 +91,8 @@ class Pool:
         self.drought = np.array([[((ms.get(m) or {}).get('drought') or {}).get(y, np.nan) for y in self.years] for m in self.mws], float).reshape(n, T)
         cb = ctx_by_mws or {}
         self.ctx = [(b.get('mws') if isinstance(b.get('mws'), dict) else None) or cb.get(b.get('home_mws')) or {} for b in B]
-        from scipy.spatial import cKDTree
         ok = np.isfinite(self.xy_km).all(axis=1)
-        self.tree = cKDTree(np.where(ok[:, None], self.xy_km, 1e9))
+        self.tree = _Ball(np.where(ok[:, None], self.xy_km, 1e9))
 
 def pool_years(bodies):
     ys = sorted({int(y) for b in bodies for y in (b.get('years') or [])})

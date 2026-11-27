@@ -98,11 +98,12 @@ def note_env(rec, wb, S, labels, group=None, itype='desilting'):
             'group_n': g.get('n', 0), 'group_unit': g.get('unit', ''), 'group_mean_signed': signed(g.get('mean'))}
 
 def unit_stats(recs, S, label, R=None, rng=None):
-    A = S['averages']; rng = rng or np.random.default_rng(7)
+    A = S['averages']; rng = rng or random.Random(7)
     xs = np.array([r['effects']['W']['did'] for r in recs], float)
     out = {'n': len(recs), 'unit_label': label}
     if len(xs):
-        bs = [float(np.mean(rng.choice(xs, len(xs)))) for _ in range(A['bootstrap'])] if len(xs) > 1 else [float(xs[0])]
+        xs_list = xs.tolist()
+        bs = [float(np.mean(rng.choices(xs_list, k=len(xs_list)))) for _ in range(A['bootstrap'])] if len(xs) > 1 else [float(xs[0])]
         out.update(mean=round(float(xs.mean()), 2), lo=round(float(np.percentile(bs, 2.5)), 2), hi=round(float(np.percentile(bs, 97.5)), 2),
                    n_gain=sum(r['verdict'] == 'likely_gain' for r in recs), n_loss=sum(r['verdict'] == 'likely_loss' for r in recs),
                    reference_mean=round(float(np.nanmean([r['effects']['W'].get('reference_mean') or np.nan for r in recs])), 2),
