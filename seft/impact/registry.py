@@ -239,29 +239,19 @@ def save(doc, path):
     Path(path).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
 
 def add_to_locations(recs, role='coverage', scope='tehsil', log=print):
-    """Add the resolved tehsils (or whole districts) to config/waterbody/locations.json (role coverage, so the atlas
-    pools are unaffected) and to config/impact/locations.json (role `role`)."""
+    """Register the resolved tehsils (or whole districts) in config/impact/locations.json with `role`, and, as
+    coverage, in the modules the impact module depends on: the waterbody atlas and the watershed atlas
+    (seft.util.register_locations)."""
     from ..groundtruth import active_locations
+    from ..util import register_locations
     want = defaultdict(set)
     for r in recs:
         L = r.get('location') or {}
         if L.get('tehsil'): want[(L['state'], L['district'])].add(L['tehsil'])
     if scope == 'district':
-        locs = {(s['label'], d['label']): [b['label'] for b in d.get('blocks', d.get('block', []))] for s in active_locations() for d in s['district']}
+        locs = {(s, d['label']): [b['label'] for b in d.get('blocks', d.get('block', []))] for s0 in active_locations() for s in [s0['label']] for d in s0['district']}
         for k in list(want): want[k] |= set(locs.get(k, []))
-    for path, rl in ((ROOT / 'config' / 'waterbody' / 'locations.json', 'coverage'), (IMPACT_CFG / 'locations.json', role)):
-        cfg = load_json(path) if path.exists() else {'districts': []}
-        added = 0
-        for (s, d), ts in sorted(want.items()):
-            e = next((x for x in cfg['districts'] if x['state'] == s and x['district'] == d), None)
-            if e is None:
-                e = {'state': s, 'district': d, 'tehsils': [], 'roles': [rl]}; cfg['districts'].append(e)
-            new = [t for t in sorted(ts) if t not in e['tehsils']]; e['tehsils'] += new; added += len(new)
-            if rl not in (e.get('roles') or []) and not (rl == 'coverage' and e.get('roles')):
-                e['roles'] = (e.get('roles') or []) + [rl]
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(cfg, indent=1, ensure_ascii=False) + '\n')
-        log(f'  {path.relative_to(ROOT)}: {added} tehsils added')
+    return register_locations('impact', {k: sorted(v) for k, v in want.items()}, role, log=log)
 
 # ---------------------------------------------------------------- loading and linking
 def load_all(paths=None):

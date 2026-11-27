@@ -79,7 +79,7 @@ def _mean(xs):
     xs = [x for x in xs or [] if isinstance(x, (int, float))]
     return round(sum(xs) / len(xs), 2) if xs else None
 
-def score_all(cfg, log=print, pools=None, pool_districts=None):
+def score_all(cfg, log=print, pools=None, pool_districts=None, pool_tehsils=None):
     """Build and score every waterbody of the locations. Returns (bodies, stats, types, K, pools)."""
     K = load_knowledge()
     B, stats, types = build_all(cfg, log=log)
@@ -92,7 +92,8 @@ def score_all(cfg, log=print, pools=None, pool_districts=None):
     for b in B: b['vars'] = compute(b, prof, drought, ref)
     if pools is None:
         pools = pool_thresholds([base_env(b, b['vars']) for b in B if b['type'] in scope
-                                 and (pool_districts is None or b['district'] in pool_districts)], K)
+                                 and (pool_districts is None or b['district'] in pool_districts)
+                                 and (pool_tehsils is None or (b['district'], b['tehsil']) in pool_tehsils)], K)
     for b in B:
         if b['type'] in scope: b['signals'], b['roles'], b['rules'] = score(b, b['vars'], K, pools)
         else: b['signals'], b['roles'], b['rules'] = {}, {}, {}
@@ -235,10 +236,12 @@ def main(cfg_path=None, out=None, merge=False, web=True, update_pools=False, log
     if update_pools or not pub:
         if not pool_d: raise SystemExit("No district in the locations file has the 'pools' role.")
         log(f"  pooling waterbody thresholds over the 'pools' districts: {', '.join(pool_d)}")
-        B, stats, types, K, pools = score_all(cfg, log=log, pool_districts=set(pool_d))
+        from ..util import role_tehsils
+        pool_t = {(d, t) for _, d, t in role_tehsils(cfg, 'pools')}
+        B, stats, types, K, pools = score_all(cfg, log=log, pool_districts=set(pool_d), pool_tehsils=pool_t)
         write_pools('waterbody', {k: {t: [_num(a), _num(c)] for t, (a, c) in v.items()} for k, v in pools.items()},
                     {'districts': pool_d, 'computed': f'{datetime.date.today()}, wb-run --update-pools',
-                     'n_waterbodies': sum(1 for b in B if b['district'] in pool_d)})
+                     'n_waterbodies': sum(1 for b in B if (b['district'], b['tehsil']) in pool_t)})
         log('  wrote the waterbody pools to knowledge/pools.json (bump knowledge/manifest.json before releasing a pack)')
     else:
         log('  scoring with the published waterbody pools (knowledge/pools.json); --update-pools to recompute')

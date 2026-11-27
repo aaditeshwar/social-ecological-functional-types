@@ -308,7 +308,8 @@ are in `knowledge/impact/settings.json`, public-note rules in `knowledge/impact/
 python -m seft.cli impact-build-registry --id atecf_desilting --layers swb_layers.csv --zoi zoi_layers.csv \
        [--name "..."] [--role test|reference|coverage] [--scope tehsil|district] [--refresh-locations]
 python -m seft.cli wb-fetch            # the tehsils the builder added (API data and waterbody layers)
-python -m seft.cli wb-run --merge      # atlas bundles for them (MWS context for the averages)
+python -m seft.cli wb-run --merge      # waterbody atlas bundles for them (MWS context for the averages)
+python -m seft.cli run --merge         # watershed atlas bundles for them (the waterbody pages need these too)
 python -m seft.cli impact-link         # link registry records to atlas waterbodies
 python -m seft.cli impact-run          # -> out/impact/{records,averages}.json, review.md; web/data/waterbody/impact*.json
 python -m seft.cli impact-validate
@@ -321,7 +322,8 @@ python -m seft.cli impact-validate
   the desilting point kept beside it), drops records repeated across layers (same desilting point, year and
   volume), resolves state, district and tehsil names against `get_active_locations` (exact, prefix, then close
   spelling; `config/impact/aliases.json` for renamed districts such as Beed → Bid) and adds the tehsils to
-  `config/waterbody/locations.json` (role `coverage`) and `config/impact/locations.json` (`--role`). With
+  `config/impact/locations.json` (`--role`) and, as coverage, to the waterbody and watershed locations
+  (`config/README.md`, "Modules depend on each other's locations"). With
   `--zoi`, each record's zone of influence (cropping and fortnightly NDVI, for later outcomes) goes to
   `data/registries/<id>.zoi.json.gz`.
 * **`impact-link`** links each record to an atlas waterbody: the record's point inside a cached waterbody

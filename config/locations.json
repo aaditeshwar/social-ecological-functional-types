@@ -19,10 +19,14 @@
     "Junnar",
     "Khed",
     "Mawal",
-    "Mulshi-Paud"
+    "Mulshi-Paud",
+    "Velhe"
    ],
    "roles": [
     "pools"
+   ],
+   "coverage_tehsils": [
+    "Velhe"
    ]
   },
   {

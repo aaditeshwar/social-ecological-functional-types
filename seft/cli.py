@@ -67,12 +67,16 @@ def cmd_impact_build(a):
 
 def cmd_impact_link(a):
     from .impact import registry as R
+    from .util import sync_dependencies
+    sync_dependencies('impact'); sync_dependencies('waterbody')
     paths = [R.REG_DIR / f'{x}.json' for x in a.registry.split(',')] if a.registry else None
     for doc in R.load_all(paths):
         R.link(doc); R.save(doc, R.REG_DIR / f"{doc['registry']['id']}.json")
 
 def cmd_impact_run(a):
     from .impact.run import main as imain
+    from .util import sync_dependencies
+    sync_dependencies('impact'); sync_dependencies('waterbody')
     if a.finalize_only:
         from .impact.run import finalize_only
         finalize_only(web=not a.no_web); return
@@ -101,6 +105,9 @@ def cmd_add(a):
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(__import__('json').dumps(cfg, indent=1, ensure_ascii=False) + '\n')
     print(f"{a.district}, {a.state}: added {len(added)} tehsil(s) to {p} ({len(d['tehsils'])} in total); roles: {', '.join(d['roles'])}")
+    if a.cmd == 'wb-add' and loc == str(ROOT / 'config' / 'waterbody' / 'locations.json') or (a.cmd == 'wb-add' and Path(loc).resolve() == (ROOT / 'config' / 'waterbody' / 'locations.json').resolve()):
+        from .util import register_locations     # the waterbody atlas draws on the watershed atlas's MWS bundles
+        register_locations('mws', {(a.state, a.district): d['tehsils']}, 'coverage', cascade=False, dependency=True)
     if 'pools' in d['roles'] and 'pools' not in old:
         run = 'wb-run' if a.cmd == 'wb-add' else 'run'
         print(f"This district is now part of the pools sample: after fetching, `python -m seft.cli {run} --update-pools` "
@@ -131,16 +138,17 @@ def cmd_run(a):
     from .export import write_csv, write_web, _knowledge
     answers = load_json(a.answers) if a.answers else None
     if answers and 'answers' in answers: answers = answers['answers']
-    from .util import with_role, pools_doc, write_pools
+    from .util import with_role, pools_doc, write_pools, role_tehsils
     import datetime
     pub = pools_doc().get('mws')
     pool_d = {(d['state'], d['district']) for d in with_role(cfg, 'pools')['districts']}
+    pool_t = role_tehsils(cfg, 'pools')          # coverage_tehsils of a pools district stay out of the sample
     if a.update_pools or not pub:
         if not pool_d: raise SystemExit("No district in the locations file has the 'pools' role.")
         print(f"pooling the signal thresholds over the 'pools' districts: {', '.join(d for _, d in sorted(pool_d))}")
-        recs, vill, cl, meta = run(cfg, kd, answers=answers, pool_filter=lambda r: (r['state'], r['district']) in pool_d)
+        recs, vill, cl, meta = run(cfg, kd, answers=answers, pool_filter=lambda r: (r['state'], r['district'], r['tehsil']) in pool_t)
         write_pools('mws', meta['pools'], {'districts': [d for _, d in sorted(pool_d)],
-                    'n_mws': sum(1 for r in recs if (r['state'], r['district']) in pool_d),
+                    'n_mws': sum(1 for r in recs if (r['state'], r['district'], r['tehsil']) in pool_t),
                     'computed': f'{datetime.date.today()}, run --update-pools'})
         print('wrote the MWS pools to knowledge/pools.json (bump knowledge/manifest.json before releasing a pack)')
         if a.merge: print('Note: districts kept from the atlas by --merge were scored with the previous pools; '
@@ -160,7 +168,19 @@ def cmd_run(a):
 
 def cmd_wb_fetch(a):
     from .wb.layers import fetch_all_layers
+    from .util import sync_dependencies
+    sync_dependencies('waterbody')                # the tehsils fetched here are also in the watershed locations
     fetch_all_layers(load_json(a.locations), force=a.force)
+    _bundle_check()
+
+def _bundle_check():
+    """Waterbody districts whose watershed bundle (web/data/d_<district>.json) is missing: the atlas needs both."""
+    from .util import slug
+    wcfg = load_json(ROOT / 'config' / 'waterbody' / 'locations.json')
+    miss = [d['district'] for d in wcfg['districts'] if not (ROOT / 'web' / 'data' / f"d_{slug(d['district'])}.json").exists()]
+    if miss:
+        print(f"{len(miss)} waterbody district(s) have no watershed bundle yet ({', '.join(miss[:8])}{' ...' if len(miss) > 8 else ''}): "
+              f"run `python -m seft.cli fetch` and `python -m seft.cli run --merge` so the atlas can show them.")
 
 def cmd_wb_audit(a):
     from .wb.audit import report
@@ -173,6 +193,7 @@ def cmd_wb_validate(a):
 def cmd_wb_run(a):
     from .wb.run import main as wb_run
     wb_run(a.locations, a.out, merge=a.merge, web=not a.no_web, update_pools=a.update_pools)
+    _bundle_check()
 
 def cmd_wb_census(a):
     from .wb.census import main as wb_census
