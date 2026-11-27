@@ -2283,7 +2283,8 @@ function renderWb(){
   const go=()=>{const t=W.tab; if(t==="explore") return renderWbExplore(m); if(t==="graph") return renderWbGraph(m); if(t==="types") return renderWbTypes(m);
     if(t==="rules") return renderWbRules(m); if(t==="questions") return renderWbQuestions(m); if(t==="interventions") return renderInterventions(m,"wb");
     if(t==="schemes") return renderWbSchemes(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
-  if(WIDX) return go();
+  if(WIDX&&WIMP_TRIED) return go();
+  if(WIDX) return wImpIndex().then(()=>{$("#asub").textContent=atlasSub(); go();});
   m.innerHTML=`<div class="loading">Loading the waterbody atlas…</div>`;
   loadWbData("index").then(async x=>{WIDX=x; WK=x.knowledge; wIndex(); applyViews(); await wImpIndex(); $("#asub").textContent=atlasSub(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
 }
