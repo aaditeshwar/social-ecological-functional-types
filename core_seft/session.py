@@ -480,7 +480,8 @@ class Session:
         from seft.impact import registry as REG
         from seft.impact.pool import Pool, pool_years, mws_years
         from seft.impact.estimate import Estimator
-        from seft.impact.run import assess_waterbody, note_env, type_labels, unit_stats, treated_map
+        from seft.impact.run import assess_waterbody, note_env, type_labels, unit_stats, treated_map, pick_group, usable
+        from seft.impact.pool import CTX_KEYS
         from seft.impact.notes import render, rules as note_rules
         S = REG.settings(); R = note_rules(); labels, scope = type_labels()
         tehs = set(self._cached_tehsils(state, district))
@@ -514,12 +515,13 @@ class Session:
                     'xy': [round(float(c), 5) for c in pool.lonlat[i]]}
         def records_for(k, xs, scr):
             i = pool.index[k]; info = wb_info(i)
-            return [{**info, **rec} for rec in assess_waterbody(E, i, xs, S, labels, screened=scr)]
+            ctx = {c: (pool.ctx[i] or {}).get(c) for c in CTX_KEYS}
+            return [{**info, 'ctx': ctx, **rec} for rec in assess_waterbody(E, i, xs, S, labels, screened=scr)]
         gkey = ('impact-group', key)
         if gkey not in self._wb:            # every registered work of the district, for group means and unit averages
             self._wb[gkey] = [r for k, xs in sorted(reg.items()) for r in records_for(k, xs, True)]
         allrecs = self._wb[gkey]
-        ok = [r for r in allrecs if r['window'] in ('single', 'first') and r['verdict'] != 'not_assessable' and not r['quality_flags']]
+        ok = [r for r in allrecs if usable(r)]
         if uid is None:
             sel = [r for r in ok if not tehsil or r['tehsil'] == tehsil]
             unit = f'{tehsil} tehsil' if tehsil else f'{district} district'
@@ -545,9 +547,9 @@ class Session:
                     'message': 'No intervention is known for this waterbody. Pass intervention={"type": "desilting", "year": 2023, "volume_m3": ...}.',
                     'versions': versions}
         recs = records_for(k, xs, scr)
+        cache = {}
         for r in recs:
-            same = [x for x in ok if x['district'] == r['district'] and x['type'] == r['type']]
-            g = {'n': len(same), 'unit': f"{r['district']} district", 'mean': sum(x['effects']['W']['did'] for x in same) / len(same)} if same else None
+            g = pick_group(r, ok, S, labels, cache)   # district and type; else rainfall regime and type (works cached here)
             r['note'] = render('waterbody', note_env(r, r, S, labels, g), R)
             r['group'] = g
         return {'kind': 'waterbody-impact', 'waterbody': wb_info(pool.index[k]), 'records': recs, 'source': source,

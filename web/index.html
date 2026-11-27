@@ -1901,7 +1901,7 @@ function typeWalk(R){
     <div class="tbl"><table><thead><tr><th>Type, in order</th><th>Assigned when</th><th>Holds?</th></tr></thead><tbody>${WK.types.types.map(t=>{const v=PyEval.safe(t.when,e); const hit=!found&&v!==null&&!!v; if(hit) found=true;
       return `<tr${hit?' style="font-weight:600"':""}><td>${esc(t.label)}</td><td><code>${wExprHtml(t.when)}</code></td><td>${hit?"yes: assigned":v===null?"unknown":(v?"yes (an earlier type matched)":"no")}</td></tr>`;}).join("")}</tbody></table></div></div>`;}
 /* ---------- waterbody impact (seft/impact; data/waterbody/impact.json and imp_<district>.json) ---------- */
-const IMP_COL={likely_gain:"var(--ok)",likely_loss:"var(--bad)",inconclusive:"var(--warn)",no_change:"var(--muted)",not_assessable:"var(--na)"};
+const IMP_COL={likely_gain:"var(--ok)",early_gain:"color-mix(in srgb,var(--ok) 65%,#fff)",likely_loss:"var(--bad)",early_loss:"color-mix(in srgb,var(--bad) 65%,#fff)",inconclusive:"var(--warn)",no_change:"var(--muted)",not_assessable:"var(--na)"};
 function impLabel(v){return (WIMP&&WIMP.settings.verdict.labels[v])||v}
 function impChip(v){return `<span class="pill" style="background:${IMP_COL[v]||"var(--na)"}">${esc(impLabel(v))}</span>`}
 function impSigned(x,n=1){if(x==null) return "–"; const t=Math.abs(x).toFixed(n); if(+t===0) return (0).toFixed(n); return x>0?"+"+t:"−"+t;}

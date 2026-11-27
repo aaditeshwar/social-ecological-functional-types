@@ -74,8 +74,17 @@ def assess_waterbody(E, i, interventions, S, labels, screened=True, itype='desil
                                               'ids': [i_ for u in used for i_ in u['ids']]},
                    quality_flags=sorted({q for u in used for q in u['quality_flags']}))
         rec['flags'] = conf_flags(rec, S, P.type[i], float(P.area[i])) + ([] if screened else ['unscreened'])
-        out.append(rec)
+        adjust_verdict(rec, S); out.append(rec)
     return out
+
+def adjust_verdict(rec, S):
+    """A likely gain or loss with fewer than verdict.min_post_years_full years after the work is an early sign."""
+    v = rec.get('verdict'); need = S['verdict'].get('min_post_years_full', 2)
+    if v in ('likely_gain', 'likely_loss') and len(rec.get('post_years') or []) < need:
+        rec['verdict'] = 'early_gain' if v == 'likely_gain' else 'early_loss'
+    return rec
+
+GAINS, LOSSES = ('likely_gain', 'early_gain'), ('likely_loss', 'early_loss')
 
 def note_env(rec, wb, S, labels, group=None, itype='desilting'):
     it = next((t for t in S['intervention_types'] if t['id'] == itype), {'label': itype})
@@ -84,7 +93,7 @@ def note_env(rec, wb, S, labels, group=None, itype='desilting'):
     tl = labels.get(wb.get('type'), wb.get('type') or 'waterbody').lower()
     tlp = ' / '.join(x + 's' for x in tl.split(' / '))
     flags = [S['flags'][f]['label'] for f in rec.get('flags') or [] if f in S['flags']] + \
-            [S['registry_quality']['labels'].get(q, q) for q in rec.get('quality_flags') or []]
+            [S['registry_quality']['labels'].get(q, q) for q in rec.get('quality_flags') or [] if q != 'volume_implausible']
     ys = (rec.get('intervention') or {}).get('years') or []
     g = group or {}
     return {'verdict': rec.get('verdict'), 'intervention_label_lower': it['label'].lower(),
@@ -95,7 +104,10 @@ def note_env(rec, wb, S, labels, group=None, itype='desilting'):
             'has_volume': vol is not None, 'volume_text': f'{vol:,.0f}' if vol is not None else '',
             'depth_text': f'{vol / (area * 1e4):.2f}' if vol is not None and area else '–',
             'n_flags': len(flags), 'flags_text': '; '.join(flags),
-            'group_n': g.get('n', 0), 'group_unit': g.get('unit', ''), 'group_mean_signed': signed(g.get('mean'))}
+            'implausible': 'volume_implausible' in (rec.get('quality_flags') or []),
+            'group_n': g.get('n', 0), 'group_unit': g.get('unit', ''), 'group_mean_signed': signed(g.get('mean')),
+            'group_label': g.get('label', tlp), 'group_concern': bool(g.get('concern')),
+            'group_placebo_text': 'gaining on' if (g.get('placebo_mean') or 0) > 0 else 'falling behind'}
 
 def unit_stats(recs, S, label, R=None, rng=None):
     A = S['averages']; rng = rng or random.Random(7)
@@ -105,13 +117,22 @@ def unit_stats(recs, S, label, R=None, rng=None):
         xs_list = xs.tolist()
         bs = [float(np.mean(rng.choices(xs_list, k=len(xs_list)))) for _ in range(A['bootstrap'])] if len(xs) > 1 else [float(xs[0])]
         out.update(mean=round(float(xs.mean()), 2), lo=round(float(np.percentile(bs, 2.5)), 2), hi=round(float(np.percentile(bs, 97.5)), 2),
-                   n_gain=sum(r['verdict'] == 'likely_gain' for r in recs), n_loss=sum(r['verdict'] == 'likely_loss' for r in recs),
+                   n_gain=sum(r['verdict'] in GAINS for r in recs), n_loss=sum(r['verdict'] in LOSSES for r in recs),
                    reference_mean=round(float(np.nanmean([r['effects']['W'].get('reference_mean') or np.nan for r in recs])), 2),
                    by_estimator={k: round(float(np.nanmean([r['effects']['W'].get(k) if r['effects']['W'].get(k) is not None else np.nan for r in recs])), 2)
                                  for k in ('did', 'did_rain', 'prepost_rain', 'counterfactual')},
                    RR=round(float(np.nanmean([r['effects']['RR'].get('did') if r['effects']['RR'].get('did') is not None else np.nan for r in recs])), 3),
                    SR=round(float(np.nanmean([r['effects']['SR'].get('did') if r['effects']['SR'].get('did') is not None else np.nan for r in recs])), 3))
+    pl = [float(np.mean(list(r['effects']['W']['placebo'].values()))) for r in recs
+          if (r['effects']['W'].get('placebo') or {}) and all(v is not None for v in r['effects']['W']['placebo'].values())]
+    if len(pl) > 1:
+        pb = [float(np.mean(rng.choices(pl, k=len(pl)))) for _ in range(A['bootstrap'])]
+        pm, plo, phi = float(np.mean(pl)), float(np.percentile(pb, 2.5)), float(np.percentile(pb, 97.5))
+        out.update(placebo_mean=round(pm, 2), placebo_lo=round(plo, 2), placebo_hi=round(phi, 2),
+                   placebo_concern=bool(abs(pm) >= A.get('placebo_concern_weeks', 1.0) or plo > 0 or phi < 0))
     env = {'n': out['n'], 'min_n': A['min_n'], 'unit_label': label, 'intervention_label_lower': 'desilting',
+           'placebo_concern': bool(out.get('placebo_concern')), 'placebo_abs': f'{abs(out.get("placebo_mean") or 0):.1f}',
+           'placebo_text': 'gaining on' if (out.get('placebo_mean') or 0) > 0 else 'falling behind',
            'mean_signed': signed(out.get('mean')), 'mean_abs': f'{abs(out.get("mean") or 0):.1f}',
            'lo': out.get('lo', 0), 'hi': out.get('hi', 0), 'lo_signed': signed(out.get('lo')), 'hi_signed': signed(out.get('hi')),
            'n_gain': out.get('n_gain', 0), 'n_loss': out.get('n_loss', 0), 'expected_each': f'{0.1 * out["n"]:.1f}'.rstrip('0').rstrip('.')}
@@ -120,7 +141,7 @@ def unit_stats(recs, S, label, R=None, rng=None):
 
 def averages(rows, S, R=None):
     """rows: [(record, unit values dict)]; uses single/first windows that are assessable and carry no quality flag."""
-    use = [(r, u) for r, u in rows if r['window'] in ('single', 'first') and r['verdict'] != 'not_assessable' and not r['quality_flags']]
+    use = [(r, u) for r, u in rows if usable(r)]
     out = {}
     for k in S['averages']['units']:
         g = collections.defaultdict(list)
@@ -162,18 +183,60 @@ def main(registry_ids=None, cfg_path=None, out=None, web=True, link=True, log=pr
         for rec in assess_waterbody(E, i, xs, S, labels):
             recs.append({**wb, **rec})
         if (n + 1) % 100 == 0: log(f'    {n + 1} of {len(by)} waterbodies')
-    unit_of = lambda r: {'state': r['state'], 'district': r['district'], 'tehsil': f"{r['district']}/{r['tehsil']}", 'mws': r['mws'], 'type': r['type'],
-                         **{c: (pool.ctx[pool.index[r['wb_id']]] or {}).get(c) for c in CTX_KEYS}}
-    AV = averages([(r, unit_of(r)) for r in recs], S, R)
-    for r in recs:
-        g = (AV.get('type') or {}).get(r['type']) if r['type'] else None
-        gd = None
-        if g is not None:
-            same = [x for x in recs if x['district'] == r['district'] and x['type'] == r['type'] and x['window'] in ('single', 'first')
-                    and x['verdict'] != 'not_assessable' and not x['quality_flags']]
-            if same: gd = {'n': len(same), 'unit': f"{r['district']} district", 'mean': float(np.mean([x['effects']['W']['did'] for x in same]))}
-        r['note'] = render('waterbody', note_env(r, r, S, labels, gd), R)
+    for r in recs: r['ctx'] = {c: (pool.ctx[pool.index[r['wb_id']]] or {}).get(c) for c in CTX_KEYS}
+    AV = finalize(recs, S, R, labels)
     write(recs, AV, regs, S, out, web, log)
+    return recs, AV
+
+def usable(r):
+    return r['window'] in ('single', 'first') and r['verdict'] != 'not_assessable' and not r['quality_flags']
+
+def pick_group(r, ok, S, labels, cache):
+    """Comparison group for a waterbody note: its district and type if that has averages.min_n works, else its
+    rainfall regime and type, else all works of its type."""
+    A = S['averages']; tl = labels.get(r['type'], r['type'] or 'waterbody').lower(); tlp = ' / '.join(x + 's' for x in tl.split(' / '))
+    rain = (r.get('ctx') or {}).get('ctx_rainfall')
+    for kind in A.get('group_order', ['district', 'ctx_rainfall', 'all']):
+        if kind == 'district': key, unit = ('district', r['district'], r['type']), f"{r['district']} district"
+        elif kind == 'ctx_rainfall':
+            if not rain: continue
+            key, unit = ('rain', rain, r['type']), f"{rain.replace('_', '-')} areas"
+        else: key, unit = ('type', r['type']), 'all assessed districts'
+        if key not in cache:
+            sel = [x for x in ok if x['type'] == r['type'] and (kind == 'all' or (kind == 'district' and x['district'] == r['district'])
+                                                                or (kind == 'ctx_rainfall' and (x.get('ctx') or {}).get('ctx_rainfall') == rain))]
+            st = unit_stats(sel, S, unit) if sel else {'n': 0}
+            cache[key] = {'n': st['n'], 'unit': unit, 'label': tlp, 'mean': st.get('mean'), 'concern': st.get('placebo_concern', False),
+                          'placebo_mean': st.get('placebo_mean')}
+        g = cache[key]
+        if g['n'] >= A['min_n'] or kind == 'all': return g if g['n'] else None
+    return None
+
+def finalize(recs, S, R=None, labels=None, log=print):
+    """Verdicts (early signs), averages by unit and the public notes, from computed records. Idempotent."""
+    R = R or note_rules(); labels = labels or type_labels()[0]
+    ctxs = {}
+    for r in recs:
+        adjust_verdict(r, S)
+        if not r.get('ctx'):
+            if r['district'] not in ctxs: ctxs[r['district']] = bundle_ctx(r['district'])
+            r['ctx'] = {c: (ctxs[r['district']].get(r.get('mws')) or {}).get(c) for c in CTX_KEYS}
+    unit_of = lambda r: {'state': r['state'], 'district': r['district'], 'tehsil': f"{r['district']}/{r['tehsil']}", 'mws': r['mws'],
+                         'type': r['type'], **(r.get('ctx') or {})}
+    AV = averages([(r, unit_of(r)) for r in recs], S, R)
+    ok = [r for r in recs if usable(r)]; cache = {}
+    for r in recs:
+        g = pick_group(r, ok, S, labels, cache)
+        r['group'] = g
+        r['note'] = render('waterbody', note_env(r, r, S, labels, g), R)
+    return AV
+
+def finalize_only(out=None, web=True, log=print):
+    """Rebuild verdicts, notes, averages and bundles from out/impact/records.json (no estimation)."""
+    S = REG.settings(); out = Path(out or OUT)
+    recs = json.loads((out / 'records.json').read_text(encoding='utf-8'))
+    AV = finalize(recs, S, log=log)
+    write(recs, AV, REG.load_all(), S, out, web, log)
     return recs, AV
 
 def write(recs, AV, regs, S, out=None, web=True, log=print):
@@ -227,6 +290,7 @@ def review(recs, AV, S):
     for k in ('district', 'type', 'ctx_rainfall', 'ctx_aquifer', 'dominant_system'):
         rows = sorted((AV.get(k) or {}).items(), key=lambda kv: -kv[1]['n'])
         if not rows: continue
-        L += ['', f'## By {k}', '', '| Unit | n | Mean DiD (95% range) | Likely gain / loss | Reference mean |', '| --- | --- | --- | --- | --- |']
-        L += [f"| {v} | {s['n']} | {s.get('mean', 0):+.2f} ({s.get('lo', 0):+.2f}, {s.get('hi', 0):+.2f}) | {s.get('n_gain', 0)} / {s.get('n_loss', 0)} | {s.get('reference_mean', 0):+.2f} |" for v, s in rows]
+        L += ['', f'## By {k}', '', '| Unit | n | Mean DiD (95% range) | Gain / loss (incl. early) | Reference mean | Placebo mean (95% range) |', '| --- | --- | --- | --- | --- | --- |']
+        L += [f"| {v} | {s['n']} | {s.get('mean', 0):+.2f} ({s.get('lo', 0):+.2f}, {s.get('hi', 0):+.2f}) | {s.get('n_gain', 0)} / {s.get('n_loss', 0)} | {s.get('reference_mean', 0):+.2f} | "
+              + (f"{s['placebo_mean']:+.2f} ({s['placebo_lo']:+.2f}, {s['placebo_hi']:+.2f}){' **concern**' if s.get('placebo_concern') else ''}" if 'placebo_mean' in s else '–') + ' |' for v, s in rows]
     return '\n'.join(L) + '\n'

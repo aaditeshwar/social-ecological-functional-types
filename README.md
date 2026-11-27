@@ -336,9 +336,14 @@ python -m seft.cli impact-validate
   minus pre without controls, a counterfactual model); placebo starts two and three years earlier; a percentile
   among untreated waterbodies of the district and type run through the same steps; and a verdict (likely gain at
   the 90th percentile or above, likely loss at the 10th or below, if placebos and the counterfactual agree;
-  otherwise inconclusive; no detectable change in between). Several works on one waterbody are assessed until
+  otherwise inconclusive; no detectable change in between; with only one year of data after the work a gain or loss is shown as an early sign). Several works on one waterbody are assessed until
   the next work, then together. Averages by state, district, tehsil, MWS, type and context use the assessable,
-  unflagged works. `review.md` summarises verdicts, estimator agreement and averages for decisions.
+  unflagged works. `review.md` summarises verdicts, estimator agreement and averages for decisions;
+  a unit whose placebo estimates average a week or more, or exclude zero, is marked and its note says so.
+  Waterbody notes compare with the district and type when it has 15 works, else the rainfall regime and type,
+  and say when a silt volume implies more than 2 m of depth (the record was probably matched to the wrong
+  waterbody). `impact-run --finalize-only` rebuilds verdicts, notes and averages from `out/impact/records.json`
+  after changes to the notes or verdict rules, without re-estimating.
 * In the atlas, a desilted waterbody shows its result, chart and public note; districts, tehsils and MWS show the
   average and the list of works. `core_seft` answers `analyse("waterbody-impact", ...)` with the same code.
 

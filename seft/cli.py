@@ -73,6 +73,9 @@ def cmd_impact_link(a):
 
 def cmd_impact_run(a):
     from .impact.run import main as imain
+    if a.finalize_only:
+        from .impact.run import finalize_only
+        finalize_only(web=not a.no_web); return
     imain(a.registry.split(',') if a.registry else None, link=not a.no_link, web=not a.no_web)
 
 def cmd_add(a):
@@ -270,6 +273,7 @@ def main(argv=None):
     p.add_argument('--registry', help='comma-separated registry ids (default: all in data/registries)')
     p.add_argument('--no-link', action='store_true', help='use the links already in the registries')
     p.add_argument('--no-web', action='store_true', help='do not copy bundles to web/data/waterbody')
+    p.add_argument('--finalize-only', action='store_true', help='rebuild verdicts, notes and averages from out/impact/records.json without re-estimating')
     sub.add_parser('impact-validate', help='check knowledge/impact, config/impact and the registries')
     a = ap.parse_args(argv)
     if a.cmd == 'add': cmd_add(a)
