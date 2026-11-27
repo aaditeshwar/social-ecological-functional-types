@@ -7,3 +7,5 @@ out/web/
 *.pyc
 out/waterbody/web/
 out/priority/
+
+out/impact/web/

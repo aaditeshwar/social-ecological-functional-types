@@ -49,7 +49,25 @@ r = s.analyse("waterbody", state="Jharkhand", district="Godda", tehsil="Basantra
 r = s.analyse("mws", state="Jharkhand", district="Godda", tehsil="Basantrai", uid="12_313813",
               answers={"sys_irrigated_share": "low"})
 print(r.mix["dominant"], [i["name"] for i in r.interventions[:5]])
+
+# impact of an intervention on a waterbody (registry record, or the intervention passed here)
+r = s.analyse("waterbody-impact", state="Maharashtra", district="Pune", tehsil="Daund", uid="7806220")
+r = s.analyse("waterbody-impact", state="Maharashtra", district="Pune", tehsil="Daund", uid="7805722",
+              intervention={"type": "desilting", "year": 2023, "volume_m3": 10000})
+r = s.analyse("waterbody-impact", state="Maharashtra", district="Pune", tehsil="Daund")   # average of the tehsil
 ```
+
+`kind="waterbody-impact"` returns a plain dict. For a waterbody: `waterbody` (id, type, area, MWS, location),
+`records` (one per window: `single`, or `first` and `combined` when there are several works; each with
+`pre_years`, `post_years`, `controls`, `effects` for W, RR and SR with the four estimators, placebos and
+percentile, `verdict`, `reason`, `flags`, `quality_flags`, `note` and the `group` mean for the district and
+type), `source` (`registry` or `supplied`), `screened` (whether a registry covers the district, so treated
+waterbodies are kept out of the controls; without one every other waterbody is assumed untreated) and
+`registries`. For a district or tehsil: `average` (n, mean, 95% range, likely gains and losses, the note) and
+`records`. Registries are read from `<data_dir>/registries/` and the repository's `data/registries/`. Controls
+come from every cached tehsil of the district plus the waterbody's own tehsil; fetch neighbouring tehsils first
+for waterbodies near a tehsil edge. The first call in a district builds the pool and computes every registered
+work there (tens of seconds); later calls reuse it.
 
 Module-level `analyse(...)` is the same after `core_seft.configure(data_dir=..., api_key=...)`.
 

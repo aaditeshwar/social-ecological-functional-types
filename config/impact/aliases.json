@@ -1,0 +1,28 @@
+{
+ "_about": "Names in registry layers that get_active_locations spells differently. Keys: \"<State>/<name in the layer>\" for districts, \"<State>/<District as in get_active_locations>/<name in the layer>\" for tehsils.",
+  "districts": {
+  "Maharashtra/Beed": "Bid",
+  "Maharashtra/Osmanabad": "Usmanabad",
+  "Maharashtra/Dharashiv": "Usmanabad",
+  "Maharashtra/Ahemadnagar": "Ahamadnagar",
+  "Maharashtra/Ahilyanagar": "Ahamadnagar",
+  "Maharashtra/Chhatrapati Sambhajinagar": "Aurangabad",
+  "Maharashtra/Jalana": "Jalna",
+  "Maharashtra/Amravati": "Amaravati",
+  "Odisha/Balangir": "Bolangir (Balangir)"
+ },
+ "tehsils": {
+  "Maharashtra/Amaravati/Tiwsa": "Teosa",
+  "Maharashtra/Bid/Beed": "Bid",
+  "Maharashtra/Bid/Kaij": "Kej",
+  "Maharashtra/Bid/Parali": "Parli-Vai",
+  "Maharashtra/Usmanabad/Bhoom": "Bhum",
+  "Maharashtra/Usmanabad/Omerga": "Umarga",
+  "Maharashtra/Usmanabad/Dharashiv": "Usmanabad",
+  "Maharashtra/Nanded/NaigaonKhairgaon": "Naigaon",
+  "Maharashtra/Nashik/Peth": "Peint",
+  "Maharashtra/Parbhani/Selu": "Sailu",
+  "Maharashtra/Jalna/Ghanasavangi": "Ghan",
+  "Maharashtra/Yavatmal/Zari": "Zarijaman"
+ }
+}

@@ -16,3 +16,27 @@
   comparison (`wb-census`); `pools` the sample for the waterbody pools (`wb-run --update-pools`).
 * `groundtruth/locations.json` — the watershed ground-truth tehsils (role `groundtruth`), rebuilt by the
   `groundtruth` command from `final_ground_truth.json`; `add --role groundtruth` appends to it.
+* `impact/locations.json` — districts of the waterbody-impact module, with roles `reference` (untreated
+  waterbodies here form the published reference distributions), `test` (results reviewed for decisions; now
+  Pune and Amaravati) and `coverage` (fetched for control pools or on demand). `impact-build-registry --role`
+  sets the role of districts it adds; it also adds their tehsils to `waterbody/locations.json` as `coverage`.
+* `impact/aliases.json` — district and tehsil names in registry layers that `get_active_locations` spells
+  differently (`"Maharashtra/Beed": "Bid"`). Add an entry when `impact-build-registry` reports a name unresolved.
+
+**Modules depend on each other's locations.** The waterbody atlas draws on the watershed atlas's MWS bundles and
+context, and the impact module on the waterbody atlas. So adding locations to a module also adds them, as
+coverage, to the modules it depends on (`seft.util.register_locations`; `MODULE_DEPENDS` in `seft/util.py`):
+
+| Command | Writes | Also adds, as coverage, to |
+| --- | --- | --- |
+| `add` | `locations.json` | — |
+| `wb-add` | `waterbody/locations.json` | `locations.json` |
+| `impact-build-registry` | `impact/locations.json` (`--role`) | `waterbody/locations.json`, `locations.json` |
+
+`wb-fetch`, `impact-link` and `impact-run` first sync their module's locations into its dependencies, so files
+edited by hand catch up too. A new district in a dependency gets the role `coverage`. Tehsils added to an
+existing pools or ground-truth district are listed under `coverage_tehsils`: they are fetched and scored, but
+left out of the pools sample and the ground-truth comparison (`seft.util.with_role`, `role_tehsils`).
+`wb-fetch` and `wb-run` end by listing waterbody districts that have no watershed bundle yet
+(`web/data/d_<district>.json`), with the commands that build it (`fetch`, then `run --merge`).
+Districts fetched on demand by core-seft are recorded in `<data_dir>/index.json`, one list for all modules.

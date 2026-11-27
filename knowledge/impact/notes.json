@@ -1,0 +1,92 @@
+{
+ "_about": "Rules that write the public note for an intervention's impact. For each note kind the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files.",
+ "version": "0.1.0",
+ "waterbody": {
+  "main": [
+   {
+    "when": "verdict == 'not_assessable'",
+    "text": "The effect of {intervention_label_lower} in {year_label} cannot be assessed yet: {reason}."
+   },
+   {
+    "when": "verdict == 'early_gain'",
+    "text": "After {intervention_label_lower} in {year_label}, this {type_label} held water about {effect_abs} weeks longer than {n_controls} similar untreated waterbodies within {radius_km} km in {post_text}, the only year of data after the work so far. That is an early sign of a gain; another year of data is needed to confirm it."
+   },
+   {
+    "when": "verdict == 'early_loss'",
+    "text": "After {intervention_label_lower} in {year_label}, this {type_label} held water about {effect_abs} weeks less than {n_controls} similar untreated waterbodies within {radius_km} km in {post_text}, the only year of data after the work so far. That is an early sign of a loss; another year of data is needed to confirm it."
+   },
+   {
+    "when": "verdict == 'likely_gain'",
+    "text": "After {intervention_label_lower} in {year_label}, this {type_label} held water about {effect_abs} weeks a year longer than {n_controls} similar untreated waterbodies within {radius_km} km, over {post_text}. Untreated waterbodies show a gain this large less than one time in ten, so the gain is likely real."
+   },
+   {
+    "when": "verdict == 'likely_loss'",
+    "text": "After {intervention_label_lower} in {year_label}, this {type_label} held water about {effect_abs} weeks a year less than {n_controls} similar untreated waterbodies within {radius_km} km, over {post_text}. A loss this large is unusual; ask whether the work changed the inlet, the outlet or the bund."
+   },
+   {
+    "when": "verdict == 'inconclusive'",
+    "text": "After {intervention_label_lower} in {year_label}, this {type_label} held water {effect_signed} weeks a year compared with {n_controls} similar untreated waterbodies within {radius_km} km, but {reason}, so the result is unsettled."
+   },
+   {
+    "when": "true",
+    "text": "After {intervention_label_lower} in {year_label}, this {type_label} held water {effect_signed} weeks a year compared with {n_controls} similar untreated waterbodies within {radius_km} km, over {post_text}. That is within the range untreated waterbodies show by chance, so no change can be told apart. A change smaller than one season may not show in seasonal data."
+   }
+  ],
+  "add": [
+   {
+    "when": "has_volume and not implausible and verdict != 'not_assessable'",
+    "text": "{volume_text} m³ of silt was removed, about {depth_text} m over its area."
+   },
+   {
+    "when": "implausible",
+    "text": "The recorded silt volume ({volume_text} m³) would mean about {depth_text} m of depth over this waterbody, so the desilting record was probably matched to the wrong waterbody: its latitude and longitude are likely incorrect. Treat this result with caution."
+   },
+   {
+    "when": "n_flags > 0 and verdict != 'not_assessable'",
+    "text": "Caution: {flags_text}."
+   },
+   {
+    "when": "group_n >= 1 and verdict != 'not_assessable'",
+    "text": "Across {group_n} desilted {group_label} in {group_unit}, the average change is {group_mean_signed} weeks a year."
+   },
+   {
+    "when": "group_n >= 1 and group_concern and verdict != 'not_assessable'",
+    "text": "Desilted waterbodies there were already {group_placebo_text} their controls before the work, so that average may partly reflect differences that predate desilting."
+   }
+  ]
+ },
+ "unit": {
+  "main": [
+   {
+    "when": "n == 0",
+    "text": "No assessable {intervention_label_lower} in {unit_label} yet."
+   },
+   {
+    "when": "n < min_n",
+    "text": "{n} {intervention_label_lower} works in {unit_label} can be assessed so far: on average {mean_signed} weeks of water a year compared with similar untreated waterbodies. Too few to rely on."
+   },
+   {
+    "when": "lo > 0",
+    "text": "{n} waterbodies desilted in {unit_label} held water on average {mean_abs} weeks a year longer than similar untreated waterbodies (95% range {lo_signed} to {hi_signed})."
+   },
+   {
+    "when": "hi < 0",
+    "text": "{n} waterbodies desilted in {unit_label} held water on average {mean_abs} weeks a year less than similar untreated waterbodies (95% range {lo_signed} to {hi_signed})."
+   },
+   {
+    "when": "true",
+    "text": "{n} waterbodies desilted in {unit_label} show no average change in how long they hold water that can be told apart from zero: {mean_signed} weeks a year (95% range {lo_signed} to {hi_signed})."
+   }
+  ],
+  "add": [
+   {
+    "when": "n > 0",
+    "text": "{n_gain} show a likely gain or an early sign of one and {n_loss} a loss, against about {expected_each} each expected by chance."
+   },
+   {
+    "when": "n > 0 and placebo_concern",
+    "text": "Before the works, these waterbodies were already {placebo_text} their controls by about {placebo_abs} weeks a year (placebo check), so part of this average may reflect differences that predate desilting."
+   }
+  ]
+ }
+}
