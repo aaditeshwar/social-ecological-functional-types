@@ -1711,7 +1711,9 @@ async function wGo(level,arg){
   if(level==="india"){W.district=W.tehsil=W.wb=W.mws=null;}
   if(level==="district"){W.district=arg;W.tehsil=W.wb=W.mws=null;
     $("#wpane").innerHTML=`<div class="loading">Loading ${esc(arg)}…</div>`;
-    const d=wDist(); await Promise.all([loadBundle(d.slug),wBundle(d.slug)]);}
+    const d=wDist();
+    try{await Promise.all([loadBundle(d.slug),wBundle(d.slug)]);}
+    catch(e){W.district=null; $("#wpane").innerHTML=`<div class="block"><p>The data for ${esc(arg)} is not published yet: its waterbodies are listed for the impact assessment, and its watershed file comes with the next update.</p></div>`; return;}}
   if(level==="tehsil"){W.tehsil=arg||null;W.wb=W.mws=null;}
   if(level==="mws"){W.mws=arg;W.wb=null;}
   if(level==="wb"){W.wb=arg; const w=WBB[wDist().slug].byId[arg]; W.mws=w.mws; if(W.tehsil&&w.teh!==W.tehsil) W.tehsil=w.teh;}
