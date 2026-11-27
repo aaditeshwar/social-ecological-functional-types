@@ -1,0 +1,13 @@
+{
+ "_about": "Names in registry layers that get_active_locations spells differently. Keys: \"<State>/<name in the layer>\" for districts, \"<State>/<District as in get_active_locations>/<name in the layer>\" for tehsils.",
+ "districts": {
+  "Maharashtra/Beed": "Bid",
+  "Maharashtra/Osmanabad": "Usmanabad",
+  "Maharashtra/Dharashiv": "Usmanabad",
+  "Maharashtra/Ahemadnagar": "Ahamadnagar",
+  "Maharashtra/Ahilyanagar": "Ahamadnagar",
+  "Maharashtra/Chhatrapati Sambhajinagar": "Aurangabad",
+  "Maharashtra/Jalana": "Jalna"
+ },
+ "tehsils": {}
+}

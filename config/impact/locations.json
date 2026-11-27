@@ -1,0 +1,52 @@
+{
+ "note": "Districts of the waterbody-impact module. Roles: 'reference' = districts whose untreated waterbodies form the published reference distributions; 'test' = districts whose results are reviewed for decisions on pooling, estimators and thresholds; 'coverage' = fetched for control pools or on demand. impact-build-registry adds the tehsils of new records with the role it is given (default coverage).",
+ "roles": {
+  "reference": "Untreated waterbodies here form the reference distributions published with the atlas.",
+  "test": "Results reviewed for decisions (pilot: Pune and Amaravati, 2023-24 desilting).",
+  "coverage": "Fetched for control pools or on demand."
+ },
+ "districts": [
+  {
+   "state": "Maharashtra",
+   "district": "Pune",
+   "tehsils": [
+    "Ambegaon",
+    "Baramati",
+    "Bhor",
+    "Daund",
+    "Haveli",
+    "Indapur",
+    "Junnar",
+    "Khed",
+    "Mawal",
+    "Mulshi-Paud"
+   ],
+   "roles": [
+    "test"
+   ]
+  },
+  {
+   "state": "Maharashtra",
+   "district": "Amaravati",
+   "tehsils": [
+    "Achalpur",
+    "Amaravati",
+    "Anjangaon-Surji",
+    "Bhatkuli",
+    "Chandur-Railway",
+    "Chandurbazar",
+    "Chikhaldar",
+    "Daryapur",
+    "Dhamangaon",
+    "Dharni",
+    "Morshi",
+    "Nandgaon",
+    "Teosa",
+    "Warud"
+   ],
+   "roles": [
+    "test"
+   ]
+  }
+ ]
+}

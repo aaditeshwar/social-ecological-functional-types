@@ -1,5 +1,5 @@
 """core-seft: on-demand analysis of CoRE Stack micro-watersheds, waterbodies, tehsils and districts."""
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 from .errors import CacheMiss, CoreSeftError, KnowledgeError, UnknownEntity
 from .session import Session, analyse, configure

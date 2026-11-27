@@ -26,6 +26,14 @@ Waterbody atlas (same operations, on config/waterbody/locations.json):
     python -m seft.cli wb-census       # compare with the Water Body Census fields -> out/waterbody/census/
     python -m seft.cli wb-assess --answers community_answers.json   # re-assess with answers saved from the page
 
+Waterbody impact (config/impact/locations.json, registries in data/registries/):
+    python -m seft.cli impact-build-registry --id atecf_desilting --layers swb_layers.csv [--zoi zoi_layers.csv]
+                                       # GeoServer layers of intervened waterbodies -> data/registries/<id>.json,
+                                       # tehsils added to the waterbody and impact locations (--role, --scope)
+    python -m seft.cli impact-link     # link registry records to atlas waterbodies (after wb-fetch)
+    python -m seft.cli impact-run      # effects, verdicts, averages -> out/impact and web/data/waterbody
+    python -m seft.cli impact-validate # check knowledge/impact, config/impact and the registries
+
 Common options: --locations FILE (default config/locations.json). For run and wb-run: --answers FILE
 (community answers saved from the atlas), --merge (keep districts already in the atlas that this run does not
 cover), --update-pools (recompute the percentile pools over the 'pools' districts; otherwise the published
@@ -50,6 +58,22 @@ def _roles(a):
     bad = [r for r in roles if r not in ROLES]
     if bad: raise SystemExit(f"Unknown role(s) {', '.join(bad)}; use {', '.join(ROLES)} (comma-separated for several).")
     return roles
+
+def cmd_impact_build(a):
+    from .impact.registry import build
+    if a.role not in ('reference', 'test', 'coverage'): raise SystemExit('--role is reference, test or coverage')
+    build(a.id, a.layers, a.zoi, name=a.name, role=a.role, scope=a.scope, refresh_locations=a.refresh_locations,
+          add_locations=not a.no_locations)
+
+def cmd_impact_link(a):
+    from .impact import registry as R
+    paths = [R.REG_DIR / f'{x}.json' for x in a.registry.split(',')] if a.registry else None
+    for doc in R.load_all(paths):
+        R.link(doc); R.save(doc, R.REG_DIR / f"{doc['registry']['id']}.json")
+
+def cmd_impact_run(a):
+    from .impact.run import main as imain
+    imain(a.registry.split(',') if a.registry else None, link=not a.no_link, web=not a.no_web)
 
 def cmd_add(a):
     roles = _roles(a)
@@ -231,6 +255,22 @@ def main(argv=None):
                    help="percentile thresholds: the atlas's (default) or pooled over the ground-truth MWS")
     p.add_argument('--no-sample', action='store_true',
                    help='skip firing rates over the atlas sample (computed once per knowledge version, then cached)')
+    p = sub.add_parser('impact-build-registry', help='intervention registry from GeoServer layer lists -> data/registries/<id>.json')
+    p.add_argument('--id', required=True, help='registry id, e.g. atecf_desilting')
+    p.add_argument('--layers', required=True, help='CSV of the intervened-waterbody layers (columns layer, wfs_geojson_url)')
+    p.add_argument('--zoi', help='CSV of their zone-of-influence layers (same columns)')
+    p.add_argument('--name', help='display name of the registry')
+    p.add_argument('--role', default='coverage', help='role of the new districts in config/impact/locations.json: reference, test or coverage')
+    p.add_argument('--scope', choices=['tehsil', 'district'], default='tehsil', help='add the tehsils with records (default) or whole districts')
+    p.add_argument('--refresh-locations', action='store_true', help='re-download get_active_locations before resolving names')
+    p.add_argument('--no-locations', action='store_true', help='do not add tehsils to the locations files')
+    p = sub.add_parser('impact-link', help='link registry records to atlas waterbodies (after wb-fetch)')
+    p.add_argument('--registry', help='comma-separated registry ids (default: all in data/registries)')
+    p = sub.add_parser('impact-run', help='impact of every registered intervention -> out/impact, web/data/waterbody')
+    p.add_argument('--registry', help='comma-separated registry ids (default: all in data/registries)')
+    p.add_argument('--no-link', action='store_true', help='use the links already in the registries')
+    p.add_argument('--no-web', action='store_true', help='do not copy bundles to web/data/waterbody')
+    sub.add_parser('impact-validate', help='check knowledge/impact, config/impact and the registries')
     a = ap.parse_args(argv)
     if a.cmd == 'add': cmd_add(a)
     elif a.cmd == 'fetch': cmd_fetch(a)
@@ -246,6 +286,11 @@ def main(argv=None):
     elif a.cmd == 'wb-census': cmd_wb_census(a)
     elif a.cmd == 'wb-assess': cmd_wb_assess(a)
     elif a.cmd == 'refresh-knowledge': cmd_refresh_knowledge(a)
+    elif a.cmd == 'impact-build-registry': cmd_impact_build(a)
+    elif a.cmd == 'impact-link': cmd_impact_link(a)
+    elif a.cmd == 'impact-run': cmd_impact_run(a)
+    elif a.cmd == 'impact-validate':
+        from .impact.validate import main as iv; sys.exit(0 if iv() else 1)
     elif a.cmd == 'cc-build':
         from .commons_connect import build; build(a.forms)
     elif a.cmd == 'rules-xlsx':

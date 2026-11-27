@@ -49,11 +49,12 @@ def copy_pack(src, dest):
     dest.mkdir(parents=True, exist_ok=True)
     for p in src.glob('*.json'):
         shutil.copy2(p, dest / p.name)
-    wb = src / 'waterbody'
-    if wb.exists():
-        (dest / 'waterbody').mkdir(exist_ok=True)
-        for p in wb.glob('*.json'):
-            shutil.copy2(p, dest / 'waterbody' / p.name)
+    for sub in ('waterbody', 'impact'):
+        d = src / sub
+        if d.exists():
+            (dest / sub).mkdir(exist_ok=True)
+            for p in d.glob('*.json'):
+                shutil.copy2(p, dest / sub / p.name)
     return dest
 
 

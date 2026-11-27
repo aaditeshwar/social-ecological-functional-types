@@ -18,7 +18,7 @@ from .knowledge import bundled_knowledge, pack_version, min_library, parse_ver, 
 from .present import present_mws, present_waterbody, rollup, mws_diff
 
 _DEFAULT = None
-KINDS = ('district', 'tehsil', 'mws', 'waterbody')
+KINDS = ('district', 'tehsil', 'mws', 'waterbody', 'waterbody-impact')
 LAYERS_FILE = 'swb_layers.json.gz'
 
 
@@ -28,10 +28,11 @@ def configure(data_dir=None, api_key=None, knowledge_dir=None, log=print):
     return _DEFAULT
 
 
-def analyse(kind, *, state, district, tehsil=None, uid=None, answers=None, fetch=True, include=None, detail='summary'):
+def analyse(kind, *, state, district, tehsil=None, uid=None, answers=None, fetch=True, include=None, detail='summary',
+            intervention=None):
     if _DEFAULT is None:
         configure()
-    return _DEFAULT.analyse(kind, state=state, district=district, tehsil=tehsil, uid=uid,
+    return _DEFAULT.analyse(kind, state=state, district=district, tehsil=tehsil, uid=uid, intervention=intervention,
                             answers=answers, fetch=fetch, include=include, detail=detail)
 
 
@@ -399,9 +400,14 @@ class Session:
         return hits[0]
 
     def analyse(self, kind, *, state, district, tehsil=None, uid=None, answers=None,
-                fetch=True, include=None, detail='summary'):
+                fetch=True, include=None, detail='summary', intervention=None):
         if kind not in KINDS:
             raise UnknownEntity(f'kind must be one of {KINDS}, not {kind!r}')
+        if kind == 'waterbody-impact':
+            if not state or not district:
+                raise UnknownEntity('analyse requires state= and district=')
+            self._activate()
+            return self._impact(state, district, tehsil=tehsil, uid=uid, intervention=intervention, fetch=fetch)
         if not state or not district:
             raise UnknownEntity('analyse requires state= and district=')
         if kind == 'tehsil' and not tehsil:
@@ -455,3 +461,94 @@ class Session:
                 home = None
         return present_waterbody(b, K, home, versions, answers=answers, detail=detail,
                                  A=kn['A'], C=kn['C'], CC=kn.get('CC'))
+
+
+    # ------------------------------------------------------------------ waterbody impact
+    def _registries(self):
+        """Registries from <data_dir>/registries and the repository's data/registries (same id: data_dir wins)."""
+        out = {}
+        for d in (ROOT / 'data' / 'registries', Path(self.data_dir) / 'registries'):
+            if d.is_dir():
+                for p in sorted(d.glob('*.json')):
+                    doc = load_json(p); out[doc['registry']['id']] = doc
+        return list(out.values())
+
+    def _impact(self, state, district, tehsil=None, uid=None, intervention=None, fetch=True):
+        """Impact of an intervention on a waterbody (uid), or averages over the registered works of a district or
+        tehsil. Controls come from every cached tehsil of the district (plus the waterbody's own tehsil)."""
+        import collections
+        from seft.impact import registry as REG
+        from seft.impact.pool import Pool, pool_years, mws_years
+        from seft.impact.estimate import Estimator
+        from seft.impact.run import assess_waterbody, note_env, type_labels, unit_stats, treated_map
+        from seft.impact.notes import render, rules as note_rules
+        S = REG.settings(); R = note_rules(); labels, scope = type_labels()
+        tehs = set(self._cached_tehsils(state, district))
+        if uid is not None:
+            tehs |= set(self._tehsils_for_query('waterbody', state, district, uid=uid, fetch=fetch))
+        elif tehsil:
+            tehs |= {tehsil}
+        tehs = sorted(t for t in tehs if (raw_dir(state, district, t) / LAYERS_FILE).exists()) or \
+            sorted(self._tehsils_for_query('waterbody' if uid else 'tehsil', state, district, tehsil=tehsil, uid=uid, fetch=fetch))
+        key = ('impact', self._scope_key(state, district, tehs))
+        if key not in self._wb:
+            B = self._score_wb(state, district, tehs, fetch=fetch)
+            ms = {}
+            for t in tehs: ms.update(mws_years(state, district, t))
+            pool = Pool(B, pool_years(B), scope, None, ms)
+            regs = self._registries()
+            self._wb[key] = (pool, regs, Estimator(pool, S, treated_map(regs, pool)))
+        pool, regs, E = self._wb[key]
+        reg = collections.defaultdict(list)
+        for doc in regs:
+            for r in doc['interventions']:
+                w = r.get('waterbody') or {}
+                if w.get('wb_id') is not None and r.get('year') and str(w['wb_id']) in pool.index:
+                    reg[str(w['wb_id'])].append({'year': r['year'], 'volume_m3': r.get('volume_m3'), 'ids': [r['id']],
+                                                 'quality_flags': r.get('quality_flags') or []})
+        screened = any(any((r.get('location') or {}).get('district') == district for r in d['interventions']) for d in regs)
+        versions = self._versions()
+        def wb_info(i):
+            return {'wb_id': pool.key[i], 'state': pool.state[i], 'district': pool.district[i], 'tehsil': pool.tehsil[i],
+                    'mws': pool.mws[i], 'type': pool.type[i], 'area': round(float(pool.area[i]), 2),
+                    'xy': [round(float(c), 5) for c in pool.lonlat[i]]}
+        def records_for(k, xs, scr):
+            i = pool.index[k]; info = wb_info(i)
+            return [{**info, **rec} for rec in assess_waterbody(E, i, xs, S, labels, screened=scr)]
+        gkey = ('impact-group', key)
+        if gkey not in self._wb:            # every registered work of the district, for group means and unit averages
+            self._wb[gkey] = [r for k, xs in sorted(reg.items()) for r in records_for(k, xs, True)]
+        allrecs = self._wb[gkey]
+        ok = [r for r in allrecs if r['window'] in ('single', 'first') and r['verdict'] != 'not_assessable' and not r['quality_flags']]
+        if uid is None:
+            sel = [r for r in ok if not tehsil or r['tehsil'] == tehsil]
+            unit = f'{tehsil} tehsil' if tehsil else f'{district} district'
+            return {'kind': 'waterbody-impact', 'unit': unit, 'state': state, 'district': district, 'tehsil': tehsil,
+                    'average': unit_stats(sel, S, unit, R), 'records': [r for r in allrecs if not tehsil or r['tehsil'] == tehsil],
+                    'registries': [d['registry']['id'] for d in regs], 'versions': versions}
+        k = str(uid)
+        if k not in pool.index:
+            raise UnknownEntity(f'waterbody {uid} is not in {state}/{district}')
+        source, xs, scr = None, None, screened
+        if intervention:
+            iv = dict(intervention)
+            if not iv.get('year'): raise UnknownEntity('intervention needs a year (hydrological year, e.g. 2023 for 2023-24)')
+            xs = [{'year': int(iv['year']), 'volume_m3': iv.get('volume_m3'), 'ids': ['supplied'], 'quality_flags': []}]
+            source = 'supplied'
+            if k in reg:
+                same = sorted({x['year'] for x in reg[k]}) == [int(iv['year'])]
+                source = 'supplied (matches the registry)' if same else 'supplied (the registry lists other works on this waterbody)'
+        elif k in reg:
+            xs, source = reg[k], 'registry'
+        if not xs:
+            return {'kind': 'waterbody-impact', 'waterbody': wb_info(pool.index[k]), 'records': [], 'source': None,
+                    'message': 'No intervention is known for this waterbody. Pass intervention={"type": "desilting", "year": 2023, "volume_m3": ...}.',
+                    'versions': versions}
+        recs = records_for(k, xs, scr)
+        for r in recs:
+            same = [x for x in ok if x['district'] == r['district'] and x['type'] == r['type']]
+            g = {'n': len(same), 'unit': f"{r['district']} district", 'mean': sum(x['effects']['W']['did'] for x in same) / len(same)} if same else None
+            r['note'] = render('waterbody', note_env(r, r, S, labels, g), R)
+            r['group'] = g
+        return {'kind': 'waterbody-impact', 'waterbody': wb_info(pool.index[k]), 'records': recs, 'source': source,
+                'screened': scr, 'registries': [d['registry']['id'] for d in regs], 'versions': versions}

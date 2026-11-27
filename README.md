@@ -296,6 +296,55 @@ python -m seft.cli wb-census           # compare with the Water Body Census fiel
   `out/waterbody/census/report.md`, `detail.csv` and `comparison.json`. The census fields are never inputs.
   Decisions taken from it are in `docs/waterbody_census_comparison.md`.
 
+## Waterbody impact
+
+`waterbody-impact` estimates the effect of an intervention (desilting first) on how long a waterbody holds water,
+from intervention registries in `data/registries/`, the waterbody atlas's layers and its MWS context. Settings
+are in `knowledge/impact/settings.json`, public-note rules in `knowledge/impact/notes.json` (see
+`knowledge/impact/README.md`); districts in `config/impact/locations.json` with roles `reference`, `test` and
+`coverage`. The design note is in the project docs ("Waterbody impact module: design note").
+
+```bash
+python -m seft.cli impact-build-registry --id atecf_desilting --layers swb_layers.csv --zoi zoi_layers.csv \
+       [--name "..."] [--role test|reference|coverage] [--scope tehsil|district] [--refresh-locations]
+python -m seft.cli wb-fetch            # the tehsils the builder added (API data and waterbody layers)
+python -m seft.cli wb-run --merge      # atlas bundles for them (MWS context for the averages)
+python -m seft.cli impact-link         # link registry records to atlas waterbodies
+python -m seft.cli impact-run          # -> out/impact/{records,averages}.json, review.md; web/data/waterbody/impact*.json
+python -m seft.cli impact-validate
+```
+
+* **`impact-build-registry`** (`seft/impact/registry.py`) reads CSV lists of GeoServer layers (columns `layer`
+  and `wfs_geojson_url`; rows whose layer ends in a dot are skipped; a `series` column, if present, keeps only
+  `waterbodies_atecf` rows), fetches each layer (port 8443: run where it is reachable), makes one record per
+  desilting row (year from `intervention_year`, volume from `slit_excavated`, point at the waterbody polygon,
+  the desilting point kept beside it), drops records repeated across layers (same desilting point, year and
+  volume), resolves state, district and tehsil names against `get_active_locations` (exact, prefix, then close
+  spelling; `config/impact/aliases.json` for renamed districts such as Beed → Bid) and adds the tehsils to
+  `config/waterbody/locations.json` (role `coverage`) and `config/impact/locations.json` (`--role`). With
+  `--zoi`, each record's zone of influence (cropping and fortnightly NDVI, for later outcomes) goes to
+  `data/registries/<id>.zoi.json.gz`.
+* **`impact-link`** links each record to an atlas waterbody: the record's point inside a cached waterbody
+  fragment, else the nearest fragment within 100 m. Records get quality flags (`match_far`, `volume_missing`,
+  `volume_implausible`, `type_out_of_scope`, `below_min_area`, `unlinked`); flagged records are assessed but left
+  out of averages.
+* **`impact-run`** (`seft/impact/run.py`, `estimate.py`) builds the pool from every cached tehsil of the impact
+  districts, then for each linked waterbody: up to 10 untreated controls of the same atlas type within 20 km
+  (outside its MWS, away from waterbodies treated in the same years; waterbodies treated later count until their
+  own work), matched on size, catchment, stream order, rainfall, drought, rabi retention and the weeks of water in
+  each pre year; four estimators (DiD over all pre years as headline, rainfall-matched DiD, rainfall-matched post
+  minus pre without controls, a counterfactual model); placebo starts two and three years earlier; a percentile
+  among untreated waterbodies of the district and type run through the same steps; and a verdict (likely gain at
+  the 90th percentile or above, likely loss at the 10th or below, if placebos and the counterfactual agree;
+  otherwise inconclusive; no detectable change in between). Several works on one waterbody are assessed until
+  the next work, then together. Averages by state, district, tehsil, MWS, type and context use the assessable,
+  unflagged works. `review.md` summarises verdicts, estimator agreement and averages for decisions.
+* In the atlas, a desilted waterbody shows its result, chart and public note; districts, tehsils and MWS show the
+  average and the list of works. `core_seft` answers `analyse("waterbody-impact", ...)` with the same code.
+
+The registry `atecf_pilot` is a browser extract of the Pune and Amravati desilting layers used for the pilot;
+replace it with the full registry built locally.
+
 ## How the frontend works
 
 The page has two atlases, switched at the top: **Watersheds** (described below) and **Waterbodies**. The waterbody

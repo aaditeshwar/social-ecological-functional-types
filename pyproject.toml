@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "core-seft"
-version = "0.1.2"
+version = "0.2.0"
 description = "On-demand social-ecological analysis of CoRE Stack districts, tehsils, micro-watersheds and waterbodies."
 readme = "docs/core-seft.md"
 requires-python = ">=3.10"
@@ -21,5 +21,5 @@ notebooks = ["jupyter", "ipykernel"]
 include = ["core_seft*", "seft*", "knowledge*", "config*"]
 
 [tool.setuptools.package-data]
-knowledge = ["*.json", "waterbody/*.json"]
-config = ["*.json", "groundtruth/*.json", "waterbody/*.json"]
+knowledge = ["*.json", "waterbody/*.json", "impact/*.json"]
+config = ["*.json", "groundtruth/*.json", "waterbody/*.json", "impact/*.json"]

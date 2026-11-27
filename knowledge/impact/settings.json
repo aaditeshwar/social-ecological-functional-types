@@ -1,0 +1,56 @@
+{
+ "_about": "Settings of the waterbody-impact module: how an intervention's effect on a waterbody's seasonal water is estimated. Read by seft/impact and core_seft. See knowledge/impact/README.md.",
+ "version": "0.1.0",
+ "intervention_types": [
+  {"id": "desilting", "label": "Desilting", "about": "Silt excavated from the waterbody bed, usually in modules of about 10,000 m3, before the monsoon.",
+   "outcomes": ["W", "RR", "SR"], "headline": "W"}
+ ],
+ "year_convention": "Hydrological years start in June and are named by their first calendar year (2023 = 2023-24). Work is done before the monsoon, so an intervention in year Y has Y, Y+1, ... as post years and Y-1 and earlier as pre years.",
+ "outcomes": [
+  {"id": "W", "label": "Weeks of water", "unit": "weeks", "expr": "17.3 * (k + kr + krz) / 100",
+   "about": "Each season is about 17 weeks; a waterbody wet in all three seasons over its whole maximum area scores 52. The seasonal analogue of mean weeks of water."},
+  {"id": "RR", "label": "Rabi retention", "unit": "share", "expr": "kr / k", "min_k": 10,
+   "about": "Share of the monsoon fill still holding water in rabi. Undefined when the kharif fill is under 10% of the maximum area."},
+  {"id": "SR", "label": "Summer retention", "unit": "share", "expr": "krz / k", "min_k": 10,
+   "about": "Share of the monsoon fill still holding water in summer (zaid)."}
+ ],
+ "matching": {
+  "radius_km": 20,
+  "n_controls": 10,
+  "min_controls": 5,
+  "exact": ["type"],
+  "exclude_own_mws": true,
+  "exclude_near_treated_m": 200,
+  "features": ["log_area", "log_catchment", "stream_order", "pre_rain", "pre_drought", "pre_rabi_retention", "W_each_pre_year"],
+  "about": "Controls are untreated waterbodies of the same atlas type within radius_km, outside the treated waterbody's own MWS and more than exclude_near_treated_m from any waterbody treated in the estimate's window, nearest by Mahalanobis distance on the features. Waterbodies treated later than the window are valid controls (not yet treated)."
+ },
+ "estimators": [
+  {"id": "did", "label": "DiD over all pre years", "headline": true},
+  {"id": "did_rain", "label": "Rainfall-matched DiD", "rain_weight": 3},
+  {"id": "prepost_rain", "label": "Rainfall-matched post minus pre, no controls"},
+  {"id": "counterfactual", "label": "Counterfactual model on the pre years", "min_pre_years": 4}
+ ],
+ "placebo_offsets": [2, 3],
+ "min_pre_years": 4,
+ "reference": {"sample": 200, "min_n": 30, "seed": 7,
+  "about": "Untreated waterbodies of the same district and type, run through the same pipeline as if treated in the same year with the same post years. Fewer than min_n of the type: all in-scope types of the district."},
+ "verdict": {
+  "gain_pct": 90, "loss_pct": 10, "placebo_band": [25, 75],
+  "labels": {"likely_gain": "Likely gain", "likely_loss": "Likely loss", "no_change": "No detectable change",
+             "inconclusive": "Inconclusive", "not_assessable": "Not assessable"}
+ },
+ "flags": {
+  "small": {"max_area_ha": 0.5, "label": "under 0.5 ha: the water classifier is least reliable"},
+  "flow_driven": {"types": ["river_reach", "canal_fed"], "label": "water follows river flows or canal releases"},
+  "one_post_year": {"label": "only one year after the work"},
+  "unscreened": {"label": "controls not screened for other interventions (no registry for this area)"}
+ },
+ "registry_quality": {
+  "match_far_m": 30, "link_max_m": 100, "max_depth_m": 2,
+  "labels": {"match_far": "linked to a waterbody more than 30 m away", "volume_missing": "no silt volume recorded",
+             "volume_implausible": "silt volume implies more than 2 m depth over the waterbody",
+             "type_out_of_scope": "waterbody type is out of the atlas scope", "below_min_area": "waterbody below the atlas minimum area",
+             "unlinked": "not linked to an atlas waterbody"}
+ },
+ "averages": {"min_n": 15, "bootstrap": 1000, "units": ["state", "district", "tehsil", "mws", "type", "ctx_rainfall", "ctx_aquifer", "ctx_terrain", "ctx_gw_category", "dominant_system"]}
+}

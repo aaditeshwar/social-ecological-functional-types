@@ -1402,7 +1402,7 @@ function renderMethod(m){
    `python -m seft.cli wb-run`. MWS outlines and tehsils come from the watershed bundles (d_<district>).
    The scoring below mirrors seft/wb/build.py (types), seft/wb/score.py (signals, roles, rules) and
    seft/wb/assess.py (community answers), so a type answer can re-score a waterbody in the browser. */
-let WIDX=null, WK=null; const WBB={};
+let WIDX=null, WK=null; const WBB={}; let WIMP=null, WIMP_TRIED=false;
 const W={tab:"explore", district:null, tehsil:null, wb:null, mws:null, mode:"type", arg:null, show:"all"};
 try{const t=localStorage.getItem("wba_tab"); if(t) W.tab=t;}catch(e){}
 const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["rules","Observed stresses"],["interventions","Interventions"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
@@ -1431,9 +1431,11 @@ async function loadWbData(name){
   throw new Error("data/waterbody/"+key+".js did not load");
 }
 function wDist(){return WIDX.districts.find(d=>d.district===W.district)}
+async function wImpIndex(){if(WIMP_TRIED) return WIMP; WIMP_TRIED=true; try{WIMP=await loadWbData("impact");}catch(e){WIMP=null;} return WIMP;}
 async function wBundle(slug){
   if(WBB[slug]) return WBB[slug];
   const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={}; b.slug=slug;
+  await wImpIndex(); if(WIMP&&WIMP.districts.some(x=>x.slug===slug)){try{b.imp=(await loadWbData("imp_"+slug)).waterbodies;}catch(e){b.imp=null;}}
   b.waterbodies.forEach(w=>{b.byId[w.id]=w; (b.byMws[w.mws]=b.byMws[w.mws]||[]).push(w); w.rmap={}; (w.ru||[]).forEach(([i,s,v])=>w.rmap[i]=[s,v]);});
   b.maxPonds=Math.max(1,...Object.values(b.mws).map(m=>m.recent_ponds||0));
   WBB[slug]=b; return b;
@@ -1810,6 +1812,7 @@ function wPane(){
       <div class="eyebrow">How often they hold water (waterbodies in scope)</div>${statusBar(C.st)}
       <div class="eyebrow">Types</div>${typeBar(C.ty)}</div>
     ${top}
+    ${impAvgBlock(W.tehsil?"tehsil":"district",W.tehsil?d.district+"/"+W.tehsil:d.district,ws,b)}
     <div class="block"><h3>Observed stresses and opportunities</h3>${ruleBars(C.rules)}</div>`;
   P.querySelectorAll(".bar[data-ri]").forEach(e=>e.onclick=()=>{W.mode="rule";W.arg=+e.dataset.ri; wMapCtl(); WBMAP.draw(); wPane();});
   P.querySelectorAll(".wrow").forEach(e=>e.onclick=()=>wGo("wb",+e.dataset.id));
@@ -1834,6 +1837,7 @@ function wPaneMws(P,u,d,b){
     <div class="block"><div class="eyebrow">How often they hold water</div>${statusBar(C.st)}</div>
     <div class="block"><h3>Waterbodies</h3><div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Status</th><th class="r">ha</th><th class="r">Triggered</th></tr></thead><tbody>
     ${sorted.map(w=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[wTypeOf(w,b)].label)}</td><td><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${WST_COL[w.st]}"></i> ${esc(WSTC[w.st].label.split(" (")[0])}</td><td class="r num">${w.a}</td><td class="r num">${(w.ru||[]).filter(x=>x[1]==="s").length}</td></tr>`).join("")}</tbody></table></div></div>
+    ${impAvgBlock("mws",u,b.byMws[u]||[],b)}
     <div class="block"><h3>Observed stresses and opportunities here</h3>${ruleBars(C.rules)}</div>`;
   P.querySelectorAll(".wrow").forEach(e=>e.onclick=()=>wGo("wb",+e.dataset.id));
   P.querySelectorAll(".bar[data-ri]").forEach(e=>e.onclick=()=>{W.mode="rule";W.arg=+e.dataset.ri; wMapCtl(); WBMAP.draw();});
@@ -1896,6 +1900,58 @@ function typeWalk(R){
     ${R.typeSteps.derived.map(([k,v])=>`<tr><td>${wvref(k)} = <code>${wExprHtml(WDER[k].expr)}</code></td><td class="r num">${v?"yes":"no"}</td></tr>`).join("")}</tbody></table></div>
     <div class="tbl"><table><thead><tr><th>Type, in order</th><th>Assigned when</th><th>Holds?</th></tr></thead><tbody>${WK.types.types.map(t=>{const v=PyEval.safe(t.when,e); const hit=!found&&v!==null&&!!v; if(hit) found=true;
       return `<tr${hit?' style="font-weight:600"':""}><td>${esc(t.label)}</td><td><code>${wExprHtml(t.when)}</code></td><td>${hit?"yes: assigned":v===null?"unknown":(v?"yes (an earlier type matched)":"no")}</td></tr>`;}).join("")}</tbody></table></div></div>`;}
+/* ---------- waterbody impact (seft/impact; data/waterbody/impact.json and imp_<district>.json) ---------- */
+const IMP_COL={likely_gain:"var(--ok)",likely_loss:"var(--bad)",inconclusive:"var(--warn)",no_change:"var(--muted)",not_assessable:"var(--na)"};
+function impLabel(v){return (WIMP&&WIMP.settings.verdict.labels[v])||v}
+function impChip(v){return `<span class="pill" style="background:${IMP_COL[v]||"var(--na)"}">${esc(impLabel(v))}</span>`}
+function impSigned(x,n=1){if(x==null) return "–"; const t=Math.abs(x).toFixed(n); return x>0?"+"+t:x<0?"−"+t:t;}
+function impYears(ys){return (ys||[]).map(y=>`${y}-${String(y+1).slice(2)}`).join(", ")}
+function wWeeks(w){return WYEARS.map((_,i)=>{const k=(w.k||[])[i],kr=(w.kr||[])[i],krz=(w.krz||[])[i]; return k==null?null:17.3*((k||0)+(kr||0)+(krz||0))/100;});}
+function impChart(w,b,rec){
+  const tw=wWeeks(w), cs=((rec.controls||{}).ids||[]).map(id=>b.byId[id]).filter(Boolean).map(wWeeks);
+  const cm=WYEARS.map((_,i)=>{const v=cs.map(c=>c[i]).filter(x=>x!=null); return v.length?v.reduce((a,c)=>a+c,0)/v.length:null;});
+  const H=100,X0=30,DX=40,Wd=X0+DX*(WYEARS.length-1)+20, y=v=>8+H-(v/52)*H, x=i=>X0+i*DX;
+  const line=(a,st)=>{let d="";a.forEach((v,i)=>{if(v==null) return; d+=(d?"L":"M")+x(i)+" "+y(v);}); return `<path d="${d}" fill="none" ${st}/>`;};
+  const y0=(rec.post_years||[])[0], i0=WYEARS.indexOf(y0);
+  let s=`<svg viewBox="0 0 ${Wd} ${H+30}" width="100%" style="max-width:${Wd*1.5}px" role="img" aria-label="Weeks of water, this waterbody and its controls">`;
+  [0,26,52].forEach(v=>s+=`<line x1="${X0-4}" x2="${Wd-10}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width=".5"/><text x="${X0-6}" y="${y(v)+3}" font-size="7" text-anchor="end" fill="var(--muted)">${v}</text>`);
+  if(i0>=0) s+=`<line x1="${x(i0)-DX/2}" x2="${x(i0)-DX/2}" y1="4" y2="${H+8}" stroke="var(--select)" stroke-dasharray="3 3"/><text x="${x(i0)-DX/2+3}" y="12" font-size="7" fill="var(--muted)">work done</text>`;
+  s+=line(cm,'stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"')+line(tw,'stroke="var(--accent)" stroke-width="2"');
+  tw.forEach((v,i)=>{if(v!=null) s+=`<circle cx="${x(i)}" cy="${y(v)}" r="2.2" fill="var(--accent)"><title>${WYEARS[i]}: ${v.toFixed(1)} weeks</title></circle>`;});
+  WYEARS.forEach((yr,i)=>s+=`<text x="${x(i)}" y="${H+22}" font-size="7.5" text-anchor="middle" fill="var(--muted)">${yr}</text>`);
+  return s+`</svg><div class="legend"><span><i style="background:var(--accent)"></i>This waterbody</span><span><i style="background:var(--muted)"></i>Mean of its ${cs.length} controls</span><span>Weeks of water a year = 17.3 × (kharif + rabi + summer shares) / 100.</span></div>`;
+}
+function impRecord(w,b,rec){
+  const S=WIMP.settings, est=Object.fromEntries(S.estimators.map(e=>[e.id,e.label])), E=rec.effects||{}, Wf=E.W||{};
+  const win=rec.window==="combined"?" (all works together)":rec.window==="first"?" (until the next work)":"";
+  const qf=(rec.quality_flags||[]).map(q=>WIMP.quality_labels[q]||q), cf=(rec.flags||[]).map(f=>(S.flags[f]||{}).label||f);
+  const rows=rec.verdict==="not_assessable"?"":`<div class="tbl"><table><thead><tr><th>Estimator</th><th class="r">Weeks of water</th><th class="r">Rabi retention</th><th class="r">Summer retention</th></tr></thead><tbody>
+    ${["did","did_rain","prepost_rain","counterfactual"].map(k=>`<tr><td>${esc(est[k])}${k==="did"?" <b>(headline)</b>":""}</td><td class="r num">${impSigned(Wf[k])}</td><td class="r num">${E.RR&&E.RR[k]!=null?impSigned(E.RR[k]*100,0)+" pts":"–"}</td><td class="r num">${E.SR&&E.SR[k]!=null?impSigned(E.SR[k]*100,0)+" pts":"–"}</td></tr>`).join("")}
+    <tr><td>Percentile among untreated waterbodies</td><td class="r num">${Wf.percentile??"–"}</td><td class="r num">${E.RR?.percentile??"–"}</td><td class="r num">${E.SR?.percentile??"–"}</td></tr>
+    ${Object.entries(Wf.placebo||{}).map(([y,v])=>`<tr><td>Placebo: pretend the work was in ${y}-${String(+y+1).slice(2)}</td><td class="r num">${impSigned(v)}</td><td class="r num">${E.RR?.placebo?.[y]!=null?impSigned(E.RR.placebo[y]*100,0)+" pts":"–"}</td><td class="r num">${E.SR?.placebo?.[y]!=null?impSigned(E.SR.placebo[y]*100,0)+" pts":"–"}</td></tr>`).join("")}</tbody></table></div>`;
+  const c=rec.controls||{};
+  return `<div style="margin:8px 0 14px"><h3>${esc((S.intervention_types[0]||{}).label||"Intervention")} in ${impYears((rec.intervention||{}).years)}${win}</h3>
+    <div class="chips">${impChip(rec.verdict)}${(rec.intervention||{}).volume_m3!=null?`<span class="chip">${Math.round(rec.intervention.volume_m3).toLocaleString("en-IN")} m³ of silt</span>`:""}</div>
+    <p class="pubnote">${esc(rec.note||"")}</p>
+    ${rec.verdict!=="not_assessable"?impChart(w,b,rec):""}
+    <details><summary>How this was estimated</summary>${rows}
+      <p class="note">Before: ${impYears(rec.pre_years)}. After: ${impYears(rec.post_years)||"none yet"}. ${c.n!=null?`Controls: ${c.n} untreated ${esc(WTYPE[w.t]?WTYPE[w.t].label.toLowerCase():"waterbodie")}s within ${c.radius_km} km, chosen from ${c.candidates} candidates, outside this waterbody's micro-watershed, matched on size, catchment, stream order, rainfall, drought and the water held in each year before the work (median match distance ${c.median_distance}).`:""} ${rec.reference?`The percentile compares the headline estimate with ${rec.reference.n} untreated waterbodies of ${rec.reference.scope==="type"?"the same type":"any type"} in this district, run through the same steps as if treated.`:""}</p>
+      ${qf.length?`<p class="note"><b>Record quality:</b> ${qf.map(esc).join("; ")}.</p>`:""}${cf.length?`<p class="note"><b>Cautions:</b> ${cf.map(esc).join("; ")}.</p>`:""}
+      <p class="note">Records: ${((rec.intervention||{}).ids||[]).map(i=>`<span class="mono">${esc(i)}</span>`).join(", ")}</p></details></div>`;
+}
+function impBlockWb(w,b){
+  const recs=b.imp&&b.imp[String(w.id)]; if(!recs||!WIMP) return "";
+  return `<div class="block" id="wimpact"><div class="eyebrow">Impact of interventions</div>${recs.map(r=>impRecord(w,b,r)).join("")}
+    <p class="note">Estimated by comparing this waterbody's change with the change at similar untreated waterbodies nearby over the same years (Methodology tab). Each result is placed among untreated waterbodies run through the same steps, so chance changes are not read as effects.</p></div>`;
+}
+function impAvgBlock(kind,key,ws,b){
+  if(!WIMP||!b.imp) return "";
+  const a=((WIMP.averages||{})[kind]||{})[key];
+  const list=ws.filter(w=>b.imp[String(w.id)]).map(w=>[w,b.imp[String(w.id)].find(r=>r.window!=="combined")||b.imp[String(w.id)][0]]);
+  if(!a&&!list.length) return "";
+  const tbl=list.length?`<div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Work</th><th>Result</th><th class="r">Weeks of water</th></tr></thead><tbody>${list.sort((x,y)=>((y[1].effects||{}).W?.did??-99)-((x[1].effects||{}).W?.did??-99)).map(([w,r])=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t]?.label||w.t)}</td><td>${impYears((r.intervention||{}).years)}</td><td>${impChip(r.verdict)}</td><td class="r num">${impSigned((r.effects||{}).W?.did)}</td></tr>`).join("")}</tbody></table></div>`:"";
+  return `<div class="block"><div class="eyebrow">Impact of desilting</div>${a?`<p class="pubnote">${esc(a.note)}</p>${a.n?`<p class="note">Average of the headline estimate over ${a.n} assessed works without record-quality flags (95% range ${impSigned(a.lo)} to ${impSigned(a.hi)} weeks a year). Other estimators: rainfall-matched ${impSigned(a.by_estimator?.did_rain)}, counterfactual model ${impSigned(a.by_estimator?.counterfactual)}, post minus pre without controls ${impSigned(a.by_estimator?.prepost_rain)} weeks. Untreated waterbodies run through the same steps average ${impSigned(a.reference_mean)}.</p>`:""}`:""}${tbl}</div>`;
+}
 function wPaneWb(P,w,d,b){
   const key=wKey(b,w), R=wAssessC(w,b), T=WTYPE[R.type], inS=T.in_scope, m=b.mws[w.mws];
   R.ivEnv=wIvEnv(w,d);
@@ -1925,6 +1981,7 @@ function wPaneWb(P,w,d,b){
     <tr><th>Micro-watershed</th><td><button class="btn ghost" id="wgomws" style="padding:1px 8px">MWS ${esc(w.mws||"–")}</button> ${m&&m.recent_ponds?`· ${m.recent_ponds} recent ponds`:""}</td></tr></tbody></table></div></div>
     <div class="block"><h3>Water held, 2017–2024</h3>${fillChart(w)}
       ${kv.length?`<div class="tbl"><table><tbody>${kv.map(k=>`<tr><th>${wvref(k)}</th><td class="num">${wVal(k,R.env[k])}</td></tr>`).join("")}</tbody></table></div>`:""}</div>
+    ${impBlockWb(w,b)}
     <div class="block" id="wtypeq"><div class="eyebrow">Waterbody type</div><h3>${esc(T.label)}</h3><p>${esc(T.description)}</p>
       <details><summary>How this type was assigned</summary>${typeWalk(R)}</details>
       ${typeQ.length?`<p class="note">The data cannot see who owns a pond or whether a small stream feeds it. Answers set those fields, the type rules are evaluated again, and every rule is re-scored for the new type.</p>${typeQ.map(q=>wQuestionHtml(q,key,WPR[q.id])).join("")}<div class="filters"><button class="btn" data-wapply>Re-compute type</button></div>`:""}</div>
@@ -2122,6 +2179,17 @@ function wKschemaHtml(){
      <div class="tbl"><table><thead><tr><th>Fields of each entry in <span class="mono">${esc(S.list)}</span></th><th>Meaning</th></tr></thead><tbody>${S.fields.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>
      ${(WKEX[S.file]||[]).map(([cap,get])=>{let o=null;try{o=get()}catch(e){} return o?`<p class="note"><b>Example.</b> ${esc(cap)}</p><pre class="kex">${esc(JSON.stringify(trimJ(o),null,1))}</pre>`:""}).join("")}</details>`;}).join("")}
    <p class="note">How the files connect: variables (and the home MWS) feed signals and roles; types decide which rules apply; rules combine signals and roles; questions point at rules (likelihood ratios) and at type fields; links in schemes point at rules; every sources list points at sources.json.</p></div>`;}
+function impMethod(){
+  if(!WIMP) return `<div class="block"><h3>Impact of interventions</h3><p>No intervention registry is loaded. Build one with <code>python -m seft.cli impact-build-registry</code> and run <code>impact-run</code> (README, Waterbody impact).</p></div>`;
+  const S=WIMP.settings, M=S.matching, V=S.verdict, regs=WIMP.registries||[];
+  return `<div class="block"><h3>Impact of interventions</h3>
+   <p>Where an intervention registry lists works on a waterbody (now: ${regs.map(r=>`${esc(r.name)}, ${r.n} records, ${r.linked} linked`).join("; ")}), the atlas estimates their effect on how long the waterbody holds water. ${esc(S.year_convention)}</p>
+   <p><b>Outcomes.</b> ${S.outcomes.map(o=>`${esc(o.label)} (${esc(o.expr)}): ${esc(o.about)}`).join(" ")}</p>
+   <p><b>Controls.</b> Up to ${M.n_controls} untreated waterbodies of the same type within ${M.radius_km} km, outside the treated waterbody's own micro-watershed and more than ${M.exclude_near_treated_m} m from any waterbody treated in the same years, nearest on size, catchment, stream order, rainfall, drought, rabi retention and the weeks of water in each year before the work. Waterbodies treated later count as controls for the years before their own work. Fewer than ${M.min_controls} controls: not assessable.</p>
+   <p><b>Four estimators</b> are reported together. DiD over all pre years (the headline): the waterbody's change from the years before to the years after, minus the average change at its controls. Rainfall-matched DiD: the same with one pre year per post year, chosen for similar rainfall. Post minus pre without controls: the raw change in a rainfall-matched pre year, shown as the raw change, never as the effect. Counterfactual model: the waterbody fitted against its controls over the pre years and projected over the post years.</p>
+   <p><b>Verdict.</b> The headline estimate is placed among untreated waterbodies of the same district and type run through the same steps as if treated. At or above the ${V.gain_pct}th percentile it is a likely gain, at or below the ${V.loss_pct}th a likely loss, provided placebo checks (the same estimate with a pretend start two and three years earlier) show no earlier divergence and the counterfactual model agrees in sign; otherwise it is inconclusive. Between the two percentiles it is no detectable change. Several works on one waterbody are assessed separately until the next work, then together.</p>
+   <p><b>Averages</b> for a micro-watershed, tehsil or district average the headline estimates of the works there that are assessable and carry no record-quality flag, with a 95% bootstrap range. Public notes are written by the rules in <span class="mono">knowledge/impact/notes.json</span>.</p></div>`;
+}
 function renderWbMethod(m){
   const n=WIDX.districts.reduce((s,d)=>s+d.n,0), nt=Object.keys(WIDX.tehsil_stats).length;
   const zl=Object.values(WIDX.tehsil_stats).reduce((a,s)=>[a[0]+(s.zoi_location||0)+(s.zoi_wb_id||0),a[1]+s.kept],[0,0]);
@@ -2145,6 +2213,7 @@ function renderWbMethod(m){
   <div class="block"><h3>Check against the Water Body Census</h3><p>Rule patterns were compared with census fields for the matched waterbodies (how full, how often it fills, use, encroachment, repair, storage loss, water user associations, pisciculture) and six tuning changes were made. After them, waterbodies the census records as rarely full trigger inflow shortfall more often (6% to 20% across the census fill classes); those under repair trigger sudden loss more (19% against 8%); those with a water user association trigger irrigation underuse less (19% against 40%); encroached ones trigger siltation more (32% against 21%). The census describes 2017-18 and the match is approximate, so it supports the direction rather than the exact rates (${srcLinksW(["wb_census_check"])}).</p></div>
   <div class="block"><h3>Schemes</h3>${wDrawsOn("Schemes")}<p>Each rule links to the schemes that can fund its interventions, filtered by the waterbody's state and type; recent ponds link to the farm-pond schemes. A scheme is suggested for a waterbody when one of its linked rules is present after any answers. Status notes were checked on ${esc(WK.schemes.verified)}.</p></div>
   <div class="block"><h3>Interventions</h3>${wDrawsOn("Interventions")}<p>Each rule links to interventions in the catalogue shared with the watershed atlas (Interventions tab): waterbody rehabilitation (desilting, inlet restoration, bund and sluice repair, cascades, encroachment protection, lining, summer-water pockets), catchment treatment above the waterbody (trenches, loose boulder checks, gully plugs), and use of the stored water (protective irrigation, conveyance, water user associations, fishery). An intervention is offered for a waterbody when one of its rules is present and the waterbody's type is in the intervention's types. Its landscape fit (suited, possible, not suited) is judged on the home micro-watershed's terrain, slope, aquifer, rainfall, land use and systems, using the same test as the watershed atlas. Site rules from the CoRE Stack structure-suitability spreadsheet and the ridge-to-valley placement of the toolkit paper are shown with each intervention.</p></div>
+  ${impMethod()}
   ${wKschemaHtml()}
   <div class="block"><h3>Known limitations</h3><ul>
    <li>Most zone-of-influence layers have no waterbody id; about 1 in 10 waterbodies has no matched zone and its irrigation role relies on the home MWS.</li>
@@ -2187,7 +2256,7 @@ function renderWb(){
     if(t==="schemes") return renderWbSchemes(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
   if(WIDX) return go();
   m.innerHTML=`<div class="loading">Loading the waterbody atlas…</div>`;
-  loadWbData("index").then(x=>{WIDX=x; WK=x.knowledge; wIndex(); $("#asub").textContent=atlasSub(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
+  loadWbData("index").then(async x=>{WIDX=x; WK=x.knowledge; wIndex(); await wImpIndex(); $("#asub").textContent=atlasSub(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
 }
 
 /* ================= Interventions (knowledge/interventions.json, shared by both atlases) =================

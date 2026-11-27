@@ -16,3 +16,9 @@
   comparison (`wb-census`); `pools` the sample for the waterbody pools (`wb-run --update-pools`).
 * `groundtruth/locations.json` — the watershed ground-truth tehsils (role `groundtruth`), rebuilt by the
   `groundtruth` command from `final_ground_truth.json`; `add --role groundtruth` appends to it.
+* `impact/locations.json` — districts of the waterbody-impact module, with roles `reference` (untreated
+  waterbodies here form the published reference distributions), `test` (results reviewed for decisions; now
+  Pune and Amaravati) and `coverage` (fetched for control pools or on demand). `impact-build-registry --role`
+  sets the role of districts it adds; it also adds their tehsils to `waterbody/locations.json` as `coverage`.
+* `impact/aliases.json` — district and tehsil names in registry layers that `get_active_locations` spells
+  differently (`"Maharashtra/Beed": "Bid"`). Add an entry when `impact-build-registry` reports a name unresolved.
