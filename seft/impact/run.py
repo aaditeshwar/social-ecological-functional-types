@@ -6,7 +6,7 @@ context used in the averages by rainfall regime, aquifer and so on).
 Writes out/impact/records.json, averages.json, review.md and web/ bundles, then copies the bundles to
 web/data/waterbody/ (impact.json, imp_<district>.json).
 """
-import collections, json, random, shutil
+import collections, json, math, random, shutil
 from pathlib import Path
 import warnings
 import numpy as np
@@ -239,8 +239,16 @@ def finalize_only(out=None, web=True, log=print):
     write(recs, AV, REG.load_all(), S, out, web, log)
     return recs, AV
 
+def _finite(o):
+    """Replace NaN/Infinity with None so the files are strict JSON (browsers' JSON.parse rejects NaN)."""
+    if isinstance(o, float): return o if math.isfinite(o) else None
+    if isinstance(o, dict): return {k: _finite(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)): return [_finite(v) for v in o]
+    return o
+
 def write(recs, AV, regs, S, out=None, web=True, log=print):
     out = Path(out or OUT); (out / 'web').mkdir(parents=True, exist_ok=True)
+    recs, AV = _finite(recs), _finite(AV)
     (out / 'records.json').write_text(json.dumps(recs, indent=1, ensure_ascii=False), encoding='utf-8')
     (out / 'averages.json').write_text(json.dumps(AV, indent=1, ensure_ascii=False), encoding='utf-8')
     (out / 'review.md').write_text(review(recs, AV, S), encoding='utf-8')
@@ -254,7 +262,7 @@ def write(recs, AV, regs, S, out=None, web=True, log=print):
            'averages': AV}
     files = {'impact': idx, **{f'imp_{slug(d)}': {'district': d, 'waterbodies': v} for d, v in by.items()}}
     for n, o in files.items():
-        (out / 'web' / f'{n}.json').write_text(json.dumps(o, separators=(',', ':'), ensure_ascii=False), encoding='utf-8')
+        (out / 'web' / f'{n}.json').write_text(json.dumps(o, separators=(',', ':'), ensure_ascii=False, allow_nan=False), encoding='utf-8')
     log(f'  wrote {out}/records.json ({len(recs)} records), averages.json, review.md, web/ ({len(files)} bundles)')
     if web:
         from ..webdata import write_js

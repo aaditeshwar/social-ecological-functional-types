@@ -1470,8 +1470,8 @@
     "prepost_rain": -34.6,
     "counterfactual": -1.75
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in Sengaon tehsil can be assessed so far: on average −2.3 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "Parbhani/Jintur": {
@@ -1581,8 +1581,8 @@
     "prepost_rain": 0.0,
     "counterfactual": -2.31
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in Sailu tehsil can be assessed so far: on average +0.1 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "Hingoli/Basmat": {
@@ -1600,8 +1600,8 @@
     "prepost_rain": 3.62,
     "counterfactual": -12.53
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in Basmat tehsil can be assessed so far: on average −8.0 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "Bid/Georai": {
@@ -2490,8 +2490,8 @@
     "prepost_rain": 0.0,
     "counterfactual": -18.07
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 24 14316 can be assessed so far: on average −26.6 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "24_15362": {
@@ -2589,8 +2589,8 @@
     "prepost_rain": -25.24,
     "counterfactual": -14.9
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 24 7297 can be assessed so far: on average −14.7 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "24_7061": {
@@ -2627,8 +2627,8 @@
     "prepost_rain": 0.33,
     "counterfactual": 2.18
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 24 7192 can be assessed so far: on average +0.9 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "24_6942": {
@@ -2855,8 +2855,8 @@
    "reference_mean": -0.52,
    "by_estimator": {
     "did": 0.13,
-    "did_rain": NaN,
-    "prepost_rain": NaN,
+    "did_rain": null,
+    "prepost_rain": null,
     "counterfactual": 0.13
    },
    "RR": -0.008,
@@ -3129,8 +3129,8 @@
     "prepost_rain": -3.76,
     "counterfactual": -9.61
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 12 264822 can be assessed so far: on average −9.8 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 1 a loss, against about 0.1 each expected by chance."
   },
   "12_276264": {
@@ -3319,8 +3319,8 @@
     "prepost_rain": 27.79,
     "counterfactual": -0.34
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 12 173923 can be assessed so far: on average +14.3 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "12_148896": {
@@ -3456,8 +3456,8 @@
     "prepost_rain": -19.39,
     "counterfactual": -8.38
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 12 154966 can be assessed so far: on average −9.9 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "12_177098": {
@@ -3494,8 +3494,8 @@
     "prepost_rain": 26.49,
     "counterfactual": 16.34
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 12 174306 can be assessed so far: on average +10.6 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "12_134540": {
@@ -3779,8 +3779,8 @@
     "prepost_rain": 28.39,
     "counterfactual": 28.39
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 12 152245 can be assessed so far: on average +9.0 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "12_159467": {
@@ -3988,8 +3988,8 @@
     "prepost_rain": 25.3,
     "counterfactual": 25.3
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 12 172146 can be assessed so far: on average +16.0 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 1 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "12_168798": {
@@ -4216,8 +4216,8 @@
     "prepost_rain": 18.63,
     "counterfactual": 18.63
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 12 115486 can be assessed so far: on average +6.9 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "12_143704": {
@@ -5357,8 +5357,8 @@
     "prepost_rain": -30.89,
     "counterfactual": -11.43
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 131840 can be assessed so far: on average −12.0 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "4_131951": {
@@ -5471,8 +5471,8 @@
     "prepost_rain": -29.3,
     "counterfactual": -8.85
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 130009 can be assessed so far: on average −9.7 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "25_20723": {
@@ -6007,8 +6007,8 @@
     "prepost_rain": 0.0,
     "counterfactual": -0.77
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 132807 can be assessed so far: on average −1.6 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "4_133264": {
@@ -6026,8 +6026,8 @@
     "prepost_rain": -30.07,
     "counterfactual": -14.48
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "placebo_mean": 0.34,
    "placebo_lo": -0.68,
    "placebo_hi": 1.35,
@@ -6049,8 +6049,8 @@
     "prepost_rain": -26.38,
     "counterfactual": -16.89
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 131984 can be assessed so far: on average −17.1 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 1 a loss, against about 0.1 each expected by chance."
   },
   "4_113587": {
@@ -6201,8 +6201,8 @@
     "prepost_rain": -34.6,
     "counterfactual": -1.75
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 109536 can be assessed so far: on average −2.3 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "4_144428": {
@@ -6262,8 +6262,8 @@
     "prepost_rain": 0.0,
     "counterfactual": -4.28
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 110319 can be assessed so far: on average −0.1 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "4_111115": {
@@ -6319,8 +6319,8 @@
     "prepost_rain": 0.0,
     "counterfactual": -36.67
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 102140 can be assessed so far: on average −34.6 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "4_103098": {
@@ -6414,8 +6414,8 @@
     "prepost_rain": -19.28,
     "counterfactual": 2.7
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 141702 can be assessed so far: on average +0.3 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "4_102387": {
@@ -6726,8 +6726,8 @@
     "prepost_rain": -10.78,
     "counterfactual": -5.49
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 139331 can be assessed so far: on average −6.2 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 1 a loss, against about 0.1 each expected by chance."
   },
   "4_135276": {
@@ -6764,8 +6764,8 @@
     "prepost_rain": 0.0,
     "counterfactual": -2.31
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 134621 can be assessed so far: on average +0.1 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "4_98590": {
@@ -6783,8 +6783,8 @@
     "prepost_rain": 3.62,
     "counterfactual": -12.53
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 98590 can be assessed so far: on average −8.0 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "4_141502": {
@@ -7632,8 +7632,8 @@
     "prepost_rain": -28.9,
     "counterfactual": -7.96
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 4 73240 can be assessed so far: on average −7.2 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 1 a loss, against about 0.1 each expected by chance."
   },
   "18_74443": {
@@ -7921,8 +7921,8 @@
    "reference_mean": 0.31,
    "by_estimator": {
     "did": -7.46,
-    "did_rain": NaN,
-    "prepost_rain": NaN,
+    "did_rain": null,
+    "prepost_rain": null,
     "counterfactual": -6.9
    },
    "RR": 0.04,
@@ -7959,8 +7959,8 @@
    "reference_mean": 0.78,
    "by_estimator": {
     "did": 3.04,
-    "did_rain": NaN,
-    "prepost_rain": NaN,
+    "did_rain": null,
+    "prepost_rain": null,
     "counterfactual": 2.78
    },
    "RR": 0.002,
@@ -8351,8 +8351,8 @@
     "prepost_rain": -17.13,
     "counterfactual": -6.78
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 18 54550 can be assessed so far: on average −6.7 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "18_57583": {
@@ -8431,8 +8431,8 @@
     "prepost_rain": -4.62,
     "counterfactual": -5.27
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 18 59329 can be assessed so far: on average −5.0 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "18_75405": {
@@ -8686,8 +8686,8 @@
     "prepost_rain": -31.71,
     "counterfactual": -8.06
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 18 50480 can be assessed so far: on average −5.4 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "18_68400": {
@@ -8899,8 +8899,8 @@
     "prepost_rain": -27.49,
     "counterfactual": -5.07
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 18 72359 can be assessed so far: on average −6.9 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "18_64655": {
@@ -8918,8 +8918,8 @@
     "prepost_rain": -14.42,
     "counterfactual": -10.7
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 18 64655 can be assessed so far: on average −11.0 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 1 a loss, against about 0.1 each expected by chance."
   },
   "18_65570": {
@@ -9051,8 +9051,8 @@
     "prepost_rain": -4.66,
     "counterfactual": -0.72
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 18 56444 can be assessed so far: on average −0.8 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "18_71299": {
@@ -9473,8 +9473,8 @@
     "prepost_rain": 10.99,
     "counterfactual": 10.99
    },
-   "RR": NaN,
-   "SR": NaN,
+   "RR": null,
+   "SR": null,
    "note": "1 desilting works in MWS 14 62842 can be assessed so far: on average −2.3 weeks of water a year compared with similar untreated waterbodies. Too few to rely on. 0 show a likely gain or an early sign of one and 0 a loss, against about 0.1 each expected by chance."
   },
   "14_63368": {
@@ -10227,8 +10227,8 @@
    "reference_mean": 0.78,
    "by_estimator": {
     "did": 3.04,
-    "did_rain": NaN,
-    "prepost_rain": NaN,
+    "did_rain": null,
+    "prepost_rain": null,
     "counterfactual": 2.78
    },
    "RR": 0.002,

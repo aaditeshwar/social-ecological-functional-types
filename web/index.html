@@ -1418,7 +1418,7 @@ function renderMethod(m){
    `python -m seft.cli wb-run`. MWS outlines and tehsils come from the watershed bundles (d_<district>).
    The scoring below mirrors seft/wb/build.py (types), seft/wb/score.py (signals, roles, rules) and
    seft/wb/assess.py (community answers), so a type answer can re-score a waterbody in the browser. */
-let WIDX=null, WK=null; const WBB={}; let WIMP=null, WIMP_TRIED=false;
+let WIDX=null, WK=null; const WBB={}; let WIMP=null, WIMP_TRIED=false, WIMP_ERR="";
 const W={tab:"explore", district:null, tehsil:null, wb:null, mws:null, mode:"type", arg:null, show:"all"};
 try{const t=localStorage.getItem("wba_tab"); if(t) W.tab=t;}catch(e){}
 const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["rules","Observed stresses"],["interventions","Interventions"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
@@ -1441,13 +1441,15 @@ function wIndex(){
 async function loadWbData(name){
   const key="wb_"+name; if(window.SEFT_DATA[key]) return window.SEFT_DATA[key];
   if(location.protocol!=="file:"){
-    for(const base of ["data/waterbody/","waterbody/"]){try{const r=await fetch(base+name+".json"); if(r.ok) return (window.SEFT_DATA[key]=await r.json());}catch(e){}}
+    for(const base of ["data/waterbody/","waterbody/"]){try{const r=await fetch(base+name+".json"); if(r.ok) return (window.SEFT_DATA[key]=await r.json()); console.warn("[atlas]",base+name+".json",r.status);}catch(e){console.warn("[atlas]",base+name+".json",e&&e.message||e);}}
   }
   for(const base of ["data/waterbody/","waterbody/"]){try{await loadScript(base+key+".js"); if(window.SEFT_DATA[key]) return window.SEFT_DATA[key];}catch(e){}}
   throw new Error("data/waterbody/"+key+".js did not load");
 }
 function wDist(){return WIDX.districts.find(d=>d.district===W.district)}
-async function wImpIndex(){if(WIMP_TRIED) return WIMP; WIMP_TRIED=true; try{WIMP=await loadWbData("impact");}catch(e){WIMP=null;} applyViews(); return WIMP;}
+async function wImpIndex(){if(WIMP_TRIED) return WIMP; WIMP_TRIED=true;
+  for(let i=0;i<3&&!WIMP;i++){try{WIMP=await loadWbData("impact");}catch(e){WIMP_ERR=String(e&&e.message||e); console.warn("[atlas] impact index attempt",i+1,"failed:",WIMP_ERR); await new Promise(r=>setTimeout(r,800*(i+1)));}}
+  applyViews(); return WIMP;}
 async function wBundle(slug){
   if(WBB[slug]) return WBB[slug];
   const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={}; b.slug=slug;
@@ -1766,6 +1768,7 @@ function wPickers(){
   if(W.district) h+=`<label for="wpt">Tehsil<select id="wpt"><option value="">All tehsils</option>${wTehsils().map(t=>`<option ${t===W.tehsil?"selected":""}>${esc(t)}</option>`).join("")}</select></label>`;
   if(W.district) h+=`<label for="wps">Show<select id="wps">${[["all","All waterbodies"],["r","Holds water regularly"],["x","Rarely holds water"],["n","New (since 2022)"]].map(([v,l])=>`<option value="${v}" ${W.show===v?"selected":""}>${l}</option>`).join("")}</select></label>`;
   h+=distToggle("wall");
+  if(!WIMP) h+=`<span class="note" style="align-self:flex-end;padding-bottom:6px">Intervention data not loaded${WIMP_TRIED?"":" yet"}${WIMP_ERR?": "+esc(WIMP_ERR):""}</span>`;
   if(WIMP) h+=`<label class="tog" for="wimp"><input type="checkbox" id="wimp" ${IMPONLY?"checked":""}> Only waterbodies with interventions</label>`;
   $("#wpickers").innerHTML=h; bindDistToggle("wall");
   if($("#wimp")) $("#wimp").onchange=e=>{IMPONLY=e.target.checked; try{localStorage.setItem("wb_imp_only",IMPONLY?"1":"0")}catch(x){} applyViews();
