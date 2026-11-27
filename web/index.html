@@ -1904,7 +1904,8 @@ function typeWalk(R){
 const IMP_COL={likely_gain:"var(--ok)",likely_loss:"var(--bad)",inconclusive:"var(--warn)",no_change:"var(--muted)",not_assessable:"var(--na)"};
 function impLabel(v){return (WIMP&&WIMP.settings.verdict.labels[v])||v}
 function impChip(v){return `<span class="pill" style="background:${IMP_COL[v]||"var(--na)"}">${esc(impLabel(v))}</span>`}
-function impSigned(x,n=1){if(x==null) return "–"; const t=Math.abs(x).toFixed(n); return x>0?"+"+t:x<0?"−"+t:t;}
+function impSigned(x,n=1){if(x==null) return "–"; const t=Math.abs(x).toFixed(n); if(+t===0) return (0).toFixed(n); return x>0?"+"+t:"−"+t;}
+function impPlural(l){return l.split(" / ").map(x=>x+"s").join(" / ")}
 function impYears(ys){return (ys||[]).map(y=>`${y}-${String(y+1).slice(2)}`).join(", ")}
 function wWeeks(w){return WYEARS.map((_,i)=>{const k=(w.k||[])[i],kr=(w.kr||[])[i],krz=(w.krz||[])[i]; return k==null?null:17.3*((k||0)+(kr||0)+(krz||0))/100;});}
 function impChart(w,b,rec){
@@ -1935,7 +1936,7 @@ function impRecord(w,b,rec){
     <p class="pubnote">${esc(rec.note||"")}</p>
     ${rec.verdict!=="not_assessable"?impChart(w,b,rec):""}
     <details><summary>How this was estimated</summary>${rows}
-      <p class="note">Before: ${impYears(rec.pre_years)}. After: ${impYears(rec.post_years)||"none yet"}. ${c.n!=null?`Controls: ${c.n} untreated ${esc(WTYPE[w.t]?WTYPE[w.t].label.toLowerCase():"waterbodie")}s within ${c.radius_km} km, chosen from ${c.candidates} candidates, outside this waterbody's micro-watershed, matched on size, catchment, stream order, rainfall, drought and the water held in each year before the work (median match distance ${c.median_distance}).`:""} ${rec.reference?`The percentile compares the headline estimate with ${rec.reference.n} untreated waterbodies of ${rec.reference.scope==="type"?"the same type":"any type"} in this district, run through the same steps as if treated.`:""}</p>
+      <p class="note">Before: ${impYears(rec.pre_years)}. After: ${impYears(rec.post_years)||"none yet"}. ${c.n!=null?`Controls: ${c.n} untreated ${esc(WTYPE[w.t]?impPlural(WTYPE[w.t].label.toLowerCase()):"waterbodies")} within ${c.radius_km} km, chosen from ${c.candidates} candidates, outside this waterbody's micro-watershed, matched on size, catchment, stream order, rainfall, drought and the water held in each year before the work (median match distance ${c.median_distance}).`:""} ${rec.reference?`The percentile compares the headline estimate with ${rec.reference.n} untreated waterbodies of ${rec.reference.scope==="type"?"the same type":"any type"} in this district, run through the same steps as if treated.`:""}</p>
       ${qf.length?`<p class="note"><b>Record quality:</b> ${qf.map(esc).join("; ")}.</p>`:""}${cf.length?`<p class="note"><b>Cautions:</b> ${cf.map(esc).join("; ")}.</p>`:""}
       <p class="note">Records: ${((rec.intervention||{}).ids||[]).map(i=>`<span class="mono">${esc(i)}</span>`).join(", ")}</p></details></div>`;
 }
