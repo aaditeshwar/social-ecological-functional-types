@@ -57,6 +57,8 @@ nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(-
 .crumbs button[disabled]{cursor:default;background:var(--sunk);font-weight:600}
 .crumbs span.sep{color:var(--muted)}
 .pickers{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pickers label.tog{flex-direction:row;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:.8rem;color:var(--ink);align-self:flex-end;padding-bottom:6px}
+.pickers label.tog input{margin:0}
 .pickers label{max-width:100%;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 select{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:5px 6px;min-width:0;max-width:100%;text-transform:none;letter-spacing:0;font-size:.9rem}
 .explore{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
@@ -280,6 +282,20 @@ function decode(s){
     for(let i=0;i+1<v.length;i+=2){x+=v[i];y+=v[i+1];ring.push([x/1e4,y/1e4]);} return ring;});
 }
 function curDistrict(){return IDX.districts.find(d=>d.district===S.district)}
+// District views: by default only districts with more than MIN_TEHSILS populated tehsils are listed; the full lists stay in ._all.
+const MIN_TEHSILS=5; let ALLD=false, IMPONLY=false;
+try{ALLD=localStorage.getItem("all_districts")==="1"; IMPONLY=localStorage.getItem("wb_imp_only")==="1";}catch(e){}
+const bigDistrict=d=>ALLD||(d.tehsils||[]).length>MIN_TEHSILS;
+function impDistricts(){return WIMP?new Set(WIMP.districts.filter(x=>x.n_waterbodies>0).map(x=>x.slug)):null}
+function applyViews(){
+  if(IDX){IDX._all=IDX._all||IDX.districts; IDX.districts=IDX._all.filter(bigDistrict);}
+  if(WIDX){WIDX._all=WIDX._all||WIDX.districts; const im=IMPONLY?impDistricts():null; WIDX.districts=WIDX._all.filter(d=>bigDistrict(d)&&(!im||im.has(d.slug)));}
+}
+function distToggle(id){return `<label class="tog" for="${id}"><input type="checkbox" id="${id}" ${ALLD?"":"checked"}> Only districts with more than ${MIN_TEHSILS} tehsils</label>`}
+function bindDistToggle(id){const e=$("#"+id); if(!e) return; e.onchange=()=>{ALLD=!e.checked; try{localStorage.setItem("all_districts",ALLD?"1":"0")}catch(x){} applyViews();
+  if(S.district&&!IDX.districts.some(d=>d.district===S.district)){S.level="india";S.district=S.tehsil=S.mws=null;}
+  if(typeof W!=="undefined"&&W.district&&WIDX&&!WIDX.districts.some(d=>d.district===W.district)){W.district=W.tehsil=W.wb=W.mws=null;}
+  $("#asub").textContent=atlasSub(); render();};}
 
 /*CORE-START*/
 /* ---------- expression evaluator: scalar mirror of seft/expr.py ---------- */
@@ -530,7 +546,8 @@ function renderPickers(){
     h+=`<label for="pt">Tehsil<select id="pt"><option value="">All tehsils</option>${d.tehsils.map(t=>`<option ${t===S.tehsil?"selected":""}>${esc(t)}</option>`).join("")}</select></label>`;}
   if(S.tehsil){const b=BUNDLES[curDistrict().slug]; const ms=b.mws.filter(m=>m.ts.includes(S.tehsil)).sort((a,b)=>a.u.localeCompare(b.u,undefined,{numeric:true}));
     h+=`<label for="pm">Micro-watershed<select id="pm"><option value="">Select MWS…</option>${ms.map(m=>`<option value="${m.u}" ${m.u===S.mws?"selected":""}>${m.u} · ${esc(ARCH[m.dom]?.label||"")}</option>`).join("")}</select></label>`;}
-  $("#pickers").innerHTML=h;
+  h+=distToggle("pall");
+  $("#pickers").innerHTML=h; bindDistToggle("pall");
   $("#pd").onchange=e=>e.target.value?go("district",e.target.value):go("india");
   if($("#pt")) $("#pt").onchange=e=>e.target.value?go("tehsil",e.target.value):go("district",S.district);
   if($("#pm")) $("#pm").onchange=e=>e.target.value?go("mws",e.target.value):go("tehsil",S.tehsil);
@@ -631,7 +648,6 @@ class MapView{
         let col=ARCH[dom].color; if(S.mode==="stress") col=seqColor((d.stress_rate[S.modeArg]||0)/0.7)||col;
         c.fillStyle=col; c.fill(f.p2); c.strokeStyle=f===this.hover?sel:ink; c.lineWidth=(f===this.hover?3:1.2)*lw; c.stroke(f.p2);} }
       c.setTransform(this.dpr,0,0,this.dpr,0,0); c.font="600 11px "+getComputedStyle(document.body).fontFamily; c.fillStyle=ink;
-      IDX.districts.forEach(d=>{const [X,Y]=this.proj((d.bounds[0]+d.bounds[2])/2,d.bounds[3]); c.fillText(d.district, v.x+X*v.s+8, v.y+Y*v.s-2);});
       return;
     }
     const inTeh=m=>!S.tehsil||m.ts.includes(S.tehsil);
@@ -1089,7 +1105,7 @@ function toast(msg){let t=$("#toast"); if(!t){t=document.createElement("div"); t
 
 function renderData(m){
   const files=[["mws_all.csv","All watersheds: indicators, context, system shares, observed-stress status and intensity, causal-pathway status, intensity, severity and probability, schemes (one row per MWS)"],["villages_all.csv","All villages: census and livestock values, assigned MWS and overlap share"]];
-  IDX.districts.forEach(d=>{files.push([`mws_${d.slug}.csv`,`${d.district}: watersheds`]);files.push([`villages_${d.slug}.csv`,`${d.district}: villages`]);});
+  (IDX._all||IDX.districts).forEach(d=>{files.push([`mws_${d.slug}.csv`,`${d.district}: watersheds`]);files.push([`villages_${d.slug}.csv`,`${d.district}: villages`]);});
   const kfiles=["variables","contexts","archetypes","signals","taxonomy","causal_graph","schemes","questions","interventions","sources"];
   m.innerHTML=`<div class="doc"><h2>Data downloads</h2>
     <p>Everything shown in the atlas can be saved: first the knowledge files that hold the logic, then the result tables. Watershed tables carry every indicator in <code>variables.json</code>, the context class on each dimension, the share of each system archetype, the status and intensity of each observed stress within each production system, and the status, intensity (0–100), severity and probability of each causal pathway. Missing values are blank.</p>
@@ -1366,7 +1382,7 @@ function renderMethod(m){
   <div class="block"><h3>Purpose and framing</h3>
    <p>The atlas follows the idea of social-ecological functional types (SEFTs) from Vallejos et al. (2020, <i>Ecosystems</i> 23:471–484), who grouped census tracts of the Argentine Chaco by how ecosystems function and how people use them. Their types came from clustering and did not model relationships. Here the same idea is made explicit and causal: each micro-watershed (MWS) is decomposed into a mixture of system archetypes using transparent rules, and a knowledge graph of causal pathways turns CoRE Stack indicators into stresses and opportunities, conditioned on aquifer, rainfall, terrain and canal context. Stresses follow production system → observed stress → causal pathway, with causal pathways written as combinations of signals, and carry an intensity from 0 to 100. All logic lives in nine JSON files that experts can read and edit.</p></div>
   <div class="block"><h3>Study area and data</h3>${drawsOn("Study area and data")}
-   <ul><li>Eight districts with at least four populated tehsils in CoRE Stack: Pune and Amaravati (Maharashtra), Ananthapur and Srikakulam (Andhra Pradesh), Godda (Jharkhand), Koraput (Odisha), Udaipur (Rajasthan) and Ballia (Uttar Pradesh). Keonjhar was dropped because the API does not resolve its name.</li>${IDX.districts.length>8?`<li>Added later with the same commands (<code>add</code>, <code>fetch</code>, <code>run --merge</code>): ${IDX.districts.slice(8).map(d=>`${esc(d.district)} (${esc(d.state)}, ${d.tehsils.length} tehsils)`).join(", ")}. The tehsil and watershed counts below are for the first eight.</li>`:""}
+   <ul><li>Eight districts with at least four populated tehsils in CoRE Stack: Pune and Amaravati (Maharashtra), Ananthapur and Srikakulam (Andhra Pradesh), Godda (Jharkhand), Koraput (Odisha), Udaipur (Rajasthan) and Ballia (Uttar Pradesh). Keonjhar was dropped because the API does not resolve its name.</li>${(IDX._all||IDX.districts).length>8?`<li>Added later with the same commands (<code>add</code>, <code>fetch</code>, <code>run --merge</code>): ${(IDX._all||IDX.districts).slice(8).map(d=>`${esc(d.district)} (${esc(d.state)}, ${d.tehsils.length} tehsils)`).join(", ")}. The tehsil and watershed counts below are for the first eight.</li>`:""}
    <li>73 tehsils were pulled from the CoRE Stack <code>get_tehsil_data</code> API: land use (2017–24), cropping intensity, kharif drought weeks and dry spells, hydrological balance, surface water bodies, aquifer, terrain, groundwater assessment category, canals, Green Credit projects, tree-cover and degradation change, urbanisation, restoration opportunity, village livestock and census values. The empty <code>drought</code> section was ignored in favour of the kharif drought data. An empty <code>green_credit</code> section is read as no project.</li>
    <li>Where API responses were truncated (land use for tehsils with more than about 118 MWS), values were back-filled from the CoRE Stack GeoServer, which matches the API exactly where both exist. Watershed and village geometry also come from GeoServer.</li>
    <li>972 watersheds straddle tehsil boundaries and are returned by each tehsil, sometimes with different hydrology and drought values. Each is counted once, using the copy from its home tehsil (the one with most village area inside it), which leaves 4,598 unique watersheds.</li></ul></div>
@@ -1431,7 +1447,7 @@ async function loadWbData(name){
   throw new Error("data/waterbody/"+key+".js did not load");
 }
 function wDist(){return WIDX.districts.find(d=>d.district===W.district)}
-async function wImpIndex(){if(WIMP_TRIED) return WIMP; WIMP_TRIED=true; try{WIMP=await loadWbData("impact");}catch(e){WIMP=null;} return WIMP;}
+async function wImpIndex(){if(WIMP_TRIED) return WIMP; WIMP_TRIED=true; try{WIMP=await loadWbData("impact");}catch(e){WIMP=null;} applyViews(); return WIMP;}
 async function wBundle(slug){
   if(WBB[slug]) return WBB[slug];
   const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={}; b.slug=slug;
@@ -1442,7 +1458,11 @@ async function wBundle(slug){
 }
 const wsBundleOk=d=>IDX&&IDX.districts.some(x=>x.slug===d.slug);
 function wScope(t){return WTYPE[t]&&WTYPE[t].in_scope}
-function wInView(w){return (!W.tehsil||w.teh===W.tehsil)&&(W.show==="all"||w.st===W.show)}
+function wImpW(w){if(!IMPONLY||!w) return true; const b=W.district&&WBB[wDist().slug]; return !!(b&&b.imp&&b.imp[String(w.id)]);}
+function wShown(w){return (W.show==="all"||w.st===W.show)&&wImpW(w)}
+function wInView(w){return (!W.tehsil||w.teh===W.tehsil)&&wShown(w)}
+function wTehsils(){const d=wDist(); if(!IMPONLY) return d.tehsils; const b=WBB[d.slug]; if(!b||!b.imp) return d.tehsils;
+  const t=new Set(b.waterbodies.filter(w=>b.imp[String(w.id)]).map(w=>w.teh)); return d.tehsils.filter(x=>t.has(x));}
 function wName(w){return w.n?`${esc(w.n)} <span class="muted mono">#${w.id}</span>`:`Waterbody <span class="mono">#${w.id}</span>`}
 function stPill(code){const s=WSTC[code]; if(!s) return ""; return `<span class="pill" style="background:${WST_COL[code]};${code==="x"||code==="d"?"color:var(--ink)":""}">${esc(s.label)}</span>`}
 function ctxText(v){return v==null?"–":esc(String(v).replace(/_/g," "))}
@@ -1628,7 +1648,6 @@ class WbMap{
       for(const f of this.feats) if(f.kind==="state"){c.fillStyle=surf; c.fill(f.p2,"evenodd"); c.strokeStyle=line; c.lineWidth=lw; c.stroke(f.p2);}
       for(const f of this.feats) if(f.kind==="district"){c.fillStyle=acc; c.globalAlpha=f===this.hover?0.9:0.6; c.fill(f.p2); c.globalAlpha=1; c.strokeStyle=f===this.hover?sel:ink; c.lineWidth=(f===this.hover?3:1.2)*lw; c.stroke(f.p2);}
       c.setTransform(this.dpr,0,0,this.dpr,0,0); c.font="600 11px "+getComputedStyle(document.body).fontFamily; c.fillStyle=ink;
-      this.feats.filter(f=>f.kind==="district").forEach(f=>{const b=f.d.bounds; const [X,Y]=this.proj((b[0]+b[2])/2,b[3]); c.fillText(f.d.district, v.x+X*v.s+8, v.y+Y*v.s-2);});
       return;
     }
     const wb=this.wb, ponds=W.mode==="ponds";
@@ -1744,9 +1763,16 @@ function wCrumbs(){
 function wPickers(){
   const ds=WIDX.districts.slice().sort((a,b)=>a.state.localeCompare(b.state)||a.district.localeCompare(b.district));
   let h=`<label for="wpd">District<select id="wpd"><option value="">Select district…</option>${ds.map(d=>`<option value="${esc(d.district)}" ${d.district===W.district?"selected":""}>${esc(d.district)}, ${esc(d.state)}</option>`).join("")}</select></label>`;
-  if(W.district) h+=`<label for="wpt">Tehsil<select id="wpt"><option value="">All tehsils</option>${wDist().tehsils.map(t=>`<option ${t===W.tehsil?"selected":""}>${esc(t)}</option>`).join("")}</select></label>`;
+  if(W.district) h+=`<label for="wpt">Tehsil<select id="wpt"><option value="">All tehsils</option>${wTehsils().map(t=>`<option ${t===W.tehsil?"selected":""}>${esc(t)}</option>`).join("")}</select></label>`;
   if(W.district) h+=`<label for="wps">Show<select id="wps">${[["all","All waterbodies"],["r","Holds water regularly"],["x","Rarely holds water"],["n","New (since 2022)"]].map(([v,l])=>`<option value="${v}" ${W.show===v?"selected":""}>${l}</option>`).join("")}</select></label>`;
-  $("#wpickers").innerHTML=h;
+  h+=distToggle("wall");
+  if(WIMP) h+=`<label class="tog" for="wimp"><input type="checkbox" id="wimp" ${IMPONLY?"checked":""}> Only waterbodies with interventions</label>`;
+  $("#wpickers").innerHTML=h; bindDistToggle("wall");
+  if($("#wimp")) $("#wimp").onchange=e=>{IMPONLY=e.target.checked; try{localStorage.setItem("wb_imp_only",IMPONLY?"1":"0")}catch(x){} applyViews();
+    if(W.district&&!WIDX.districts.some(d=>d.district===W.district)){W.district=W.tehsil=W.wb=W.mws=null;}
+    if(W.tehsil&&!wTehsils().includes(W.tehsil)) W.tehsil=null;
+    if(W.wb&&W.district&&!wImpW(WBB[wDist().slug].byId[W.wb])) W.wb=null;
+    render();};
   $("#wpd").onchange=e=>e.target.value?wGo("district",e.target.value):wGo("india");
   if($("#wpt")) $("#wpt").onchange=e=>wGo("tehsil",e.target.value);
   if($("#wps")) $("#wps").onchange=e=>{W.show=e.target.value; wPane(); WBMAP.draw();};
@@ -1831,7 +1857,7 @@ function openInWatershed(u){
   loadBundle(d.slug).then(b=>{S.district=d.district; S.level="mws"; const m=b.mwsById[u]; S.tehsil=m?m.t:null; S.mws=u; render();});
 }
 function wPaneMws(P,u,d,b){
-  const m=b.mws[u], ws=(b.byMws[u]||[]).filter(w=>W.show==="all"||w.st===W.show), C=wCounts(ws);
+  const m=b.mws[u], ws=(b.byMws[u]||[]).filter(wShown), C=wCounts(ws);
   const sorted=ws.slice().sort((a,c)=>c.a-a.a);
   P.innerHTML=`<div class="block"><div class="eyebrow">Micro-watershed · ${esc(d.district)}</div><h2 class="mono">MWS ${esc(u)}</h2>
     <p>${ws.length} waterbodies with this MWS as home · <b>${m&&m.recent_ponds||0}</b> recent ponds${m&&m.recent_ponds_ha?` (${m.recent_ponds_ha} ha)`:""}</p>
@@ -2194,12 +2220,12 @@ function impMethod(){
    <p><b>Averages</b> for a micro-watershed, tehsil or district average the headline estimates of the works there that are assessable and carry no record-quality flag, with a 95% bootstrap range. Public notes are written by the rules in <span class="mono">knowledge/impact/notes.json</span>.</p></div>`;
 }
 function renderWbMethod(m){
-  const n=WIDX.districts.reduce((s,d)=>s+d.n,0), nt=Object.keys(WIDX.tehsil_stats).length;
+  const WD=WIDX._all||WIDX.districts, n=WD.reduce((s,d)=>s+d.n,0), nt=Object.keys(WIDX.tehsil_stats).length;
   const zl=Object.values(WIDX.tehsil_stats).reduce((a,s)=>[a[0]+(s.zoi_location||0)+(s.zoi_wb_id||0),a[1]+s.kept],[0,0]);
   m.innerHTML=`<div class="doc"><h2>Methodology</h2>
   <div class="block"><h3>Purpose and framing</h3><p>The waterbody atlas applies the approach of the watershed atlas to single waterbodies. Each waterbody is typed, read through its own water series, placed in the landscape of its home micro-watershed, and checked against transparent rules for observed stresses and opportunities. Every threshold, rule and question sits in editable JSON files with its sources; the page and the Python pipeline evaluate the same files.</p></div>
   <div class="block"><h3>Data</h3>${wDrawsOn("Data")}<ul>
-   <li>${n.toLocaleString("en-IN")} waterbodies in ${nt} tehsils of the ${WIDX.districts.length} watershed-atlas districts (${WIDX.districts.map(d=>esc(d.district)).join(", ")}); every tehsil used has a zone-of-influence layer.</li>
+   <li>${n.toLocaleString("en-IN")} waterbodies in ${nt} tehsils of the ${WD.length} watershed-atlas districts (${WD.map(d=>esc(d.district)).join(", ")}); every tehsil used has a zone-of-influence layer.</li>
    <li><b>Surface water bodies</b> (CoRE Stack GeoServer layer <span class="mono">swb:surface_waterbodies_&lt;district&gt;_&lt;tehsil&gt;</span>): for each waterbody and hydrological year 2017–2024, the share of its mapped extent holding water in kharif (k), through rabi (kr) and through zaid (krz), with its drainage position, stream order, catchment and CoRE Stack's own type. Fragments of one waterbody with the same area and series, within about 30 m, are merged.</li>
    <li><b>Zones of influence</b> (<span class="mono">swb:waterbodies_zoi_…</span>): the land around a waterbody that it irrigates, with yearly cropping intensity and double- and triple-cropped area. Joined by waterbody id where the layer has one and otherwise by location; ${zl[1]?Math.round(zl[0]/zl[1]*100):0}% of waterbodies have a zone.</li>
    <li><b>Home micro-watershed</b>: the MWS holding most of the waterbody. Its context (rainfall, aquifer, terrain, groundwater category, canals, cropping), system shares and variables come from the watershed atlas pipeline run for the same tehsils.</li>
@@ -2233,7 +2259,7 @@ function renderWbData(m){
   m.innerHTML=`<div class="doc"><h2>Data downloads</h2>
     <p>The knowledge files that hold the logic, then one table per district with one row per waterbody: identity, type, status, size, drainage, home MWS and its context, recent ponds in the MWS, variables, roles, the intensity of each rule (blank: not applicable; 0: not triggered; NA: insufficient data) and the schemes linked to its triggered rules. Built by <code>python -m seft.cli wb-run</code>.</p>
     <div><div class="eyebrow">Knowledge files (editable logic)</div>${kf.map(f=>`<div class="dl"><span><b class="mono">${f}.json</b><br><span class="note">${esc((WKSCHEMA.find(x=>x.file===f+".json")||{}).role||"")}</span></span><button class="btn ghost" data-wk="${f}">Save</button></div>`).join("")}</div>
-    <div><div class="eyebrow">Tables</div>${WIDX.districts.map(d=>`<div class="dl"><span><b class="mono">wb_${d.slug}.csv</b><br><span class="note">${esc(d.district)}, ${esc(d.state)} · ${d.n.toLocaleString("en-IN")} waterbodies</span></span><button class="btn ghost" data-wf="wb_${d.slug}.csv">Save</button></div>`).join("")}</div>
+    <div><div class="eyebrow">Tables</div>${(WIDX._all||WIDX.districts).map(d=>`<div class="dl"><span><b class="mono">wb_${d.slug}.csv</b><br><span class="note">${esc(d.district)}, ${esc(d.state)} · ${d.n.toLocaleString("en-IN")} waterbodies</span></span><button class="btn ghost" data-wf="wb_${d.slug}.csv">Save</button></div>`).join("")}</div>
     <div><div class="eyebrow">Community answers</div><p class="note">Answers you enter in Explore are kept in this browser. Save them to share with your team or to run <code>python -m seft.cli wb-assess --answers waterbody_answers.json</code>; load a saved file to restore them.</p><div class="filters"><button class="btn ghost" id="wdsave">Save all answers (JSON)</button><label class="btn ghost" for="wdload" style="cursor:pointer">Load answers…</label><input type="file" id="wdload" accept=".json,application/json" hidden></div></div>
     <div class="block"><h3>Rebuild locally</h3><pre class="kex">python -m seft.cli wb-add  --state ... --district ... --tehsils ...   # add tehsils to config/waterbody/locations.json
 python -m seft.cli wb-fetch          # watershed data + waterbody and zone-of-influence layers
@@ -2259,7 +2285,7 @@ function renderWb(){
     if(t==="schemes") return renderWbSchemes(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
   if(WIDX) return go();
   m.innerHTML=`<div class="loading">Loading the waterbody atlas…</div>`;
-  loadWbData("index").then(async x=>{WIDX=x; WK=x.knowledge; wIndex(); await wImpIndex(); $("#asub").textContent=atlasSub(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
+  loadWbData("index").then(async x=>{WIDX=x; WK=x.knowledge; wIndex(); applyViews(); await wImpIndex(); $("#asub").textContent=atlasSub(); go();}).catch(e=>{m.innerHTML=`<div class="loading"><p><b>The waterbody data did not load.</b></p><p>Build them with <code>python -m seft.cli wb-run</code>, which writes <code>web/data/waterbody/</code>.</p><p class="note">${esc(e.message||e)}</p></div>`;});
 }
 
 /* ================= Interventions (knowledge/interventions.json, shared by both atlases) =================
@@ -2525,7 +2551,7 @@ async function renderCC(){
   const m=$("#main");
   if(!CCD){m.innerHTML=`<div class="loading">Loading the Commons Connect forms…</div>`;
     try{CCD=await loadData("commons_connect");}catch(e){m.innerHTML=`<div class="loading"><p><b>The Commons Connect forms did not load.</b></p><p>Build them with <code>python -m seft.cli cc-build --forms &lt;folder&gt;</code> and <code>python -m seft.cli refresh-knowledge</code>.</p></div>`;return;}}
-  if(!WIDX){try{WIDX=await loadWbData("index"); WK=WIDX.knowledge; wIndex();}catch(e){}}
+  if(!WIDX){try{WIDX=await loadWbData("index"); WK=WIDX.knowledge; wIndex(); applyViews();}catch(e){}}
   $("#asub").textContent=atlasSub();
   if(CC.tab==="forms") return ccRenderForms(m);
   if(CC.tab==="method") return ccRenderMethod(m);
@@ -2735,7 +2761,7 @@ function prMethodBlock(kind){
 /* ---------- boot ---------- */
 (async()=>{
   renderTabs(); $("#main").innerHTML=`<div class="loading">Loading the atlas…</div>`;
-  try{ [IDX,CCD]=await Promise.all([loadData("index"),loadData("commons_connect").catch(()=>null)]); K=IDX.knowledge; indexKnowledge(); render(); }
+  try{ [IDX,CCD]=await Promise.all([loadData("index"),loadData("commons_connect").catch(()=>null)]); K=IDX.knowledge; indexKnowledge(); applyViews(); render(); }
   catch(e){ $("#main").innerHTML=`<div class="loading"><p><b>The atlas data did not load.</b></p><p>The page looks for <code>data/index.json</code> (or <code>data/index.js</code> when opened directly from disk) in the folder that holds this page. Build it with <code>python -m seft.cli run</code> followed by <code>python -m seft.webdata</code>, or serve the folder with <code>python -m http.server -d web 8000</code> and open http://localhost:8000.</p><p class="note">${esc(e.message||e)}</p></div>`; }
 })();
 </script>
