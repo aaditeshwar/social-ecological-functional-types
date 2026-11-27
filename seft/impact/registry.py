@@ -207,13 +207,20 @@ def build(reg_id, layers_csv, zoi_csv=None, name=None, itype='desilting', role='
     resolve(recs, refresh_locations, log)
     zoi = {}
     if zoi_csv:
-        by_layer = defaultdict(list)
-        for r in recs: by_layer[r['source']['layer'].replace('waterbodies_atecf_', '')].append(r)
+        by_layer, by_dist = defaultdict(list), defaultdict(list)
+        for r in recs:
+            by_layer[r['source']['layer'].replace('waterbodies_atecf_', '')].append(r)
+            by_dist[_norm(r['names'].get('district'))].append(r)
         for z in read_layer_list(zoi_csv):
             k = z['layer'].replace('waterbodies_zoi_atecf_', '')
+            # a ZoI layer may come from another run than the waterbody layer of the same name (Ahemadnagar), so
+            # its zones are matched spatially against the records of the same layer name and of the same district
+            cand = list({r['id']: r for r in by_layer.get(k, []) + by_dist.get(_norm(z.get('district')), [])}.values())
             try:
-                got = zoi_for(by_layer.get(k, []), _fetch(z['wfs_geojson_url'])); zoi.update(got)
-                log(f'  {z["layer"]}: {len(got)} of {len(by_layer.get(k, []))} records matched to a zone of influence')
+                got = zoi_for(cand, _fetch(z['wfs_geojson_url']))
+                for rid, zz in got.items():
+                    if rid not in zoi or zz['distance_m'] < zoi[rid]['distance_m']: zoi[rid] = zz
+                log(f'  {z["layer"]}: {len(got)} of {len(cand)} records matched to a zone of influence')
             except Exception as e:
                 log(f'  {z["layer"]}: FAILED {str(e)[:160]}')
     doc = {'registry': {'id': reg_id, 'name': name or reg_id, 'source': f'GeoServer layers listed in {Path(layers_csv).name}',
