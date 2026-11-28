@@ -194,7 +194,8 @@
     "Bijawar",
     "Gaurihar",
     "Nowgong",
-    "Rajnagar"
+    "Rajnagar",
+    "Loundi"
    ],
    "roles": [
     "coverage"
@@ -353,7 +354,9 @@
     "Surgana",
     "Trimbakeshwar",
     "Yeola",
-    "Peint"
+    "Peint",
+    "Baglan",
+    "Niphad"
    ],
    "roles": [
     "coverage"
@@ -518,6 +521,76 @@
    "tehsils": [
     "Balangir",
     "Titlagarh"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Jharkhand",
+   "district": "Dumka",
+   "tehsils": [
+    "Gopikandar",
+    "Kathikund",
+    "Masalia",
+    "Ramgarh",
+    "Saraiyahat",
+    "Shikaripara"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Jharkhand",
+   "district": "Ramgarh",
+   "tehsils": [
+    "Chitarpur",
+    "Dulmi",
+    "Gola",
+    "Mandu",
+    "Patratu",
+    "Ramgarh"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Madhya Pradesh",
+   "district": "Sehore",
+   "tehsils": [
+    "Ashta",
+    "Budhni",
+    "Ichhawar",
+    "Nasrullahganj",
+    "Sehore"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Gujarat",
+   "district": "Mahisagar",
+   "tehsils": [
+    "Kadana",
+    "Khanpur",
+    "Santrampur",
+    "Virpur"
+   ],
+   "roles": [
+    "coverage"
+   ]
+  },
+  {
+   "state": "Uttar Pradesh",
+   "district": "Basti",
+   "tehsils": [
+    "Basti",
+    "Bhanpur",
+    "Harraiya",
+    "Rudhauli"
    ],
    "roles": [
     "coverage"
