@@ -77,7 +77,7 @@ Placebo DiD: mean -0.01, spread 5.49 weeks over 713 placebo windows.
 
 | Unit | n | Mean DiD (95% range) | Gain / loss (incl. early) | Reference mean | Placebo mean (95% range) |
 | --- | --- | --- | --- | --- | --- |
-| semi_arid | 308 | +1.51 (+0.59, +2.51) | 28 / 15 | -0.31 | -0.11 (-0.63, +0.51) |
+| semi_arid | 307 | +1.52 (+0.55, +2.49) | 28 / 15 | -0.31 | -0.11 (-0.64, +0.48) |
 | dry_subhumid | 89 | -0.14 (-1.73, +1.19) | 2 / 2 | -0.19 | -0.10 (-1.35, +1.16) |
 
 ## By ctx_aquifer
@@ -92,8 +92,8 @@ Placebo DiD: mean -0.01, spread 5.49 weeks over 713 placebo windows.
 
 | Unit | n | Mean DiD (95% range) | Gain / loss (incl. early) | Reference mean | Placebo mean (95% range) |
 | --- | --- | --- | --- | --- | --- |
-| rainfed_dryland | 249 | +1.57 (+0.56, +2.59) | 19 / 9 | +0.01 | -0.03 (-0.62, +0.61) |
-| groundwater_irrigated | 59 | +0.08 (-2.43, +2.30) | 1 / 5 | -0.82 | -0.06 (-1.80, +1.69) |
+| rainfed_dryland | 248 | +1.57 (+0.59, +2.54) | 19 / 9 | +0.00 | -0.03 (-0.70, +0.59) |
+| groundwater_irrigated | 60 | +0.08 (-2.36, +2.49) | 1 / 5 | -0.80 | -0.06 (-1.89, +1.62) |
 | forest_fringe | 44 | +0.13 (-2.67, +2.90) | 3 / 2 | -0.42 | -0.15 (-1.50, +1.23) |
 | canal_irrigated | 20 | +1.10 (-3.56, +5.70) | 3 / 1 | -0.89 | -0.59 (-3.41, +1.97) |
 | rainfed_rice_subhumid | 17 | -1.07 (-4.79, +2.77) | 1 / 0 | -1.05 | +1.34 (-0.89, +3.68) **concern** |
