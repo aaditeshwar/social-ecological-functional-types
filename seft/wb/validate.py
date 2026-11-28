@@ -82,6 +82,9 @@ def validate(kdir=None, log=print):
                     if sid not in known_src: problems.append(f'{name}: unknown source {sid}')
     for x in K['signals']['signals'] + K['roles']['roles'] + K['rules']['rules'] + K['types']['types']:
         if not x.get('sources'): problems.append(f"{x['id']}: no sources")
+    from ..notes_check import check_notes
+    problems += check_notes(K['notes'], ('waterbody', 'unit'), extra={v['id'] for v in K['variables']['variables']},
+                            where='waterbody/notes.json')
     for p in problems: log('  ' + p)
     log(f"{len(problems)} problems; {len(K['types']['types'])} types, {len(sig)} signals, {len(roles)} roles, {len(K['rules']['rules'])} rules, {len(sch)} schemes, {len(qids)} questions, {len(known_src)} sources")
     return not problems

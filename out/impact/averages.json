@@ -9757,27 +9757,27 @@
  },
  "ctx_rainfall": {
   "semi_arid": {
-   "n": 308,
+   "n": 307,
    "unit_label": "semi arid (rainfall)",
-   "mean": 1.51,
-   "lo": 0.59,
-   "hi": 2.51,
+   "mean": 1.52,
+   "lo": 0.55,
+   "hi": 2.49,
    "n_gain": 28,
    "n_loss": 15,
    "reference_mean": -0.31,
    "by_estimator": {
-    "did": 1.51,
+    "did": 1.52,
     "did_rain": 1.23,
-    "prepost_rain": -2.43,
+    "prepost_rain": -2.42,
     "counterfactual": 1.59
    },
    "RR": 0.019,
    "SR": 0.009,
    "placebo_mean": -0.11,
-   "placebo_lo": -0.63,
-   "placebo_hi": 0.51,
+   "placebo_lo": -0.64,
+   "placebo_hi": 0.48,
    "placebo_concern": false,
-   "note": "308 waterbodies desilted in semi arid (rainfall) held water on average 1.5 weeks a year longer than similar untreated waterbodies (95% range +0.6 to +2.5). 28 show a likely gain or an early sign of one and 15 a loss, against about 30.8 each expected by chance."
+   "note": "307 waterbodies desilted in semi arid (rainfall) held water on average 1.5 weeks a year longer than similar untreated waterbodies (95% range +0.6 to +2.5). 28 show a likely gain or an early sign of one and 15 a loss, against about 30.7 each expected by chance."
   },
   "dry_subhumid": {
    "n": 89,
@@ -10079,50 +10079,50 @@
    "note": "44 waterbodies desilted in forest fringe areas show no average change in how long they hold water that can be told apart from zero: +0.1 weeks a year (95% range −2.7 to +2.9). 3 show a likely gain or an early sign of one and 2 a loss, against about 4.4 each expected by chance."
   },
   "groundwater_irrigated": {
-   "n": 59,
+   "n": 60,
    "unit_label": "groundwater irrigated areas",
    "mean": 0.08,
-   "lo": -2.43,
-   "hi": 2.3,
+   "lo": -2.36,
+   "hi": 2.49,
    "n_gain": 1,
    "n_loss": 5,
-   "reference_mean": -0.82,
+   "reference_mean": -0.8,
    "by_estimator": {
     "did": 0.08,
-    "did_rain": 0.1,
-    "prepost_rain": -0.39,
-    "counterfactual": -1.89
+    "did_rain": 0.12,
+    "prepost_rain": -0.5,
+    "counterfactual": -1.85
    },
    "RR": -0.013,
    "SR": -0.007,
    "placebo_mean": -0.06,
-   "placebo_lo": -1.8,
-   "placebo_hi": 1.69,
+   "placebo_lo": -1.89,
+   "placebo_hi": 1.62,
    "placebo_concern": false,
-   "note": "59 waterbodies desilted in groundwater irrigated areas show no average change in how long they hold water that can be told apart from zero: +0.1 weeks a year (95% range −2.4 to +2.3). 1 show a likely gain or an early sign of one and 5 a loss, against about 5.9 each expected by chance."
+   "note": "60 waterbodies desilted in groundwater irrigated areas show no average change in how long they hold water that can be told apart from zero: +0.1 weeks a year (95% range −2.4 to +2.5). 1 show a likely gain or an early sign of one and 5 a loss, against about 6 each expected by chance."
   },
   "rainfed_dryland": {
-   "n": 249,
+   "n": 248,
    "unit_label": "rainfed dryland areas",
    "mean": 1.57,
-   "lo": 0.56,
-   "hi": 2.59,
+   "lo": 0.59,
+   "hi": 2.54,
    "n_gain": 19,
    "n_loss": 9,
-   "reference_mean": 0.01,
+   "reference_mean": 0.0,
    "by_estimator": {
     "did": 1.57,
     "did_rain": 1.2,
-    "prepost_rain": -3.73,
-    "counterfactual": 2.09
+    "prepost_rain": -3.71,
+    "counterfactual": 2.1
    },
    "RR": 0.019,
    "SR": 0.003,
    "placebo_mean": -0.03,
-   "placebo_lo": -0.62,
-   "placebo_hi": 0.61,
+   "placebo_lo": -0.7,
+   "placebo_hi": 0.59,
    "placebo_concern": false,
-   "note": "249 waterbodies desilted in rainfed dryland areas held water on average 1.6 weeks a year longer than similar untreated waterbodies (95% range +0.6 to +2.6). 19 show a likely gain or an early sign of one and 9 a loss, against about 24.9 each expected by chance."
+   "note": "248 waterbodies desilted in rainfed dryland areas held water on average 1.6 weeks a year longer than similar untreated waterbodies (95% range +0.6 to +2.5). 19 show a likely gain or an early sign of one and 9 a loss, against about 24.8 each expected by chance."
   },
   "tree_crops": {
    "n": 10,

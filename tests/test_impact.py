@@ -119,3 +119,9 @@ class TestImpact(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+def test_notes_panel_covers_page():
+    from seft.impact.validate import panel_errors
+    from seft.util import load_json, knowledge_dir
+    assert panel_errors(load_json(knowledge_dir() / 'impact' / 'notes.json')) == []

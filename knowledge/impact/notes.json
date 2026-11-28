@@ -1,6 +1,6 @@
 {
- "_about": "Rules that write the public note for an intervention's impact. For each note kind the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files.",
- "version": "0.1.0",
+ "_about": "Rules that write the public note for an intervention's impact, and the fixed text of the impact panels. For each note kind (`waterbody`, `unit`) the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files. `panel` holds the labels, headings and explanations around the notes in the atlas panels; its placeholders are listed in `panel._placeholders`.",
+ "version": "0.2.0",
  "waterbody": {
   "main": [
    {
@@ -88,5 +88,55 @@
     "text": "Before the works, these waterbodies were already {placebo_text} their controls by about {placebo_abs} weeks a year (placebo check), so part of this average may reflect differences that predate desilting."
    }
   ]
+ },
+ "panel": {
+  "_about": "Fixed text of the impact panels in the waterbody atlas (web/index.html, impT). Text is shown as written; placeholders in braces are filled by the page.",
+  "_placeholders": {
+   "record_title": "intervention_label, years, window_text",
+   "volume_chip": "volume",
+   "placebo_row": "year",
+   "periods": "pre, post",
+   "controls": "n, type_plural, radius_km, candidates, median_distance",
+   "reference": "n, scope",
+   "unit_eyebrow": "intervention_label_lower",
+   "unit_summary": "n, lo, hi, did_rain, counterfactual, prepost_rain, reference_mean",
+   "chart_controls": "n"
+  },
+  "waterbody_eyebrow": "Impact of interventions",
+  "record_title": "{intervention_label} in {years}{window_text}",
+  "window_combined": " (all works together)",
+  "window_first": " (until the next work)",
+  "volume_chip": "{volume} m³ of silt",
+  "how_summary": "How this was estimated",
+  "col_estimator": "Estimator",
+  "col_weeks": "Weeks of water",
+  "col_rabi": "Rabi retention",
+  "col_summer": "Summer retention",
+  "headline_tag": "(headline)",
+  "points_unit": "pts",
+  "percentile_row": "Percentile among untreated waterbodies",
+  "placebo_row": "Placebo: pretend the work was in {year}",
+  "periods": "Before: {pre}. After: {post}.",
+  "post_none": "none yet",
+  "controls": "Controls: {n} untreated {type_plural} within {radius_km} km, chosen from {candidates} candidates, outside this waterbody's micro-watershed, matched on size, catchment, stream order, rainfall, drought and the water held in each year before the work (median match distance {median_distance}).",
+  "type_plural_fallback": "waterbodies",
+  "reference": "The percentile compares the headline estimate with {n} untreated waterbodies of {scope} in this district, run through the same steps as if treated.",
+  "reference_scope_type": "the same type",
+  "reference_scope_any": "any type",
+  "quality_label": "Record quality:",
+  "cautions_label": "Cautions:",
+  "records_label": "Records:",
+  "waterbody_footer": "Estimated by comparing this waterbody's change with the change at similar untreated waterbodies nearby over the same years (Methodology tab). Each result is placed among untreated waterbodies run through the same steps, so chance changes are not read as effects.",
+  "unit_eyebrow": "Impact of {intervention_label_lower}",
+  "unit_summary": "Average of the headline estimate over {n} assessed works without record-quality flags (95% range {lo} to {hi} weeks a year). Other estimators: rainfall-matched {did_rain}, counterfactual model {counterfactual}, post minus pre without controls {prepost_rain} weeks. Untreated waterbodies run through the same steps average {reference_mean}.",
+  "col_waterbody": "Waterbody",
+  "col_type": "Type",
+  "col_work": "Work",
+  "col_result": "Result",
+  "chart_aria": "Weeks of water, this waterbody and its controls",
+  "chart_work_done": "work done",
+  "chart_this": "This waterbody",
+  "chart_controls": "Mean of its {n} controls",
+  "chart_formula": "Weeks of water a year = 17.3 × (kharif + rabi + summer shares) / 100."
  }
 }

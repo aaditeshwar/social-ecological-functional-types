@@ -1,6 +1,6 @@
 # Knowledge files
 
-These nine JSON files hold every rule, threshold, weight, scheme and question that the pipeline uses.
+These JSON files hold every rule, threshold, weight, scheme and question that the pipeline uses.
 None of them contains code. After editing, run:
 
 ```bash
@@ -63,6 +63,9 @@ Missing data is treated as unknown. An `or` can still be true if another part is
 | `interventions.json` → `fit.community_vars` | Variables only a community answer supplies (now `wl_post_monsoon`, depth to water after the monsoon, from the landscape question `ls_wl_post`). Unknown by default, so they change no verdict until answered. | `site_rules` hold only site layers (slope, stream order, catchment, distance to drainage, land use, soil); rainfall, aquifer, groundwater stage and depth to water belong in `suits` / `avoid`. |
 | `pools.json` | Published percentile pools (`mws`, `waterbody`) and their `provenance`: the districts, counts and date they were computed over. Written by `run --update-pools` / `wb-run --update-pools` (or `core_seft.knowledge.dump_pools_from_atlas`). | The atlas and core-seft score every district with these unless the pools are recomputed. |
 | `commons_connect.json` | Built by `python -m seft.cli cc-build --forms <folder>` from the Commons Connect ODK templates; edit the annotations in `seft/commons_connect.py` and rebuild. `forms` (section landscape / resource_mapping / planning, questions with `role`, `atlas_match`, `must_ask`, `prefill`, `routes`, `work_map`), `priority` (weights and bands of the must-ask score). | `must_ask.rules` are expressions over the watershed variables, `share_<archetype>`, context classes, `ps_<production system>`, `p_` / `pos_` / `urg_<rule>` (dots as `__`) and `ask_<atlas question>`; in the waterbody form also `wtype`, `wp_` / `wpos_<rule>` and `wask_<question>`. |
+| `notes.json` | Rules that write the short introductory note at the top of a micro-watershed (`mws`) and a tehsil or district (`unit`) panel: `main` (the first rule whose `when` holds gives the opening sentence) and `add` (every rule that holds appends one), with `_fields` listing what each kind can read and fill in. | Written by the page, so notes follow community answers. `validate` checks every condition and placeholder; `refresh-knowledge` puts an edited file into the atlas without re-running. The waterbody atlas has its own `waterbody/notes.json`, and the impact notes are in `impact/notes.json`. |
+| `sheet_rules.json` | The Signal_Verification sheet's revised rules as expressions. | Used only by the ground-truth comparison (`seft/groundtruth.py`, `seft/sheet.py`), not by the atlas. |
+| `manifest.json` | Pack `version`, `date`, `min_library` and `datasets_required` for core-seft. | Bump the version when releasing a changed pack. |
 | `sources.json` | Bibliography: `id`, `citation`, `url`, `used_for`. | Every `sources` list in the other files refers to these ids. |
 
 ## Signals and rules

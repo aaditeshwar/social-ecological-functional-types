@@ -13,6 +13,11 @@ Read by `seft/impact` (`impact-run`) and `core_seft` (`analyse("waterbody-impact
 * `notes.json` — public notes. For a waterbody (`waterbody`) and for a unit (`unit`): the first `main` rule whose
   `when` holds gives the main sentence, every `add` rule whose `when` holds appends one. Placeholders are listed
   in `seft/impact/notes.py`. Expressions use the syntax of the other knowledge files.
+  `panel` holds the fixed text around the notes in the atlas panels (headings, table labels, the estimation
+  explanation, chart legend). It is copied into `web/data/waterbody/impact.json` by `impact-run` and filled by the
+  page; each entry's placeholders are declared in `panel._placeholders`, and `impact-validate` checks that every
+  key the page uses exists. Changing any of this text needs `impact-run --finalize-only` (or a full run) to reach
+  the atlas.
 
 Size floor and scope follow the waterbody atlas (`knowledge/waterbody/types.json`: 0.05 ha; reservoirs, large
 rivers and unclassified waterbodies out of scope).

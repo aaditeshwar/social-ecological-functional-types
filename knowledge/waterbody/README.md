@@ -30,6 +30,11 @@ page (web/index.html, Waterbodies); `wb-validate` checks that every id, expressi
   waterbody's home micro-watershed. `wb-run` writes `interventions_suited` / `interventions_possible` per waterbody.
 - `sources.json`: waterbody sources. Every `sources` list may also cite ids from the watershed `knowledge/sources.json`.
   Thresholds without a published norm cite `expert_judgement`.
+- `notes.json`: rules that write the short introductory note at the top of a waterbody's panel (`waterbody`) and
+  of the waterbodies of a micro-watershed, tehsil or district (`unit`): the first `main` rule whose `when` holds gives
+  the opening sentence, every `add` rule that holds appends one. `_fields` lists the fields each kind can read and
+  fill in (placeholders in braces). The page writes the notes, so they follow community answers; `wb-validate`
+  checks every condition and placeholder, and `refresh-knowledge` puts an edited file into the atlas without re-scoring.
 
 Status per rule and waterbody: not applicable, triggered, not triggered, or insufficient data. Most rules are
 checked only for waterbodies that hold water in 3 or more of the 8 years and are not new (first wet in 2022

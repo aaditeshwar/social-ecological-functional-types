@@ -13,6 +13,7 @@ import numpy as np
 warnings.filterwarnings("ignore", category=RuntimeWarning, module=__name__)
 from ..util import ROOT, load_json, raw_dir, slug, knowledge_dir
 from . import registry as REG
+from .notes import rules as load_notes
 from .pool import Pool, pool_years, mws_years, bundle_ctx, CTX_KEYS
 from .estimate import Estimator, OUTCOMES
 from .notes import render, signed, years_text, rules as note_rules
@@ -259,7 +260,7 @@ def write(recs, AV, regs, S, out=None, web=True, log=print):
            'registries': [{**d['registry'], 'n': len(d['interventions']),
                            'linked': sum(1 for r in d['interventions'] if (r.get('waterbody') or {}).get('wb_id') is not None)} for d in regs],
            'districts': [{'district': d, 'slug': slug(d), 'n_waterbodies': len(v), 'n_records': sum(len(x) for x in v.values())} for d, v in sorted(by.items())],
-           'averages': AV}
+           'averages': AV, 'panel': load_notes().get('panel', {})}
     files = {'impact': idx, **{f'imp_{slug(d)}': {'district': d, 'waterbodies': v} for d, v in by.items()}}
     for n, o in files.items():
         (out / 'web' / f'{n}.json').write_text(json.dumps(o, separators=(',', ':'), ensure_ascii=False, allow_nan=False), encoding='utf-8')

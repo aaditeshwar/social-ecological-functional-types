@@ -14,7 +14,8 @@ def load_knowledge(kdir=None):
     kdir = kdir or (knowledge_dir() / 'waterbody')
     K = {n: load_json(kdir / f'{n}.json') for n in ('types', 'signals', 'roles', 'rules')}
     opt = {'schemes': {'schemes': [], 'links': {}}, 'variables': {'variables': [], 'type_fields': []},
-           'questions': {'type_questions': [], 'stress_questions': []}, 'sources': {'sources': []}}
+           'questions': {'type_questions': [], 'stress_questions': []}, 'sources': {'sources': []},
+           'notes': {'waterbody': {'main': [], 'add': []}, 'unit': {'main': [], 'add': []}}}
     for n, empty in opt.items():
         K[n] = load_json(kdir / f'{n}.json') if (kdir / f'{n}.json').exists() else empty
     # interventions: the catalogue shared with the watershed atlas (knowledge/interventions.json)

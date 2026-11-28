@@ -20,6 +20,7 @@ def mws_context(cfg, log=print):
         row.update({f'mws_{k}': v for k, v in (r.get('ind') or {}).items()})
         row['mws_area_ha'] = r.get('area')
         row['dominant_system'] = (r.get('mix') or {}).get('dominant')
+        row['mws_tehsil'] = r.get('tehsil')
         out[r['uid']] = row
     return out
 

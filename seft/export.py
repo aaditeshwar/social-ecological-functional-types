@@ -8,7 +8,7 @@ from .geo import to_shape, encode_geom
 
 STATUS = {'triggered': 2, 'not triggered': 1, 'not applicable': 0, 'unknown': -1, 'insufficient data': -1}
 SEV = {'severe': 2, 'moderate': 1}
-KFILES = ('variables', 'contexts', 'archetypes', 'signals', 'taxonomy', 'causal_graph', 'schemes', 'questions', 'sources', 'interventions')
+KFILES = ('variables', 'contexts', 'archetypes', 'signals', 'taxonomy', 'causal_graph', 'schemes', 'questions', 'sources', 'interventions', 'notes')
 
 def _knowledge(kd):
     return {k: load_json(kd / f'{k}.json') for k in KFILES}

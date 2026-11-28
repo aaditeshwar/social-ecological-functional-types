@@ -79,6 +79,68 @@ def _mean(xs):
     xs = [x for x in xs or [] if isinstance(x, (int, float))]
     return round(sum(xs) / len(xs), 2) if xs else None
 
+def tehsil_shapes(B, geo=None):
+    """{district: {tehsil: prepared polygon}} for every fetched tehsil of the districts in B (data/geo/geometry_raw.json)."""
+    from shapely.prepared import prep
+    from ..geo import to_shape
+    from ..util import geom_path, gs_slug
+    if geo is None:
+        p = geom_path()
+        if not p.exists(): return {}
+        geo = load_json(p)
+    names = collections.defaultdict(set)
+    for b in B: names[b['district']].add(b['tehsil'])
+    out = {}
+    for d, listed in names.items():
+        pre = gs_slug(d) + '/'
+        for key, g in geo.items():
+            if not key.startswith(pre) or not g.get('teh'): continue
+            shp = to_shape(g['teh'])
+            if shp is None: continue
+            t = next((x for x in listed if gs_slug(x) == key[len(pre):]), key[len(pre):])
+            out.setdefault(d, {})[t] = prep(shp.buffer(0.001))  # ~100 m of slack at the border
+    return out
+
+def dedupe(B, log=print, shapes=None):
+    """CoRE Stack tehsil layers overlap at tehsil borders, so a waterbody can come in with two or more tehsils, or
+    with a tehsil it is not in. Each waterbody (wb_id) is kept once, in the tehsil whose boundary holds its centre:
+    1. a record whose centre lies in its own tehsil; else
+    2. if the centre lies in another fetched tehsil of the district: moved there when that tehsil is in this run,
+       dropped when it is not (it belongs to a tehsil outside the run); else
+    3. (no boundary holds it, or no boundaries) the record in its home micro-watershed's tehsil, else the largest."""
+    from shapely.geometry import Point
+    shapes = tehsil_shapes(B) if shapes is None else shapes
+    loaded = collections.defaultdict(set)
+    for b in B: loaded[b['district']].add(b['tehsil'])
+    groups = collections.defaultdict(list)
+    for i, b in enumerate(B): groups[b['wb_id']].append(i)
+    keep, moved, dropped = {}, 0, 0
+    for ids in groups.values():
+        b0 = B[ids[0]]; S = shapes.get(b0['district']) or {}
+        def inside(b, t):
+            c = b.get('centroid'); g = S.get(t)
+            return bool(g and c and g.contains(Point(c[0], c[1])))
+        own = [i for i in ids if inside(B[i], B[i]['tehsil'])]
+        if own: keep[own[0]] = None; continue
+        other = next((t for t in S if inside(b0, t)), None) if S else None
+        if other is not None:
+            if other in loaded[b0['district']]: keep[ids[0]] = other; moved += 1
+            else: dropped += 1
+            continue
+        home = [i for i in ids if B[i]['tehsil'] == (B[i].get('mws') or {}).get('mws_tehsil')]
+        keep[home[0] if home else max(ids, key=lambda i: (B[i]['area_ha'], -i))] = None
+    out = []
+    for i, b in enumerate(B):
+        if i not in keep: continue
+        if keep[i] is not None: b = dict(b, tehsil=keep[i])
+        out.append(b)
+    n = len(B) - len(out)
+    if n or moved:
+        log(f'  waterbodies by tehsil boundary: {len(B)} records -> {len(out)} waterbodies '
+            f'({sum(len(v) > 1 for v in groups.values())} listed in more than one tehsil layer, {moved} moved to the tehsil '
+            f'that holds them, {dropped} in tehsils outside this run dropped)')
+    return out
+
 def score_all(cfg, log=print, pools=None, pool_districts=None, pool_tehsils=None):
     """Build and score every waterbody of the locations. Returns (bodies, stats, types, K, pools)."""
     K = load_knowledge()
@@ -88,6 +150,7 @@ def score_all(cfg, log=print, pools=None, pool_districts=None, pool_tehsils=None
     ctx = mws_context(cfg, log=log)
     prof, drought = build_profiles(cfg)
     attach(B, ctx, prof)
+    B = dedupe(B, log=log)
     ref = year_reference(B, scope)
     for b in B: b['vars'] = compute(b, prof, drought, ref)
     if pools is None:

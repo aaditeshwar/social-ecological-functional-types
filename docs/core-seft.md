@@ -81,6 +81,7 @@ Every kind includes `kind`, `state`, `district`, `library_version`, `knowledge_v
 
 | Field | MWS / waterbody | District / tehsil |
 |---|---|---|
+| `intro_note` | Short introductory note: for an MWS its system mix, contexts, likely stresses, opportunities and schemes; for a waterbody its type, size, water presence, trend, likely uses, stresses and recorded interventions | Size, system mix, common contexts, the most common stresses and opportunity, the scheme matched most often |
 | `identity` | Area, canals, villages count; waterbody also has type label, description, coordinates, stream order | Counts and area |
 | `context` | Classes with labels (rainfall, aquifer, terrain, …); waterbody copies the **home MWS** | Distribution of classes |
 | `mix` | System shares, labels, dominant, present | Area-weighted mean shares |
@@ -92,8 +93,11 @@ Every kind includes `kind`, `state`, `district`, `library_version`, `knowledge_v
 | `commons_connect` | Commons Connect inform questions (landscape + resource mapping + planning on an MWS; waterbody form on a waterbody), same must-ask scores as the field-visit tab | — |
 | `must_ask_summary` | Counts of must / useful / skip for atlas and Commons Connect | — |
 | `diff` | After `answers`: status / posterior / schemes / interventions that changed | — |
+| `waterbodies` | MWS with `include="waterbody"`: `n_waterbodies` and `note` for the waterbodies whose home is this MWS | When waterbody layers are cached (or `include="waterbody"`): counts, rule rates and `note` on the waterbodies of the district or tehsil |
 
 Must-ask scores use the same rules as `seft.priority` and the Explore / Commons Connect tabs (`knowledge/commons_connect.json` → `priority`). Bands: **must** ≥ 60, **useful** ≥ 30, **skip** below that. `detail="summary"` omits Commons Connect questions in the skip band; `detail="full"` keeps them. Apps should treat skip-band atlas questions as collapsed, as the page does.
+
+The notes come from the rules in `knowledge/notes.json` (MWS, tehsil, district) and `knowledge/waterbody/notes.json` (waterbody, and the waterbodies of an MWS, tehsil or district), rendered by `seft/intro_notes.py`, which mirrors the atlas page: the same data and answers give the same note. A tehsil query fetches only that tehsil's layers, so its waterbodies are those whose centre lies inside the tehsil boundary (`seft/wb/run.py` `dedupe`); a waterbody listed only in a neighbouring tehsil's layer is counted in the atlas but not here.
 
 `r.to_dict()` is JSON-safe. `detail="full"` adds not-applicable rules and every indicator.
 

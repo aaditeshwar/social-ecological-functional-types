@@ -157,6 +157,10 @@ def validate(kd=None):
         cov_wb = {a for x in IV['interventions'] for a in x.get('addresses_wb', [])}
         for st in sorted(wb_rules - cov_wb): errs.append(f'waterbody rule {st}: no intervention addresses it')
     n_cc = _validate_cc(kd, K, errs)
+    if (kd / 'notes.json').exists():
+        from .notes_check import check_notes
+        errs += check_notes(load_json(kd / 'notes.json'), ('mws', 'unit'), extra=var,
+                            dims=[d['id'] for d in K['contexts']['dimensions']], where='notes.json')
     for e in errs: print('ERROR', e)
     print(f"{len(errs)} problems; {len(var)} variables, {len(arch)} archetypes, {len(nodes)} graph nodes, "
           f"{len(K['causal_graph']['edges'])} edges, {len(sig)} signals, {len(stresses)} rules under {sum(len(p['observed_stresses']) for p in T['production_systems'])} observed stresses in {len(T['production_systems'])} production systems, {len(K['schemes']['schemes'])} schemes, {len(qids)} questions, {n_iv} interventions, {len(src)} sources, {n_cc} Commons Connect questions")
