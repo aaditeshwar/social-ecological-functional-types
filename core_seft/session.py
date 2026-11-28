@@ -522,7 +522,7 @@ class Session:
         """Predicted impact of a new pond or tank (intervention='new_pond') or of desilting (intervention='desilting').
 
         new_pond: where (waterbody= an existing one, or mws=, or lat= and lon=), type= (farm_pond, headwater_pond,
-        small_onstream_pond, onstream_tank, village_pond, canal_fed; default farm_pond or the waterbody's type),
+        small_onstream_pond, onstream_tank, village_pond; default farm_pond or the waterbody's type),
         area_ha=, and if known zoi_area_ha=, catchment_ha=, stream_order=, lined= (farm ponds: True, False or None).
         desilting: waterbody= and volume_m3=. Returns the predicted effect, the group of assessed structures it falls in
         with their range, the most similar assessed structures and the model's notes (see core_seft/predict.py)."""

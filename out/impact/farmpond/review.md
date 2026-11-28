@@ -153,33 +153,6 @@ Heterogeneity: BLP 0.811 (SE 0.251); GATES +2.4 (-0.8, +5.7) n=126; +6.3 (+2.5, 
 - pastoral share of MWS: importance 0.071, lowest group 1.02, highest 6.14
 - groundwater irrigated share of MWS: importance 0.06, lowest group 1.03, highest 14.81
 
-## canal_fed
-
-1512 new since 2019; 707 assessed in 29 districts; classes None.
-Placebo (year before): -4.3 (-6.5, -2.2) n=401 points. Model: background coefficient 0.843, drought weeks -0.00135; support {'district': 1090, 'background': 1414, 'pooled': 894}.
-
-| Outcome | Class | Up to 2022 (points) | Normal years | Drought years | Later years (early) |
-| --- | --- | --- | --- | --- | --- |
-| ci | all | -0.6 (-2.2, +1.0) n=634 | -0.5 | -0.3 | +0.2 (-1.3, +1.8) n=707 |
-| nonkharif | all | +0.1 (-0.9, +1.1) n=634 | +0.0 | -0.2 | +0.7 (-0.2, +1.6) n=707 |
-| multi | all | -0.2 (-1.2, +0.9) n=633 | +0.3 | +0.0 | -0.4 (-1.4, +0.5) n=706 |
-| cropped | all | -0.4 (-1.3, +0.4) n=634 | -0.6 | -0.5 | -0.2 (-1.2, +0.8) n=707 |
-
-| Same-district DiD | Class | No covariates | Size | Size + MWS |
-| --- | --- | --- | --- | --- |
-| ci | all | +2.1 (-2.5, +7.7) | +15.8 (+7.6, +23.8) | +3.9 (-0.9, +9.4) |
-| nonkharif | all | +1.2 (-2.8, +4.4) | +10.3 (+5.0, +16.7) | -4.5 (-8.8, -0.2) |
-
-Heterogeneity: BLP 1.064 (SE 0.239); GATES -6.1 (-9.1, -2.7) n=127; -3.2 (-6.3, +0.1) n=127; +1.5 (-1.9, +4.4) n=126; +1.9 (-0.9, +5.1) n=127; +3.2 (-0.5, +6.8) n=127
-- groundwater irrigated share of MWS: importance 0.241, lowest group 23.02, highest 1.15
-- canal irrigated share of MWS: importance 0.144, lowest group 28.17, highest 2.35
-- pastoral share of MWS: importance 0.1, lowest group 0.79, highest 6.67
-- peri urban share of MWS: importance 0.081, lowest group 3.25, highest 0.6
-- MWS cropping intensity before the pond: importance 0.072, lowest group 135.44, highest 109.52
-- catchment area: importance 0.069, lowest group 1.08, highest 1.53
-- rainfed dryland share of MWS: importance 0.069, lowest group 26.68, highest 30.4
-- tree crops share of MWS: importance 0.041, lowest group 10.13, highest 2.47
-
 ## Older structures (site-premium corrected)
 
 | Type | n | Gap | Premium | Corrected |
@@ -189,4 +162,3 @@ Heterogeneity: BLP 1.064 (SE 0.239); GATES -6.1 (-9.1, -2.7) n=127; -3.2 (-6.3, 
 | village_pond | 4984 | -4.6 | -13.4 | +9.4 (+8.6, +10.2) n=4284 |
 | onstream_tank | 4663 | +1.0 | -1.9 | +3.9 (+2.9, +4.8) n=2162 |
 | small_onstream_pond | 2926 | +1.3 | -3.1 | +4.3 (+3.4, +5.2) n=2746 |
-| canal_fed | 2686 | -5.8 | -4.2 | -1.5 (-2.5, -0.7) n=2227 |

@@ -19,7 +19,7 @@ the lined/unlined class in waterbody notes). The atlas's Impact assessment tab d
   background change, placebo), the lined/unlined thresholds, verdicts, averages, the heterogeneity forest and the
   effectiveness measure for older structures. Every `about` is shown on the Impact assessment tab.
   Also: `intervention.types` (farm and headwater ponds, and as `exploratory_types` small on-stream ponds, on-stream
-  tanks, village ponds and canal-fed ponds), `not_assessed` (river reaches, with the reason shown), `lining.types`
+  tanks and village ponds), `not_assessed` (river reaches and canal-fed waterbodies, with the reason shown), `lining.types`
   (the lined/unlined split, farm ponds only), `effectiveness.min_group` (the percentile of an older structure among
   its type in its district) and `heterogeneity.ship_trees` (trees of the prediction model shipped with core_seft).
 * `references.json` — the references cited (id, short, citation, url to a public copy where one exists, doi,

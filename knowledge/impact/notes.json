@@ -1,6 +1,6 @@
 {
  "_about": "Rules that write the public note for an intervention's impact, and the fixed text of the impact panels. For each note kind (`waterbody`, `unit` for desilting; `fp_waterbody`, `fp_unit`, `fp_old`, `fp_none` for new ponds and tanks, older structures and waterbodies that cannot be assessed) the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files. `panel` and `fp_panel` hold the labels, headings and explanations around the notes in the atlas panels; its placeholders are listed in `panel._placeholders`.",
- "version": "0.5.0",
+ "version": "0.6.0",
  "waterbody": {
   "main": [
    {
@@ -200,10 +200,6 @@
     "text": "A village pond serves households, livestock and fish as much as crops, so the cropping around it shows only part of its use; this is an exploratory result."
    },
    {
-    "when": "wtype == 'canal_fed' and verdict != 'not_assessable'",
-    "text": "It fills with canal releases, so its water and the cropping around it follow the canal as much as the pond; this is an exploratory result."
-   },
-   {
     "when": "appeared_2019",
     "text": "Caution: it first held water in 2019-20, after the dry years 2017-18, so it may be an older pond that was dry rather than a new one."
    },
@@ -340,6 +336,10 @@
    {
     "when": "code == 'river_reach'",
     "text": "The impact of a river reach cannot be assessed: its water follows the river's flow, so the first year it shows water is not a construction year, and the fields beside it are not served by it the way a pond's are."
+   },
+   {
+    "when": "code == 'canal_fed'",
+    "text": "The impact of a canal-fed waterbody cannot be assessed: it fills with canal releases, so the first year it shows water follows the canal rather than construction, and the cropping around it follows the canal as much as the waterbody."
    },
    {
     "when": "code == 'dry'",

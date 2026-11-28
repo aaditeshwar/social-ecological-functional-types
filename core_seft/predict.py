@@ -156,7 +156,7 @@ class Predictor:
             'similar': [{'district': n[0], 'waterbody': n[1], 'first_wet': n[2], 'effect': _pct(n[3]), 'lining': n[4]} for n in nb],
             'model': {'name': 'farmpond', 'version': Mdl.get('version'), 'n': T['n'], 'blp': T['blp'], 'blp_se': T['blp_se']},
             'notes': notes + ([f'{type} results are exploratory: much of the benefit can lie downstream or in uses other than crops']
-                              if type in ('small_onstream_pond', 'onstream_tank', 'village_pond', 'canal_fed') else []),
+                              if type in ('small_onstream_pond', 'onstream_tank', 'village_pond') else []),
             'caution': 'The prediction says how much structures like this one gained on average; one structure varies by about 20 points from year to year, so the range of similar structures (p10_p90) matters more than the point value. Features are associations, not causes.'}
 
     def _desilting(self, state, district, waterbody, tehsil, volume_m3, fetch, k):

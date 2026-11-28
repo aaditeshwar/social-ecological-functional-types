@@ -124,7 +124,7 @@ s = cs.site_suitability({"slope_pct": 3, "stream_order": 2, "catchment_ha": 4, "
 ```
 
 * **`predict_impact("new_pond", ...)`**: types `farm_pond`, `headwater_pond`, `small_onstream_pond`, `onstream_tank`,
-  `village_pond`, `canal_fed` (the last four exploratory). Inputs: where (`waterbody=`, `mws=` or `lat=`/`lon=`,
+  `village_pond` (the last three exploratory; river reaches and canal-fed waterbodies are not assessed). Inputs: where (`waterbody=`, `mws=` or `lat=`/`lon=`,
   with `tehsil=` to fetch only that tehsil), `area_ha=`, and if known `zoi_area_ha=`, `catchment_ha=`, `stream_order=`,
   `lined=` (farm ponds). The micro-watershed's cropping intensity, kharif drought, context and farming-system shares
   are looked up. Unknown sizes are set to the median of assessed structures and listed in `notes`. The model is a

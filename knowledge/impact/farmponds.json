@@ -1,6 +1,6 @@
 {
  "_about": "Settings of the impact assessment of new ponds and tanks (farm ponds first) (seft/impact/farmpond.py, command impact-farmpond): which waterbodies count as new ponds, the outcomes read in their zone of influence, the estimators, the lined/unlined rule, the per-pond verdicts, the averages and the effectiveness measure for older structures. Unlike desilting there is no registry: a pond's first wet year in the CoRE Stack water series is its construction year. The full method is described on the atlas's Impact assessment tab and in knowledge/impact/README.md; references are ids in knowledge/impact/references.json.",
- "version": "0.3.0",
+ "version": "0.4.0",
  "intervention": {
   "id": "new_farmpond",
   "label": "New ponds and tanks",
@@ -9,18 +9,16 @@
    "headwater_pond",
    "small_onstream_pond",
    "onstream_tank",
-   "village_pond",
-   "canal_fed"
+   "village_pond"
   ],
-  "about": "A pond or tank of an assessed type that first holds water in a year from 2019 and keeps holding water in most years since. Farm ponds are mostly dug on private farmland (MGNREGA, state farm-pond schemes such as Magel Tyala Shettale, or by farmers) to store runoff for protective irrigation; headwater ponds and check dams sit on first-order drainage lines. Small on-stream ponds, on-stream tanks, village ponds and canal-fed ponds are assessed the same way but as exploratory results: much of their benefit can lie downstream (recharge, irrigation of a command area) or in uses other than crops (households, livestock, fish), which the cropping around the structure does not capture, and canal-fed ponds fill with canal releases.",
+  "about": "A pond or tank of an assessed type that first holds water in a year from 2019 and keeps holding water in most years since. Farm ponds are mostly dug on private farmland (MGNREGA, state farm-pond schemes such as Magel Tyala Shettale, or by farmers) to store runoff for protective irrigation; headwater ponds and check dams sit on first-order drainage lines. Small on-stream ponds, on-stream tanks and village ponds are assessed the same way but as exploratory results: much of their benefit can lie downstream (recharge, irrigation of a command area) or in uses other than crops (households, livestock, fish), which the cropping around the structure does not capture.",
   "references": [
    "kaur2024farmponds"
   ],
   "exploratory_types": [
    "small_onstream_pond",
    "onstream_tank",
-   "village_pond",
-   "canal_fed"
+   "village_pond"
   ]
  },
  "years": {
@@ -190,6 +188,7 @@
   "min_group": 10
  },
  "not_assessed": {
-  "river_reach": "Water in a river reach follows the river's flow, so the first year it shows water is not a construction year, and the fields beside it are not served by it the way a pond's are."
+  "river_reach": "Water in a river reach follows the river's flow, so the first year it shows water is not a construction year, and the fields beside it are not served by it the way a pond's are.",
+  "canal_fed": "A canal-fed waterbody fills with canal releases, so the first year it shows water follows the canal rather than construction; when assessed like a pond, its sites were already falling behind their prediction the year before they appeared (a placebo of about −4 points), so the result is not reliable."
  }
 }
