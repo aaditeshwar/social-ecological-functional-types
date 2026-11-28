@@ -129,6 +129,7 @@ code{font-family:var(--font-mono);font-size:.82em;background:var(--sunk);padding
 .btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
 .dl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
 .note{font-size:.8rem;color:var(--muted)}
+.pubnote.intro{margin:8px 0}
 .loading{padding:20px;color:var(--muted)}
 fieldset.q{border:1px solid var(--line);border-radius:4px;padding:8px 10px;margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
 fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
@@ -699,6 +700,82 @@ class MapView{
 }
 
 /* ---------- pane ---------- */
+/* ---------- introductory notes: rules in knowledge/notes.json (watersheds) and knowledge/waterbody/notes.json ---------- */
+function plainLabel(s){s=String(s||"").replace(/\s*\([^)]*\)/g,"").trim(); return s&&!/^[A-Z]{2}/.test(s)?s[0].toLowerCase()+s.slice(1):s;}
+function capFirst(s){s=String(s||""); return s?s[0].toUpperCase()+s.slice(1):s;}
+function joinAnd(xs){xs=xs.filter(Boolean); return xs.length<2?(xs[0]||""):xs.slice(0,-1).join(", ")+" and "+xs[xs.length-1];}
+function noteFmt(v){if(typeof v==="number") return Number.isInteger(v)?v.toLocaleString("en-IN"):(Math.round(v*10)/10).toLocaleString("en-IN"); if(typeof v==="boolean") return v?"yes":"no"; return v==null?"":String(v);}
+function noteRender(spec,env){
+  if(!spec) return ""; env={...env,true:true,false:false}; const ok=r=>{const v=PyEval.safe(r.when,env); return v!=null&&!!v;};
+  const fill=t=>esc(t).replace(/\{(\w+)\}/g,(m,k)=>env[k]!=null&&env[k]!==""?esc(/year/.test(k)?String(env[k]):noteFmt(env[k])):m);
+  const out=[]; const m=(spec.main||[]).find(ok); if(m) out.push(fill(m.text));
+  (spec.add||[]).forEach(r=>{if(ok(r)) out.push(fill(r.text));}); return out.join(" ");}
+function introNote(spec,env){const t=noteRender(spec,env); return t?`<p class="pubnote intro">${t}</p>`:"";}
+const notePct=(a,b)=>b?Math.round(a/b*100):0;
+function osLabel(k,extra){const x=OSX[pwSplit(k)[0]]; return plainLabel(x.os.label)+(pwOpp(k)&&x.os.type!=="opportunity"?" (opportunity)":"")+" ("+plainLabel(x.ps.label).toLowerCase()+(extra?", "+extra:"")+")";}
+function mixEnv(shares,ids,minShare){
+  const ix=ids.map((a,i)=>[a,shares[i]||0]).filter(([a])=>a!=="other").sort((a,b)=>b[1]-a[1]);
+  const lab=a=>plainLabel(ARCH[a].label);
+  return {dom_label:ix[0]?lab(ix[0][0]):"", dom_pct:ix[0]?Math.round(ix[0][1]*100):0, second_label:ix[1]?lab(ix[1][0]):"", second_pct:ix[1]?Math.round(ix[1][1]*100):0,
+    mix_text:joinAnd(ix.filter(([a,v])=>v>=(minShare==null?(ARCH[a].present_at||0.15):minShare)).map(([a,v])=>`${lab(a)} (${Math.round(v*100)}%)`)),
+    n_systems:ix.filter(([a,v])=>v>=(ARCH[a].present_at||0.15)).length};}
+function mwsNoteEnv(m,d,R){
+  const ids=K.archetypes.archetypes.map(a=>a.id), env=envFor(m,d);
+  Object.assign(env,mixEnv(R.shares,ids),{area_ha:Math.round(m.a),tehsil:m.t});
+  K.contexts.dimensions.forEach((x,i)=>{const c=x.classes.find(y=>y.id===m.c[i]); env[x.id+"_label"]=c?plainLabel(c.label):"";});
+  env.ps_text=joinAnd(K.taxonomy.production_systems.filter(ps=>psOn(m,ps.id,R.se)===true).map(ps=>plainLabel(ps.label)));
+  const ks=pwKeys().filter(k=>R.pw[k].positive).sort((a,c)=>(R.pw[c].post||0)-(R.pw[a].post||0)||(R.pw[c].inten||0)-(R.pw[a].inten||0));
+  const st=ks.filter(k=>!pwOpp(k)), op=ks.filter(k=>pwOpp(k));
+  Object.assign(env,{n_stress:st.length,stress_text:joinAnd(st.slice(0,3).map(osLabel)),n_severe:st.filter(k=>R.pw[k].asev==="severe").length,
+    n_opp:op.length,opp_text:joinAnd(op.slice(0,3).map(osLabel)),n_schemes:(R.schemes||[]).length});
+  return env;}
+function unitNoteEnv(ms,A,label){
+  const env={unit_label:label,unit_label_cap:capFirst(label),n:ms.length,area_km2:Math.round(A.area/100)};
+  Object.assign(env,mixEnv(A.shares,A.ids,0.1));
+  K.contexts.dimensions.forEach((x,i)=>{const c={}; ms.forEach(m=>{if(m.c[i]) c[m.c[i]]=(c[m.c[i]]||0)+1;}); const top=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];
+    const cl=top&&x.classes.find(y=>y.id===top[0]); env[x.id+"_label"]=cl?plainLabel(cl.label):""; env[x.id+"_pct"]=top?notePct(top[1],ms.length):0;});
+  const ks=pwKeys().map(k=>[k,A.rates[k]||0]).sort((a,b)=>b[1]-a[1]), st=ks.filter(([k])=>!pwOpp(k)), op=ks.filter(([k])=>pwOpp(k));
+  const common=st.filter(([,v])=>v>=0.25);
+  Object.assign(env,{stress1_label:st[0]?osLabel(st[0][0]):"",stress1_pct:st[0]?Math.round(st[0][1]*100):0,n_stress_common:common.length,
+    stress_text:joinAnd(common.slice(0,3).map(([k,v])=>osLabel(k,Math.round(v*100)+"%"))),
+    opp_label:op[0]&&op[0][1]>0?osLabel(op[0][0]):"",opp_pct:op[0]?Math.round(op[0][1]*100):0});
+  const sc=Object.entries(A.sch).sort((a,b)=>b[1]-a[1])[0];
+  env.scheme_label=sc&&SCH[sc[0]]?SCH[sc[0]].name:""; env.scheme_pct=sc?notePct(sc[1],ms.length):0;
+  return env;}
+function wbNoteEnv(w,b,R){
+  const T=WTYPE[R.type]||{label:R.type||"waterbody"}, env={...(R.env||{})};
+  const wk=wWeeks(w), mean=a=>{const v=a.filter(x=>x!=null); return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;};
+  const we=mean(wk.slice(0,4)), wl=mean(wk.slice(4));
+  Object.assign(env,{type:R.type,type_label:plainLabel(T.label).toLowerCase(),in_scope:!!T.in_scope,status:w.st,status_label:plainLabel((WSTC[w.st]||{}).label||"").toLowerCase(),
+    area_ha:w.a,stream_order:w.so,n_years:WYEARS.length,tehsil:w.teh,weeks_mean:mean(wk),weeks_early:we,weeks_late:wl,weeks_change:we!=null&&wl!=null?wl-we:null});
+  const ro=Object.entries(R.roles||{}).sort((a,c)=>c[1]-a[1]), rl=id=>plainLabel((WROLE[id]||{}).label||id).toLowerCase();
+  const strong=ro.filter(([,v])=>v>=0.5);
+  Object.assign(env,{n_roles:strong.length,roles_text:joinAnd(strong.map(([id])=>rl(id))),role_top_label:ro[0]&&ro[0][1]>0?rl(ro[0][0]):"",role_top:ro[0]?ro[0][1]:0});
+  const pos=WK.rules.rules.filter(r=>R.st[r.id]&&R.st[r.id].positive).sort((a,c)=>(R.st[c.id].post||0)-(R.st[a.id].post||0));
+  const lab=r=>plainLabel(r.label).toLowerCase(), st=pos.filter(r=>!wOpp(r.id)), op=pos.filter(r=>wOpp(r.id));
+  Object.assign(env,{n_stress:st.length,stress_text:joinAnd(st.slice(0,3).map(lab)),n_severe:st.filter(r=>R.st[r.id].severe).length,n_opp:op.length,opp_text:joinAnd(op.slice(0,3).map(lab))});
+  const recs=(b.imp&&b.imp[String(w.id)]||[]).filter(r=>r.window!=="combined"), it=WIMP&&WIMP.settings.intervention_types[0];
+  env.n_works=recs.length; env.works_text=recs.length?plainLabel((it||{}).label||"intervention").toLowerCase()+" in "+joinAnd(recs.map(r=>impYears((r.intervention||{}).years))):"";
+  return env;}
+function wbUnitNoteEnv(ws,b,label){
+  const sc=ws.filter(w=>wScope(w.t)), env={unit_label:label,unit_label_cap:capFirst(label),n:ws.length,n_scope:sc.length,area_ha:Math.round(ws.reduce((s,w)=>s+w.a,0))};
+  const ty={}; ws.forEach(w=>ty[w.t]=(ty[w.t]||0)+1); const tl=t=>impPlural(plainLabel(WTYPE[t].label).toLowerCase());
+  const tys=Object.entries(ty).sort((a,c)=>c[1]-a[1]);
+  [0,1].forEach(i=>{const x=tys[i]; env[`type${i+1}_label`]=x?tl(x[0]):""; env[`type${i+1}_n`]=x?x[1]:0; env[`type${i+1}_pct`]=x?notePct(x[1],ws.length):0;});
+  env.types_text=joinAnd(tys.slice(0,4).map(([t,n])=>`${tl(t)} (${n.toLocaleString("en-IN")})`));
+  env.pct_regular=notePct(sc.filter(w=>w.st==="r").length,sc.length); env.pct_rarely=notePct(sc.filter(w=>w.st==="x").length,sc.length); env.n_recent=sc.filter(w=>w.st==="n").length;
+  const wk=sc.map(w=>{const v=wWeeks(w).filter(x=>x!=null); return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;}).filter(x=>x!=null).sort((a,c)=>a-c);
+  env.weeks_median=wk.length?wk[Math.floor(wk.length/2)]:null;
+  const ki=WIDX.env_ids.indexOf("krz_mean"), summer=sc.filter(w=>ki>=0&&(w.e||[])[ki]!=null&&w.e[ki]>=30).length; env.n_summer=summer; env.pct_summer=notePct(summer,sc.length);
+  const rc=WK.roles.roles.map((r,i)=>[r,sc.filter(w=>w.ro&&w.ro[i]>=0.5).length]).sort((a,c)=>c[1]-a[1]);
+  env.role_label=rc[0]&&rc[0][1]?plainLabel(rc[0][0].label).toLowerCase():""; env.role_pct=rc[0]?notePct(rc[0][1],sc.length):0;
+  const C=wCounts(ws).rules.map(x=>[x.r,x.app?x.trig/x.app:0,x.app]).filter(x=>x[2]>0).sort((a,c)=>c[1]-a[1]);
+  const st=C.filter(x=>!wOpp(x[0].id)), op=C.filter(x=>wOpp(x[0].id)), common=st.filter(x=>x[1]>=0.1);
+  Object.assign(env,{stress1_label:st[0]?plainLabel(st[0][0].label).toLowerCase():"",stress1_pct:st[0]?Math.round(st[0][1]*100):0,n_stress_rules:common.length,
+    stress_text:joinAnd(common.slice(0,3).map(([r,v])=>`${plainLabel(r.label).toLowerCase()} (${Math.round(v*100)}%)`)),
+    opp_label:op[0]&&op[0][1]>0?plainLabel(op[0][0].label).toLowerCase():"",opp_pct:op[0]?Math.round(op[0][1]*100):0});
+  env.n_works=b.imp?ws.filter(w=>b.imp[String(w.id)]).length:0;
+  return env;}
 function aggregate(ms){
   const ids=K.archetypes.archetypes.map(a=>a.id); const tot=ms.reduce((s,m)=>s+m.a,0)||1;
   const shares=ids.map((_,i)=>ms.reduce((s,m)=>s+m.a*m.m[i],0)/tot);
@@ -740,7 +817,7 @@ function renderPane(){
     const sub=S.level==="tehsil"?`${A.n} micro-watersheds (including ${ms.filter(m=>m.t!==S.tehsil).length} shared with neighbouring tehsils)`:`${A.n.toLocaleString()} micro-watersheds · ${b.villages.length.toLocaleString()} villages · ${(A.area/100).toFixed(0)} km²`;
     let teh="";
     if(S.level==="district"){teh=`<div class="block"><div class="eyebrow">Tehsils</div><div class="tbl"><table><thead><tr><th>Tehsil</th><th>System mix</th><th class="r">MWS</th></tr></thead><tbody>${b.tehsils.map(t=>{const mt=b.mws.filter(m=>m.ts.includes(t.name)); const a=aggregate(mt); return `<tr data-t="${esc(t.name)}" style="cursor:pointer"><td><a href="#" onclick="return false">${esc(t.name)}</a></td><td style="min-width:140px">${mixBar(a.shares,a.ids)}</td><td class="r num">${mt.length}</td></tr>`;}).join("")}</tbody></table></div></div>`;}
-    p.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.state)}</div><h2>${title}</h2><p class="muted">${sub}</p>${mixBar(A.shares,A.ids)}${mixList(A.shares,A.ids)}
+    p.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.state)}</div><h2>${title}</h2><p class="muted">${sub}</p>${K.notes?introNote(K.notes.unit,unitNoteEnv(ms,A,S.level==="tehsil"?S.tehsil+" tehsil":d.district+" district")):""}${mixBar(A.shares,A.ids)}${mixList(A.shares,A.ids)}
       <p class="note">Shares are area-weighted means of each watershed's system mix. ${d.rain_factor!==1?`Rainfall regime uses CoRE precipitation rescaled by ×${d.rain_factor} to the district normal.`:""}</p></div>
       <div class="block">${stressBars(A.rates)}</div>${teh}
       <div class="block"><div class="eyebrow">Schemes most often matched</div>${schemeList(A.sch,A.n)}<p class="note">Open a watershed to see why each scheme is suggested.</p></div>
@@ -1019,7 +1096,7 @@ function renderMws(p,m,b,d){
   const varRows=Object.entries(K.variables.groups).map(([g,gl])=>{const vs=K.variables.variables.filter(v=>v.group===g&&!v.series);return `<tr><th colspan="2">${esc(gl)}</th></tr>`+vs.map(v=>`<tr><td>${vref(v.id)}</td><td class="r num">${fmtVal(m.i[VIDX[v.id]],v.unit)}${esc(unitLabel(v.unit))}</td></tr>`).join("")}).join("");
   const status=`<p class="note" id="ansStatus">${pending?`<b>${nAns} answer${nAns===1?"":"s"} not yet applied.</b> `:""}${hasApplied(m.u)?`${Object.keys(APPLIED[m.u]).length} community answer(s) applied to this MWS.`:"No community answers applied yet; results are from data alone."}</p>`;
   p.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.district)} · ${esc(m.t)}${m.ts.length>1?` (also in ${esc(m.ts.filter(t=>t!==m.t).join(", "))})`:""}</div>
-      <h2>Micro-watershed ${m.u}</h2><p class="muted">${(m.a/100).toFixed(1)} km² · ${m.v.length} villages assigned · dominant system: <b>${esc(ARCH[dom].label)}</b> · plus the cross-cutting socio-economic system</p>
+      <h2>Micro-watershed ${m.u}</h2><p class="muted">${(m.a/100).toFixed(1)} km² · ${m.v.length} villages assigned · dominant system: <b>${esc(ARCH[dom].label)}</b> · plus the cross-cutting socio-economic system</p>${K.notes?introNote(K.notes.mws,mwsNoteEnv(m,d,R)):""}
       ${mixBar(R.shares,ids)}${mixTable(R,m,ids)}
       <p class="note">All systems with at least 1% are listed, whatever their confidence. "Present" means the share reaches the system's threshold. Confidence describes how directly the data measure that system; it never scales the share. ${R.sysChanged?"Shares reflect the community answers applied below.":""}</p>
       <div class="chips">${ctxChips}</div>${m.cp.length?`<p class="note">Canals: ${esc(m.cp.join(", "))}</p>`:""}
@@ -1106,7 +1183,7 @@ function toast(msg){let t=$("#toast"); if(!t){t=document.createElement("div"); t
 function renderData(m){
   const files=[["mws_all.csv","All watersheds: indicators, context, system shares, observed-stress status and intensity, causal-pathway status, intensity, severity and probability, schemes (one row per MWS)"],["villages_all.csv","All villages: census and livestock values, assigned MWS and overlap share"]];
   (IDX._all||IDX.districts).forEach(d=>{files.push([`mws_${d.slug}.csv`,`${d.district}: watersheds`]);files.push([`villages_${d.slug}.csv`,`${d.district}: villages`]);});
-  const kfiles=["variables","contexts","archetypes","signals","taxonomy","causal_graph","schemes","questions","interventions","sources"];
+  const kfiles=["variables","contexts","archetypes","signals","taxonomy","causal_graph","schemes","questions","interventions","notes","sources"].filter(f=>K[f]);
   m.innerHTML=`<div class="doc"><h2>Data downloads</h2>
     <p>Everything shown in the atlas can be saved: first the knowledge files that hold the logic, then the result tables. Watershed tables carry every indicator in <code>variables.json</code>, the context class on each dimension, the share of each system archetype, the status and intensity of each observed stress within each production system, and the status, intensity (0–100), severity and probability of each causal pathway. Missing values are blank.</p>
     <p class="note" id="dlnote"></p>
@@ -1309,9 +1386,16 @@ const KSCHEMA=[
  {file:"interventions.json",role:"Supply- and demand-side interventions shared by both atlases: where they go, site rules, the landscapes they suit, what they respond to, schemes, practice and sources.",top:[["sides","supply and demand"],["categories","id → label of the intervention categories"],["fit","how landscape fit is judged, and its levels"],["site_rules_about","where the site rules come from"],["interventions","list of interventions (below)"]],
   list:"interventions",fields:[["id, name, side, category","identity, supply or demand side, and category"],["site_rules[].basis, sources, note; site_check","the basis of each site rule: source, proposed or not sourced, with its sources"],["what, where, site_spec","what it is, where it is built, and the ridge-to-valley placement from the toolkit paper"],["site_rules","[{parameter, unit, accepted, partial, not_accepted}] from the structure-suitability spreadsheet"],["landscape, archetypes","the landscapes and system archetypes where it fits best"],["suits, avoid, avoid_note","landscape fit test for a micro-watershed: suited, possible or not suited"],["caution","known risks (for example, ponds filled from borewells)"],["addresses, addresses_wb, wb_types","watershed stresses and waterbody rules it responds to; waterbody types it applies to"],["schemes, practice, sources","funding schemes, examples from civil society practice, and source ids"]]},
  {file:"sources.json",role:"Bibliography. Every sources list in the other files holds ids from here.",top:[["sources","list of sources (below)"]],
-  list:"sources",fields:[["id","referenced from other files"],["citation, url","reference"],["used_for","what the source supports"]]}
+  list:"sources",fields:[["id","referenced from other files"],["citation, url","reference"],["used_for","what the source supports"]]},
+ {file:"notes.json",role:"Introductory notes: the rules that write the short note at the top of a micro-watershed, tehsil and district panel.",top:[["_fields","for each note kind, the fields its rules can read and fill in"],["mws","note for one micro-watershed: main and add rules"],["unit","note for a tehsil or a district: main and add rules"]],
+  list:"main and add rules",fields:[["when","condition over the fields; in main the first rule that holds gives the opening sentence, in add every rule that holds appends its sentence"],["text","the sentence, with fields in braces"]]},
+ {file:"pools.json",role:"Pooled percentile thresholds that signals marked as pooled compare against, computed over the 'pools' districts; one section per atlas. Written by run / wb-run --update-pools.",top:[["mws","signal id → {value, severe, pct, severe_pct, n}"],["waterbody","signal id → {waterbody type → [threshold, severe threshold]}"],["provenance","districts, count and date of each pool"]],
+  list:"mws",fields:[["value, severe","the thresholds"],["pct, severe_pct","the percentiles they sit at"],["n","micro-watersheds pooled"]]},
+ {file:"sheet_rules.json",role:"The Signal_Verification sheet's revised rules as expressions, used only to compare with the atlas in the ground-truth check (seft/groundtruth.py); not used by the atlas itself.",top:[["source","the sheet and its date"],["rules","list (below)"]],
+  list:"rules",fields:[["id, section, type","rule, sheet section, stress or opportunity"],["signals","sig_NN → {expr, sheet}: the expression and the sheet's original wording"],["trigger, intensity, out_of","how signals combine, and the maximum intensity"]]},
+ {file:"manifest.json",role:"Knowledge pack version read by the core-seft library.",top:[["version, date","pack version and release date"],["min_library","oldest core-seft that can read the pack"],["datasets_required","CoRE Stack datasets the pack needs"]],list:"",fields:[]}
 ];
-const DRAWS={"Study area and data":["config/locations.json","config/datasets.json"],"Indicators":["variables.json"],"Contexts":["contexts.json"],"System archetypes":["archetypes.json","variables.json"],"Signals, rules and pathways":["signals.json","causal_graph.json","taxonomy.json"],"Community questions and re-assessment":["questions.json","causal_graph.json","archetypes.json"],"Thresholds":["signals.json","variables.json","sources.json"],"Village clusters and schemes":["schemes.json","causal_graph.json"],"Interventions":["interventions.json","sources.json"],"Sources":["sources.json"]};
+const DRAWS={"Study area and data":["config/locations.json","config/datasets.json"],"Indicators":["variables.json"],"Contexts":["contexts.json"],"System archetypes":["archetypes.json","variables.json"],"Signals, rules and pathways":["signals.json","causal_graph.json","taxonomy.json"],"Community questions and re-assessment":["questions.json","causal_graph.json","archetypes.json"],"Thresholds":["signals.json","variables.json","sources.json"],"Village clusters and schemes":["schemes.json","causal_graph.json"],"Interventions":["interventions.json","sources.json"],"Introductory notes":["notes.json"],"Sources":["sources.json"]};
 function drawsOn(t){const f=DRAWS[t];return f?`<p class="note">Draws on: ${f.map(x=>`<a href="#kfiles" class="mono" data-kf>${x}</a>`).join(", ")}</p>`:"";}
 /* examples shown for each knowledge file: real entries, long text shortened */
 function trimJ(o,n=110){
@@ -1368,11 +1452,11 @@ function fnTableHtml(){
 function kschemaHtml(){
   const count=f=>{const k=f.replace(".json","");const d=K[k];if(!d)return "";const S=KSCHEMA.find(x=>x.file===f);const l=d[S.list];return Array.isArray(l)?` · ${l.length} ${S.list.replace(/_/g," ")}`:"";};
   return `<div class="block" id="kfiles"><h3>Knowledge files and their structure</h3>
-   <p>All logic sits in nine JSON files in <span class="mono">knowledge/</span>, with the locations in <span class="mono">config/</span>. Every file has an <span class="mono">_about</span> text and a <span class="mono">version</span>. Formulas and conditions are expressions in a small safe language: arithmetic, comparisons, <span class="mono">and / or / not</span>, dataset columns as <span class="mono">alias.column</span> (for example <span class="mono">lulc.tree_forest_area</span>), earlier ids, <span class="mono">ctx.&lt;dimension&gt;</span>, <span class="mono">share_&lt;system&gt;</span>, and functions such as <span class="mono">mean</span>, <span class="mono">slope</span>, <span class="mono">div</span> and <span class="mono">ramp</span>. Fields that cite evidence hold ids from <span class="mono">sources.json</span>. <span class="mono">knowledge/README.md</span> in the code explains how to edit them. Function names in formulas are shown in italics; hover one for what it does.</p>
+   <p>All logic sits in ${KSCHEMA.length} JSON files in <span class="mono">knowledge/</span> (the last four are support files: notes, pools, the sheet rules for the ground-truth check and the pack manifest), with the locations in <span class="mono">config/</span>. Every file has an <span class="mono">_about</span> text and a <span class="mono">version</span>. Formulas and conditions are expressions in a small safe language: arithmetic, comparisons, <span class="mono">and / or / not</span>, dataset columns as <span class="mono">alias.column</span> (for example <span class="mono">lulc.tree_forest_area</span>), earlier ids, <span class="mono">ctx.&lt;dimension&gt;</span>, <span class="mono">share_&lt;system&gt;</span>, and functions such as <span class="mono">mean</span>, <span class="mono">slope</span>, <span class="mono">div</span> and <span class="mono">ramp</span>. Fields that cite evidence hold ids from <span class="mono">sources.json</span>. <span class="mono">knowledge/README.md</span> in the code explains how to edit them. Function names in formulas are shown in italics; hover one for what it does.</p>
    ${fnTableHtml()}
    ${KSCHEMA.map(S=>`<details><summary><b class="mono">${S.file}</b> — ${esc(S.role)}${count(S.file)}</summary>
      <div class="tbl"><table><thead><tr><th>Top-level key</th><th>Holds</th></tr></thead><tbody>${S.top.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>
-     <div class="tbl"><table><thead><tr><th>Fields of each entry in <span class="mono">${esc(S.list)}</span></th><th>Meaning</th></tr></thead><tbody>${S.fields.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>${kexHtml(S.file)}</details>`).join("")}
+     ${S.fields.length?`<div class="tbl"><table><thead><tr><th>Fields of each entry in <span class="mono">${esc(S.list)}</span></th><th>Meaning</th></tr></thead><tbody>${S.fields.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>`:""}${kexHtml(S.file)}</details>`).join("")}
    <p class="note">How the files connect: indicators (variables) feed contexts, weights and shares (archetypes) and signals. System signals read the shares; stress and context signals read indicators. Rules (causal_graph) combine signals; taxonomy places them as causal pathways under observed stresses within production systems. Rules that are present, together with shares and eligibility conditions, select schemes. Question options point at rule ids, weights and systems.</p></div>`;}
 
 function renderMethod(m){
@@ -1401,6 +1485,7 @@ function renderMethod(m){
   <div class="block"><h3>Village clusters and schemes</h3>${drawsOn("Village clusters and schemes")}<p>A village belongs to the watershed it overlaps most. Its whole population and livestock are listed in that watershed's cluster, while watershed indicators use area-apportioned values. Schemes are matched when they respond to a triggered stress or opportunity, belong to the right state, meet their eligibility condition and, where listed, fit one of the watershed's main systems. Scheme coverage and names change; every entry carries a status note and should be checked before use.</p></div>
   <div class="block"><h3>Interventions</h3>${drawsOn("Interventions")}<p>${K.interventions?K.interventions.interventions.length:0} supply- and demand-side interventions (Interventions tab) respond to the observed stresses and opportunities. Their placement follows the ridge-to-valley sequence of watershed-development manuals as summarised in the CoRE Stack toolkit paper: area treatment on ridges and slopes (contour and staggered trenches on 10–25% slopes, water absorption trenches at the foothills, bunds and terraces on farms), then drainage-line treatment by stream order (loose boulder checks on first-order streams with 2–50 ha catchments, gabions and gully plugs on second-order streams with 50–500 ha, check dams, nadis and bandharas on third-order and larger streams), with farm ponds, the 5% and 30×40 models and tanks on gentle land with catchments under 2 ha. Site rules for 24 structures (slope, stream order, catchment, distance to drainage, land use) come from the CoRE Stack structure-suitability spreadsheet. Demand-side measures follow the paper's crop-water accounting (FAO-56 crop coefficients) and its finding that, in one micro-watershed, changing crops met far more of the deficit than new structures. The catalogue extends both with recharge structures from the CGWB master plan, waterbody rehabilitation, ecological restoration, drinking water, flood and governance measures, and practice documented by civil society organisations.</p>
    <p>For each micro-watershed, an intervention is <b>suited</b> when its landscape fit test holds (for example, check dams where the aquifer is hard rock or the block is stressed, and the land slopes), <b>not suited</b> when its avoid test holds (for example, solar pumps in over-exploited blocks), and <b>possible</b> otherwise. The fit test uses only what the data can see; the site rules and the community decide the actual site. Suggestions follow the stresses present after any community answers. The Python pipeline writes the suited and possible interventions to the MWS tables (<span class="mono">seft/interventions.py</span>).</p></div>
+  <div class="block"><h3>Introductory notes</h3>${drawsOn("Introductory notes")}<p>The short note at the top of each micro-watershed, tehsil and district panel is written from rules, not by hand. For each kind, the first <i>main</i> rule whose condition holds gives the opening sentence (the system mix), and every <i>add</i> rule that holds appends one (contexts, likely stresses and opportunities, schemes). Conditions use the same expression language as the other files, and the note is written from the same data and community answers as the rest of the panel. ${K.notes?`Now: ${K.notes.mws.main.length+K.notes.mws.add.length} rules for micro-watersheds, ${K.notes.unit.main.length+K.notes.unit.add.length} for tehsils and districts.`:""}</p></div>
   ${kschemaHtml()}
   <div class="block"><h3>Known limitations</h3><ul>
    <li>CoRE precipitation is spatially smooth: the 450 to over 2,000 mm gradient across Pune appears as 627–874 mm, and Pune is left uncorrected.</li>
@@ -1450,9 +1535,21 @@ function wDist(){return WIDX.districts.find(d=>d.district===W.district)}
 async function wImpIndex(){if(WIMP_TRIED) return WIMP; WIMP_TRIED=true;
   for(let i=0;i<3&&!WIMP;i++){try{WIMP=await loadWbData("impact");}catch(e){WIMP_ERR=String(e&&e.message||e); console.warn("[atlas] impact index attempt",i+1,"failed:",WIMP_ERR); await new Promise(r=>setTimeout(r,800*(i+1)));}}
   applyViews(); return WIMP;}
+/* CoRE Stack tehsil layers overlap at tehsil borders, so bundles built before wb-run deduplicated them can list a
+   waterbody under two or more tehsils. Keep one per id, by the rule in seft/wb/run.py dedupe(): the record in its home
+   micro-watershed's tehsil, else the largest, else the first. */
+async function wDedupe(ws,slug){
+  const seen=new Map(); ws.forEach((w,i)=>{const g=seen.get(w.id); if(g) g.push(i); else seen.set(w.id,[i]);});
+  if(seen.size===ws.length) return ws;
+  let sb=null; try{sb=await loadBundle(slug);}catch(e){}
+  const home=w=>{const m=sb&&sb.mwsById&&sb.mwsById[w.mws]; return m?m.t:null;};
+  const keep=new Set(); seen.forEach(ix=>{if(ix.length===1){keep.add(ix[0]);return;}
+    const h=ix.filter(i=>ws[i].teh===home(ws[i])); keep.add(h.length?h[0]:ix.reduce((a,c)=>ws[c].a>ws[a].a?c:a,ix[0]));});
+  return ws.filter((_,i)=>keep.has(i));}
 async function wBundle(slug){
   if(WBB[slug]) return WBB[slug];
   const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={}; b.slug=slug;
+  b.waterbodies=await wDedupe(b.waterbodies,slug);
   await wImpIndex(); if(WIMP&&WIMP.districts.some(x=>x.slug===slug)){try{b.imp=(await loadWbData("imp_"+slug)).waterbodies;}catch(e){b.imp=null;}}
   b.waterbodies.forEach(w=>{b.byId[w.id]=w; (b.byMws[w.mws]=b.byMws[w.mws]||[]).push(w); w.rmap={}; (w.ru||[]).forEach(([i,s,v])=>w.rmap[i]=[s,v]);});
   b.maxPonds=Math.max(1,...Object.values(b.mws).map(m=>m.recent_ponds||0));
@@ -1839,6 +1936,7 @@ function wPane(){
       <h3>Schemes behind farm ponds in ${esc(d.state)}</h3>${wSchemeList(schemesFor("recent_ponds",null,d.state))}</div>`;}
   P.innerHTML=`<div class="block"><div class="eyebrow">${esc(W.tehsil?W.tehsil+" tehsil, ":"")}${esc(d.district)}, ${esc(d.state)}</div>
       <h2>${C.n.toLocaleString("en-IN")} waterbodies${W.show!=="all"?" · "+esc(WSTC[W.show].label.toLowerCase()):""}</h2>
+      ${introNote(WK.notes&&WK.notes.unit,wbUnitNoteEnv(b.waterbodies.filter(w=>!W.tehsil||w.teh===W.tehsil),b,W.tehsil?W.tehsil+" tehsil":d.district+" district"))}
       <p><b>${C.rp}</b> recent ponds (${C.rpha.toFixed(1)} ha) first held water in 2022 or later.</p>
       <div class="eyebrow">How often they hold water (waterbodies in scope)</div>${statusBar(C.st)}
       <div class="eyebrow">Types</div>${typeBar(C.ty)}</div>
@@ -1863,6 +1961,7 @@ function wPaneMws(P,u,d,b){
   const m=b.mws[u], ws=(b.byMws[u]||[]).filter(wShown), C=wCounts(ws);
   const sorted=ws.slice().sort((a,c)=>c.a-a.a);
   P.innerHTML=`<div class="block"><div class="eyebrow">Micro-watershed · ${esc(d.district)}</div><h2 class="mono">MWS ${esc(u)}</h2>
+    ${introNote(WK.notes&&WK.notes.unit,wbUnitNoteEnv(b.byMws[u]||[],b,"this micro-watershed"))}
     <p>${ws.length} waterbodies with this MWS as home · <b>${m&&m.recent_ponds||0}</b> recent ponds${m&&m.recent_ponds_ha?` (${m.recent_ponds_ha} ha)`:""}</p>
     ${ctxBlock(m)}${m&&wsBundleOk(d)?`<button class="btn ghost" id="wopenws">Open this MWS in the watershed atlas</button>`:""}</div>
     <div class="block"><div class="eyebrow">How often they hold water</div>${statusBar(C.st)}</div>
@@ -2011,7 +2110,7 @@ function wPaneWb(P,w,d,b){
   const varRows=Object.entries(WK.variables.groups).map(([g,gl])=>{const vs=WK.variables.variables.filter(v=>v.group===g);return `<tr><th colspan="2">${esc(gl)}</th></tr>`+vs.map(v=>`<tr><td>${wvref(v.id)}</td><td class="r num">${wVal(v.id,R.env[v.id])}</td></tr>`).join("")}).join("");
   const kv=WIDX.web_vars.filter(k=>R.env[k]!=null);
   P.innerHTML=`<div class="block"><div class="eyebrow">${esc(d.district)}, ${esc(d.state)}</div><h2>${wName(w)}</h2><div class="chips">${stPill(w.st)}<span class="chip">${esc(T.label)}</span>${changed?'<span class="chip">type from community answers</span>':""}</div>
-    ${stNote}<div class="tbl"><table><tbody>${facts.map(([l,v])=>`<tr><th>${l}</th><td>${v}</td></tr>`).join("")}
+    ${introNote(WK.notes&&WK.notes.waterbody,wbNoteEnv(w,b,R))}${stNote}<div class="tbl"><table><tbody>${facts.map(([l,v])=>`<tr><th>${l}</th><td>${v}</td></tr>`).join("")}
     <tr><th>Micro-watershed</th><td><button class="btn ghost" id="wgomws" style="padding:1px 8px">MWS ${esc(w.mws||"–")}</button> ${m&&m.recent_ponds?`· ${m.recent_ponds} recent ponds`:""}</td></tr></tbody></table></div></div>
     <div class="block"><h3>Water held, 2017–2024</h3>${fillChart(w)}
       ${kv.length?`<div class="tbl"><table><tbody>${kv.map(k=>`<tr><th>${wvref(k)}</th><td class="num">${wVal(k,R.env[k])}</td></tr>`).join("")}</tbody></table></div>`:""}</div>
@@ -2193,8 +2292,12 @@ const WKSCHEMA=[
  {file:"questions.json",k:"questions",role:"Community questions and how answers change the type and the rules.",top:[["assessment","priors, confidence shrink, bands, positive_at, severe_at"],["lr_scale","the likelihood-ratio scale"],["type_questions","questions whose options set type fields ('set')"],["stress_questions","questions whose options carry likelihood ratios ('stress')"]],list:"stress_questions",fields:[["id, text, rationale, origin, sources","the question, why it is asked, and its basis"],["rules / applies_to","rules a stress question informs; types a type question is asked for"],["options","{id, label, stress [{id, lr, severe}], set {field: value}}"]]},
  {file:"schemes.json",k:"schemes",role:"Schemes that fund the interventions, and the links from rules to schemes.",top:[["verified","date the status notes were checked"],["schemes","list (below)"],["links","rule id (or recent_ponds) → [{scheme, for, types}]"]],list:"schemes",fields:[["id, name, level, states, department","identity; states null for all states"],["components, status, status_note, sources, url","what it funds and its current status"]]},
  {file:"interventions.json",k:"interventions",role:"The intervention catalogue shared with the watershed atlas (knowledge/interventions.json): which waterbody rules each intervention responds to (addresses_wb), for which waterbody types (wb_types), and its landscape fit test, site rules, schemes and sources.",top:[["fit","how landscape fit is judged"],["interventions","list (below)"]],list:"interventions",fields:[["id, name, side, category","identity, supply or demand side, category"],["addresses_wb, wb_types","waterbody rules it responds to and the types it applies to"],["suits, avoid","landscape fit test, evaluated on the home micro-watershed"],["site_rules, where, landscape","siting guidance"],["schemes, practice, sources","funding, examples and sources"]]},
- {file:"sources.json",k:"sources",role:"Bibliography; the watershed sources.json is read too.",top:[["sources","list (below)"]],list:"sources",fields:[["id","cited from other files"],["citation, url","reference"],["used_for","what it supports"]]}];
-const WDRAWS={"Data":["config/waterbody/locations.json","variables.json"],"Types":["types.json","variables.json"],"Variables":["variables.json"],"Signals and thresholds":["signals.json","sources.json"],"Roles":["roles.json"],"Rules":["rules.json","signals.json","roles.json"],"Community questions and re-assessment":["questions.json","types.json","rules.json"],"Schemes":["schemes.json"],"Interventions":["interventions.json"],"Sources":["sources.json"]};
+ {file:"sources.json",k:"sources",role:"Bibliography; the watershed sources.json is read too.",top:[["sources","list (below)"]],list:"sources",fields:[["id","cited from other files"],["citation, url","reference"],["used_for","what it supports"]]},
+ {file:"notes.json",k:"notes",role:"Introductory notes: the rules that write the short note at the top of a waterbody panel and of a micro-watershed, tehsil or district.",top:[["_fields","for each note kind, the fields its rules can read and fill in"],["waterbody","note for one waterbody: main and add rules"],["unit","note for the waterbodies of a micro-watershed, tehsil or district: main and add rules"]],list:"main and add rules",fields:[["when","condition over the fields; in main the first rule that holds gives the opening sentence, in add every rule that holds appends its sentence"],["text","the sentence, with fields in braces"]]},
+ {file:"../impact/settings.json",k:"impact_settings",role:"Impact of interventions: intervention types, outcomes, control matching, the four estimators, the reference, verdicts, flags, registry quality checks and averages.",top:[["intervention_types, outcomes","what is assessed and the outcomes read (weeks of water, rabi and summer retention)"],["matching, estimators, reference","how controls are chosen, the four estimators, and the untreated reference the result is placed among"],["verdict, flags","verdict percentiles and placebo tests, and confidence flags"],["registry_quality, averages","checks on registry records, and how averages for micro-watersheds, tehsils and districts are made"]],list:"estimators",fields:[["id, label","did (headline), did_rain, prepost_rain, counterfactual"],["about","what the estimator compares"]]},
+ {file:"../impact/notes.json",k:"impact_notes",role:"Impact of interventions: rules that write the public notes on a waterbody's result and on averages, and the fixed text of the impact panels.",top:[["waterbody, unit","main and add rules, as in notes.json, for one waterbody's result and for averages"],["panel","headings, table labels, the estimation explanation and the chart legend, with their placeholders in panel._placeholders"]],list:"main and add rules",fields:[["when","condition over the result's fields (seft/impact/notes.py lists them)"],["text","the sentence, with fields in braces"]]},
+ {file:"../pools.json",k:"pools",role:"Pooled thresholds for the waterbody signals marked as pooled, by waterbody type, computed over the 'pools' districts with wb-run --update-pools (the waterbody section of knowledge/pools.json).",top:[["waterbody","signal id → {type → [threshold, severe threshold]}"],["provenance.waterbody","districts, count and date"]],list:"",fields:[]}];
+const WDRAWS={"Data":["config/waterbody/locations.json","variables.json"],"Types":["types.json","variables.json"],"Variables":["variables.json"],"Signals and thresholds":["signals.json","sources.json"],"Roles":["roles.json"],"Rules":["rules.json","signals.json","roles.json"],"Community questions and re-assessment":["questions.json","types.json","rules.json"],"Schemes":["schemes.json"],"Interventions":["interventions.json"],"Impact of interventions":["../impact/settings.json","../impact/notes.json"],"Introductory notes":["notes.json"],"Sources":["sources.json"]};
 function wDrawsOn(t){const f=WDRAWS[t];return f?`<p class="note">Draws on: ${f.map(x=>`<a href="#wkfiles" class="mono" data-wkf>${x}</a>`).join(", ")}</p>`:"";}
 const WKEX={"types.json":[["A type rule, and the derived field it uses.",()=>[WK.types.derived[1],only(WTYPE.village_pond,["id","label","in_scope","when","sources"])]]],
  "variables.json":[["A variable.",()=>WVAR.rel_slope],["A type field set only by answers.",()=>WTF.ownership]],
@@ -2206,17 +2309,17 @@ const WKEX={"types.json":[["A type rule, and the derived field it uses.",()=>[WK
  "sources.json":[["A source.",()=>WSRC.wbc2023]]};
 function wKschemaHtml(){
   return `<div class="block" id="wkfiles"><h3>Knowledge files and their structure</h3>
-   <p>All waterbody logic sits in eight JSON files in <span class="mono">knowledge/waterbody/</span>, with the tehsils in <span class="mono">config/waterbody/locations.json</span>. Formulas and conditions use the same safe expression language as the watershed atlas: arithmetic, comparisons, <span class="mono">and / or / not</span>, text in quotes, variable ids, the home MWS's values as <span class="mono">mws_&lt;id&gt;</span>, <span class="mono">share_&lt;system&gt;</span> and <span class="mono">ctx_&lt;dimension&gt;</span>, and functions such as <span class="mono">nz</span>, <span class="mono">ramp</span>, <span class="mono">clip</span> and <span class="mono">ifelse</span>. Fields that cite evidence hold ids from <span class="mono">sources.json</span>. <span class="mono">python -m seft.cli wb-validate</span> checks that every id, expression, question and source resolves; <span class="mono">knowledge/waterbody/README.md</span> explains how to edit them.</p>
+   <p>All waterbody logic sits in ${WKSCHEMA.filter(x=>!x.file.startsWith("..")).length} JSON files in <span class="mono">knowledge/waterbody/</span>, with the impact of interventions in <span class="mono">knowledge/impact/</span> and the pooled thresholds in <span class="mono">knowledge/pools.json</span>, with the tehsils in <span class="mono">config/waterbody/locations.json</span>. Formulas and conditions use the same safe expression language as the watershed atlas: arithmetic, comparisons, <span class="mono">and / or / not</span>, text in quotes, variable ids, the home MWS's values as <span class="mono">mws_&lt;id&gt;</span>, <span class="mono">share_&lt;system&gt;</span> and <span class="mono">ctx_&lt;dimension&gt;</span>, and functions such as <span class="mono">nz</span>, <span class="mono">ramp</span>, <span class="mono">clip</span> and <span class="mono">ifelse</span>. Fields that cite evidence hold ids from <span class="mono">sources.json</span>. <span class="mono">python -m seft.cli wb-validate</span> checks that every id, expression, question and source resolves; <span class="mono">knowledge/waterbody/README.md</span> explains how to edit them.</p>
    ${fnTableHtml()}
    ${WKSCHEMA.map(S=>{const l=(WK[S.k]||{})[S.list];return `<details><summary><b class="mono">${S.file}</b> — ${esc(S.role)}${Array.isArray(l)?` · ${l.length} ${S.list.replace(/_/g," ")}`:""}</summary>
      <div class="tbl"><table><thead><tr><th>Top-level key</th><th>Holds</th></tr></thead><tbody>${S.top.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>
-     <div class="tbl"><table><thead><tr><th>Fields of each entry in <span class="mono">${esc(S.list)}</span></th><th>Meaning</th></tr></thead><tbody>${S.fields.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>
+     ${S.fields.length?`<div class="tbl"><table><thead><tr><th>Fields of each entry in <span class="mono">${esc(S.list)}</span></th><th>Meaning</th></tr></thead><tbody>${S.fields.map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>`:""}
      ${(WKEX[S.file]||[]).map(([cap,get])=>{let o=null;try{o=get()}catch(e){} return o?`<p class="note"><b>Example.</b> ${esc(cap)}</p><pre class="kex">${esc(JSON.stringify(trimJ(o),null,1))}</pre>`:""}).join("")}</details>`;}).join("")}
    <p class="note">How the files connect: variables (and the home MWS) feed signals and roles; types decide which rules apply; rules combine signals and roles; questions point at rules (likelihood ratios) and at type fields; links in schemes point at rules; every sources list points at sources.json.</p></div>`;}
 function impMethod(){
   if(!WIMP) return `<div class="block"><h3>Impact of interventions</h3><p>No intervention registry is loaded. Build one with <code>python -m seft.cli impact-build-registry</code> and run <code>impact-run</code> (README, Waterbody impact).</p></div>`;
   const S=WIMP.settings, M=S.matching, V=S.verdict, regs=WIMP.registries||[];
-  return `<div class="block"><h3>Impact of interventions</h3>
+  return `<div class="block"><h3>Impact of interventions</h3>${wDrawsOn("Impact of interventions")}
    <p>Where an intervention registry lists works on a waterbody (now: ${regs.map(r=>`${esc(r.name)}, ${r.n} records, ${r.linked} linked`).join("; ")}), the atlas estimates their effect on how long the waterbody holds water. ${esc(S.year_convention)}</p>
    <p><b>Outcomes.</b> ${S.outcomes.map(o=>`${esc(o.label)} (${esc(o.expr)}): ${esc(o.about)}`).join(" ")}</p>
    <p><b>Controls.</b> Up to ${M.n_controls} untreated waterbodies of the same type within ${M.radius_km} km, outside the treated waterbody's own micro-watershed and more than ${M.exclude_near_treated_m} m from any waterbody treated in the same years, nearest on size, catchment, stream order, rainfall, drought, rabi retention and the weeks of water in each year before the work. Waterbodies treated later count as controls for the years before their own work. Fewer than ${M.min_controls} controls: not assessable.</p>
@@ -2248,6 +2351,7 @@ function renderWbMethod(m){
   <div class="block"><h3>Schemes</h3>${wDrawsOn("Schemes")}<p>Each rule links to the schemes that can fund its interventions, filtered by the waterbody's state and type; recent ponds link to the farm-pond schemes. A scheme is suggested for a waterbody when one of its linked rules is present after any answers. Status notes were checked on ${esc(WK.schemes.verified)}.</p></div>
   <div class="block"><h3>Interventions</h3>${wDrawsOn("Interventions")}<p>Each rule links to interventions in the catalogue shared with the watershed atlas (Interventions tab): waterbody rehabilitation (desilting, inlet restoration, bund and sluice repair, cascades, encroachment protection, lining, summer-water pockets), catchment treatment above the waterbody (trenches, loose boulder checks, gully plugs), and use of the stored water (protective irrigation, conveyance, water user associations, fishery). An intervention is offered for a waterbody when one of its rules is present and the waterbody's type is in the intervention's types. Its landscape fit (suited, possible, not suited) is judged on the home micro-watershed's terrain, slope, aquifer, rainfall, land use and systems, using the same test as the watershed atlas. Site rules from the CoRE Stack structure-suitability spreadsheet and the ridge-to-valley placement of the toolkit paper are shown with each intervention.</p></div>
   ${impMethod()}
+  <div class="block"><h3>Introductory notes</h3>${wDrawsOn("Introductory notes")}<p>The short note at the top of each waterbody panel, and of the waterbodies of a micro-watershed, tehsil or district, is written from rules, not by hand. For each kind, the first <i>main</i> rule whose condition holds gives the opening sentence (type, size and how often it holds water; or the type mix), and every <i>add</i> rule that holds appends one (seasonal water, trend, likely uses, stresses, opportunities, recorded interventions). Conditions use the same expression language as the other files, and the note is written from the same data and community answers as the rest of the panel. ${WK.notes?`Now: ${WK.notes.waterbody.main.length+WK.notes.waterbody.add.length} rules for waterbodies, ${WK.notes.unit.main.length+WK.notes.unit.add.length} for groups of waterbodies.`:""}</p></div>
   ${wKschemaHtml()}
   <div class="block"><h3>Known limitations</h3><ul>
    <li>Most zone-of-influence layers have no waterbody id; about 1 in 10 waterbodies has no matched zone and its irrigation role relies on the home MWS.</li>
@@ -2260,7 +2364,7 @@ function renderWbMethod(m){
   m.querySelectorAll("[data-wkf]").forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById("wkfiles")?.scrollIntoView();});
 }
 function renderWbData(m){
-  const kf=["types","variables","signals","roles","rules","questions","schemes","interventions","sources"];
+  const kf=["types","variables","signals","roles","rules","questions","schemes","interventions","notes","sources"].filter(f=>WK[f]);
   m.innerHTML=`<div class="doc"><h2>Data downloads</h2>
     <p>The knowledge files that hold the logic, then one table per district with one row per waterbody: identity, type, status, size, drainage, home MWS and its context, recent ponds in the MWS, variables, roles, the intensity of each rule (blank: not applicable; 0: not triggered; NA: insufficient data) and the schemes linked to its triggered rules. Built by <code>python -m seft.cli wb-run</code>.</p>
     <div><div class="eyebrow">Knowledge files (editable logic)</div>${kf.map(f=>`<div class="dl"><span><b class="mono">${f}.json</b><br><span class="note">${esc((WKSCHEMA.find(x=>x.file===f+".json")||{}).role||"")}</span></span><button class="btn ghost" data-wk="${f}">Save</button></div>`).join("")}</div>

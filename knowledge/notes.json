@@ -1,0 +1,58 @@
+{
+ "_about": "Rules that write the short introductory note at the top of a micro-watershed's panel (`mws`) and of a tehsil or district (`unit`). For each kind the first `main` rule whose `when` holds gives the opening sentence; every `add` rule whose `when` holds appends its sentence, in order. `when` uses the expression language of the other knowledge files; placeholders in braces are filled from the fields listed in `_fields` (numbers are rounded: whole numbers as they are, others to one decimal). Labels are used in lower case without their bracketed definitions. The notes are written by the page from the same data and community answers as the rest of the panel, so they change when answers are applied.",
+ "version": "0.1.0",
+ "_fields": {
+  "mws": {
+   "indicators": "every indicator in variables.json by id, and the context classes as ctx.<dimension> (ids, as in signals.json)",
+   "area_ha, tehsil": "area in ha and the tehsil the micro-watershed is mainly in",
+   "dom_label, dom_pct, second_label, second_pct, mix_text, n_systems": "the largest and second-largest system archetype (labels, share of area in %), the systems at their present_at share or more as text with shares, and their count; the 'other land' class is left out",
+   "rainfall_label, aquifer_label, terrain_label, gw_category_label, canal_label, cropping_label": "the context class on each dimension (contexts.json), empty when unknown",
+   "ps_text": "production systems present",
+   "n_stress, stress_text, n_severe, n_opp, opp_text": "observed stresses present after answers (count, up to three labels with their production system, strongest first), how many are severe, and the same for opportunities",
+   "n_schemes": "schemes matched"
+  },
+  "unit": {
+   "unit_label, unit_label_cap": "'<name> tehsil' or '<name> district', and the same with a capital letter",
+   "n, area_km2": "micro-watersheds and their area in km2",
+   "dom_label, dom_pct, second_label, second_pct, mix_text": "area-weighted system mix: the two largest systems (labels, %), and systems at 10% or more as text",
+   "<dimension>_label, <dimension>_pct": "for each context dimension (rainfall, aquifer, terrain, gw_category, canal, cropping): the most common class among the micro-watersheds and the share that have it (%)",
+   "stress1_label, stress1_pct, stress_text, n_stress_common": "the most common observed stress (label with its production system in brackets, share of micro-watersheds where it is present, %), up to three present in 25% or more as text with their production system and share in brackets, and how many reach 25%",
+   "opp_label, opp_pct": "the most common opportunity and its share (%)",
+   "scheme_label, scheme_pct": "the scheme matched most often and the share of micro-watersheds it is matched for (%)"
+  }
+ },
+ "mws": {
+  "main": [
+   {"when": "dom_pct >= 60", "text": "A micro-watershed of {area_ha} ha dominated by {dom_label} ({dom_pct}% of its area)."},
+   {"when": "second_pct >= 15", "text": "A micro-watershed of {area_ha} ha with a mix of {dom_label} ({dom_pct}%) and {second_label} ({second_pct}%)."},
+   {"when": "true", "text": "A micro-watershed of {area_ha} ha, mainly {dom_label} ({dom_pct}%)."}
+  ],
+  "add": [
+   {"when": "rainfall_label and aquifer_label and terrain_label", "text": "It is {rainfall_label}, on {aquifer_label} aquifers and {terrain_label} terrain."},
+   {"when": "gw_category_label", "text": "Its block's groundwater is assessed as {gw_category_label}."},
+   {"when": "canal_label == 'canal crosses mws'", "text": "A canal crosses it."},
+   {"when": "cropping_label", "text": "Cropping regime: {cropping_label}."},
+   {"when": "n_stress > 0 and n_severe > 0", "text": "Likely stresses: {stress_text} ({n_severe} severe)."},
+   {"when": "n_stress > 0 and n_severe == 0", "text": "Likely stresses: {stress_text}."},
+   {"when": "n_stress == 0", "text": "No observed stress is flagged from the data."},
+   {"when": "n_opp > 0", "text": "Opportunity: {opp_text}."},
+   {"when": "n_schemes > 0", "text": "{n_schemes} schemes match it (below)."}
+  ]
+ },
+ "unit": {
+  "main": [
+   {"when": "n == 0", "text": "No micro-watersheds are mapped in {unit_label}."},
+   {"when": "dom_pct >= 50", "text": "{unit_label_cap} has {n} micro-watersheds over {area_km2} km2, dominated by {dom_label} ({dom_pct}% of the area)."},
+   {"when": "true", "text": "{unit_label_cap} has {n} micro-watersheds over {area_km2} km2: {mix_text}."}
+  ],
+  "add": [
+   {"when": "rainfall_label and aquifer_label", "text": "Most of it is {rainfall_label} ({rainfall_pct}% of micro-watersheds) on {aquifer_label} aquifers ({aquifer_pct}%)."},
+   {"when": "gw_category_label and gw_category_pct >= 50", "text": "Groundwater is mostly assessed as {gw_category_label} ({gw_category_pct}%)."},
+   {"when": "n_stress_common > 1", "text": "The most common stresses are {stress_text}."},
+   {"when": "n_stress_common == 1", "text": "The most common stress is {stress_text}."},
+   {"when": "n > 0 and n_stress_common == 0", "text": "No observed stress is present in a quarter or more of its micro-watersheds; the most common is {stress1_label}, in {stress1_pct}%."},
+   {"when": "opp_label and opp_pct >= 25", "text": "Opportunity: {opp_label}, in {opp_pct}% of micro-watersheds."},
+   {"when": "scheme_label", "text": "The scheme matched most often is {scheme_label} ({scheme_pct}% of micro-watersheds)."}
+  ]
+ }
+}

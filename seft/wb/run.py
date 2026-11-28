@@ -79,6 +79,20 @@ def _mean(xs):
     xs = [x for x in xs or [] if isinstance(x, (int, float))]
     return round(sum(xs) / len(xs), 2) if xs else None
 
+def dedupe(B, log=print):
+    """CoRE Stack tehsil layers overlap at tehsil borders, so a waterbody can come in with two or more tehsils.
+    Keep one record per wb_id: the one in its home micro-watershed's tehsil, else the largest, else the first."""
+    groups = collections.defaultdict(list)
+    for i, b in enumerate(B): groups[b['wb_id']].append(i)
+    keep = set()
+    for ids in groups.values():
+        if len(ids) == 1: keep.add(ids[0]); continue
+        home = [i for i in ids if B[i]['tehsil'] == (B[i].get('mws') or {}).get('mws_tehsil')]
+        keep.add(home[0] if home else max(ids, key=lambda i: (B[i]['area_ha'], -i)))
+    n = len(B) - len(keep)
+    if n: log(f'  {n} duplicate records of {sum(len(v) > 1 for v in groups.values())} waterbodies listed in more than one tehsil layer removed')
+    return [b for i, b in enumerate(B) if i in keep]
+
 def score_all(cfg, log=print, pools=None, pool_districts=None, pool_tehsils=None):
     """Build and score every waterbody of the locations. Returns (bodies, stats, types, K, pools)."""
     K = load_knowledge()
@@ -88,6 +102,7 @@ def score_all(cfg, log=print, pools=None, pool_districts=None, pool_tehsils=None
     ctx = mws_context(cfg, log=log)
     prof, drought = build_profiles(cfg)
     attach(B, ctx, prof)
+    B = dedupe(B, log=log)
     ref = year_reference(B, scope)
     for b in B: b['vars'] = compute(b, prof, drought, ref)
     if pools is None:
