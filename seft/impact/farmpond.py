@@ -107,7 +107,8 @@ def note_fields(k, kr, krz, wtype, dweeks, S=None):
     i0 = int(np.argmax(w)); E = Y[i0]
     if w[i0:].mean() < S['appearance']['persist_share']: return out
     s = lining(k, kr, krz, dweeks, E, Y, {**S['lining'], 'drought_weeks': S['drought']['min_weeks']})
-    if s: out.update(fp_lining=s['cls'], fp_summer_area=round(s['summer_area']), fp_summer_years=round(100 * s['summer_years']))
+    if s and wtype in S['lining'].get('types', S['intervention']['types']):
+        out.update(fp_lining=s['cls'], fp_summer_area=round(s['summer_area']), fp_summer_years=round(100 * s['summer_years']))
     if E >= S['years']['first_appearance']: out.update(fp_new=True, fp_year_label=years_text([E]))
     return out
 
@@ -467,7 +468,7 @@ def old_env(o, wtype, labels):
             'premium_abs': f"{abs((p or 0) * 100):.1f}", 'premium_dir': 'below' if (p or 0) < 0 else 'above', 'has_premium': p is not None,
             'corrected_signed': pts(c), 'corrected': c if c is not None else 0}
 
-def unit_stats(ks, recs, units, S, label, rng):
+def unit_stats(ks, recs, units, S, label, rng, classes=CLS):
     sel = [k for k in ks if recs[k]['verdict'] != 'not_assessable']
     main = [recs[k]['effects']['ci']['main'] for k in sel if recs[k]['effects']['ci']['main'] is not None]
     st = {'n_new': len(ks), **boot(main, S['averages']['bootstrap'], rng), 'label': label}
@@ -478,7 +479,7 @@ def unit_stats(ks, recs, units, S, label, rng):
     ea = [recs[k]['effects']['ci']['early'] for k in sel if recs[k]['effects']['ci']['early'] is not None]
     st['n_early'] = len(ea); st['early_mean'] = _r(np.mean(ea), 4) if ea else None
     st['by_class'] = {}
-    for c in CLS:
+    for c in classes:
         v = [recs[k]['effects']['ci']['main'] for k in sel if recs[k]['cls'] == c and recs[k]['effects']['ci']['main'] is not None]
         w = [recs[k]['effects']['nonkharif']['main'] for k in sel if recs[k]['cls'] == c and recs[k]['effects']['nonkharif']['main'] is not None]
         st['by_class'][c] = {'n': len(v), 'mean': _r(np.mean(v), 4) if v else None, 'nk': _r(np.mean(w), 4) if w else None}
@@ -518,14 +519,19 @@ def run_panel(B, MWS, S=None, out=None, web=True, log=print, seed=7):
     # lining for every pond of the assessed types (shown in the waterbody note)
     lin = {}
     for u in U:
-        if u['type'] in I['types'] and u['persist'] >= A['persist_share']:
+        if u['type'] in S['lining'].get('types', I['types']) and u['persist'] >= A['persist_share']:
             s = lining(u['k'], u['kr'], u['krz'], {y: v for y, v in zip(Y, u['dweeks']) if np.isfinite(v)}, u['E'], Y, L)
             if s: u['sig'] = {k: (_r(v, 3) if isinstance(v, float) else v) for k, v in s.items()}; u['cls'] = s['cls']; lin[u['id']] = u
     records, summary, by_unit = {}, {'types': {}}, {}
     for typ in I['types']:
         cand = [u for u in U if u['type'] == typ and first <= u['E'] <= max(lastA, Y[-1]) and u['persist'] >= A['persist_share']]
         units = [u for u in cand if u['E'] <= lastA and u['valid_pre'] and u['ok']]
-        for u in units: u.setdefault('cls', 'uncertain'); u.setdefault('sig', None)
+        classed = typ in S['lining'].get('types', I['types'])          # lined/unlined split for farm ponds only
+        CL = CLS if classed else ()
+        for u in units:
+            if classed: u.setdefault('cls', 'uncertain')
+            else: u['cls'] = None
+            u.setdefault('sig', None)
         log(f'  {typ}: {len(cand)} new since {first}, {len(units)} assessable (first wet {first}-{lastA}, qualifying pre year, ZoI cropping)')
         OUT_, Ms = {}, {}
         for oc in OUTS:
@@ -534,12 +540,12 @@ def run_panel(B, MWS, S=None, out=None, web=True, log=print, seed=7):
         recs = pond_records(units, OUT_, hold, S, rng)
         # summary: outcomes by class and period; same-district DiD; placebo
         T = {'n_candidates': len(cand), 'n_assessed': len(units), 'n_districts': len({u['district'] for u in units}),
-             'classes': dict(collections.Counter(u['cls'] for u in units)), 'gamma': _r(Ms['ci']['beta'][0]) if Ms['ci'] else None,
+             'classes': dict(collections.Counter(u['cls'] for u in units)) if classed else None, 'gamma': _r(Ms['ci']['beta'][0]) if Ms['ci'] else None,
              'delta': _r(Ms['ci']['beta'][1], 5) if Ms['ci'] else None, 'support': dict(collections.Counter(c[4] for c in OUT_['ci'])),
              'placebo': boot([c[2] for c in hold], 500, rng), 'placebo_sd': _r(np.std([c[2] for c in hold]), 4) if hold else None, 'outcomes': {}, 'did': {}, 'by_appearance': {}, 'event': {}}
         for oc in OUTS:
             T['outcomes'][oc] = {}
-            for c in ('all',) + CLS:
+            for c in ('all',) + CL:
                 inc = lambda k: c == 'all' or units[k]['cls'] == c
                 main = [recs[k]['effects'][oc]['main'] for k in recs if inc(k) and recs[k]['effects'][oc]['main'] is not None]
                 early = [recs[k]['effects'][oc]['early'] for k in recs if inc(k) and recs[k]['effects'][oc]['early'] is not None]
@@ -550,7 +556,7 @@ def run_panel(B, MWS, S=None, out=None, web=True, log=print, seed=7):
                                         'n_drought_cells': sum(1 for x in cm if x[3] == 1)}
         for oc in ('ci', 'nonkharif'):
             T['did'][oc] = {}
-            for c in ('all',) + CLS:
+            for c in ('all',) + CL:
                 sub = units if c == 'all' else [u for u in units if u['cls'] == c]
                 T['did'][oc][c] = {cov: did_district(sub, oc, S['_last_main'], dd['min_n'], cov, rng=rng) for cov in ('none', 'size', 'mws')}
         for g in range(first, lastA + 1):
@@ -573,7 +579,7 @@ def run_panel(B, MWS, S=None, out=None, web=True, log=print, seed=7):
             if u['mws']: groups['mws'][u['mws']].append(k)
         for kind, G in groups.items():
             for v, ks in G.items():
-                st = unit_stats(ks, recs, units, S, tlp, rng); st['label_one'] = 'new ' + tl
+                st = unit_stats(ks, recs, units, S, tlp, rng, CL); st['label_one'] = 'new ' + tl
                 st['note'] = render('fp_unit', unit_env(st, _unit_label(kind, v), S), R)
                 by_unit.setdefault(kind, {}).setdefault(v, {})[typ] = st
         for k, rec in recs.items():

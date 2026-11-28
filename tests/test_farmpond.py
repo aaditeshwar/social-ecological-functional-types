@@ -28,6 +28,8 @@ class Lining(unittest.TestCase):
         f = F.note_fields(k, k, [0, 0, 0, 70, 75, 72, 70, 74], 'farm_pond', DW, self.S)
         self.assertEqual((f['fp_lining'], f['fp_new'], f['fp_year_label']), ('lined', True, '2020-21'))
         self.assertFalse(F.note_fields(k, k, k, 'village_pond', DW, self.S)['fp_lining'])
+        hw = F.note_fields(k, k, [0, 0, 0, 70, 75, 72, 70, 74], 'headwater_pond', DW, self.S)
+        self.assertEqual((hw['fp_lining'], hw['fp_new']), ('', True))       # one category: no lined/unlined split
         old = F.note_fields([80, 20, 80, 80, 80, 20, 80, 80], [60] * 8, [0] * 8, 'farm_pond', DW, self.S)
         self.assertFalse(old['fp_new']); self.assertEqual(old['fp_lining'], 'unlined')
 

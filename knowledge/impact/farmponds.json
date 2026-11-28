@@ -1,6 +1,6 @@
 {
  "_about": "Settings of the new-farm-pond impact assessment (seft/impact/farmpond.py, command impact-farmpond): which waterbodies count as new ponds, the outcomes read in their zone of influence, the estimators, the lined/unlined rule, the per-pond verdicts, the averages and the effectiveness measure for older structures. Unlike desilting there is no registry: a pond's first wet year in the CoRE Stack water series is its construction year. The full method is described on the atlas's Impact assessment tab and in knowledge/impact/README.md; references are ids in knowledge/impact/references.json.",
- "version": "0.1.0",
+ "version": "0.2.0",
  "intervention": {
   "id": "new_farmpond",
   "label": "New farm pond",
@@ -117,6 +117,9 @@
   }
  ],
  "lining": {
+  "types": [
+   "farm_pond"
+  ],
   "lined_summer_years": 0.75,
   "lined_summer_area": 40,
   "unlined_summer_area": 10,
@@ -128,7 +131,7 @@
    "unlined": "unlined-like",
    "uncertain": "uncertain"
   },
-  "about": "Many farm ponds, especially in Maharashtra, are lined with plastic sheet and are filled from wells as well as from runoff, so they store water for rabi and summer crops; unlined ponds lose water to seepage, recharge groundwater and mostly hold water in the monsoon. Lining is not observed, so the class is read from the water seen after the pond first holds water. Lined-like: water in summer (zaid) in at least lined_summer_years of those years, over at least lined_summer_area % of its area, and at least min_supporting of the supporting signs. Unlined-like: summer water on less than unlined_summer_area % of its area, with neither a drought-proof fill nor more water in rabi or summer than in kharif. Supporting signs: kharif fill in drought years at least drought_fill_ratio of that in normal years (filled by pumping, not only by rain), rabi or summer water above the kharif water, and a steady kharif fill (coefficient of variation below steady_cv). Everything else is uncertain. The class describes how the pond behaves, not how it was built; it is used only for the impact assessment and the waterbody's note, not as a type or role."
+  "about": "Many farm ponds, especially in Maharashtra, are lined with plastic sheet and are filled from wells as well as from runoff, so they store water for rabi and summer crops; unlined ponds lose water to seepage, recharge groundwater and mostly hold water in the monsoon. Lining is not observed, so the class is read from the water seen after the pond first holds water. Lined-like: water in summer (zaid) in at least lined_summer_years of those years, over at least lined_summer_area % of its area, and at least min_supporting of the supporting signs. Unlined-like: summer water on less than unlined_summer_area % of its area, with neither a drought-proof fill nor more water in rabi or summer than in kharif. Supporting signs: kharif fill in drought years at least drought_fill_ratio of that in normal years (filled by pumping, not only by rain), rabi or summer water above the kharif water, and a steady kharif fill (coefficient of variation below steady_cv). Everything else is uncertain. Only farm ponds are classed (types); headwater ponds and check dams, which sit on drainage lines and are rarely lined, are reported as a single category. The class describes how the pond behaves, not how it was built; it is used only for the impact assessment and the waterbody's note, not as a type or role."
  },
  "verdict": {
   "gain_pct": 90,

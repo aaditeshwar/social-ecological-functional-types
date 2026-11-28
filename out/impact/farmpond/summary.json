@@ -839,11 +839,7 @@
    "n_candidates": 4315,
    "n_assessed": 2018,
    "n_districts": 35,
-   "classes": {
-    "unlined": 984,
-    "uncertain": 749,
-    "lined": 285
-   },
+   "classes": null,
    "gamma": 0.713,
    "delta": -0.00398,
    "support": {
@@ -876,57 +872,6 @@
       "normal": 0.0271,
       "drought": 0.0823,
       "n_drought_cells": 550
-     },
-     "lined": {
-      "main": {
-       "n": 227,
-       "mean": 0.0157,
-       "lo": -0.0054,
-       "hi": 0.0347
-      },
-      "early": {
-       "n": 285,
-       "mean": 0.0135,
-       "lo": -0.0088,
-       "hi": 0.0346
-      },
-      "normal": 0.0093,
-      "drought": 0.0535,
-      "n_drought_cells": 89
-     },
-     "uncertain": {
-      "main": {
-       "n": 696,
-       "mean": 0.0438,
-       "lo": 0.031,
-       "hi": 0.0589
-      },
-      "early": {
-       "n": 749,
-       "mean": 0.0497,
-       "lo": 0.0342,
-       "hi": 0.0668
-      },
-      "normal": 0.0415,
-      "drought": 0.0854,
-      "n_drought_cells": 322
-     },
-     "unlined": {
-      "main": {
-       "n": 947,
-       "mean": 0.0237,
-       "lo": 0.0134,
-       "hi": 0.0339
-      },
-      "early": {
-       "n": 984,
-       "mean": 0.0305,
-       "lo": 0.0176,
-       "hi": 0.0429
-      },
-      "normal": 0.0219,
-      "drought": 0.0935,
-      "n_drought_cells": 139
      }
     },
     "nonkharif": {
@@ -934,69 +879,18 @@
       "main": {
        "n": 1870,
        "mean": 0.008,
-       "lo": 0.0023,
-       "hi": 0.0132
+       "lo": 0.0026,
+       "hi": 0.0129
       },
       "early": {
        "n": 2018,
        "mean": 0.0333,
-       "lo": 0.0285,
-       "hi": 0.0382
+       "lo": 0.028,
+       "hi": 0.0383
       },
       "normal": 0.0064,
       "drought": 0.043,
       "n_drought_cells": 550
-     },
-     "lined": {
-      "main": {
-       "n": 227,
-       "mean": 0.0013,
-       "lo": -0.013,
-       "hi": 0.016
-      },
-      "early": {
-       "n": 285,
-       "mean": 0.0264,
-       "lo": 0.0139,
-       "hi": 0.0397
-      },
-      "normal": -0.0007,
-      "drought": 0.0268,
-      "n_drought_cells": 89
-     },
-     "uncertain": {
-      "main": {
-       "n": 696,
-       "mean": 0.0199,
-       "lo": 0.0107,
-       "hi": 0.0291
-      },
-      "early": {
-       "n": 749,
-       "mean": 0.0396,
-       "lo": 0.0322,
-       "hi": 0.0477
-      },
-      "normal": 0.0201,
-      "drought": 0.048,
-      "n_drought_cells": 322
-     },
-     "unlined": {
-      "main": {
-       "n": 947,
-       "mean": 0.0008,
-       "lo": -0.0058,
-       "hi": 0.0074
-      },
-      "early": {
-       "n": 984,
-       "mean": 0.0304,
-       "lo": 0.0234,
-       "hi": 0.0373
-      },
-      "normal": -0.0005,
-      "drought": 0.0417,
-      "n_drought_cells": 139
      }
     },
     "multi": {
@@ -1004,69 +898,18 @@
       "main": {
        "n": 1866,
        "mean": 0.0025,
-       "lo": -0.0036,
-       "hi": 0.0083
+       "lo": -0.0031,
+       "hi": 0.0081
       },
       "early": {
        "n": 2014,
        "mean": 0.0028,
-       "lo": -0.0029,
-       "hi": 0.0089
+       "lo": -0.0027,
+       "hi": 0.0079
       },
       "normal": 0.0029,
       "drought": 0.024,
       "n_drought_cells": 550
-     },
-     "lined": {
-      "main": {
-       "n": 226,
-       "mean": -0.0002,
-       "lo": -0.0147,
-       "hi": 0.0152
-      },
-      "early": {
-       "n": 284,
-       "mean": 0.0036,
-       "lo": -0.0099,
-       "hi": 0.0157
-      },
-      "normal": -0.0006,
-      "drought": 0.0251,
-      "n_drought_cells": 89
-     },
-     "uncertain": {
-      "main": {
-       "n": 696,
-       "mean": 0.0151,
-       "lo": 0.0051,
-       "hi": 0.0254
-      },
-      "early": {
-       "n": 749,
-       "mean": 0.0087,
-       "lo": -0.0001,
-       "hi": 0.0177
-      },
-      "normal": 0.0174,
-      "drought": 0.0335,
-      "n_drought_cells": 322
-     },
-     "unlined": {
-      "main": {
-       "n": 944,
-       "mean": -0.0061,
-       "lo": -0.015,
-       "hi": 0.0024
-      },
-      "early": {
-       "n": 981,
-       "mean": -0.002,
-       "lo": -0.0102,
-       "hi": 0.0062
-      },
-      "normal": -0.0051,
-      "drought": 0.0015,
-      "n_drought_cells": 139
      }
     },
     "cropped": {
@@ -1074,69 +917,18 @@
       "main": {
        "n": 1870,
        "mean": 0.0185,
-       "lo": 0.0126,
-       "hi": 0.0241
+       "lo": 0.0124,
+       "hi": 0.024
       },
       "early": {
        "n": 2018,
        "mean": 0.0201,
-       "lo": 0.0137,
-       "hi": 0.0267
+       "lo": 0.0132,
+       "hi": 0.0268
       },
       "normal": 0.016,
       "drought": 0.048,
       "n_drought_cells": 550
-     },
-     "lined": {
-      "main": {
-       "n": 227,
-       "mean": 0.01,
-       "lo": -0.0037,
-       "hi": 0.0237
-      },
-      "early": {
-       "n": 285,
-       "mean": 0.0052,
-       "lo": -0.0095,
-       "hi": 0.0177
-      },
-      "normal": 0.0038,
-      "drought": 0.0242,
-      "n_drought_cells": 89
-     },
-     "uncertain": {
-      "main": {
-       "n": 696,
-       "mean": 0.0193,
-       "lo": 0.009,
-       "hi": 0.0288
-      },
-      "early": {
-       "n": 749,
-       "mean": 0.0234,
-       "lo": 0.013,
-       "hi": 0.036
-      },
-      "normal": 0.0155,
-      "drought": 0.0445,
-      "n_drought_cells": 322
-     },
-     "unlined": {
-      "main": {
-       "n": 947,
-       "mean": 0.0199,
-       "lo": 0.012,
-       "hi": 0.0282
-      },
-      "early": {
-       "n": 984,
-       "mean": 0.0219,
-       "lo": 0.012,
-       "hi": 0.0321
-      },
-      "normal": 0.0186,
-      "drought": 0.0714,
-      "n_drought_cells": 139
      }
     }
    },
@@ -1145,81 +937,21 @@
      "all": {
       "none": {
        "mean": 0.0615,
-       "lo": 0.0376,
-       "hi": 0.0795,
+       "lo": 0.0387,
+       "hi": 0.0855,
        "n_cells": 98
       },
       "size": {
        "mean": 0.2635,
-       "lo": 0.231,
-       "hi": 0.2968,
+       "lo": 0.2239,
+       "hi": 0.2965,
        "n_cells": 98
       },
       "mws": {
        "mean": -0.0307,
-       "lo": -0.0585,
-       "hi": -0.0053,
+       "lo": -0.0601,
+       "hi": -0.0007,
        "n_cells": 98
-      }
-     },
-     "lined": {
-      "none": {
-       "mean": 0.0422,
-       "lo": -0.0906,
-       "hi": 0.2034,
-       "n_cells": 8
-      },
-      "size": {
-       "mean": 0.0254,
-       "lo": -0.097,
-       "hi": 0.1416,
-       "n_cells": 8
-      },
-      "mws": {
-       "mean": 0.0074,
-       "lo": -0.1296,
-       "hi": 0.1404,
-       "n_cells": 8
-      }
-     },
-     "uncertain": {
-      "none": {
-       "mean": 0.0708,
-       "lo": 0.0236,
-       "hi": 0.1264,
-       "n_cells": 34
-      },
-      "size": {
-       "mean": 0.2417,
-       "lo": 0.1687,
-       "hi": 0.3209,
-       "n_cells": 34
-      },
-      "mws": {
-       "mean": 0.1313,
-       "lo": 0.0585,
-       "hi": 0.1973,
-       "n_cells": 34
-      }
-     },
-     "unlined": {
-      "none": {
-       "mean": 0.0135,
-       "lo": -0.0371,
-       "hi": 0.0493,
-       "n_cells": 27
-      },
-      "size": {
-       "mean": 1.0913,
-       "lo": 0.8552,
-       "hi": 1.2812,
-       "n_cells": 27
-      },
-      "mws": {
-       "mean": 1.2117,
-       "lo": 0.9808,
-       "hi": 1.4606,
-       "n_cells": 27
       }
      }
     },
@@ -1227,81 +959,21 @@
      "all": {
       "none": {
        "mean": 0.0439,
-       "lo": 0.0264,
-       "hi": 0.0623,
+       "lo": 0.028,
+       "hi": 0.0616,
        "n_cells": 98
       },
       "size": {
        "mean": -0.0128,
-       "lo": -0.0506,
-       "hi": 0.0164,
+       "lo": -0.0458,
+       "hi": 0.0172,
        "n_cells": 98
       },
       "mws": {
        "mean": -0.1286,
-       "lo": -0.1625,
-       "hi": -0.0919,
+       "lo": -0.1745,
+       "hi": -0.0929,
        "n_cells": 98
-      }
-     },
-     "lined": {
-      "none": {
-       "mean": 0.0456,
-       "lo": -0.0538,
-       "hi": 0.1302,
-       "n_cells": 8
-      },
-      "size": {
-       "mean": 0.0137,
-       "lo": -0.0926,
-       "hi": 0.0963,
-       "n_cells": 8
-      },
-      "mws": {
-       "mean": -0.0271,
-       "lo": -0.1102,
-       "hi": 0.0542,
-       "n_cells": 8
-      }
-     },
-     "uncertain": {
-      "none": {
-       "mean": 0.0557,
-       "lo": 0.0212,
-       "hi": 0.0964,
-       "n_cells": 34
-      },
-      "size": {
-       "mean": 0.1005,
-       "lo": 0.0434,
-       "hi": 0.1524,
-       "n_cells": 34
-      },
-      "mws": {
-       "mean": -0.0466,
-       "lo": -0.199,
-       "hi": 0.0851,
-       "n_cells": 34
-      }
-     },
-     "unlined": {
-      "none": {
-       "mean": 0.0337,
-       "lo": 0.0038,
-       "hi": 0.0701,
-       "n_cells": 27
-      },
-      "size": {
-       "mean": 0.4685,
-       "lo": 0.3913,
-       "hi": 0.5577,
-       "n_cells": 27
-      },
-      "mws": {
-       "mean": 0.7497,
-       "lo": 0.617,
-       "hi": 0.9138,
-       "n_cells": 27
       }
      }
     }
@@ -1356,104 +1028,104 @@
    },
    "heterogeneity": {
     "n": 1870,
-    "blp": 1.084,
-    "blp_se": 0.176,
+    "blp": 1.05,
+    "blp_se": 0.177,
     "gates": [
      {
       "n": 374,
-      "mean": 0.015,
-      "lo": -0.0019,
-      "hi": 0.0328
+      "mean": 0.0243,
+      "lo": 0.0054,
+      "hi": 0.0416
      },
      {
       "n": 374,
-      "mean": 0.0027,
-      "lo": -0.0162,
-      "hi": 0.0178
+      "mean": -0.0055,
+      "lo": -0.0231,
+      "hi": 0.0117
      },
      {
       "n": 374,
-      "mean": 0.0196,
-      "lo": 0.002,
-      "hi": 0.0376
+      "mean": 0.0164,
+      "lo": -0.0018,
+      "hi": 0.0344
      },
      {
       "n": 374,
-      "mean": 0.0303,
-      "lo": 0.0141,
-      "hi": 0.0448
+      "mean": 0.035,
+      "lo": 0.0191,
+      "hi": 0.0507
      },
      {
       "n": 374,
-      "mean": 0.0835,
-      "lo": 0.0632,
-      "hi": 0.1047
+      "mean": 0.0807,
+      "lo": 0.0592,
+      "hi": 0.1012
      }
     ],
     "clan": [
      {
       "feature": "MWS cropping intensity before the pond",
       "unit": "%",
-      "importance": 0.161,
-      "low": 117.11,
-      "high": 75.51,
+      "importance": 0.164,
+      "low": 118.33,
+      "high": 76.41,
       "stat": "mean"
      },
      {
       "feature": "kharif drought weeks after it appeared",
       "unit": "weeks a year",
-      "importance": 0.145,
-      "low": 0.47,
-      "high": 2.47,
+      "importance": 0.15,
+      "low": 0.42,
+      "high": 2.49,
       "stat": "mean"
      },
      {
       "feature": "pastoral share of MWS",
       "unit": "% of MWS area",
-      "importance": 0.13,
-      "low": 3.75,
-      "high": 14.07,
+      "importance": 0.126,
+      "low": 3.46,
+      "high": 13.95,
       "stat": "mean"
      },
      {
       "feature": "tank irrigated share of MWS",
       "unit": "% of MWS area",
-      "importance": 0.082,
-      "low": 6.61,
-      "high": 2.75,
-      "stat": "mean"
-     },
-     {
-      "feature": "groundwater irrigated share of MWS",
-      "unit": "% of MWS area",
-      "importance": 0.064,
-      "low": 11.71,
-      "high": 8.92,
+      "importance": 0.08,
+      "low": 6.27,
+      "high": 2.65,
       "stat": "mean"
      },
      {
       "feature": "rainfed dryland share of MWS",
       "unit": "% of MWS area",
-      "importance": 0.059,
-      "low": 31.58,
-      "high": 28.02,
+      "importance": 0.064,
+      "low": 31.1,
+      "high": 28.16,
+      "stat": "mean"
+     },
+     {
+      "feature": "groundwater irrigated share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.061,
+      "low": 11.96,
+      "high": 8.99,
       "stat": "mean"
      },
      {
       "feature": "catchment area",
       "unit": "ha",
       "importance": 0.054,
-      "low": 38.93,
-      "high": 35.32,
+      "low": 39.78,
+      "high": 34.7,
       "stat": "median"
      },
      {
-      "feature": "peri urban share of MWS",
-      "unit": "% of MWS area",
-      "importance": 0.05,
-      "low": 2.19,
-      "high": 1.69,
-      "stat": "mean"
+      "feature": "zone of influence area",
+      "unit": "ha",
+      "importance": 0.048,
+      "low": 41.28,
+      "high": 32.03,
+      "stat": "median"
      }
     ]
    },
@@ -1461,32 +1133,32 @@
     "Ahamadnagar": {
      "n": 51,
      "mean": 0.0689,
-     "lo": 0.0343,
-     "hi": 0.1059
+     "lo": 0.0286,
+     "hi": 0.1052
     },
     "Amaravati": {
      "n": 50,
      "mean": 0.0885,
-     "lo": 0.0381,
-     "hi": 0.1391
+     "lo": 0.0316,
+     "hi": 0.1417
     },
     "Ananthapur": {
      "n": 20,
      "mean": 0.1996,
-     "lo": 0.1217,
-     "hi": 0.2762
+     "lo": 0.1168,
+     "hi": 0.2752
     },
     "Aurangabad": {
      "n": 119,
      "mean": -0.0217,
-     "lo": -0.0563,
-     "hi": 0.0111
+     "lo": -0.054,
+     "hi": 0.0053
     },
     "Ballia": {
      "n": 28,
      "mean": -0.0031,
-     "lo": -0.0862,
-     "hi": 0.1048
+     "lo": -0.0882,
+     "hi": 0.111
     },
     "Baran": {
      "n": 1,
@@ -1497,122 +1169,122 @@
     "Bid": {
      "n": 96,
      "mean": 0.0204,
-     "lo": -0.0075,
-     "hi": 0.05
+     "lo": -0.0116,
+     "hi": 0.0528
     },
     "Bolangir (Balangir)": {
      "n": 111,
      "mean": 0.0289,
-     "lo": 0.0011,
-     "hi": 0.0596
+     "lo": 0.0003,
+     "hi": 0.0561
     },
     "Chandrapur": {
      "n": 7,
      "mean": -0.027,
-     "lo": -0.0985,
-     "hi": 0.0541
+     "lo": -0.0901,
+     "hi": 0.0364
     },
     "Chhatarpur": {
      "n": 65,
      "mean": 0.1055,
-     "lo": 0.0466,
-     "hi": 0.1591
+     "lo": 0.0454,
+     "hi": 0.159
     },
     "Chitrakoot": {
      "n": 23,
      "mean": -0.0255,
-     "lo": -0.0852,
-     "hi": 0.048
+     "lo": -0.0787,
+     "hi": 0.0242
     },
     "Chittoor": {
      "n": 76,
      "mean": 0.0274,
-     "lo": -0.0277,
-     "hi": 0.0791
+     "lo": -0.0201,
+     "hi": 0.0846
     },
     "Godda": {
      "n": 34,
      "mean": 0.0024,
-     "lo": -0.0613,
-     "hi": 0.0637
+     "lo": -0.0678,
+     "hi": 0.0658
     },
     "Gondia": {
      "n": 17,
      "mean": 0.0231,
-     "lo": -0.0721,
-     "hi": 0.1102
+     "lo": -0.0705,
+     "hi": 0.1054
     },
     "Hazaribagh": {
      "n": 49,
      "mean": -0.0386,
-     "lo": -0.0964,
-     "hi": 0.0213
+     "lo": -0.0904,
+     "hi": 0.0169
     },
     "Hingoli": {
      "n": 32,
      "mean": 0.0239,
-     "lo": -0.0278,
-     "hi": 0.0893
+     "lo": -0.0358,
+     "hi": 0.0831
     },
     "Jalgaon": {
      "n": 34,
      "mean": 0.0048,
-     "lo": -0.0482,
-     "hi": 0.0665
+     "lo": -0.049,
+     "hi": 0.0662
     },
     "Jalna": {
      "n": 151,
      "mean": 0.0208,
-     "lo": -0.0041,
-     "hi": 0.0475
+     "lo": -0.0073,
+     "hi": 0.0443
     },
     "Koraput": {
      "n": 23,
      "mean": -0.0284,
-     "lo": -0.1007,
-     "hi": 0.0453
+     "lo": -0.0953,
+     "hi": 0.0328
     },
     "Nanded": {
      "n": 34,
      "mean": -0.0058,
-     "lo": -0.0637,
-     "hi": 0.0541
+     "lo": -0.0605,
+     "hi": 0.0482
     },
     "Nandurbar": {
      "n": 4,
      "mean": 0.1356,
-     "lo": -0.0046,
-     "hi": 0.3135
+     "lo": 0.0247,
+     "hi": 0.3114
     },
     "Nashik": {
      "n": 301,
      "mean": 0.0157,
-     "lo": -0.0011,
-     "hi": 0.0323
+     "lo": -0.002,
+     "hi": 0.0354
     },
     "Palghar": {
      "n": 3,
      "mean": 0.2466,
-     "lo": 0.0016,
+     "lo": -0.0495,
      "hi": 0.5159
     },
     "Parbhani": {
      "n": 19,
      "mean": 0.0378,
-     "lo": -0.0345,
-     "hi": 0.1224
+     "lo": -0.0392,
+     "hi": 0.112
     },
     "Pune": {
      "n": 85,
      "mean": 0.0011,
-     "lo": -0.0365,
-     "hi": 0.0417
+     "lo": -0.0361,
+     "hi": 0.0424
     },
     "Sangli": {
      "n": 87,
      "mean": 0.1342,
-     "lo": 0.096,
-     "hi": 0.1698
+     "lo": 0.0957,
+     "hi": 0.1724
     },
     "Satara": {
      "n": 2,
@@ -1623,50 +1295,50 @@
     "Sirohi": {
      "n": 11,
      "mean": -0.0589,
-     "lo": -0.1551,
-     "hi": 0.0211
+     "lo": -0.1491,
+     "hi": 0.0274
     },
     "Solapur": {
      "n": 119,
      "mean": 0.0366,
-     "lo": 0.0118,
-     "hi": 0.0622
+     "lo": 0.0112,
+     "hi": 0.0585
     },
     "Srikakulam": {
      "n": 49,
      "mean": 0.0805,
-     "lo": 0.0046,
-     "hi": 0.1522
+     "lo": 0.0113,
+     "hi": 0.1537
     },
     "Thane": {
      "n": 4,
      "mean": 0.1415,
-     "lo": -0.1309,
+     "lo": -0.1423,
      "hi": 0.4253
     },
     "Udaipur": {
      "n": 13,
      "mean": 0.1215,
-     "lo": 0.0116,
-     "hi": 0.2416
+     "lo": -0.0041,
+     "hi": 0.2324
     },
     "Usmanabad": {
      "n": 127,
      "mean": 0.0196,
-     "lo": -0.0054,
-     "hi": 0.0438
+     "lo": -0.0041,
+     "hi": 0.0431
     },
     "Washim": {
      "n": 17,
      "mean": 0.0343,
-     "lo": -0.0595,
-     "hi": 0.111
+     "lo": -0.0633,
+     "hi": 0.1129
     },
     "Yavatmal": {
      "n": 8,
      "mean": 0.0387,
-     "lo": -0.1104,
-     "hi": 0.1743
+     "lo": -0.1259,
+     "hi": 0.176
     }
    }
   }

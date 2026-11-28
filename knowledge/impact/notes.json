@@ -1,6 +1,6 @@
 {
  "_about": "Rules that write the public note for an intervention's impact, and the fixed text of the impact panels. For each note kind (`waterbody`, `unit` for desilting; `fp_waterbody`, `fp_unit`, `fp_old` for new farm ponds) the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files. `panel` and `fp_panel` hold the labels, headings and explanations around the notes in the atlas panels; its placeholders are listed in `panel._placeholders`.",
- "version": "0.3.0",
+ "version": "0.4.0",
  "waterbody": {
   "main": [
    {
@@ -274,7 +274,8 @@
    "unit_summary": "n, lo, hi, lined, uncertain, unlined",
    "more_rows": "n, total",
    "unit_eyebrow_type": "label",
-   "chart_built": "year"
+   "chart_built": "year",
+   "unit_summary_plain": "n, lo, hi"
   },
   "waterbody_eyebrow": "Impact of a new farm pond",
   "record_title": "{intervention_label}, first wet in {year}",
@@ -309,6 +310,7 @@
   "col_effect": "Cropping intensity (points)",
   "more_rows": "The largest and smallest {n} of {total} are listed.",
   "old_eyebrow": "Effectiveness of an older structure",
-  "old_footer": "A comparison of places, not of years before and after: see the Impact assessment tab."
+  "old_footer": "A comparison of places, not of years before and after: see the Impact assessment tab.",
+  "unit_summary_plain": "Average over {n} assessed ponds (95% range {lo} to {hi} points of cropping intensity)."
  }
 }
