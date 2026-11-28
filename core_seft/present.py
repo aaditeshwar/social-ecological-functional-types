@@ -423,10 +423,12 @@ def present_mws(r, G, T, S, SC, Q, IV, versions, answers=None, mix_before=None, 
         'n_villages': r.get('n_villages') if r.get('n_villages') is not None else len(vrows),
         'canals': canals or None,
     }.items() if v not in (None, [])}
+    from seft.intro_notes import render as note_render, rules as note_rules, mws_env as note_mws_env
+    intro = note_render(note_rules('watershed').get('mws'), note_mws_env(r, A, C, T)) or None
     return AnalyseResult(
         kind='mws', state=r['state'], district=r['district'], tehsil=r.get('tehsil'), uid=str(r['uid']),
         library_version=versions['library'], knowledge_version=versions['knowledge'],
-        identity=ident,
+        identity=ident, intro_note=intro,
         context=_context(r, C), mix=mix, mix_before=mb,
         notes=notes, observed_stresses=observed, pathways=pathways,
         signals=_signals(r, S, used, detail), indicators=_indicators(r, S, used, detail),
@@ -450,7 +452,7 @@ def _rule_on(res, positive_at):
     return res.get('status') == 'triggered'
 
 
-def present_waterbody(b, K, mws, versions, answers=None, detail='summary', A=None, C=None, CC=None):
+def present_waterbody(b, K, mws, versions, answers=None, detail='summary', A=None, C=None, CC=None, works=None):
     from seft.interventions import suggest, load_interventions
     from seft.wb.score import iv_env
     from seft.wb.run import status as wb_status
@@ -535,11 +537,13 @@ def present_waterbody(b, K, mws, versions, answers=None, detail='summary', A=Non
         'lon': xy[0] if len(xy) == 2 else None, 'lat': xy[1] if len(xy) == 2 else None,
         'villages': b.get('villages') or None, 'canal_project': b.get('canal_project'),
     }.items() if v not in (None, '', [])}
+    from seft.intro_notes import render as note_render, rules as note_rules, wb_env as note_wb_env
+    intro = note_render(note_rules('waterbody').get('waterbody'), note_wb_env(b, K, works)) or None
     return AnalyseResult(
         kind='waterbody', state=b['state'], district=b['district'], tehsil=b.get('tehsil'), uid=str(b.get('wb_id')),
         library_version=versions['library'], knowledge_version=versions['knowledge'],
         identity=ident,
-        type=b.get('type'), status=b.get('status') or wb_status(b),
+        type=b.get('type'), status=b.get('status') or wb_status(b), intro_note=intro,
         roles=roles,
         context=jsonable(ctx), mix=mix,
         notes=notes, pathways=pathways,
@@ -554,8 +558,17 @@ def present_waterbody(b, K, mws, versions, answers=None, detail='summary', A=Non
     )
 
 
-def rollup(recs, G, T, SC, IV, versions, kind, state, district, tehsil=None, waterbodies=None):
+def rollup(recs, G, T, SC, IV, versions, kind, state, district, tehsil=None, waterbodies=None, A=None, C=None):
     recs = [r for r in recs if tehsil is None or r.get('tehsil') == tehsil]
+    if A is None:
+        from seft.archetypes import load_archetypes
+        A = load_archetypes()
+    if C is None:
+        from seft.context import load_contexts
+        C = load_contexts()
+    from seft.intro_notes import render as note_render, rules as note_rules, unit_env as note_unit_env
+    intro = note_render(note_rules('watershed').get('unit'),
+                        note_unit_env(recs, f'{tehsil} tehsil' if tehsil else f'{district} district', A, C, T, SC)) or None
     n = len(recs)
     tot = sum(r.get('area') or 0 for r in recs) or 1.0
     shares = {}
@@ -621,7 +634,7 @@ def rollup(recs, G, T, SC, IV, versions, kind, state, district, tehsil=None, wat
         }.items() if v is not None},
         mix={'shares': shares, 'dominant': dominant, 'present': [k for k, v in shares.items() if v >= 0.05],
              'raw_total': None},
-        context=ctx_dist, notes=notes, observed_stresses=observed,
+        context=ctx_dist, intro_note=intro, notes=notes, observed_stresses=observed,
         schemes=schemes, interventions=interventions, tehsils=tehsils,
         waterbodies=waterbodies, questions=[], answers_applied={},
         evidence={'n_scored': n, 'pools': 'pack'},

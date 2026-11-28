@@ -45,7 +45,7 @@
    {"when": "n_stress > 0 and n_severe == 0", "text": "Likely stresses: {stress_text}."},
    {"when": "in_scope and status == 'r' and n_stress == 0", "text": "No observed stress is flagged."},
    {"when": "n_opp > 0", "text": "Opportunity: {opp_text}."},
-   {"when": "n_works > 0", "text": "Recorded intervention: {works_text}; its impact is assessed below."}
+   {"when": "n_works > 0", "text": "Recorded intervention: {works_text}; its impact is assessed separately."}
   ]
  },
  "unit": {

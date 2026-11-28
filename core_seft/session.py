@@ -326,7 +326,7 @@ class Session:
         mix_before = before['mix'] if before['mix'] != r['mix'] else None
         return r, mix_before, mws_diff(before, r)
 
-    def _wb_section(self, state, district, tehsils, recs, fetch, include):
+    def _wb_section(self, state, district, tehsils, recs, fetch, include, tehsil=None):
         cfg = self._cfg(state, district, tehsils)
         have = not self._missing(cfg, layers=True)
         if not have and include != 'waterbody':
@@ -348,7 +348,29 @@ class Session:
             'by_status': dict(Counter(b.get('status') for b in in_scope)),
             'recent_ponds': sum(n for n, _ in rp.values()),
             'rules': rates(bodies, K, scope),
+            'note': self._wb_unit_note(bodies, K, state, district, tehsil=tehsil),
         }
+
+    def _works(self, district):
+        """Recorded intervention years by waterbody id (str), from the registries' linked records in this district."""
+        from seft.util import slug
+        out = {}
+        for doc in self._registries():
+            for r in doc.get('interventions') or []:
+                w = r.get('waterbody') or {}
+                if w.get('wb_id') is not None and r.get('year') and slug(w.get('district') or '') == slug(district):
+                    out.setdefault(str(w['wb_id']), []).append(r['year'])
+        return out
+
+    def _wb_unit_note(self, bodies, K, state, district, tehsil=None, uid=None):
+        from seft.intro_notes import render, rules, wb_unit_env
+        if uid is not None:
+            sel, label = [b for b in bodies if str(b.get('home_mws')) == str(uid)], 'this micro-watershed'
+        elif tehsil:
+            sel, label = [b for b in bodies if b.get('tehsil') == tehsil], f'{tehsil} tehsil'
+        else:
+            sel, label = bodies, f'{district} district'
+        return render(rules('waterbody').get('unit'), wb_unit_env(sel, label, K, set(self._works(district)))) or None
 
     def _score_wb(self, state, district, tehsils, fetch=True):
         key = self._scope_key(state, district, tehsils)
@@ -371,9 +393,12 @@ class Session:
             row.update({f'mws_{k}': v for k, v in (r.get('ind') or {}).items()})
             row['mws_area_ha'] = r.get('area')
             row['dominant_system'] = (r.get('mix') or {}).get('dominant')
+            row['mws_tehsil'] = r.get('tehsil')
             ctx[r['uid']] = row
         prof, drought = build_profiles(cfg)
         attach(B, ctx, prof)
+        from seft.wb.run import dedupe
+        B = dedupe(B, log=lambda m: None)
         scope = {t['id'] for t in types['types'] if t['in_scope']}
         ref = year_reference(B, scope)
         for b in B:
@@ -429,18 +454,27 @@ class Session:
             vrows = _villages(r['uid'], vill, cl, district)
             r = dict(r)
             r['n_villages'] = r.get('n_villages') if r.get('n_villages') is not None else len(vrows)
-            return present_mws(r, kn['G'], kn['T'], kn['S'], kn['SC'], kn['Q'], kn['IV'], versions,
-                               answers=answers, mix_before=mix_before, diff=diff, detail=detail,
-                               A=kn['A'], C=kn['C'], CC=kn.get('CC'), villages=vrows)
+            res = present_mws(r, kn['G'], kn['T'], kn['S'], kn['SC'], kn['Q'], kn['IV'], versions,
+                              answers=answers, mix_before=mix_before, diff=diff, detail=detail,
+                              A=kn['A'], C=kn['C'], CC=kn.get('CC'), villages=vrows)
+            if include == 'waterbody':
+                # the waterbodies whose home is this MWS, as in the waterbody atlas's MWS panel
+                from seft.wb.score import load_knowledge
+                bodies = self._score_wb(state, district, tehsils, fetch=fetch)
+                mine = [b for b in bodies if str(b.get('home_mws')) == str(r['uid'])]
+                res.waterbodies = {'n_waterbodies': len(mine),
+                                   'note': self._wb_unit_note(bodies, load_knowledge(), state, district, uid=r['uid'])}
+            return res
         if kind in ('district', 'tehsil'):
             wb = None
             try:
-                wb = self._wb_section(state, district, tehsils, recs, fetch, include)
+                wb = self._wb_section(state, district, tehsils, recs, fetch, include,
+                                      tehsil=tehsil if kind == 'tehsil' else None)
             except CacheMiss:
                 wb = None
             return rollup(recs, kn['G'], kn['T'], kn['SC'], kn['IV'], versions,
                           kind, state, district, tehsil=tehsil if kind == 'tehsil' else None,
-                          waterbodies=wb)
+                          waterbodies=wb, A=kn['A'], C=kn['C'])
         bodies = self._score_wb(state, district, tehsils, fetch=fetch)
         b = self._find_wb(bodies, uid, state, district)
         from seft.wb.assess import assess
@@ -460,7 +494,7 @@ class Session:
             except UnknownEntity:
                 home = None
         return present_waterbody(b, K, home, versions, answers=answers, detail=detail,
-                                 A=kn['A'], C=kn['C'], CC=kn.get('CC'))
+                                 A=kn['A'], C=kn['C'], CC=kn.get('CC'), works=self._works(district).get(str(b.get('wb_id'))))
 
 
     # ------------------------------------------------------------------ waterbody impact

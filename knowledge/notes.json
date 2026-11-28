@@ -30,13 +30,13 @@
   "add": [
    {"when": "rainfall_label and aquifer_label and terrain_label", "text": "It is {rainfall_label}, on {aquifer_label} aquifers and {terrain_label} terrain."},
    {"when": "gw_category_label", "text": "Its block's groundwater is assessed as {gw_category_label}."},
-   {"when": "canal_label == 'canal crosses mws'", "text": "A canal crosses it."},
+   {"when": "ctx.canal == 'canal_present'", "text": "A canal crosses it."},
    {"when": "cropping_label", "text": "Cropping regime: {cropping_label}."},
    {"when": "n_stress > 0 and n_severe > 0", "text": "Likely stresses: {stress_text} ({n_severe} severe)."},
    {"when": "n_stress > 0 and n_severe == 0", "text": "Likely stresses: {stress_text}."},
    {"when": "n_stress == 0", "text": "No observed stress is flagged from the data."},
    {"when": "n_opp > 0", "text": "Opportunity: {opp_text}."},
-   {"when": "n_schemes > 0", "text": "{n_schemes} schemes match it (below)."}
+   {"when": "n_schemes > 0", "text": "{n_schemes} schemes match it."}
   ]
  },
  "unit": {

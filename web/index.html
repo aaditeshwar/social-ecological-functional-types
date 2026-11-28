@@ -726,8 +726,8 @@ function mwsNoteEnv(m,d,R){
   env.ps_text=joinAnd(K.taxonomy.production_systems.filter(ps=>psOn(m,ps.id,R.se)===true).map(ps=>plainLabel(ps.label)));
   const ks=pwKeys().filter(k=>R.pw[k].positive).sort((a,c)=>(R.pw[c].post||0)-(R.pw[a].post||0)||(R.pw[c].inten||0)-(R.pw[a].inten||0));
   const st=ks.filter(k=>!pwOpp(k)), op=ks.filter(k=>pwOpp(k));
-  Object.assign(env,{n_stress:st.length,stress_text:joinAnd(st.slice(0,3).map(osLabel)),n_severe:st.filter(k=>R.pw[k].asev==="severe").length,
-    n_opp:op.length,opp_text:joinAnd(op.slice(0,3).map(osLabel)),n_schemes:(R.schemes||[]).length});
+  Object.assign(env,{n_stress:st.length,stress_text:joinAnd(st.slice(0,3).map(k=>osLabel(k))),n_severe:st.filter(k=>R.pw[k].asev==="severe").length,
+    n_opp:op.length,opp_text:joinAnd(op.slice(0,3).map(k=>osLabel(k))),n_schemes:(R.schemes||[]).length});
   return env;}
 function unitNoteEnv(ms,A,label){
   const env={unit_label:label,unit_label_cap:capFirst(label),n:ms.length,area_km2:Math.round(A.area/100)};
@@ -1536,16 +1536,26 @@ async function wImpIndex(){if(WIMP_TRIED) return WIMP; WIMP_TRIED=true;
   for(let i=0;i<3&&!WIMP;i++){try{WIMP=await loadWbData("impact");}catch(e){WIMP_ERR=String(e&&e.message||e); console.warn("[atlas] impact index attempt",i+1,"failed:",WIMP_ERR); await new Promise(r=>setTimeout(r,800*(i+1)));}}
   applyViews(); return WIMP;}
 /* CoRE Stack tehsil layers overlap at tehsil borders, so bundles built before wb-run deduplicated them can list a
-   waterbody under two or more tehsils. Keep one per id, by the rule in seft/wb/run.py dedupe(): the record in its home
-   micro-watershed's tehsil, else the largest, else the first. */
+   waterbody under two or more tehsils, or under a tehsil it is not in. Same rule as seft/wb/run.py dedupe(): keep each
+   waterbody once, in the tehsil whose boundary holds its centre (a record in its own tehsil; else moved to the tehsil
+   that holds it); where no boundary holds it, the record in its home micro-watershed's tehsil, else the largest. */
+function inRings(rings,x,y){let c=false; for(const r of rings){for(let i=0,j=r.length-1;i<r.length;j=i++){const [xi,yi]=r[i],[xj,yj]=r[j];
+  if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi) c=!c;}} return c;}
 async function wDedupe(ws,slug){
-  const seen=new Map(); ws.forEach((w,i)=>{const g=seen.get(w.id); if(g) g.push(i); else seen.set(w.id,[i]);});
-  if(seen.size===ws.length) return ws;
   let sb=null; try{sb=await loadBundle(slug);}catch(e){}
+  const T=(sb&&sb.tehsils||[]).map(t=>({name:t.name,rings:t.paths||decode(t.geom),bb:null}));
+  T.forEach(t=>{const xs=t.rings.flat(); t.bb=[Math.min(...xs.map(p=>p[0])),Math.min(...xs.map(p=>p[1])),Math.max(...xs.map(p=>p[0])),Math.max(...xs.map(p=>p[1]))];});
+  const inT=(w,name)=>{const t=T.find(x=>x.name===name); if(!t) return false; const [x,y]=w.xy; return x>=t.bb[0]&&x<=t.bb[2]&&y>=t.bb[1]&&y<=t.bb[3]&&inRings(t.rings,x,y);};
   const home=w=>{const m=sb&&sb.mwsById&&sb.mwsById[w.mws]; return m?m.t:null;};
-  const keep=new Set(); seen.forEach(ix=>{if(ix.length===1){keep.add(ix[0]);return;}
-    const h=ix.filter(i=>ws[i].teh===home(ws[i])); keep.add(h.length?h[0]:ix.reduce((a,c)=>ws[c].a>ws[a].a?c:a,ix[0]));});
-  return ws.filter((_,i)=>keep.has(i));}
+  const groups=new Map(); ws.forEach((w,i)=>{const g=groups.get(w.id); if(g) g.push(i); else groups.set(w.id,[i]);});
+  const out=[];
+  groups.forEach(ix=>{
+    const own=T.length?ix.filter(i=>inT(ws[i],ws[i].teh)):[];
+    if(own.length){out.push([own[0],ws[own[0]]]); return;}
+    const other=T.length?T.find(t=>inT(ws[ix[0]],t.name)):null;
+    if(other){out.push([ix[0],{...ws[ix[0]],teh:other.name}]); return;}
+    const h=ix.filter(i=>ws[i].teh===home(ws[i])); const k=h.length?h[0]:ix.reduce((a,c)=>ws[c].a>ws[a].a?c:a,ix[0]); out.push([k,ws[k]]);});
+  return out.sort((a,c)=>a[0]-c[0]).map(x=>x[1]);}
 async function wBundle(slug){
   if(WBB[slug]) return WBB[slug];
   const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={}; b.slug=slug;
@@ -2037,7 +2047,7 @@ function impT(k,env={}){const t=((WIMP&&WIMP.panel)||{})[k]; if(t==null) return 
 function impLabel(v){return (WIMP&&WIMP.settings.verdict.labels[v])||v}
 function impChip(v){return `<span class="pill" style="background:${IMP_COL[v]||"var(--na)"}">${esc(impLabel(v))}</span>`}
 function impSigned(x,n=1){if(x==null) return "–"; const t=Math.abs(x).toFixed(n); if(+t===0) return (0).toFixed(n); return x>0?"+"+t:"−"+t;}
-function impPlural(l){return l.split(" / ").map(x=>x+"s").join(" / ")}
+function impPlural(l){return l.split(" / ").map(x=>/(ch|sh|s|x)$/.test(x)?x+"es":x+"s").join(" / ")}
 function impYears(ys){return (ys||[]).map(y=>`${y}-${String(y+1).slice(2)}`).join(", ")}
 function wWeeks(w){return WYEARS.map((_,i)=>{const k=(w.k||[])[i],kr=(w.kr||[])[i],krz=(w.krz||[])[i]; return k==null?null:17.3*((k||0)+(kr||0)+(krz||0))/100;});}
 function impChart(w,b,rec){

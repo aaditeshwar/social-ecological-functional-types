@@ -20,6 +20,7 @@ class AnalyseResult:
     context: Any = None
     mix: Any = None
     mix_before: Any = None
+    intro_note: Optional[str] = None
     notes: list = field(default_factory=list)
     observed_stresses: list = field(default_factory=list)
     pathways: list = field(default_factory=list)
