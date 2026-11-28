@@ -6,6 +6,22 @@ from . import registry as REG
 
 ROLES = ('reference', 'test', 'coverage')
 
+def panel_errors(N, page=None):
+    """notes.json `panel`: every key the atlas page uses exists, and each text uses only its declared placeholders."""
+    import re
+    P = N.get('panel'); errs = []
+    if not isinstance(P, dict): return ['notes.json: missing "panel" (fixed text of the impact panels)']
+    decl = {k: {x.strip() for x in v.split(',')} for k, v in P.get('_placeholders', {}).items()}
+    for k, t in P.items():
+        if k.startswith('_'): continue
+        used = set(re.findall(r'\{(\w+)\}', t))
+        if used - decl.get(k, set()): errs.append(f'notes.json panel.{k}: placeholder(s) {sorted(used - decl.get(k, set()))} not listed in panel._placeholders')
+    page = page or ROOT / 'web' / 'index.html'
+    if page.exists():
+        for k in sorted(set(re.findall(r'impT\("(\w+)"', page.read_text(encoding='utf-8'))) - set(P)):
+            errs.append(f'notes.json panel: key "{k}" is used by web/index.html but not defined')
+    return errs
+
 def main(log=print):
     errs, warns = [], []
     S = load_json(knowledge_dir() / 'impact' / 'settings.json')
@@ -23,6 +39,7 @@ def main(log=print):
                 except Exception as e: errs.append(f'notes.json {kind}.{part}[{i}]: {e}')
         if not N.get(kind, {}).get('main') or N[kind]['main'][-1]['when'] != 'true':
             warns.append(f'notes.json {kind}.main: the last rule should be `true` so every result gets a note')
+    errs += panel_errors(N)
     p = REG.IMPACT_CFG / 'locations.json'
     if p.exists():
         for d in load_json(p)['districts']:

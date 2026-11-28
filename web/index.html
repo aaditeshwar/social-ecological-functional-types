@@ -1933,6 +1933,8 @@ function typeWalk(R){
       return `<tr${hit?' style="font-weight:600"':""}><td>${esc(t.label)}</td><td><code>${wExprHtml(t.when)}</code></td><td>${hit?"yes: assigned":v===null?"unknown":(v?"yes (an earlier type matched)":"no")}</td></tr>`;}).join("")}</tbody></table></div></div>`;}
 /* ---------- waterbody impact (seft/impact; data/waterbody/impact.json and imp_<district>.json) ---------- */
 const IMP_COL={likely_gain:"var(--ok)",early_gain:"color-mix(in srgb,var(--ok) 65%,#fff)",likely_loss:"var(--bad)",early_loss:"color-mix(in srgb,var(--bad) 65%,#fff)",inconclusive:"var(--warn)",no_change:"var(--muted)",not_assessable:"var(--na)"};
+// Fixed panel text lives in knowledge/impact/notes.json (panel), shipped in impact.json. impT escapes the template; values are inserted as given (callers pass escaped text or markup).
+function impT(k,env={}){const t=((WIMP&&WIMP.panel)||{})[k]; if(t==null) return esc("["+k+"]"); return esc(t).replace(/\{(\w+)\}/g,(m,x)=>env[x]!=null?String(env[x]):m);}
 function impLabel(v){return (WIMP&&WIMP.settings.verdict.labels[v])||v}
 function impChip(v){return `<span class="pill" style="background:${IMP_COL[v]||"var(--na)"}">${esc(impLabel(v))}</span>`}
 function impSigned(x,n=1){if(x==null) return "–"; const t=Math.abs(x).toFixed(n); if(+t===0) return (0).toFixed(n); return x>0?"+"+t:"−"+t;}
@@ -1945,44 +1947,44 @@ function impChart(w,b,rec){
   const H=100,X0=30,DX=40,Wd=X0+DX*(WYEARS.length-1)+20, y=v=>8+H-(v/52)*H, x=i=>X0+i*DX;
   const line=(a,st)=>{let d="";a.forEach((v,i)=>{if(v==null) return; d+=(d?"L":"M")+x(i)+" "+y(v);}); return `<path d="${d}" fill="none" ${st}/>`;};
   const y0=(rec.post_years||[])[0], i0=WYEARS.indexOf(y0);
-  let s=`<svg viewBox="0 0 ${Wd} ${H+30}" width="100%" style="max-width:${Wd*1.5}px" role="img" aria-label="Weeks of water, this waterbody and its controls">`;
+  let s=`<svg viewBox="0 0 ${Wd} ${H+30}" width="100%" style="max-width:${Wd*1.5}px" role="img" aria-label="${impT("chart_aria")}">`;
   [0,26,52].forEach(v=>s+=`<line x1="${X0-4}" x2="${Wd-10}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width=".5"/><text x="${X0-6}" y="${y(v)+3}" font-size="7" text-anchor="end" fill="var(--muted)">${v}</text>`);
-  if(i0>=0) s+=`<line x1="${x(i0)-DX/2}" x2="${x(i0)-DX/2}" y1="4" y2="${H+8}" stroke="var(--select)" stroke-dasharray="3 3"/><text x="${x(i0)-DX/2+3}" y="12" font-size="7" fill="var(--muted)">work done</text>`;
+  if(i0>=0) s+=`<line x1="${x(i0)-DX/2}" x2="${x(i0)-DX/2}" y1="4" y2="${H+8}" stroke="var(--select)" stroke-dasharray="3 3"/><text x="${x(i0)-DX/2+3}" y="12" font-size="7" fill="var(--muted)">${impT("chart_work_done")}</text>`;
   s+=line(cm,'stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"')+line(tw,'stroke="var(--accent)" stroke-width="2"');
   tw.forEach((v,i)=>{if(v!=null) s+=`<circle cx="${x(i)}" cy="${y(v)}" r="2.2" fill="var(--accent)"><title>${WYEARS[i]}: ${v.toFixed(1)} weeks</title></circle>`;});
   WYEARS.forEach((yr,i)=>s+=`<text x="${x(i)}" y="${H+22}" font-size="7.5" text-anchor="middle" fill="var(--muted)">${yr}</text>`);
-  return s+`</svg><div class="legend"><span><i style="background:var(--accent)"></i>This waterbody</span><span><i style="background:var(--muted)"></i>Mean of its ${cs.length} controls</span><span>Weeks of water a year = 17.3 × (kharif + rabi + summer shares) / 100.</span></div>`;
+  return s+`</svg><div class="legend"><span><i style="background:var(--accent)"></i>${impT("chart_this")}</span><span><i style="background:var(--muted)"></i>${impT("chart_controls",{n:cs.length})}</span><span>${impT("chart_formula")}</span></div>`;
 }
 function impRecord(w,b,rec){
   const S=WIMP.settings, est=Object.fromEntries(S.estimators.map(e=>[e.id,e.label])), E=rec.effects||{}, Wf=E.W||{};
-  const win=rec.window==="combined"?" (all works together)":rec.window==="first"?" (until the next work)":"";
+  const win=rec.window==="combined"?impT("window_combined"):rec.window==="first"?impT("window_first"):"";
   const qf=(rec.quality_flags||[]).map(q=>WIMP.quality_labels[q]||q), cf=(rec.flags||[]).map(f=>(S.flags[f]||{}).label||f);
-  const rows=rec.verdict==="not_assessable"?"":`<div class="tbl"><table><thead><tr><th>Estimator</th><th class="r">Weeks of water</th><th class="r">Rabi retention</th><th class="r">Summer retention</th></tr></thead><tbody>
-    ${["did","did_rain","prepost_rain","counterfactual"].map(k=>`<tr><td>${esc(est[k])}${k==="did"?" <b>(headline)</b>":""}</td><td class="r num">${impSigned(Wf[k])}</td><td class="r num">${E.RR&&E.RR[k]!=null?impSigned(E.RR[k]*100,0)+" pts":"–"}</td><td class="r num">${E.SR&&E.SR[k]!=null?impSigned(E.SR[k]*100,0)+" pts":"–"}</td></tr>`).join("")}
-    <tr><td>Percentile among untreated waterbodies</td><td class="r num">${Wf.percentile??"–"}</td><td class="r num">${E.RR?.percentile??"–"}</td><td class="r num">${E.SR?.percentile??"–"}</td></tr>
-    ${Object.entries(Wf.placebo||{}).map(([y,v])=>`<tr><td>Placebo: pretend the work was in ${y}-${String(+y+1).slice(2)}</td><td class="r num">${impSigned(v)}</td><td class="r num">${E.RR?.placebo?.[y]!=null?impSigned(E.RR.placebo[y]*100,0)+" pts":"–"}</td><td class="r num">${E.SR?.placebo?.[y]!=null?impSigned(E.SR.placebo[y]*100,0)+" pts":"–"}</td></tr>`).join("")}</tbody></table></div>`;
+  const rows=rec.verdict==="not_assessable"?"":`<div class="tbl"><table><thead><tr><th>${impT("col_estimator")}</th><th class="r">${impT("col_weeks")}</th><th class="r">${impT("col_rabi")}</th><th class="r">${impT("col_summer")}</th></tr></thead><tbody>
+    ${["did","did_rain","prepost_rain","counterfactual"].map(k=>`<tr><td>${esc(est[k])}${k==="did"?` <b>${impT("headline_tag")}</b>`:""}</td><td class="r num">${impSigned(Wf[k])}</td><td class="r num">${E.RR&&E.RR[k]!=null?impSigned(E.RR[k]*100,0)+" "+impT("points_unit"):"–"}</td><td class="r num">${E.SR&&E.SR[k]!=null?impSigned(E.SR[k]*100,0)+" "+impT("points_unit"):"–"}</td></tr>`).join("")}
+    <tr><td>${impT("percentile_row")}</td><td class="r num">${Wf.percentile??"–"}</td><td class="r num">${E.RR?.percentile??"–"}</td><td class="r num">${E.SR?.percentile??"–"}</td></tr>
+    ${Object.entries(Wf.placebo||{}).map(([y,v])=>`<tr><td>${impT("placebo_row",{year:y+"-"+String(+y+1).slice(2)})}</td><td class="r num">${impSigned(v)}</td><td class="r num">${E.RR?.placebo?.[y]!=null?impSigned(E.RR.placebo[y]*100,0)+" "+impT("points_unit"):"–"}</td><td class="r num">${E.SR?.placebo?.[y]!=null?impSigned(E.SR.placebo[y]*100,0)+" "+impT("points_unit"):"–"}</td></tr>`).join("")}</tbody></table></div>`;
   const c=rec.controls||{};
-  return `<div style="margin:8px 0 14px"><h3>${esc((S.intervention_types[0]||{}).label||"Intervention")} in ${impYears((rec.intervention||{}).years)}${win}</h3>
-    <div class="chips">${impChip(rec.verdict)}${(rec.intervention||{}).volume_m3!=null?`<span class="chip">${Math.round(rec.intervention.volume_m3).toLocaleString("en-IN")} m³ of silt</span>`:""}</div>
+  return `<div style="margin:8px 0 14px"><h3>${impT("record_title",{intervention_label:esc((S.intervention_types[0]||{}).label||"Intervention"),years:impYears((rec.intervention||{}).years),window_text:win})}</h3>
+    <div class="chips">${impChip(rec.verdict)}${(rec.intervention||{}).volume_m3!=null?`<span class="chip">${impT("volume_chip",{volume:Math.round(rec.intervention.volume_m3).toLocaleString("en-IN")})}</span>`:""}</div>
     <p class="pubnote">${esc(rec.note||"")}</p>
     ${rec.verdict!=="not_assessable"?impChart(w,b,rec):""}
-    <details><summary>How this was estimated</summary>${rows}
-      <p class="note">Before: ${impYears(rec.pre_years)}. After: ${impYears(rec.post_years)||"none yet"}. ${c.n!=null?`Controls: ${c.n} untreated ${esc(WTYPE[w.t]?impPlural(WTYPE[w.t].label.toLowerCase()):"waterbodies")} within ${c.radius_km} km, chosen from ${c.candidates} candidates, outside this waterbody's micro-watershed, matched on size, catchment, stream order, rainfall, drought and the water held in each year before the work (median match distance ${c.median_distance}).`:""} ${rec.reference?`The percentile compares the headline estimate with ${rec.reference.n} untreated waterbodies of ${rec.reference.scope==="type"?"the same type":"any type"} in this district, run through the same steps as if treated.`:""}</p>
-      ${qf.length?`<p class="note"><b>Record quality:</b> ${qf.map(esc).join("; ")}.</p>`:""}${cf.length?`<p class="note"><b>Cautions:</b> ${cf.map(esc).join("; ")}.</p>`:""}
-      <p class="note">Records: ${((rec.intervention||{}).ids||[]).map(i=>`<span class="mono">${esc(i)}</span>`).join(", ")}</p></details></div>`;
+    <details><summary>${impT("how_summary")}</summary>${rows}
+      <p class="note">${impT("periods",{pre:impYears(rec.pre_years),post:impYears(rec.post_years)||impT("post_none")})} ${c.n!=null?impT("controls",{n:c.n,type_plural:WTYPE[w.t]?esc(impPlural(WTYPE[w.t].label.toLowerCase())):impT("type_plural_fallback"),radius_km:c.radius_km,candidates:c.candidates,median_distance:c.median_distance}):""} ${rec.reference?impT("reference",{n:rec.reference.n,scope:impT(rec.reference.scope==="type"?"reference_scope_type":"reference_scope_any")}):""}</p>
+      ${qf.length?`<p class="note"><b>${impT("quality_label")}</b> ${qf.map(esc).join("; ")}.</p>`:""}${cf.length?`<p class="note"><b>${impT("cautions_label")}</b> ${cf.map(esc).join("; ")}.</p>`:""}
+      <p class="note">${impT("records_label")} ${((rec.intervention||{}).ids||[]).map(i=>`<span class="mono">${esc(i)}</span>`).join(", ")}</p></details></div>`;
 }
 function impBlockWb(w,b){
   const recs=b.imp&&b.imp[String(w.id)]; if(!recs||!WIMP) return "";
-  return `<div class="block" id="wimpact"><div class="eyebrow">Impact of interventions</div>${recs.map(r=>impRecord(w,b,r)).join("")}
-    <p class="note">Estimated by comparing this waterbody's change with the change at similar untreated waterbodies nearby over the same years (Methodology tab). Each result is placed among untreated waterbodies run through the same steps, so chance changes are not read as effects.</p></div>`;
+  return `<div class="block" id="wimpact"><div class="eyebrow">${impT("waterbody_eyebrow")}</div>${recs.map(r=>impRecord(w,b,r)).join("")}
+    <p class="note">${impT("waterbody_footer")}</p></div>`;
 }
 function impAvgBlock(kind,key,ws,b){
   if(!WIMP||!b.imp) return "";
   const a=((WIMP.averages||{})[kind]||{})[key];
   const list=ws.filter(w=>b.imp[String(w.id)]).map(w=>[w,b.imp[String(w.id)].find(r=>r.window!=="combined")||b.imp[String(w.id)][0]]);
   if(!a&&!list.length) return "";
-  const tbl=list.length?`<div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Work</th><th>Result</th><th class="r">Weeks of water</th></tr></thead><tbody>${list.sort((x,y)=>((y[1].effects||{}).W?.did??-99)-((x[1].effects||{}).W?.did??-99)).map(([w,r])=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t]?.label||w.t)}</td><td>${impYears((r.intervention||{}).years)}</td><td>${impChip(r.verdict)}</td><td class="r num">${impSigned((r.effects||{}).W?.did)}</td></tr>`).join("")}</tbody></table></div>`:"";
-  return `<div class="block"><div class="eyebrow">Impact of desilting</div>${a?`<p class="pubnote">${esc(a.note)}</p>${a.n?`<p class="note">Average of the headline estimate over ${a.n} assessed works without record-quality flags (95% range ${impSigned(a.lo)} to ${impSigned(a.hi)} weeks a year). Other estimators: rainfall-matched ${impSigned(a.by_estimator?.did_rain)}, counterfactual model ${impSigned(a.by_estimator?.counterfactual)}, post minus pre without controls ${impSigned(a.by_estimator?.prepost_rain)} weeks. Untreated waterbodies run through the same steps average ${impSigned(a.reference_mean)}.</p>`:""}`:""}${tbl}</div>`;
+  const tbl=list.length?`<div class="tbl"><table><thead><tr><th>${impT("col_waterbody")}</th><th>${impT("col_type")}</th><th>${impT("col_work")}</th><th>${impT("col_result")}</th><th class="r">${impT("col_weeks")}</th></tr></thead><tbody>${list.sort((x,y)=>((y[1].effects||{}).W?.did??-99)-((x[1].effects||{}).W?.did??-99)).map(([w,r])=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t]?.label||w.t)}</td><td>${impYears((r.intervention||{}).years)}</td><td>${impChip(r.verdict)}</td><td class="r num">${impSigned((r.effects||{}).W?.did)}</td></tr>`).join("")}</tbody></table></div>`:"";
+  return `<div class="block"><div class="eyebrow">${impT("unit_eyebrow",{intervention_label_lower:esc(((WIMP.settings.intervention_types[0]||{}).label||"interventions").toLowerCase())})}</div>${a?`<p class="pubnote">${esc(a.note)}</p>${a.n?`<p class="note">${impT("unit_summary",{n:a.n,lo:impSigned(a.lo),hi:impSigned(a.hi),did_rain:impSigned(a.by_estimator?.did_rain),counterfactual:impSigned(a.by_estimator?.counterfactual),prepost_rain:impSigned(a.by_estimator?.prepost_rain),reference_mean:impSigned(a.reference_mean)})}</p>`:""}`:""}${tbl}</div>`;
 }
 function wPaneWb(P,w,d,b){
   const key=wKey(b,w), R=wAssessC(w,b), T=WTYPE[R.type], inS=T.in_scope, m=b.mws[w.mws];

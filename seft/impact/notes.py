@@ -1,10 +1,18 @@
 """Public notes for impact results, from the rules in knowledge/impact/notes.json.
 
-Waterbody placeholders: intervention_label_lower, year_label, type_label, type_label_plural, effect_signed, effect_abs,
-n_controls, radius_km, post_text, reason, volume_text, depth_text, flags_text, group_n, group_unit, group_mean_signed;
-fields usable in `when`: verdict, has_volume, n_flags, group_n.
-Unit placeholders: n, min_n, unit_label, intervention_label_lower, mean_signed, mean_abs, lo_signed, hi_signed,
-n_gain, n_loss, expected_each; fields usable in `when`: n, min_n, lo, hi.
+Waterbody notes (`waterbody`, environment built by run.note_env)
+  Placeholders: intervention_label_lower, year_label, type_label, type_label_plural, effect_signed, effect_abs,
+    n_controls, radius_km, post_text, reason, volume_text, depth_text, flags_text, group_n, group_unit,
+    group_mean_signed, group_label, group_placebo_text.
+  Fields usable in `when`: verdict, has_volume, implausible, n_flags, group_n, group_concern (and any placeholder).
+
+Unit notes for MWS / tehsil / district averages (`unit`, environment built by run.unit_stats)
+  Placeholders: n, min_n, unit_label, intervention_label_lower, mean_signed, mean_abs, lo_signed, hi_signed,
+    n_gain, n_loss, expected_each, placebo_abs, placebo_text.
+  Fields usable in `when`: n, min_n, lo, hi, placebo_concern (and any placeholder).
+
+The fixed panel text (`panel`) is not rendered here: it is copied into web impact.json and filled by the page
+(impT in web/index.html); its placeholders are listed in `panel._placeholders`.
 """
 from ..expr import evaluate
 from ..util import load_json, knowledge_dir
