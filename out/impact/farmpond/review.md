@@ -36,14 +36,14 @@ Placebo (year before): +0.2 (-0.4, +0.8) n=6094 points. Model: background coeffi
 | nonkharif | unlined | +0.9 (-0.5, +2.3) | +0.1 (-1.9, +1.7) | -1.1 (-2.9, +0.5) |
 
 Heterogeneity: BLP 1.331 (SE 0.068); GATES -4.8 (-5.7, -3.9) n=1700; -0.1 (-1.0, +0.7) n=1699; +0.7 (-0.2, +1.7) n=1699; +2.9 (+2.0, +3.9) n=1699; +8.1 (+7.1, +9.2) n=1699
-- share pastoral: importance 0.17, lowest group 0.013, highest 0.088
-- MWS cropping intensity before: importance 0.124, lowest group 1.293, highest 1.074
-- share rainfed dryland: importance 0.086, lowest group 0.357, highest 0.272
-- log catchment: importance 0.083, lowest group 1.99, highest 0.769
-- stream order: importance 0.065, lowest group 2.59, highest 1.312
-- share tree crops: importance 0.065, lowest group 0.091, highest 0.072
-- share groundwater irrigated: importance 0.059, lowest group 0.22, highest 0.103
-- share peri urban: importance 0.056, lowest group 0.028, highest 0.014
+- pastoral share of MWS: importance 0.17, lowest group 1.33, highest 8.75
+- MWS cropping intensity before the pond: importance 0.124, lowest group 129.25, highest 107.41
+- rainfed dryland share of MWS: importance 0.086, lowest group 35.72, highest 27.16
+- catchment area: importance 0.083, lowest group 1.8, highest 0.63
+- stream order: importance 0.065, lowest group 2.59, highest 1.31
+- tree crops share of MWS: importance 0.065, lowest group 9.11, highest 7.17
+- groundwater irrigated share of MWS: importance 0.059, lowest group 22.01, highest 10.32
+- peri urban share of MWS: importance 0.056, lowest group 2.81, highest 1.41
 
 ## headwater_pond
 
@@ -81,14 +81,14 @@ Placebo (year before): -1.1 (-2.5, +0.4) n=1010 points. Model: background coeffi
 | nonkharif | unlined | +3.4 (+0.4, +7.0) | +46.9 (+39.1, +55.8) | +75.0 (+61.7, +91.4) |
 
 Heterogeneity: BLP 1.084 (SE 0.176); GATES +1.5 (-0.2, +3.3) n=374; +0.3 (-1.6, +1.8) n=374; +2.0 (+0.2, +3.8) n=374; +3.0 (+1.4, +4.5) n=374; +8.3 (+6.3, +10.5) n=374
-- MWS cropping intensity before: importance 0.161, lowest group 1.171, highest 0.755
-- drought weeks after: importance 0.145, lowest group 0.466, highest 2.471
-- share pastoral: importance 0.13, lowest group 0.038, highest 0.141
-- share tank irrigated: importance 0.082, lowest group 0.066, highest 0.027
-- share groundwater irrigated: importance 0.064, lowest group 0.117, highest 0.089
-- share rainfed dryland: importance 0.059, lowest group 0.316, highest 0.28
-- log catchment: importance 0.054, lowest group 3.789, highest 3.616
-- share peri urban: importance 0.05, lowest group 0.022, highest 0.017
+- MWS cropping intensity before the pond: importance 0.161, lowest group 117.11, highest 75.51
+- kharif drought weeks after it appeared: importance 0.145, lowest group 0.47, highest 2.47
+- pastoral share of MWS: importance 0.13, lowest group 3.75, highest 14.07
+- tank irrigated share of MWS: importance 0.082, lowest group 6.61, highest 2.75
+- groundwater irrigated share of MWS: importance 0.064, lowest group 11.71, highest 8.92
+- rainfed dryland share of MWS: importance 0.059, lowest group 31.58, highest 28.02
+- catchment area: importance 0.054, lowest group 38.93, highest 35.32
+- peri urban share of MWS: importance 0.05, lowest group 2.19, highest 1.69
 
 ## Older structures (site-premium corrected)
 

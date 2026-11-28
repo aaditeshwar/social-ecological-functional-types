@@ -366,9 +366,9 @@ def heterogeneity(units, recs, H, ctx):
     ks = [k for k, r in recs.items() if r['effects']['ci']['main'] is not None]
     if len(ks) < H['min_ponds']: return None
     y = np.array([recs[k]['effects']['ci']['main'] for k in ks])
-    names = ['log pond area', 'log ZoI area', 'stream order', 'log catchment', 'MWS cropping intensity before', 'drought weeks after',
-             'appearance year', 'lined-like', 'unlined-like', 'hard-rock aquifer', 'plain terrain', 'hilly terrain',
-             'groundwater over-exploited or critical', 'canal present', 'semi-arid'] + [f'share {a.replace("_", " ")}' for a in ARCH]
+    names = ['pond area', 'zone of influence area', 'stream order', 'catchment area', 'MWS cropping intensity before the pond', 'kharif drought weeks after it appeared',
+             'first wet year', 'water looks lined', 'water looks unlined', 'hard-rock aquifer', 'plain terrain', 'hilly terrain',
+             'groundwater over-exploited or critical', 'canal present', 'semi-arid rainfall'] + [f'{a.replace("_", " ")} share of MWS' for a in ARCH]
     def X_of(u):
         c = ctx.get(u['mws'], {}); E = u['Ei']
         return [math.log1p(u['area']), math.log1p(u.get('zoi_area') or 0), u.get('so') or 0, math.log1p(u.get('catch') or 0),
@@ -384,7 +384,15 @@ def heterogeneity(units, recs, H, ctx):
     e = y - Z @ b; Si = np.linalg.inv(Z.T @ Z); Vc = Si @ (Z.T * e ** 2) @ Z @ Si
     q = np.quantile(pred, [0.2, 0.4, 0.6, 0.8]); grp = np.searchsorted(q, pred)
     gates = [boot(y[grp == g]) for g in range(5)]
-    clan = [{'feature': names[j], 'importance': _r(imp[j]), 'low': _r(X[grp == 0, j].mean()), 'high': _r(X[grp == 4, j].mean())} for j in np.argsort(-imp)[:8]]
+    # CLAN in readable units: the forest sees log sizes, the table shows sizes in ha (medians, as they are skewed),
+    # cropping intensity in %, yes/no features and system shares as % of ponds or of MWS area
+    D = np.nan_to_num(np.array([[units[k]['area'], units[k].get('zoi_area') or 0, units[k].get('so') or 0, units[k].get('catch') or 0] for k in ks], float))
+    units_ = ['ha', 'ha', '', 'ha', '%', 'weeks a year', '', '% of ponds', '% of ponds'] + ['% of ponds'] * 6 + ['% of MWS area'] * len(ARCH)
+    def disp(j, sel):
+        if j < 4 and j != 2: return float(np.median(D[sel, j]))
+        v = float(X[sel, j].mean()); return v * 100 if units_[j].startswith('%') or j == 4 else v
+    clan = [{'feature': names[j], 'unit': units_[j], 'importance': _r(imp[j]), 'low': _r(disp(j, grp == 0), 2), 'high': _r(disp(j, grp == 4), 2),
+             'stat': 'median' if j in (0, 1, 3) else 'mean'} for j in np.argsort(-imp)[:8]]
     return {'n': len(y), 'blp': _r(b[1]), 'blp_se': _r(math.sqrt(Vc[1, 1])), 'gates': gates, 'clan': clan}
 
 def effectiveness(U, S, in_scope, log=print):

@@ -557,52 +557,68 @@
     ],
     "clan": [
      {
-      "feature": "share pastoral",
+      "feature": "pastoral share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.17,
-      "low": 0.013,
-      "high": 0.088
+      "low": 1.33,
+      "high": 8.75,
+      "stat": "mean"
      },
      {
-      "feature": "MWS cropping intensity before",
+      "feature": "MWS cropping intensity before the pond",
+      "unit": "%",
       "importance": 0.124,
-      "low": 1.293,
-      "high": 1.074
+      "low": 129.25,
+      "high": 107.41,
+      "stat": "mean"
      },
      {
-      "feature": "share rainfed dryland",
+      "feature": "rainfed dryland share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.086,
-      "low": 0.357,
-      "high": 0.272
+      "low": 35.72,
+      "high": 27.16,
+      "stat": "mean"
      },
      {
-      "feature": "log catchment",
+      "feature": "catchment area",
+      "unit": "ha",
       "importance": 0.083,
-      "low": 1.99,
-      "high": 0.769
+      "low": 1.8,
+      "high": 0.63,
+      "stat": "median"
      },
      {
       "feature": "stream order",
+      "unit": "",
       "importance": 0.065,
       "low": 2.59,
-      "high": 1.312
+      "high": 1.31,
+      "stat": "mean"
      },
      {
-      "feature": "share tree crops",
+      "feature": "tree crops share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.065,
-      "low": 0.091,
-      "high": 0.072
+      "low": 9.11,
+      "high": 7.17,
+      "stat": "mean"
      },
      {
-      "feature": "share groundwater irrigated",
+      "feature": "groundwater irrigated share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.059,
-      "low": 0.22,
-      "high": 0.103
+      "low": 22.01,
+      "high": 10.32,
+      "stat": "mean"
      },
      {
-      "feature": "share peri urban",
+      "feature": "peri urban share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.056,
-      "low": 0.028,
-      "high": 0.014
+      "low": 2.81,
+      "high": 1.41,
+      "stat": "mean"
      }
     ]
    },
@@ -1376,52 +1392,68 @@
     ],
     "clan": [
      {
-      "feature": "MWS cropping intensity before",
+      "feature": "MWS cropping intensity before the pond",
+      "unit": "%",
       "importance": 0.161,
-      "low": 1.171,
-      "high": 0.755
+      "low": 117.11,
+      "high": 75.51,
+      "stat": "mean"
      },
      {
-      "feature": "drought weeks after",
+      "feature": "kharif drought weeks after it appeared",
+      "unit": "weeks a year",
       "importance": 0.145,
-      "low": 0.466,
-      "high": 2.471
+      "low": 0.47,
+      "high": 2.47,
+      "stat": "mean"
      },
      {
-      "feature": "share pastoral",
+      "feature": "pastoral share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.13,
-      "low": 0.038,
-      "high": 0.141
+      "low": 3.75,
+      "high": 14.07,
+      "stat": "mean"
      },
      {
-      "feature": "share tank irrigated",
+      "feature": "tank irrigated share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.082,
-      "low": 0.066,
-      "high": 0.027
+      "low": 6.61,
+      "high": 2.75,
+      "stat": "mean"
      },
      {
-      "feature": "share groundwater irrigated",
+      "feature": "groundwater irrigated share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.064,
-      "low": 0.117,
-      "high": 0.089
+      "low": 11.71,
+      "high": 8.92,
+      "stat": "mean"
      },
      {
-      "feature": "share rainfed dryland",
+      "feature": "rainfed dryland share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.059,
-      "low": 0.316,
-      "high": 0.28
+      "low": 31.58,
+      "high": 28.02,
+      "stat": "mean"
      },
      {
-      "feature": "log catchment",
+      "feature": "catchment area",
+      "unit": "ha",
       "importance": 0.054,
-      "low": 3.789,
-      "high": 3.616
+      "low": 38.93,
+      "high": 35.32,
+      "stat": "median"
      },
      {
-      "feature": "share peri urban",
+      "feature": "peri urban share of MWS",
+      "unit": "% of MWS area",
       "importance": 0.05,
-      "low": 0.022,
-      "high": 0.017
+      "low": 2.19,
+      "high": 1.69,
+      "stat": "mean"
      }
     ]
    },
