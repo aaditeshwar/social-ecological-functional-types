@@ -33,6 +33,10 @@ Waterbody impact (config/impact/locations.json, registries in data/registries/):
     python -m seft.cli impact-link     # link registry records to atlas waterbodies (after wb-fetch)
     python -m seft.cli impact-run      # effects, verdicts, averages -> out/impact and web/data/waterbody
     python -m seft.cli impact-validate # check knowledge/impact, config/impact and the registries
+    python -m seft.cli impact-farmpond [--data-root DIR]
+                                       # new farm ponds (first wet 2019-2023) in every waterbody tehsil: effect on
+                                       # cropping in their zone of influence, lined/unlined class, older structures
+                                       # -> out/impact/farmpond and web/data/waterbody (fp.json, fp_<district>.json)
 
 Common options: --locations FILE (default config/locations.json). For run and wb-run: --answers FILE
 (community answers saved from the atlas), --merge (keep districts already in the atlas that this run does not
@@ -81,6 +85,12 @@ def cmd_impact_run(a):
         from .impact.run import finalize_only
         finalize_only(web=not a.no_web); return
     imain(a.registry.split(',') if a.registry else None, link=not a.no_link, web=not a.no_web)
+
+def cmd_impact_farmpond(a):
+    from .impact.farmpond import main as fmain
+    from .util import set_data_root
+    if a.data_root: set_data_root(a.data_root)
+    fmain(web=not a.no_web)
 
 def cmd_add(a):
     roles = _roles(a)
@@ -296,6 +306,9 @@ def main(argv=None):
     p.add_argument('--no-web', action='store_true', help='do not copy bundles to web/data/waterbody')
     p.add_argument('--finalize-only', action='store_true', help='rebuild verdicts, notes and averages from out/impact/records.json without re-estimating')
     sub.add_parser('impact-validate', help='check knowledge/impact, config/impact and the registries')
+    p = sub.add_parser('impact-farmpond', help='effect of new farm ponds on cropping around them -> out/impact/farmpond, web/data/waterbody')
+    p.add_argument('--data-root', help='folder holding raw/ and geo/ (default: data/)')
+    p.add_argument('--no-web', action='store_true', help='do not copy bundles to web/data/waterbody')
     a = ap.parse_args(argv)
     if a.cmd == 'add': cmd_add(a)
     elif a.cmd == 'fetch': cmd_fetch(a)
@@ -314,6 +327,7 @@ def main(argv=None):
     elif a.cmd == 'impact-build-registry': cmd_impact_build(a)
     elif a.cmd == 'impact-link': cmd_impact_link(a)
     elif a.cmd == 'impact-run': cmd_impact_run(a)
+    elif a.cmd == 'impact-farmpond': cmd_impact_farmpond(a)
     elif a.cmd == 'impact-validate':
         from .impact.validate import main as iv; sys.exit(0 if iv() else 1)
     elif a.cmd == 'cc-build':

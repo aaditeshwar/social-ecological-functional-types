@@ -254,7 +254,8 @@ def write(recs, AV, regs, S, out=None, web=True, log=print):
     (out / 'review.md').write_text(review(recs, AV, S), encoding='utf-8')
     by = collections.defaultdict(lambda: collections.defaultdict(list))
     for r in recs: by[r['district']][r['wb_id']].append({k: v for k, v in r.items() if k not in ('state', 'district', 'wb_id', 'xy')})
-    idx = {'settings': {k: S[k] for k in ('intervention_types', 'outcomes', 'matching', 'estimators', 'verdict', 'flags', 'year_convention')},
+    idx = {'settings': {k: S[k] for k in ('intervention_types', 'outcomes', 'matching', 'estimators', 'verdict', 'flags', 'year_convention',
+                                          'reference', 'placebo_offsets', 'min_pre_years', 'averages') if k in S},
            'quality_labels': S['registry_quality']['labels'],
            'registries': [{**d['registry'], 'n': len(d['interventions']),
                            'linked': sum(1 for r in d['interventions'] if (r.get('waterbody') or {}).get('wb_id') is not None)} for d in regs],

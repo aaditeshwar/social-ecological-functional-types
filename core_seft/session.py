@@ -401,8 +401,14 @@ class Session:
         B = dedupe(B, log=lambda m: None)
         scope = {t['id'] for t in types['types'] if t['in_scope']}
         ref = year_reference(B, scope)
+        from seft.impact.farmpond import note_fields, settings as fp_settings
+        try: FS = fp_settings()
+        except FileNotFoundError: FS = None          # a knowledge pack older than 0.3.x has no impact/farmponds.json
         for b in B:
             b['vars'] = compute(b, prof, drought, ref)
+            if FS:
+                dw = {int(y): (FS['drought']['min_weeks'] if v else 0) for y, v in (drought.get(b.get('home_mws')) or {}).items()}
+                b['fp_note'] = note_fields(b.get('k'), b.get('kr'), b.get('krz'), b.get('type'), dw, FS)
         pools = atlas_wb_pools()
         if not pools:
             from seft.wb.score import pool_thresholds

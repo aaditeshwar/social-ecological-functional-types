@@ -1,6 +1,6 @@
 {
- "_about": "Rules that write the public note for an intervention's impact, and the fixed text of the impact panels. For each note kind (`waterbody`, `unit`) the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files. `panel` holds the labels, headings and explanations around the notes in the atlas panels; its placeholders are listed in `panel._placeholders`.",
- "version": "0.2.0",
+ "_about": "Rules that write the public note for an intervention's impact, and the fixed text of the impact panels. For each note kind (`waterbody`, `unit` for desilting; `fp_waterbody`, `fp_unit`, `fp_old` for new farm ponds) the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files. `panel` and `fp_panel` hold the labels, headings and explanations around the notes in the atlas panels; its placeholders are listed in `panel._placeholders`.",
+ "version": "0.3.0",
  "waterbody": {
   "main": [
    {
@@ -138,5 +138,177 @@
   "chart_this": "This waterbody",
   "chart_controls": "Mean of its {n} controls",
   "chart_formula": "Weeks of water a year = 17.3 × (kharif + rabi + summer shares) / 100."
+ },
+ "fp_waterbody": {
+  "main": [
+   {
+    "when": "verdict == 'not_assessable'",
+    "text": "This {type_label} first held water in {year_label}, so it is treated as a new pond, but its effect on cropping around it cannot be assessed: {reason}."
+   },
+   {
+    "when": "verdict == 'early_gain'",
+    "text": "This {type_label} first held water in {year_label}. In {post_text}, cropping intensity in its zone of influence was about {effect_abs} points higher than predicted had it not been built. That is an early sign of a gain: it rests on too few years, or on years in which nearly every pond of the district had already been built, to confirm."
+   },
+   {
+    "when": "verdict == 'early_loss'",
+    "text": "This {type_label} first held water in {year_label}. In {post_text}, cropping intensity in its zone of influence was about {effect_abs} points lower than predicted had it not been built. That is an early sign of a loss: it rests on too few years, or on years in which nearly every pond of the district had already been built, to confirm."
+   },
+   {
+    "when": "verdict == 'likely_gain'",
+    "text": "This {type_label} first held water in {year_label}. Over {post_text}, cropping intensity in its zone of influence was about {effect_abs} points a year higher than predicted had it not been built. Ponds show a difference this large in the years before they were built less than one time in ten, so the gain is likely real."
+   },
+   {
+    "when": "verdict == 'likely_loss'",
+    "text": "This {type_label} first held water in {year_label}. Over {post_text}, cropping intensity in its zone of influence was about {effect_abs} points a year lower than predicted had it not been built. A loss this large is unusual; ask whether the pond took more cropland than its own area, or whether the zone of influence is drawn around the wrong fields."
+   },
+   {
+    "when": "verdict == 'inconclusive'",
+    "text": "This {type_label} first held water in {year_label}. Over {post_text}, cropping intensity in its zone of influence differed by {effect_signed} points from the prediction had it not been built, but {reason}, so the result is unsettled."
+   },
+   {
+    "when": "true",
+    "text": "This {type_label} first held water in {year_label}. Over {post_text}, cropping intensity in its zone of influence differed by {effect_signed} points from the prediction had it not been built. That is within the range ponds show in the years before they were built, so no change can be told apart from year-to-year variation."
+   }
+  ],
+  "add": [
+   {
+    "when": "cls == 'lined' and verdict != 'not_assessable'",
+    "text": "Its water looks like a lined pond's: water in summer in {summer_years}% of the years since, over {summer_area}% of its area on average, so it probably stores water for rabi and summer crops."
+   },
+   {
+    "when": "cls == 'unlined' and verdict != 'not_assessable'",
+    "text": "Its water looks like an unlined pond's: it is usually dry by summer, so it mainly helps the monsoon crop and recharges groundwater."
+   },
+   {
+    "when": "has_nk and verdict != 'not_assessable'",
+    "text": "Rabi and summer cropping in the zone changed by {nk_signed} points of its cropland."
+   },
+   {
+    "when": "has_drought and verdict != 'not_assessable'",
+    "text": "In drought years the difference in cropping intensity was {drought_signed} points."
+   },
+   {
+    "when": "has_early and verdict != 'not_assessable'",
+    "text": "In {early_text}, when only its micro-watershed is left as a comparison, the difference was {early_signed} points (an early sign)."
+   },
+   {
+    "when": "appeared_2019",
+    "text": "Caution: it first held water in 2019-20, after the dry years 2017-18, so it may be an older pond that was dry rather than a new one."
+   },
+   {
+    "when": "group_n >= 1 and verdict != 'not_assessable'",
+    "text": "Across {group_n} {group_label} assessed in {group_unit}, the average is {group_mean_signed} points."
+   },
+   {
+    "when": "group_cls_n >= 10 and verdict != 'not_assessable'",
+    "text": "Among the {group_cls_n} {cls_label} ones there, the average is {group_cls_mean_signed} points."
+   }
+  ]
+ },
+ "fp_unit": {
+  "main": [
+   {
+    "when": "n == 0",
+    "text": "No {type_label_plural} in {unit_label} can be assessed yet."
+   },
+   {
+    "when": "n == 1",
+    "text": "One {type_label} in {unit_label} can be assessed so far: {mean_signed} points of cropping intensity in its zone of influence compared with the prediction had it not been built. One pond is too few to rely on."
+   },
+   {
+    "when": "n < min_n",
+    "text": "{n} {type_label_plural} in {unit_label} can be assessed so far: on average {mean_signed} points of cropping intensity in their zones of influence compared with the prediction had they not been built. Too few to rely on."
+   },
+   {
+    "when": "lo > 0",
+    "text": "{n} {type_label_plural} in {unit_label} raised cropping intensity in their zones of influence by about {mean_abs} points on average (95% range {lo_signed} to {hi_signed}), compared with the prediction had they not been built."
+   },
+   {
+    "when": "hi < 0",
+    "text": "Cropping intensity in the zones of influence of {n} {type_label_plural} in {unit_label} was about {mean_abs} points lower on average than predicted had they not been built (95% range {lo_signed} to {hi_signed})."
+   },
+   {
+    "when": "true",
+    "text": "{n} {type_label_plural} in {unit_label} show no average change in cropping intensity around them that can be told apart from zero: {mean_signed} points (95% range {lo_signed} to {hi_signed})."
+   }
+  ],
+  "add": [
+   {
+    "when": "n >= min_n",
+    "text": "{n_gain} show a likely gain or an early sign of one and {n_loss} a loss, against about {expected_each} each expected by chance."
+   },
+   {
+    "when": "n >= min_n and n_lined >= 5 and n_unlined >= 5",
+    "text": "Ponds whose water looks lined: {lined_signed} points ({n_lined} ponds); unlined: {unlined_signed} points ({n_unlined})."
+   },
+   {
+    "when": "n >= min_n and has_nk",
+    "text": "Rabi and summer cropping changed by {nk_signed} points of the zones' cropland."
+   },
+   {
+    "when": "n_early >= min_n",
+    "text": "In 2023-24 and 2024-25, with only the micro-watersheds left as comparison, the {n_early} ponds with data in those years show {early_signed} points (an early sign)."
+   }
+  ]
+ },
+ "fp_old": {
+  "main": [
+   {
+    "when": "has_premium",
+    "text": "Since 2017, cropping intensity in this {type_label}'s zone of influence has been {gap_abs} points {gap_dir} that of its micro-watershed. Where {type_label_plural} were built later in this district, their zones were {premium_abs} points {premium_dir} their micro-watersheds before construction, so about {corrected_signed} points may be due to the structure. This compares places rather than years, and assumes older structures were sited like newer ones."
+   },
+   {
+    "when": "true",
+    "text": "Since 2017, cropping intensity in this {type_label}'s zone of influence has been {gap_abs} points {gap_dir} that of its micro-watershed."
+   }
+  ],
+  "add": []
+ },
+ "fp_panel": {
+  "_about": "Fixed text of the new-farm-pond panels and of the Impact assessment tab's farm-pond tables (web/index.html, fpT). Text is shown as written; placeholders in braces are filled by the page.",
+  "_placeholders": {
+   "record_title": "intervention_label, year",
+   "cls_chip": "label",
+   "lining_detail": "summer_years, summer_area, rabi, kharif, fill_ratio",
+   "method_note": "district",
+   "unit_summary": "n, lo, hi, lined, uncertain, unlined",
+   "more_rows": "n, total",
+   "unit_eyebrow_type": "label",
+   "chart_built": "year"
+  },
+  "waterbody_eyebrow": "Impact of a new farm pond",
+  "record_title": "{intervention_label}, first wet in {year}",
+  "cls_chip": "water looks {label}",
+  "how_summary": "How this was estimated",
+  "col_outcome": "Outcome (points)",
+  "col_main": "Up to 2022-23",
+  "col_early": "2023-24 on (early sign)",
+  "row_placebo": "Placebo: the year before it first held water",
+  "row_background": "Check: change against its micro-watershed",
+  "row_percentile": "Percentile among ponds in the years before they were built",
+  "row_drought": "Drought years only",
+  "lining_detail": "Water after it first filled: summer water in {summer_years}% of years, over {summer_area}% of its area on average; rabi water {rabi}%, kharif {kharif}%; fill in drought ÷ normal years {fill_ratio}.",
+  "method_note": "The prediction comes from the pond's own years before it was built, ponds in {district} district not yet built in the same year, the cropping of its micro-watershed (leaving out the fields around other new ponds) and kharif drought weeks. Outcomes after construction are corrected for the cropland the pond itself occupies.",
+  "cautions_label": "Cautions:",
+  "flag_appeared_2019": "first wet in 2019-20 after the dry years 2017-18, so it may be an older pond",
+  "flag_small": "under 0.1 ha, where the water classifier is least reliable",
+  "chart_aria": "Cropping intensity in the zone of influence, its micro-watershed and the prediction without the pond",
+  "chart_zoi": "Zone of influence",
+  "chart_mws": "Micro-watershed (without new ponds' fields)",
+  "chart_fit": "Predicted without the pond",
+  "chart_built": "first wet {year}",
+  "chart_axis": "Cropping intensity, %",
+  "waterbody_footer": "New ponds are found from the water series: there is no registry. The effect is observed cropping minus the prediction had the pond not been built, and it is placed among the same differences for ponds in the years before they were built, so that chance changes are not read as effects (Impact assessment tab).",
+  "unit_eyebrow": "Impact of new farm ponds",
+  "unit_eyebrow_type": "{label}",
+  "unit_summary": "Average over {n} assessed ponds (95% range {lo} to {hi} points of cropping intensity). By how their water looks: lined {lined}, uncertain {uncertain}, unlined {unlined} points.",
+  "col_pond": "Pond",
+  "col_year": "First wet",
+  "col_class": "Water looks",
+  "col_result": "Result",
+  "col_effect": "Cropping intensity (points)",
+  "more_rows": "The largest and smallest {n} of {total} are listed.",
+  "old_eyebrow": "Effectiveness of an older structure",
+  "old_footer": "A comparison of places, not of years before and after: see the Impact assessment tab."
  }
 }

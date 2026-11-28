@@ -192,7 +192,8 @@ def _status_code(b):
 
 
 def wb_env(b, K, works=None, intervention_label='desilting'):
-    """b: a scored waterbody with type, rules (after answers, as from seft.wb.assess), roles, vars, k/kr/krz.
+    """b: a scored waterbody with type, rules (after answers, as from seft.wb.assess), roles, vars, k/kr/krz, and
+    fp_note (seft.impact.farmpond.note_fields: lined/unlined class and new-pond year of farm and headwater ponds).
     works: years of recorded interventions on it."""
     types = {t['id']: t for t in K['types']['types']}
     T = types.get(b.get('type')) or {'label': b.get('type') or 'waterbody', 'in_scope': False}
@@ -216,6 +217,7 @@ def wb_env(b, K, works=None, intervention_label='desilting'):
     rlab = lambda r: plain_label(r['label']).lower()
     env.update(n_stress=len(st), stress_text=join_and([rlab(r) for r in st[:3]]),
                n_severe=sum(1 for r in st if res[r['id']].get('severe')), n_opp=len(op), opp_text=join_and([rlab(r) for r in op[:3]]))
+    env.update(b.get('fp_note') or {'fp_lining': '', 'fp_summer_area': None, 'fp_summer_years': None, 'fp_new': False, 'fp_year_label': ''})
     ys = sorted(set(works or []))
     env['n_works'] = len(ys)
     env['works_text'] = (intervention_label.lower() + ' in ' + join_and([f'{y}-{str(y + 1)[2:]}' for y in ys])) if ys else ''

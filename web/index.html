@@ -287,7 +287,8 @@ function curDistrict(){return IDX.districts.find(d=>d.district===S.district)}
 const MIN_TEHSILS=5; let ALLD=false, IMPONLY=false;
 try{ALLD=localStorage.getItem("all_districts")==="1"; IMPONLY=localStorage.getItem("wb_imp_only")==="1";}catch(e){}
 const bigDistrict=d=>ALLD||(d.tehsils||[]).length>MIN_TEHSILS;
-function impDistricts(){return WIMP?new Set(WIMP.districts.filter(x=>x.n_waterbodies>0).map(x=>x.slug)):null}
+function impDistricts(){if(!WIMP&&!WFP) return null; const s=new Set((WIMP?WIMP.districts:[]).filter(x=>x.n_waterbodies>0).map(x=>x.slug));
+  if(WFP) WFP.districts.filter(x=>x.n_records>0).forEach(x=>s.add(x.slug)); return s;}
 function applyViews(){
   if(IDX){IDX._all=IDX._all||IDX.districts; IDX.districts=IDX._all.filter(bigDistrict);}
   if(WIDX){WIDX._all=WIDX._all||WIDX.districts; const im=IMPONLY?impDistricts():null; WIDX.districts=WIDX._all.filter(d=>bigDistrict(d)&&(!im||im.has(d.slug)));}
@@ -756,6 +757,8 @@ function wbNoteEnv(w,b,R){
   Object.assign(env,{n_stress:st.length,stress_text:joinAnd(st.slice(0,3).map(lab)),n_severe:st.filter(r=>R.st[r.id].severe).length,n_opp:op.length,opp_text:joinAnd(op.slice(0,3).map(lab))});
   const recs=(b.imp&&b.imp[String(w.id)]||[]).filter(r=>r.window!=="combined"), it=WIMP&&WIMP.settings.intervention_types[0];
   env.n_works=recs.length; env.works_text=recs.length?plainLabel((it||{}).label||"intervention").toLowerCase()+" in "+joinAnd(recs.map(r=>impYears((r.intervention||{}).years))):"";
+  const L=(typeof fpLin==="function")?fpLin(b,w):null, fr=b.fp&&b.fp[String(w.id)];
+  Object.assign(env,{fp_lining:L?L.cls:"",fp_summer_area:L?L.summer_area:null,fp_summer_years:L?L.summer_years:null,fp_new:!!fr,fp_year_label:fr?impYears([fr.E]):""});
   return env;}
 function wbUnitNoteEnv(ws,b,label){
   const sc=ws.filter(w=>wScope(w.t)), env={unit_label:label,unit_label_cap:capFirst(label),n:ws.length,n_scope:sc.length,area_ha:Math.round(ws.reduce((s,w)=>s+w.a,0))};
@@ -1503,10 +1506,10 @@ function renderMethod(m){
    `python -m seft.cli wb-run`. MWS outlines and tehsils come from the watershed bundles (d_<district>).
    The scoring below mirrors seft/wb/build.py (types), seft/wb/score.py (signals, roles, rules) and
    seft/wb/assess.py (community answers), so a type answer can re-score a waterbody in the browser. */
-let WIDX=null, WK=null; const WBB={}; let WIMP=null, WIMP_TRIED=false, WIMP_ERR="";
+let WIDX=null, WK=null; const WBB={}; let WIMP=null, WIMP_TRIED=false, WIMP_ERR="", WFP=null, WFP_TRIED=false, WFP_ERR="";
 const W={tab:"explore", district:null, tehsil:null, wb:null, mws:null, mode:"type", arg:null, show:"all"};
 try{const t=localStorage.getItem("wba_tab"); if(t) W.tab=t;}catch(e){}
-const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["rules","Observed stresses"],["interventions","Interventions"],["questions","Community questions"],["schemes","Schemes"],["method","Methodology"],["data","Data"]];
+const WTABS=[["explore","Explore"],["graph","Knowledge graph"],["types","Waterbody types"],["rules","Observed stresses"],["interventions","Interventions"],["questions","Community questions"],["schemes","Schemes"],["impact","Impact assessment"],["method","Methodology"],["data","Data"]];
 if(!WTABS.some(t=>t[0]===W.tab)) W.tab="explore";
 const WYEARS=[2017,2018,2019,2020,2021,2022,2023,2024];
 const WTYPE_COL={river_reach:"#3b6fb6",canal_fed:"#7b6aa8",onstream_tank:"#1f7a74",small_onstream_pond:"#5fae9e",headwater_pond:"#a5803a",village_pond:"#c8642f",farm_pond:"#d6a51f",reservoir:"#8a958f",large_river:"#8a958f",unclassified:"#8a958f"};
@@ -1534,7 +1537,7 @@ async function loadWbData(name){
 function wDist(){return WIDX.districts.find(d=>d.district===W.district)}
 async function wImpIndex(){if(WIMP_TRIED) return WIMP; WIMP_TRIED=true;
   for(let i=0;i<3&&!WIMP;i++){try{WIMP=await loadWbData("impact");}catch(e){WIMP_ERR=String(e&&e.message||e); console.warn("[atlas] impact index attempt",i+1,"failed:",WIMP_ERR); await new Promise(r=>setTimeout(r,800*(i+1)));}}
-  applyViews(); return WIMP;}
+  await wFpIndex(); applyViews(); return WIMP;}
 /* CoRE Stack tehsil layers overlap at tehsil borders, so bundles built before wb-run deduplicated them can list a
    waterbody under two or more tehsils, or under a tehsil it is not in. Same rule as seft/wb/run.py dedupe(): keep each
    waterbody once, in the tehsil whose boundary holds its centre (a record in its own tehsil; else moved to the tehsil
@@ -1561,17 +1564,19 @@ async function wBundle(slug){
   const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={}; b.slug=slug;
   b.waterbodies=await wDedupe(b.waterbodies,slug);
   await wImpIndex(); if(WIMP&&WIMP.districts.some(x=>x.slug===slug)){try{b.imp=(await loadWbData("imp_"+slug)).waterbodies;}catch(e){b.imp=null;}}
+  if(WFP&&WFP.districts.some(x=>x.slug===slug)){try{const f=await loadWbData("fp_"+slug); b.fp=f.waterbodies; b.fpLin=f.lining; b.fpOld=f.old; b.fpUnits=f.units;}catch(e){b.fp=null;}}
   b.waterbodies.forEach(w=>{b.byId[w.id]=w; (b.byMws[w.mws]=b.byMws[w.mws]||[]).push(w); w.rmap={}; (w.ru||[]).forEach(([i,s,v])=>w.rmap[i]=[s,v]);});
   b.maxPonds=Math.max(1,...Object.values(b.mws).map(m=>m.recent_ponds||0));
   WBB[slug]=b; return b;
 }
 const wsBundleOk=d=>IDX&&IDX.districts.some(x=>x.slug===d.slug);
 function wScope(t){return WTYPE[t]&&WTYPE[t].in_scope}
-function wImpW(w){if(!IMPONLY||!w) return true; const b=W.district&&WBB[wDist().slug]; return !!(b&&b.imp&&b.imp[String(w.id)]);}
+const wHasWork=(b,w)=>!!(b&&((b.imp&&b.imp[String(w.id)])||(b.fp&&b.fp[String(w.id)])));
+function wImpW(w){if(!IMPONLY||!w) return true; const b=W.district&&WBB[wDist().slug]; return wHasWork(b,w);}
 function wShown(w){return (W.show==="all"||w.st===W.show)&&wImpW(w)}
 function wInView(w){return (!W.tehsil||w.teh===W.tehsil)&&wShown(w)}
-function wTehsils(){const d=wDist(); if(!IMPONLY) return d.tehsils; const b=WBB[d.slug]; if(!b||!b.imp) return d.tehsils;
-  const t=new Set(b.waterbodies.filter(w=>b.imp[String(w.id)]).map(w=>w.teh)); return d.tehsils.filter(x=>t.has(x));}
+function wTehsils(){const d=wDist(); if(!IMPONLY) return d.tehsils; const b=WBB[d.slug]; if(!b||(!b.imp&&!b.fp)) return d.tehsils;
+  const t=new Set(b.waterbodies.filter(w=>wHasWork(b,w)).map(w=>w.teh)); return d.tehsils.filter(x=>t.has(x));}
 function wName(w){return w.n?`${esc(w.n)} <span class="muted mono">#${w.id}</span>`:`Waterbody <span class="mono">#${w.id}</span>`}
 function stPill(code){const s=WSTC[code]; if(!s) return ""; return `<span class="pill" style="background:${WST_COL[code]};${code==="x"||code==="d"?"color:var(--ink)":""}">${esc(s.label)}</span>`}
 function ctxText(v){return v==null?"–":esc(String(v).replace(/_/g," "))}
@@ -1876,7 +1881,7 @@ function wPickers(){
   if(W.district) h+=`<label for="wps">Show<select id="wps">${[["all","All waterbodies"],["r","Holds water regularly"],["x","Rarely holds water"],["n","New (since 2022)"]].map(([v,l])=>`<option value="${v}" ${W.show===v?"selected":""}>${l}</option>`).join("")}</select></label>`;
   h+=distToggle("wall");
   if(!WIMP) h+=`<span class="note" style="align-self:flex-end;padding-bottom:6px">Intervention data not loaded${WIMP_TRIED?"":" yet"}${WIMP_ERR?": "+esc(WIMP_ERR):""}</span>`;
-  if(WIMP) h+=`<label class="tog" for="wimp"><input type="checkbox" id="wimp" ${IMPONLY?"checked":""}> Only waterbodies with interventions</label>`;
+  if(WIMP||WFP) h+=`<label class="tog" for="wimp"><input type="checkbox" id="wimp" ${IMPONLY?"checked":""}> Only waterbodies with interventions</label>`;
   $("#wpickers").innerHTML=h; bindDistToggle("wall");
   if($("#wimp")) $("#wimp").onchange=e=>{IMPONLY=e.target.checked; try{localStorage.setItem("wb_imp_only",IMPONLY?"1":"0")}catch(x){} applyViews();
     if(W.district&&!WIDX.districts.some(d=>d.district===W.district)){W.district=W.tehsil=W.wb=W.mws=null;}
@@ -1952,6 +1957,7 @@ function wPane(){
       <div class="eyebrow">Types</div>${typeBar(C.ty)}</div>
     ${top}
     ${impAvgBlock(W.tehsil?"tehsil":"district",W.tehsil?d.district+"/"+W.tehsil:d.district,ws,b)}
+    ${fpAvgBlock(W.tehsil?"tehsil":"district",W.tehsil?W.tehsil:d.district,ws,b)}
     <div class="block"><h3>Observed stresses and opportunities</h3>${ruleBars(C.rules)}</div>`;
   P.querySelectorAll(".bar[data-ri]").forEach(e=>e.onclick=()=>{W.mode="rule";W.arg=+e.dataset.ri; wMapCtl(); WBMAP.draw(); wPane();});
   P.querySelectorAll(".wrow").forEach(e=>e.onclick=()=>wGo("wb",+e.dataset.id));
@@ -1977,7 +1983,7 @@ function wPaneMws(P,u,d,b){
     <div class="block"><div class="eyebrow">How often they hold water</div>${statusBar(C.st)}</div>
     <div class="block"><h3>Waterbodies</h3><div class="tbl"><table><thead><tr><th>Waterbody</th><th>Type</th><th>Status</th><th class="r">ha</th><th class="r">Triggered</th></tr></thead><tbody>
     ${sorted.map(w=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[wTypeOf(w,b)].label)}</td><td><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${WST_COL[w.st]}"></i> ${esc(WSTC[w.st].label.split(" (")[0])}</td><td class="r num">${w.a}</td><td class="r num">${(w.ru||[]).filter(x=>x[1]==="s").length}</td></tr>`).join("")}</tbody></table></div></div>
-    ${impAvgBlock("mws",u,b.byMws[u]||[],b)}
+    ${impAvgBlock("mws",u,b.byMws[u]||[],b)}${fpAvgBlock("mws",u,b.byMws[u]||[],b)}
     <div class="block"><h3>Observed stresses and opportunities here</h3>${ruleBars(C.rules)}</div>`;
   P.querySelectorAll(".wrow").forEach(e=>e.onclick=()=>wGo("wb",+e.dataset.id));
   P.querySelectorAll(".bar[data-ri]").forEach(e=>e.onclick=()=>{W.mode="rule";W.arg=+e.dataset.ri; wMapCtl(); WBMAP.draw();});
@@ -2095,6 +2101,96 @@ function impAvgBlock(kind,key,ws,b){
   const tbl=list.length?`<div class="tbl"><table><thead><tr><th>${impT("col_waterbody")}</th><th>${impT("col_type")}</th><th>${impT("col_work")}</th><th>${impT("col_result")}</th><th class="r">${impT("col_weeks")}</th></tr></thead><tbody>${list.sort((x,y)=>((y[1].effects||{}).W?.did??-99)-((x[1].effects||{}).W?.did??-99)).map(([w,r])=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id}</td><td>${esc(WTYPE[w.t]?.label||w.t)}</td><td>${impYears((r.intervention||{}).years)}</td><td>${impChip(r.verdict)}</td><td class="r num">${impSigned((r.effects||{}).W?.did)}</td></tr>`).join("")}</tbody></table></div>`:"";
   return `<div class="block"><div class="eyebrow">${impT("unit_eyebrow",{intervention_label_lower:esc(((WIMP.settings.intervention_types[0]||{}).label||"interventions").toLowerCase())})}</div>${a?`<p class="pubnote">${esc(a.note)}</p>${a.n?`<p class="note">${impT("unit_summary",{n:a.n,lo:impSigned(a.lo),hi:impSigned(a.hi),did_rain:impSigned(a.by_estimator?.did_rain),counterfactual:impSigned(a.by_estimator?.counterfactual),prepost_rain:impSigned(a.by_estimator?.prepost_rain),reference_mean:impSigned(a.reference_mean)})}</p>`:""}`:""}${tbl}</div>`;
 }
+/* ---------- new farm ponds (seft/impact/farmpond.py; data/waterbody/fp.json and fp_<district>.json) ----------
+   No registry: a farm or headwater pond whose first wet year is 2019-2023 is a new pond. Records carry the effect on
+   cropping in the zone of influence, the lined/unlined class and the note; older structures carry the site-premium
+   corrected gap. Fixed text lives in knowledge/impact/notes.json (fp_panel), shipped in fp.json. */
+async function wFpIndex(){if(WFP_TRIED) return WFP; WFP_TRIED=true;
+  for(let i=0;i<2&&!WFP;i++){try{WFP=await loadWbData("fp");}catch(e){WFP_ERR=String(e&&e.message||e); console.warn("[atlas] farm-pond index attempt",i+1,"failed:",WFP_ERR); await new Promise(r=>setTimeout(r,600*(i+1)));}}
+  applyViews(); return WFP;}
+function fpT(k,env={}){const t=((WFP&&WFP.panel)||{})[k]; if(t==null) return esc("["+k+"]"); return esc(t).replace(/\{(\w+)\}/g,(m,x)=>env[x]!=null?String(env[x]):m);}
+function fpPts(x,n=1){return x==null?"–":impSigned(x*100,n)}
+function fpLabel(v){return (WFP&&WFP.settings.verdict.labels[v])||v}
+function fpChip(v){return `<span class="pill" style="background:${IMP_COL[v]||"var(--na)"}">${esc(fpLabel(v))}</span>`}
+function fpCls(c){return c?((WFP&&WFP.settings.lining.labels[c])||c):""}
+const FP_CODE={L:"lined",U:"unlined","?":"uncertain"};
+function fpLin(b,w){const L=b&&b.fpLin&&b.fpLin[String(w.id)]; return L?{cls:FP_CODE[L[0]],summer_area:L[1],summer_years:L[2],fill_ratio:L[3],E:L[4]}:null;}
+/* The pond and older-structure notes are written here from the rules shipped in fp.json (knowledge/impact/notes.json
+   fp_waterbody, fp_old); the environment mirrors seft/impact/farmpond.py wb_env and old_env. */
+function fpYearsText(ys){const l=(ys||[]).map(y=>`${y}-${String(y+1).slice(2)}`); return !l.length?"no years":l.length===1?l[0]:l.slice(0,-1).join(", ")+" and "+l[l.length-1];}
+function fpSig(rec){const g=rec.sig; if(!g) return {}; if(!Array.isArray(g)) return g; const [summer_area,summer_years,rabi_area,kharif_area,fill_ratio]=g; return {summer_area,summer_years,rabi_area,kharif_area,fill_ratio};}
+function fpNote(rec){
+  if(!WFP||!WFP.notes) return "";
+  const S=WFP.settings, e=rec.effects||{}, sg=fpSig(rec), tl=plainLabel((WTYPE[rec.type]||{label:rec.type}).label).toLowerCase(), last=S.years.last_main;
+  const A=(((WFP.averages||{}).district||{})[W.district]||{})[rec.type]||{}, C=(A.by_class||{})[rec.cls]||{};
+  const nk=e.nonkharif?(e.nonkharif.main!=null?e.nonkharif.main:e.nonkharif.early):null;
+  const env={verdict:rec.verdict,type_label:tl,year_label:fpYearsText([rec.E]),year:rec.E,effect_signed:fpPts(rec.tau),effect_abs:Math.abs((rec.tau||0)*100).toFixed(1),
+    nk_signed:fpPts(nk),has_nk:nk!=null,post_text:fpYearsText((rec.main_years&&rec.main_years.length?rec.main_years:rec.post_years)||[]),n_years:rec.n||0,
+    early_text:fpYearsText((rec.post_years||[]).filter(y=>y>last)),early_signed:fpPts(e.ci&&e.ci.early),has_early:!!(e.ci&&e.ci.early!=null&&(rec.main_years||[]).length),
+    reason:rec.reason||"",cls:rec.cls||"",cls_label:fpCls(rec.cls),summer_area:Math.round(sg.summer_area||0).toFixed(0),summer_years:Math.round(100*(sg.summer_years||0)).toFixed(0),
+    fill_ratio:sg.fill_ratio!=null?sg.fill_ratio.toFixed(2):"–",appeared_2019:(rec.flags||[]).includes("appeared_2019"),drought_signed:fpPts(rec.drought_main),has_drought:rec.drought_main!=null,
+    group_n:A.n||0,group_unit:`${W.district} district`,group_mean_signed:fpPts(A.mean),group_label:"new "+impPlural(tl),
+    group_cls_n:rec.cls==="lined"||rec.cls==="unlined"?(C.n||0):0,group_cls_mean_signed:fpPts(C.mean)};
+  if(rec.verdict==="not_assessable") Object.assign(env,{group_n:0,group_cls_n:0});
+  return noteRender(WFP.notes.fp_waterbody,env);
+}
+function fpOldNote(o,t){
+  if(!WFP||!WFP.notes||!o) return ""; const [g,p,c]=o; if(c==null) return "";
+  const tl=plainLabel((WTYPE[t]||{label:t}).label).toLowerCase();
+  return noteRender(WFP.notes.fp_old,{type_label:tl,type_label_plural:impPlural(tl),gap_abs:Math.abs((g||0)*100).toFixed(1),gap_dir:(g||0)>=0?"above":"below",
+    premium_abs:Math.abs((p||0)*100).toFixed(1),premium_dir:(p||0)<0?"below":"above",has_premium:p!=null,corrected_signed:fpPts(c),corrected:c});
+}
+function fpChart(rec){
+  const s=rec.series||{}, Z=s.zoi||[], M=s.mws||[], F=s.fit||[];
+  const all=[...Z,...M,...F].filter(v=>v!=null).map(v=>v*100); if(!all.length) return "";
+  let lo=Math.floor(Math.min(...all)/20)*20, hi=Math.ceil(Math.max(...all)/20)*20; if(hi<=lo) hi=lo+20;
+  const H=100,X0=30,DX=40,Wd=X0+DX*(WYEARS.length-1)+20, y=v=>8+H-((v*100-lo)/(hi-lo))*H, x=i=>X0+i*DX;
+  const line=(a,st)=>{let d="";a.forEach((v,i)=>{if(v==null) return; d+=(d?"L":"M")+x(i)+" "+y(v);}); return d?`<path d="${d}" fill="none" ${st}/>`:"";};
+  const i0=WYEARS.indexOf(rec.E);
+  let o=`<svg viewBox="0 0 ${Wd} ${H+30}" width="100%" style="max-width:${Wd*1.5}px" role="img" aria-label="${fpT("chart_aria")}">`;
+  [lo,(lo+hi)/2,hi].forEach(v=>o+=`<line x1="${X0-4}" x2="${Wd-10}" y1="${y(v/100)}" y2="${y(v/100)}" stroke="var(--line)" stroke-width=".5"/><text x="${X0-6}" y="${y(v/100)+3}" font-size="7" text-anchor="end" fill="var(--muted)">${Math.round(v)}</text>`);
+  if(i0>=0) o+=`<line x1="${x(i0)-DX/2}" x2="${x(i0)-DX/2}" y1="4" y2="${H+8}" stroke="var(--select)" stroke-dasharray="3 3"/><text x="${x(i0)-DX/2+3}" y="12" font-size="7" fill="var(--muted)">${fpT("chart_built",{year:impYears([rec.E])})}</text>`;
+  o+=line(M,'stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"')+line(F,'stroke="var(--select)" stroke-width="1.5" stroke-dasharray="1.5 2.5"')+line(Z,'stroke="var(--accent)" stroke-width="2"');
+  Z.forEach((v,i)=>{if(v!=null) o+=`<circle cx="${x(i)}" cy="${y(v)}" r="2.2" fill="var(--accent)"><title>${WYEARS[i]}: ${(v*100).toFixed(0)}%${F[i]!=null?` (predicted ${(F[i]*100).toFixed(0)}%)`:""}</title></circle>`;});
+  WYEARS.forEach((yr,i)=>o+=`<text x="${x(i)}" y="${H+22}" font-size="7.5" text-anchor="middle" fill="var(--muted)">${yr}</text>`);
+  return o+`</svg><div class="legend"><span><i style="background:var(--accent)"></i>${fpT("chart_zoi")}</span><span><i style="background:var(--muted)"></i>${fpT("chart_mws")}</span><span><i style="background:var(--select)"></i>${fpT("chart_fit")}</span><span>${fpT("chart_axis")}</span></div>`;
+}
+function fpRecord(w,b,rec){
+  const S=WFP.settings, E=rec.effects||{}, sg=fpSig(rec), oc=S.outcomes;
+  const rows=rec.verdict==="not_assessable"||!rec.effects?"":`<div class="tbl"><table><thead><tr><th>${fpT("col_outcome")}</th><th class="r">${fpT("col_main")}</th><th class="r">${fpT("col_early")}</th></tr></thead><tbody>
+    ${oc.map(o=>`<tr><td>${esc(o.label)}${o.headline?` <b>${impT("headline_tag")}</b>`:""}</td><td class="r num">${fpPts((E[o.id]||{}).main)}</td><td class="r num">${fpPts((E[o.id]||{}).early)}</td></tr>`).join("")}
+    ${rec.drought_main!=null?`<tr><td>${fpT("row_drought")}</td><td class="r num">${fpPts(rec.drought_main)}</td><td></td></tr>`:""}
+    <tr><td>${fpT("row_percentile")}</td><td class="r num">${rec.pct??"–"}</td><td></td></tr>
+    <tr><td>${fpT("row_placebo")}</td><td class="r num">${fpPts(rec.placebo)}</td><td></td></tr>
+    <tr><td>${fpT("row_background")}</td><td class="r num">${fpPts(rec.background)}</td><td></td></tr></tbody></table></div>`;
+  const fl=(rec.flags||[]).map(f=>fpT("flag_"+f));
+  return `<div style="margin:8px 0 14px"><h3>${fpT("record_title",{intervention_label:esc(S.intervention.label),year:impYears([rec.E])})}</h3>
+    <div class="chips">${fpChip(rec.verdict)}${rec.cls?`<span class="chip">${fpT("cls_chip",{label:esc(fpCls(rec.cls))})}</span>`:""}</div>
+    <p class="pubnote">${rec.note?esc(rec.note):fpNote(rec)}</p>
+    ${rec.verdict!=="not_assessable"?fpChart(rec):""}
+    <details><summary>${fpT("how_summary")}</summary>${rows}
+      ${rec.sig?`<p class="note">${fpT("lining_detail",{summer_years:Math.round(100*(sg.summer_years||0)),summer_area:Math.round(sg.summer_area||0),rabi:Math.round(sg.rabi_area||0),kharif:Math.round(sg.kharif_area||0),fill_ratio:sg.fill_ratio!=null?sg.fill_ratio.toFixed(2):"–"})}</p>`:""}
+      <p class="note">${fpT("method_note",{district:esc(W.district||"")})}</p>
+      ${fl.length?`<p class="note"><b>${fpT("cautions_label")}</b> ${fl.join("; ")}.</p>`:""}</details></div>`;
+}
+function fpBlockWb(w,b){
+  if(!WFP||!b.fp) return "";
+  const rec=b.fp[String(w.id)], old=b.fpOld&&b.fpOld[String(w.id)];
+  if(rec) return `<div class="block" id="wfp"><div class="eyebrow">${fpT("waterbody_eyebrow")}</div>${fpRecord(w,b,rec)}<p class="note">${fpT("waterbody_footer")}</p></div>`;
+  const on=old?fpOldNote(old,w.t):""; if(on) return `<div class="block" id="wfp"><div class="eyebrow">${fpT("old_eyebrow")}</div><p class="pubnote">${on}</p><p class="note">${fpT("old_footer")}</p></div>`;
+  return "";
+}
+function fpAvgBlock(kind,key,ws,b){
+  if(!WFP||!b.fp) return "";
+  const A=kind==="district"?((WFP.averages||{}).district||{})[key]:((b.fpUnits||{})[kind]||{})[key];
+  const list=ws.filter(w=>b.fp[String(w.id)]).map(w=>[w,b.fp[String(w.id)]]);
+  if(!A&&!list.length) return "";
+  const parts=Object.entries(A||{}).map(([t,a])=>{const c=a.by_class||{};
+    return `<p class="pubnote">${esc(a.note||"")}</p>${a.n>=((WFP.settings.averages||{}).min_n||10)?`<p class="note">${fpT("unit_summary",{n:a.n,lo:fpPts(a.lo),hi:fpPts(a.hi),lined:fpPts((c.lined||{}).mean),uncertain:fpPts((c.uncertain||{}).mean),unlined:fpPts((c.unlined||{}).mean)})}</p>`:""}`;}).join("");
+  const sorted=list.filter(([,r])=>r.tau!=null).sort((x,y)=>y[1].tau-x[1].tau), show=sorted.length>15?[...sorted.slice(0,8),...sorted.slice(-7)]:sorted;
+  const tbl=show.length?`<div class="tbl"><table><thead><tr><th>${fpT("col_pond")}</th><th>${fpT("col_year")}</th><th>${fpT("col_class")}</th><th>${fpT("col_result")}</th><th class="r">${fpT("col_effect")}</th></tr></thead><tbody>${show.map(([w,r])=>`<tr class="wrow" data-id="${w.id}" style="cursor:pointer"><td>${w.n?esc(w.n):"#"+w.id} <span class="muted">${esc(WTYPE[w.t]?.label||w.t)}</span></td><td>${impYears([r.E])}</td><td>${esc(fpCls(r.cls))}</td><td>${fpChip(r.verdict)}</td><td class="r num">${fpPts(r.tau)}</td></tr>`).join("")}</tbody></table></div>${sorted.length>show.length?`<p class="note">${fpT("more_rows",{n:show.length,total:sorted.length})} </p>`:""}`:"";
+  return `<div class="block"><div class="eyebrow">${fpT("unit_eyebrow")}</div>${parts}${tbl}</div>`;
+}
 function wPaneWb(P,w,d,b){
   const key=wKey(b,w), R=wAssessC(w,b), T=WTYPE[R.type], inS=T.in_scope, m=b.mws[w.mws];
   R.ivEnv=wIvEnv(w,d);
@@ -2124,7 +2220,7 @@ function wPaneWb(P,w,d,b){
     <tr><th>Micro-watershed</th><td><button class="btn ghost" id="wgomws" style="padding:1px 8px">MWS ${esc(w.mws||"–")}</button> ${m&&m.recent_ponds?`· ${m.recent_ponds} recent ponds`:""}</td></tr></tbody></table></div></div>
     <div class="block"><h3>Water held, 2017–2024</h3>${fillChart(w)}
       ${kv.length?`<div class="tbl"><table><tbody>${kv.map(k=>`<tr><th>${wvref(k)}</th><td class="num">${wVal(k,R.env[k])}</td></tr>`).join("")}</tbody></table></div>`:""}</div>
-    ${impBlockWb(w,b)}
+    ${impBlockWb(w,b)}${fpBlockWb(w,b)}
     <div class="block" id="wtypeq"><div class="eyebrow">Waterbody type</div><h3>${esc(T.label)}</h3><p>${esc(T.description)}</p>
       <details><summary>How this type was assigned</summary>${typeWalk(R)}</details>
       ${typeQ.length?`<p class="note">The data cannot see who owns a pond or whether a small stream feeds it. Answers set those fields, the type rules are evaluated again, and every rule is re-scored for the new type.</p>${typeQ.map(q=>wQuestionHtml(q,key,WPR[q.id])).join("")}<div class="filters"><button class="btn" data-wapply>Re-compute type</button></div>`:""}</div>
@@ -2305,9 +2401,11 @@ const WKSCHEMA=[
  {file:"sources.json",k:"sources",role:"Bibliography; the watershed sources.json is read too.",top:[["sources","list (below)"]],list:"sources",fields:[["id","cited from other files"],["citation, url","reference"],["used_for","what it supports"]]},
  {file:"notes.json",k:"notes",role:"Introductory notes: the rules that write the short note at the top of a waterbody panel and of a micro-watershed, tehsil or district.",top:[["_fields","for each note kind, the fields its rules can read and fill in"],["waterbody","note for one waterbody: main and add rules"],["unit","note for the waterbodies of a micro-watershed, tehsil or district: main and add rules"]],list:"main and add rules",fields:[["when","condition over the fields; in main the first rule that holds gives the opening sentence, in add every rule that holds appends its sentence"],["text","the sentence, with fields in braces"]]},
  {file:"../impact/settings.json",k:"impact_settings",role:"Impact of interventions: intervention types, outcomes, control matching, the four estimators, the reference, verdicts, flags, registry quality checks and averages.",top:[["intervention_types, outcomes","what is assessed and the outcomes read (weeks of water, rabi and summer retention)"],["matching, estimators, reference","how controls are chosen, the four estimators, and the untreated reference the result is placed among"],["verdict, flags","verdict percentiles and placebo tests, and confidence flags"],["registry_quality, averages","checks on registry records, and how averages for micro-watersheds, tehsils and districts are made"]],list:"estimators",fields:[["id, label","did (headline), did_rain, prepost_rain, counterfactual"],["about","what the estimator compares"]]},
- {file:"../impact/notes.json",k:"impact_notes",role:"Impact of interventions: rules that write the public notes on a waterbody's result and on averages, and the fixed text of the impact panels.",top:[["waterbody, unit","main and add rules, as in notes.json, for one waterbody's result and for averages"],["panel","headings, table labels, the estimation explanation and the chart legend, with their placeholders in panel._placeholders"]],list:"main and add rules",fields:[["when","condition over the result's fields (seft/impact/notes.py lists them)"],["text","the sentence, with fields in braces"]]},
+ {file:"../impact/notes.json",k:"impact_notes",role:"Impact of interventions: rules that write the public notes on a waterbody's result and on averages (desilting: waterbody, unit; new farm ponds: fp_waterbody, fp_unit, fp_old), and the fixed text of the impact panels.",top:[["waterbody, unit","desilting: main and add rules, as in notes.json, for one waterbody's result and for averages"],["fp_waterbody, fp_unit, fp_old","new farm ponds: a pond's result, averages, and the effectiveness of an older structure"],["panel, fp_panel","headings, table labels, the estimation explanation and the chart legend, with their placeholders in panel._placeholders"]],list:"main and add rules",fields:[["when","condition over the result's fields (seft/impact/notes.py lists them)"],["text","the sentence, with fields in braces"]]},
+ {file:"../impact/farmponds.json",k:"impact_farmponds",role:"Impact of new farm ponds: which ponds count as new, outcomes in the zone of influence, the footprint and background corrections, the estimators, the lined/unlined rule, verdicts, averages, heterogeneity and the effectiveness of older structures.",top:[["intervention, years, appearance","the types assessed, the years and the rules that date a pond's construction"],["outcomes, footprint, background, drought","what is measured around the pond and the corrections"],["estimators","imputation (headline), same-district DiD, background change, placebo"],["lining","thresholds of the lined/unlined rule"],["verdict, averages, heterogeneity, effectiveness","per-pond verdicts, unit averages, which ponds gain most, older structures"]],list:"estimators",fields:[["id, label, about","the estimator and what it compares"],["references","ids in references.json"]]},
+ {file:"../impact/references.json",k:"impact_references",role:"References of the impact assessment, cited on the Impact assessment tab.",top:[["references","list (below)"]],list:"references",fields:[["id, short","cited from settings.json and farmponds.json, and how it reads in text"],["citation, url, doi, public","reference and a public copy where one exists"],["used_for","what it supports"]]},
  {file:"../pools.json",k:"pools",role:"Pooled thresholds for the waterbody signals marked as pooled, by waterbody type, computed over the 'pools' districts with wb-run --update-pools (the waterbody section of knowledge/pools.json).",top:[["waterbody","signal id → {type → [threshold, severe threshold]}"],["provenance.waterbody","districts, count and date"]],list:"",fields:[]}];
-const WDRAWS={"Data":["config/waterbody/locations.json","variables.json"],"Types":["types.json","variables.json"],"Variables":["variables.json"],"Signals and thresholds":["signals.json","sources.json"],"Roles":["roles.json"],"Rules":["rules.json","signals.json","roles.json"],"Community questions and re-assessment":["questions.json","types.json","rules.json"],"Schemes":["schemes.json"],"Interventions":["interventions.json"],"Impact of interventions":["../impact/settings.json","../impact/notes.json"],"Introductory notes":["notes.json"],"Sources":["sources.json"]};
+const WDRAWS={"Data":["config/waterbody/locations.json","variables.json"],"Types":["types.json","variables.json"],"Variables":["variables.json"],"Signals and thresholds":["signals.json","sources.json"],"Roles":["roles.json"],"Rules":["rules.json","signals.json","roles.json"],"Community questions and re-assessment":["questions.json","types.json","rules.json"],"Schemes":["schemes.json"],"Interventions":["interventions.json"],"Impact of interventions":["../impact/settings.json","../impact/farmponds.json","../impact/notes.json","../impact/references.json"],"Introductory notes":["notes.json"],"Sources":["sources.json"]};
 function wDrawsOn(t){const f=WDRAWS[t];return f?`<p class="note">Draws on: ${f.map(x=>`<a href="#wkfiles" class="mono" data-wkf>${x}</a>`).join(", ")}</p>`:"";}
 const WKEX={"types.json":[["A type rule, and the derived field it uses.",()=>[WK.types.derived[1],only(WTYPE.village_pond,["id","label","in_scope","when","sources"])]]],
  "variables.json":[["A variable.",()=>WVAR.rel_slope],["A type field set only by answers.",()=>WTF.ownership]],
@@ -2327,15 +2425,122 @@ function wKschemaHtml(){
      ${(WKEX[S.file]||[]).map(([cap,get])=>{let o=null;try{o=get()}catch(e){} return o?`<p class="note"><b>Example.</b> ${esc(cap)}</p><pre class="kex">${esc(JSON.stringify(trimJ(o),null,1))}</pre>`:""}).join("")}</details>`;}).join("")}
    <p class="note">How the files connect: variables (and the home MWS) feed signals and roles; types decide which rules apply; rules combine signals and roles; questions point at rules (likelihood ratios) and at type fields; links in schemes point at rules; every sources list points at sources.json.</p></div>`;}
 function impMethod(){
-  if(!WIMP) return `<div class="block"><h3>Impact of interventions</h3><p>No intervention registry is loaded. Build one with <code>python -m seft.cli impact-build-registry</code> and run <code>impact-run</code> (README, Waterbody impact).</p></div>`;
-  const S=WIMP.settings, M=S.matching, V=S.verdict, regs=WIMP.registries||[];
+  const regs=(WIMP&&WIMP.registries)||[], it=WIMP&&WIMP.settings.intervention_types[0], fs=WFP&&WFP.settings;
+  if(!WIMP&&!WFP) return `<div class="block"><h3>Impact of interventions</h3><p>No impact results are loaded. Run <code>python -m seft.cli impact-run</code> (desilting, from a registry) and <code>impact-farmpond</code> (new farm ponds).</p></div>`;
   return `<div class="block"><h3>Impact of interventions</h3>${wDrawsOn("Impact of interventions")}
-   <p>Where an intervention registry lists works on a waterbody (now: ${regs.map(r=>`${esc(r.name)}, ${r.n} records, ${r.linked} linked`).join("; ")}), the atlas estimates their effect on how long the waterbody holds water. ${esc(S.year_convention)}</p>
-   <p><b>Outcomes.</b> ${S.outcomes.map(o=>`${esc(o.label)} (${esc(o.expr)}): ${esc(o.about)}`).join(" ")}</p>
-   <p><b>Controls.</b> Up to ${M.n_controls} untreated waterbodies of the same type within ${M.radius_km} km, outside the treated waterbody's own micro-watershed and more than ${M.exclude_near_treated_m} m from any waterbody treated in the same years, nearest on size, catchment, stream order, rainfall, drought, rabi retention and the weeks of water in each year before the work. Waterbodies treated later count as controls for the years before their own work. Fewer than ${M.min_controls} controls: not assessable.</p>
-   <p><b>Four estimators</b> are reported together. DiD over all pre years (the headline): the waterbody's change from the years before to the years after, minus the average change at its controls. Rainfall-matched DiD: the same with one pre year per post year, chosen for similar rainfall. Post minus pre without controls: the raw change in a rainfall-matched pre year, shown as the raw change, never as the effect. Counterfactual model: the waterbody fitted against its controls over the pre years and projected over the post years.</p>
-   <p><b>Verdict.</b> The headline estimate is placed among untreated waterbodies of the same district and type run through the same steps as if treated. At or above the ${V.gain_pct}th percentile it is a likely gain, at or below the ${V.loss_pct}th a likely loss, provided placebo checks (the same estimate with a pretend start two and three years earlier) show no earlier divergence and the counterfactual model agrees in sign; otherwise it is inconclusive. Between the two percentiles it is no detectable change. Several works on one waterbody are assessed separately until the next work, then together.</p>
-   <p><b>Averages</b> for a micro-watershed, tehsil or district average the headline estimates of the works there that are assessable and carry no record-quality flag, with a 95% bootstrap range. Public notes are written by the rules in <span class="mono">knowledge/impact/notes.json</span>.</p></div>`;
+   <p>Two intervention types are assessed. ${it?`<b>${esc(it.label)}</b>: works listed in a registry (${regs.map(r=>`${esc(r.name)}, ${r.n} records, ${r.linked} linked`).join("; ")}); the outcome is the weeks of water a year, compared with similar untreated waterbodies within ${WIMP.settings.matching.radius_km} km (difference-in-differences, four estimators) and placed among untreated waterbodies run through the same steps.`:""} ${fs?`<b>${esc(fs.intervention.label)}</b>: farm and headwater ponds that first hold water from ${fs.years.first_appearance}, found from the water series; the outcome is cropping in the zone of influence, compared with a prediction from ponds of the district not yet built and the pond's earlier years (imputation), with a lined/unlined class read from the pond's water. Older structures get a site-premium corrected effectiveness measure.`:""}</p>
+   <p>The methods in detail, with results, checks and references, are on the <a href="#" id="wgoimpact">Impact assessment</a> tab. Public notes are written by the rules in <span class="mono">knowledge/impact/notes.json</span>.</p></div>`;
+}
+/* ---------- Impact assessment tab: the intervention types and their methods in detail ---------- */
+function iaRefs(){const R={}; ((WFP&&WFP.references)||[]).forEach(r=>R[r.id]=r); return R;}
+function iaCite(ids){const R=iaRefs(); return (ids||[]).map(id=>{const r=R[id]; if(!r) return esc(id); return r.url?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.short||id)}</a>`:esc(r.short||id);}).join("; ");}
+function iaP(x){return x==null?"–":impSigned(x*100,1)}
+function iaB(b){return !b||!b.n?"–":`${iaP(b.mean)} <span class="muted">(${iaP(b.lo)} to ${iaP(b.hi)})</span>`}
+function iaDesilting(){
+  if(!WIMP) return `<div class="block" id="ia-desilting"><h3>Desilting</h3><p>No intervention registry is loaded, so desilting is not assessed here. Build one with <code>python -m seft.cli impact-build-registry</code> and run <code>impact-run</code>.</p></div>`;
+  const S=WIMP.settings, M=S.matching, V=S.verdict, it=S.intervention_types[0]||{}, regs=WIMP.registries||[], A=(WIMP.averages||{}).state||{};
+  const est=Object.fromEntries(S.estimators.map(e=>[e.id,e]));
+  const rows=Object.entries(A).sort((a,c)=>c[1].n-a[1].n).map(([k,a])=>`<tr><td>${esc(k)}</td><td class="r num">${a.n}</td><td class="r num">${impSigned(a.mean)} <span class="muted">(${impSigned(a.lo)} to ${impSigned(a.hi)})</span></td><td class="r num">${a.n_gain??"–"} / ${a.n_loss??"–"}</td><td class="r num">${a.placebo_mean!=null?impSigned(a.placebo_mean):"–"}</td></tr>`).join("");
+  return `<div class="block" id="ia-desilting"><h3>Desilting</h3>
+   <p>${esc(it.about||"")} Desilting should deepen a waterbody, so the question is whether it then holds water for longer. The method follows ${iaCite(["singh2026desilting"])}: each desilted waterbody is compared with similar untreated waterbodies nearby over the same years, and the result is placed among untreated waterbodies run through the same steps.</p>
+   <h4>Data and registry</h4>
+   <p>Works come from an intervention registry: ${regs.map(r=>`${esc(r.name)} (${r.n.toLocaleString("en-IN")} records, ${r.linked.toLocaleString("en-IN")} matched to atlas waterbodies)`).join("; ")}. Each record gives the location, year and often the volume of silt removed, and is matched to the atlas waterbody whose outline holds or lies nearest its point. A recorded volume that would mean an implausible depth over the waterbody marks a likely wrong match. ${esc(S.year_convention)}</p>
+   <p>Water comes from the CoRE Stack surface water layer (${iaCite(["core_stack"])}): for each waterbody and hydrological year 2017-2024, the share of its largest extent that held water in kharif (k), into rabi (kr) and into summer (krz).</p>
+   <h4>Outcomes</h4><ul>${S.outcomes.map(o=>`<li><b>${esc(o.label)}</b> = <span class="mono">${esc(o.expr)}</span>. ${esc(o.about)}</li>`).join("")}</ul>
+   <h4>Controls</h4>
+   <p>Up to ${M.n_controls} untreated waterbodies of the same atlas type within ${M.radius_km} km, outside the treated waterbody's own micro-watershed and more than ${M.exclude_near_treated_m} m from any waterbody treated in the same years. Among these candidates the nearest are chosen by Mahalanobis distance (${iaCite(["stuart2010"])}) on: log area, log catchment, stream order, rainfall and drought weeks in the pre years, rabi retention in the pre years, and the weeks of water in each pre year, so that controls had the same water history before the work. Waterbodies desilted later count as controls for the years before their own work (not yet treated). With fewer than ${M.min_controls} controls the work is not assessable. At least ${S.min_pre_years} pre years are needed.</p>
+   <h4>Four estimators</h4><ol>
+    <li><b>${esc(est.did.label)}</b> (headline): the waterbody's change in weeks of water from the mean of all pre years to the mean of the post years, minus the same change averaged over its controls.</li>
+    <li><b>${esc(est.did_rain.label)}</b>: the same, but each post year is compared with the pre year whose rainfall is closest (rainfall weighted ${est.did_rain.rain_weight} times in the choice), so a wet post year is not compared with a dry pre year.</li>
+    <li><b>${esc(est.prepost_rain.label)}</b>: the raw change in the rainfall-matched years, with no controls. It is shown to make the raw change visible, never as the effect.</li>
+    <li><b>${esc(est.counterfactual.label)}</b>: the waterbody's pre-year weeks of water fitted as a weighted combination of its controls, then projected over the post years; the effect is observed minus projected (in the spirit of synthetic controls, ${iaCite(["abadie2010"])}). Needs ${est.counterfactual.min_pre_years} or more pre years.</li></ol>
+   <h4>Reference distribution and verdict</h4>
+   <p>${iaSub(S.reference.about,S.reference)} Up to ${S.reference.sample} such pseudo-treated waterbodies form the reference; the headline estimate's percentile among them says how unusual it is. At or above the ${V.gain_pct}th percentile it is a likely gain, at or below the ${V.loss_pct}th a likely loss, and between them no detectable change. A gain or loss stands only if the placebo checks fall in the ${V.placebo_band[0]}-${V.placebo_band[1]} percentile band and the counterfactual model agrees in sign; otherwise it is inconclusive. ${iaSub(V.about,V)}</p>
+   <h4>Placebo checks</h4>
+   <p>The headline estimate is repeated with a pretend start ${S.placebo_offsets.join(" and ")} years before the real work, using only pre years. A desilted waterbody that was already gaining on its controls before the work would show here, and its result would not be read as an effect.</p>
+   <h4>Several works, cautions and averages</h4>
+   <p>Several works on one waterbody are assessed separately until the next work, then together. A result carries a caution when the waterbody is ${esc(S.flags.small.label)}; when it is a river reach or canal-fed (${esc(S.flags.flow_driven.label)}); or when there is ${esc(S.flags.one_post_year.label)}. ${iaSub((S.averages||{}).about||"Averages for a micro-watershed, tehsil or district average the headline estimates of the assessable works without record-quality flags, with a 95% bootstrap range.",S.averages||{})}</p>
+   <h4>Results so far</h4>
+   <div class="tbl"><table><thead><tr><th>State</th><th class="r">Works</th><th class="r">Weeks of water a year (95% range)</th><th class="r">Gain / loss</th><th class="r">Placebo</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <p class="note">Weeks of water a year, headline estimate, works without record-quality flags. Field checks of the approach in Chhatarpur are described by ${iaCite(["kaur2026validation"])}.</p>
+   <h4>What it does not show</h4>
+   <p>Seasonal water shares are coarse: a change smaller than about one season of a fraction of the area may not show. The method measures water held, not the use made of it, and a desilted waterbody may also receive more inflow from other works in its catchment.</p>
+   <p class="note">References: ${iaCite(it.references||[])}.</p></div>`;
+}
+/* the `about` texts of farmponds.json name their parameters (persist_share, min_cell, ...): show the values */
+function iaSub(t,...objs){const o=Object.assign({},...objs); return esc(t||"").replace(/\b([a-z]+(?:_[a-z0-9]+)+)\b/g,(m,k)=>{const v=o[k]; if(typeof v==="string") return esc(v); if(Array.isArray(v)&&v.every(x=>typeof x==="number")) return v.join("-"); if(typeof v!=="number") return m;
+  return /share|_years$|remove/.test(k)&&v<=1?Math.round(v*100)+"%":/_weeks$/.test(k)?v+(v===1?" week":" weeks"):String(v);});}
+function iaFarmponds(){
+  if(!WFP) return `<div class="block" id="ia-farmponds"><h3>New farm ponds</h3><p>The farm-pond assessment is not loaded. Run <code>python -m seft.cli impact-farmpond</code>.</p></div>`;
+  const S=WFP.settings, Y=S.years, A=S.appearance, L=S.lining, V=S.verdict, H=S.heterogeneity, Sm=WFP.summary||{}, T=Sm.types||{}, est=Object.fromEntries(S.estimators.map(e=>[e.id,e]));
+  const typeL=t=>esc(plainLabel((WTYPE[t]||{label:t}).label));
+  const head=Object.entries(T).map(([t,x])=>`<tr><td>${typeL(t)}</td><td class="r num">${x.n_candidates.toLocaleString("en-IN")}</td><td class="r num">${x.n_assessed.toLocaleString("en-IN")}</td><td class="r num">${x.n_districts}</td><td class="r num">${["lined","uncertain","unlined"].map(c=>(x.classes||{})[c]||0).join(" / ")}</td><td class="r num">${iaB(x.placebo)}</td></tr>`).join("");
+  const outTbl=t=>{const x=T[t]; if(!x) return ""; return `<div class="tbl"><table><thead><tr><th>${typeL(t)}: outcome</th><th>Water looks</th><th class="r">Up to ${impYears([Y.last_main])}</th><th class="r">Normal years</th><th class="r">Drought years</th><th class="r">${impYears([Y.last_main+1])} on (early)</th></tr></thead><tbody>${
+    S.outcomes.map(o=>["all","lined","uncertain","unlined"].map((c,i)=>{const r=((x.outcomes||{})[o.id]||{})[c]||{}; return `<tr>${i===0?`<td rowspan="4">${esc(o.label)}</td>`:""}<td>${c==="all"?"all":esc(fpCls(c))}</td><td class="r num">${iaB(r.main)}</td><td class="r num">${iaP(r.normal)}</td><td class="r num">${iaP(r.drought)}</td><td class="r num">${iaB(r.early)}</td></tr>`;}).join("")).join("")}</tbody></table></div>`;};
+  const didTbl=t=>{const x=T[t]; if(!x||!x.did) return ""; return `<div class="tbl"><table><thead><tr><th>${typeL(t)}: outcome</th><th>Water looks</th><th class="r">Simple DiD</th><th class="r">+ pond and catchment size</th><th class="r">+ MWS background and drought</th></tr></thead><tbody>${
+    Object.entries(x.did).map(([oc,D])=>Object.entries(D).map(([c,r],i)=>`<tr>${i===0?`<td rowspan="4">${esc((S.outcomes.find(o=>o.id===oc)||{}).label||oc)}</td>`:""}<td>${c==="all"?"all":esc(fpCls(c))}</td>${["none","size","mws"].map(k=>`<td class="r num">${r[k]?`${iaP(r[k].mean)} <span class="muted">(${iaP(r[k].lo)} to ${iaP(r[k].hi)})</span>`:"–"}</td>`).join("")}</tr>`).join("")).join("")}</tbody></table></div>`;};
+  const hetTbl=t=>{const h=(T[t]||{}).heterogeneity; if(!h) return `<p class="note">${typeL(t)}: too few ponds for the heterogeneity tests.</p>`;
+    return `<p><b>${typeL(t)}</b> (${h.n.toLocaleString("en-IN")} ponds): BLP coefficient ${h.blp} (standard error ${h.blp_se}): ${h.blp-2*h.blp_se>0?"the predicted differences between ponds are real":"the predicted differences cannot be told apart from noise"}. Average effect by fifth of predicted effect, lowest to highest: ${h.gates.map(g=>iaB(g)).join(", ")} points.</p>
+     <div class="tbl"><table><thead><tr><th>Feature (most used by the forest)</th><th class="r">Importance</th><th class="r">Lowest fifth</th><th class="r">Highest fifth</th></tr></thead><tbody>${h.clan.map(c=>`<tr><td>${esc(c.feature)}</td><td class="r num">${c.importance}</td><td class="r num">${c.low}</td><td class="r num">${c.high}</td></tr>`).join("")}</tbody></table></div>`;};
+  const effTbl=(Sm.effectiveness||[]).filter(e=>e.n>=30).map(e=>`<tr><td>${typeL(e.type)}</td><td class="r num">${e.n.toLocaleString("en-IN")}</td><td class="r num">${iaP(e.gap)}</td><td class="r num">${iaP(e.premium)}</td><td class="r num">${iaB(e.corrected)}</td><td class="r num">${e.n_districts}</td></tr>`).join("");
+  const byD=t=>{const x=(T[t]||{}).by_district||{}; const r=Object.entries(x).filter(([,b])=>b.n>=30).sort((a,c)=>c[1].mean-a[1].mean); return r.length?`<p class="note"><b>${typeL(t)} by district</b> (30 or more ponds; points, up to ${impYears([Y.last_main])}): ${r.map(([d,b])=>`${esc(d)} ${iaP(b.mean)}`).join(" · ")}.</p>`:"";};
+  const types=S.intervention.types;
+  return `<div class="block" id="ia-farmponds"><h3>New farm ponds</h3>
+   <p>${esc(S.intervention.about)} A pond's purpose is to give the fields around it water in dry spells and for a second crop, so the outcome is cropping in its zone of influence, not the water it holds. The earlier study of MGNREGA farm ponds (${iaCite(["kaur2024farmponds"])}) compared ponds with matched sites without ponds in a difference-in-differences design and found gains in the monsoon season, also in drought years, and smaller gains in rabi and summer. Here every new pond in the atlas districts is assessed, using the year it first held water as its construction year.</p>
+   <h4>Finding new ponds</h4>
+   <p>${iaSub(A.about,A)} Assessed types: ${types.map(typeL).join(" and ")}. Other new waterbodies (on-stream ponds, village ponds, river reaches) are not assessed this way, because their water also depends on works and flows upstream; older structures of every type get the effectiveness measure below.</p>
+   <div class="tbl"><table><thead><tr><th>Type</th><th class="r">New since ${Y.first_appearance}</th><th class="r">Assessed</th><th class="r">Districts</th><th class="r">Lined / uncertain / unlined</th><th class="r">Placebo (points)</th></tr></thead><tbody>${head}</tbody></table></div>
+   <h4>Zone of influence and outcomes</h4>
+   <p>CoRE Stack links each waterbody to a zone of influence (ZoI): the cropland around it that it can serve. The yearly single, double and triple cropped areas of that land give the outcomes, all in percentage points:</p>
+   <ul>${S.outcomes.map(o=>`<li><b>${esc(o.label)}</b>${o.headline?" (headline)":""} = <span class="mono">${esc(o.expr)}</span>. ${esc(o.about)}</li>`).join("")}</ul>
+   <p><b>Footprint.</b> ${iaSub(S.footprint.about,S.footprint)}</p>
+   <p><b>Background.</b> ${iaSub(S.background.about,S.background)} ${iaSub(S.drought.about,S.drought)}</p>
+   <h4>Headline estimate: imputation</h4>
+   <p>Ponds were dug in different years, so a single before-after regression over all ponds would compare late ponds with early ones already built and can be badly biased (${iaCite(["callaway2021"])}). The headline uses the imputation estimator of ${iaCite(["borusyak2024"])}. On every pond-year before the pond was built (and on ponds not yet built), the outcome is modelled as</p>
+   <p class="mono" style="margin-left:1em">Y<sub>it</sub> = α<sub>i</sub> + λ<sub>t,district</sub> + γ · background<sub>it</sub> + δ · drought weeks<sub>it</sub> + ε<sub>it</sub></p>
+   <p>where α<sub>i</sub> is the pond site's own level, λ<sub>t,district</sub> the year's shock in its district, the background is its micro-watershed's cropping without the fields of other new ponds, and drought weeks are its micro-watershed's kharif drought. The fitted model predicts each built pond's outcome in each year after it was built as if it had not been built; the effect is observed minus predicted, averaged over the pond's post years up to ${impYears([Y.last_main])}. A district-year with fewer than ${est.imputation.min_cell} ponds not yet built uses the year effect over all districts instead, and failing that the background alone; years after ${impYears([Y.last_main])} rest mostly on the background, because nearly every pond had been built by then, and are reported separately as early signs. ${iaSub(Y.about,Y)}</p>
+   ${types.map(t=>T[t]?`<p class="note">${typeL(t)}: γ = ${T[t].gamma}, δ = ${T[t].delta} per drought week; cells by support: ${Object.entries(T[t].support||{}).map(([k,v])=>`${esc(k)} ${v.toLocaleString("en-IN")}`).join(", ")}.</p>`:"").join("")}
+   <h4>Results by outcome and by how the pond's water looks</h4>
+   ${types.map(outTbl).join("")}
+   <p class="note">Mean of the ponds' effects with a 95% bootstrap range over ponds; normal and drought years average pond-years up to ${impYears([Y.last_main])}.</p>
+   ${types.map(byD).join("")}
+   <h4>Robustness: same-district difference-in-differences</h4>
+   <p>${iaSub(est.did_district.about,est.did_district)} (${iaCite(est.did_district.references)}). Only years up to ${impYears([Y.last_main])} are used, and each cohort and year needs ${est.did_district.min_n} treated and ${est.did_district.min_n} control ponds.</p>
+   ${types.map(didTbl).join("")}
+   <p class="note">The covariate-adjusted versions rest on few ponds per district and cohort for ${typeL("headwater_pond")}s and can be unstable there; the simple DiD is the more reliable check for them.</p>
+   <h4>Placebo and background checks</h4>
+   <p>${iaSub(est.placebo.about)} ${iaSub(est.background.about)}</p>
+   <h4>Lined and unlined ponds</h4>
+   <p>${iaSub(L.about,L)}</p>
+   <p>Thresholds: summer water in at least ${Math.round(L.lined_summer_years*100)}% of years and on at least ${L.lined_summer_area}% of the area for lined-like; under ${L.unlined_summer_area}% for unlined-like; drought ÷ normal fill at least ${L.drought_fill_ratio}; kharif coefficient of variation under ${L.steady_cv}. The class appears in the waterbody's note and in the results above; it is not a waterbody type or role, because it is inferred from a few years of water after construction and a run of dry years can move a lined pond into the uncertain class.</p>
+   <h4>Verdict for each pond</h4>
+   <p>${iaSub(V.about,V,{last_main:impYears([Y.last_main])})}</p>
+   <h4>Averages</h4><p>${iaSub(S.averages.about,S.averages,{last_main:impYears([Y.last_main])})}</p>
+   <h4>Which ponds gain most</h4>
+   <p>${iaSub(H.about,H)} (${iaCite(H.references)}). Ponds are grouped into fifths by the cross-fitted prediction; if the effect rises from the lowest to the highest fifth on held-out ponds, the forest has found real differences.</p>
+   ${types.map(hetTbl).join("")}
+   <h4>Older structures</h4>
+   <p>${iaSub(S.effectiveness.about,S.effectiveness)}</p>
+   <div class="tbl"><table><thead><tr><th>Type (wet since ${Y.series[0]})</th><th class="r">n</th><th class="r">ZoI − MWS</th><th class="r">Site premium</th><th class="r">Corrected (95% range)</th><th class="r">Districts</th></tr></thead><tbody>${effTbl}</tbody></table></div>
+   <p class="note">Cropping intensity, percentage points. The corrected value is given only where at least ${S.effectiveness.min_new_for_premium} new structures of the type were built later in the district.</p>
+   <h4>What it does not show</h4>
+   <p>The construction year is read from the water, so a pond that was dry for years before it first shows water is dated late, and one dug but never filled is missed. The ZoI is drawn around the pond, so its cropping also reflects other changes on the same fields, such as a new well. The estimates are averages over many ponds: a single pond's verdict carries the year-to-year noise of a small area (${types.filter(t=>T[t]&&T[t].placebo_sd!=null).map(t=>`for ${typeL(t).toLowerCase()}s a year without the pond differs from its prediction by about ${Math.round(T[t].placebo_sd*100)} points`).join(", ")||"a year without the pond differs from its prediction by many points"}), so roughly one pond in ten shows a gain or a loss by chance. Whether a pond is lined is inferred, not observed.</p>
+   <p class="note">References: ${iaCite(["kaur2024farmponds","borusyak2024","callaway2021","santanna2020","chernozhukov2025","wager2018","drought_manual","core_stack"])}.</p></div>`;
+}
+function renderWbImpact(m){
+  const R=(WFP&&WFP.references)||[];
+  const types=[];
+  if(WIMP){const it=WIMP.settings.intervention_types[0]||{}, a=(WIMP.averages||{}).state||{}, n=Object.values(a).reduce((s,x)=>s+x.n,0);
+    types.push(`<tr><td><a href="#ia-desilting">${esc(it.label||"Desilting")}</a></td><td>A work listed in an intervention registry, matched to its waterbody</td><td>Weeks of water a year in the waterbody</td><td>Similar untreated waterbodies within ${WIMP.settings.matching.radius_km} km</td><td class="r num">${n.toLocaleString("en-IN")}</td></tr>`);}
+  if(WFP){const S=WFP.settings, T=(WFP.summary||{}).types||{}, n=Object.values(T).reduce((s,x)=>s+x.n_assessed,0);
+    types.push(`<tr><td><a href="#ia-farmponds">${esc(S.intervention.label)}</a></td><td>A farm or headwater pond first holding water in ${S.years.first_appearance}-${String(S.years.last_appearance).slice(2)} (no registry)</td><td>Cropping in its zone of influence</td><td>Ponds of the same district not yet built, and the pond's own earlier years</td><td class="r num">${n.toLocaleString("en-IN")}</td></tr>`);}
+  m.innerHTML=`<div class="doc"><h2>Impact assessment</h2>
+   <div class="block"><p>The atlas estimates what interventions on waterbodies changed, from the same satellite series that describe the waterbodies. Each intervention type has its own question and design: desilting should make a waterbody hold water longer, so its outcome is the water held; a new farm pond should help the fields around it, so its outcome is their cropping. In both, a result is read against what the same steps give where nothing was done, so chance changes are not taken for effects. The settings, notes and references are editable files in <span class="mono">knowledge/impact/</span> (Methodology tab, Knowledge files).</p>
+    <div class="tbl"><table><thead><tr><th>Intervention</th><th>What counts as one</th><th>Outcome</th><th>Compared with</th><th class="r">Assessed</th></tr></thead><tbody>${types.join("")}</tbody></table></div>
+    <p class="note">Sections: <a href="#ia-desilting">Desilting</a> · <a href="#ia-farmponds">New farm ponds</a> · <a href="#ia-refs">References</a></p></div>
+   ${iaDesilting()}${iaFarmponds()}
+   <div class="block" id="ia-refs"><h3>References</h3><ul>${R.map(r=>`<li id="ref-${esc(r.id)}">${esc(r.citation)}${r.doi?` doi:<a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener">${esc(r.doi)}</a>`:""}${r.url?` <a href="${esc(r.url)}" target="_blank" rel="noopener">${r.doi?"public copy":"link"}</a>`:r.public===false?' <span class="muted">(not yet public)</span>':""}<br><span class="note">${esc(r.used_for)}</span></li>`).join("")}</ul></div></div>`;
+  m.querySelectorAll('a[href^="#ia-"]').forEach(a=>a.onclick=e=>{e.preventDefault(); const t=m.querySelector(a.getAttribute("href")); if(t) t.scrollIntoView({behavior:"smooth",block:"start"});});
 }
 function renderWbMethod(m){
   const WD=WIDX._all||WIDX.districts, n=WD.reduce((s,d)=>s+d.n,0), nt=Object.keys(WIDX.tehsil_stats).length;
@@ -2372,6 +2577,7 @@ function renderWbMethod(m){
    <p class="note">Issues found in the CoRE Stack data are logged in <span class="mono">docs/core_stack_waterbody_api_issues.md</span>.</p></div>
   <div class="block"><h3>Sources</h3>${wDrawsOn("Sources")}<ol>${WK.sources.sources.map(s=>`<li>${esc(s.citation)} ${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">link</a>`:""}<br><span class="note">Used for: ${esc(s.used_for)}</span></li>`).join("")}</ol></div></div>`;
   m.querySelectorAll("[data-wkf]").forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById("wkfiles")?.scrollIntoView();});
+  const gi=m.querySelector("#wgoimpact"); if(gi) gi.onclick=e=>{e.preventDefault(); W.tab="impact"; try{localStorage.setItem("wba_tab",W.tab)}catch(x){} render(); window.scrollTo(0,0);};
 }
 function renderWbData(m){
   const kf=["types","variables","signals","roles","rules","questions","schemes","interventions","notes","sources"].filter(f=>WK[f]);
@@ -2385,7 +2591,9 @@ python -m seft.cli wb-fetch          # watershed data + waterbody and zone-of-in
 python -m seft.cli wb-validate       # check knowledge/waterbody/*.json
 python -m seft.cli wb-run --merge    # build, score, write out/waterbody and web/data/waterbody
 python -m seft.cli wb-census         # compare with the Water Body Census
-python -m seft.cli wb-assess --answers waterbody_answers.json   # results with community answers</pre></div></div>`;
+python -m seft.cli wb-assess --answers waterbody_answers.json   # results with community answers
+python -m seft.cli impact-run        # desilting impact from the registries
+python -m seft.cli impact-farmpond   # new farm ponds: effect on cropping, lined/unlined class, older structures</pre></div></div>`;
   m.querySelectorAll("[data-wf]").forEach(b=>b.onclick=()=>saveWbCsv(b.dataset.wf));
   m.querySelectorAll("[data-wk]").forEach(b=>b.onclick=()=>saveFile(b.dataset.wk+".json",JSON.stringify(WK[b.dataset.wk],null,1)));
   $("#wdsave").onclick=wSaveAnswers; $("#wdload").onchange=e=>{if(e.target.files[0]) wLoadAnswers(e.target.files[0])};
@@ -2401,7 +2609,7 @@ function renderWb(){
   const m=$("#main");
   const go=()=>{const t=W.tab; if(t==="explore") return renderWbExplore(m); if(t==="graph") return renderWbGraph(m); if(t==="types") return renderWbTypes(m);
     if(t==="rules") return renderWbRules(m); if(t==="questions") return renderWbQuestions(m); if(t==="interventions") return renderInterventions(m,"wb");
-    if(t==="schemes") return renderWbSchemes(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
+    if(t==="schemes") return renderWbSchemes(m); if(t==="impact") return renderWbImpact(m); if(t==="method") return renderWbMethod(m); if(t==="data") return renderWbData(m);};
   if(WIDX&&WIMP_TRIED) return go();
   if(WIDX) return wImpIndex().then(()=>{$("#asub").textContent=atlasSub(); go();});
   m.innerHTML=`<div class="loading">Loading the waterbody atlas…</div>`;

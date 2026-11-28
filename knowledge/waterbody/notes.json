@@ -1,6 +1,6 @@
 {
  "_about": "Rules that write the short introductory note at the top of a waterbody's panel (`waterbody`) and of a group of waterbodies: a micro-watershed, a tehsil or a district (`unit`). For each kind the first `main` rule whose `when` holds gives the opening sentence; every `add` rule whose `when` holds appends its sentence, in order. `when` uses the expression language of the other knowledge files; placeholders in braces are filled from the fields listed in `_fields` (numbers are rounded: whole numbers as they are, others to one decimal). The notes are written by the page from the same data and community answers as the rest of the panel, so they change when answers are applied.",
- "version": "0.1.0",
+ "version": "0.2.0",
  "_fields": {
   "waterbody": {
    "variables": "every waterbody variable in variables.json, by id (years_wet, first_wet_year, k_mean, kr_mean, krz_mean, retention_kr, retention_krz, k_early, k_late, late_to_early, drought_fill_ratio, zoi_ci_mean, ...); missing values are null",
@@ -11,7 +11,8 @@
    "n_roles, roles_text, role_top_label, role_top": "roles at 0.5 or more (count and labels), and the strongest role with its value (0-1)",
    "n_stress, stress_text, n_severe, n_opp, opp_text": "observed stresses that are present after answers (count and up to three labels, strongest first), how many are severe, and the same for opportunities",
    "n_works, works_text": "recorded interventions on this waterbody (count, and type with years)",
-   "tehsil": "tehsil name"
+   "tehsil": "tehsil name",
+   "fp_new, fp_year_label, fp_lining, fp_summer_area, fp_summer_years": "farm and headwater ponds only (impact assessment, knowledge/impact/farmponds.json): whether it is a new pond assessed for its effect on cropping, its first wet year, and its lined/unlined class from the water after it first held water ('lined', 'unlined', 'uncertain' or empty) with the summer water behind it (% of area, % of years)"
   },
   "unit": {
    "unit_label, unit_label_cap": "'this micro-watershed', '<name> tehsil' or '<name> district', and the same with a capital letter",
@@ -27,45 +28,150 @@
  },
  "waterbody": {
   "main": [
-   {"when": "not in_scope", "text": "A {type_label} of {area_ha} ha. Waterbodies of this type are outside the atlas's scope: they are shown for context and not assessed."},
-   {"when": "status == 'n'", "text": "A recent pond: a {type_label} of {area_ha} ha that first held water in {first_wet_year} and has held water every year since."},
-   {"when": "status == 'd'", "text": "A {type_label} of {area_ha} ha that held no water in any of the {n_years} years."},
-   {"when": "status == 'x'", "text": "A {type_label} of {area_ha} ha that held water in only {years_wet} of the {n_years} years, so rules that read change over the years do not apply to it."},
-   {"when": "true", "text": "A {type_label} of {area_ha} ha that held water in {years_wet} of the {n_years} years, about {weeks_mean} weeks a year on average."}
+   {
+    "when": "not in_scope",
+    "text": "A {type_label} of {area_ha} ha. Waterbodies of this type are outside the atlas's scope: they are shown for context and not assessed."
+   },
+   {
+    "when": "status == 'n'",
+    "text": "A recent pond: a {type_label} of {area_ha} ha that first held water in {first_wet_year} and has held water every year since."
+   },
+   {
+    "when": "status == 'd'",
+    "text": "A {type_label} of {area_ha} ha that held no water in any of the {n_years} years."
+   },
+   {
+    "when": "status == 'x'",
+    "text": "A {type_label} of {area_ha} ha that held water in only {years_wet} of the {n_years} years, so rules that read change over the years do not apply to it."
+   },
+   {
+    "when": "true",
+    "text": "A {type_label} of {area_ha} ha that held water in {years_wet} of the {n_years} years, about {weeks_mean} weeks a year on average."
+   }
   ],
   "add": [
-   {"when": "status in ['r', 'n'] and krz_mean >= 30", "text": "It usually still holds water in summer."},
-   {"when": "status in ['r', 'n'] and krz_mean < 30 and kr_mean >= 30", "text": "It usually holds water into the rabi season and dries up before summer."},
-   {"when": "status in ['r', 'n'] and kr_mean < 30", "text": "It holds water mainly during the monsoon."},
-   {"when": "status == 'r' and weeks_change >= 4", "text": "It has held water longer in recent years: about {weeks_late} weeks a year in 2021-2024 against {weeks_early} in 2017-2020."},
-   {"when": "status == 'r' and weeks_change <= -4", "text": "It has held water for less time in recent years: about {weeks_late} weeks a year in 2021-2024 against {weeks_early} in 2017-2020."},
-   {"when": "in_scope and n_roles > 0", "text": "Its water is most likely used for {roles_text}."},
-   {"when": "in_scope and n_roles == 0 and role_top_label", "text": "No use stands out; the strongest sign is {role_top_label}."},
-   {"when": "n_stress > 0 and n_severe > 0", "text": "Likely stresses: {stress_text} ({n_severe} severe)."},
-   {"when": "n_stress > 0 and n_severe == 0", "text": "Likely stresses: {stress_text}."},
-   {"when": "in_scope and status == 'r' and n_stress == 0", "text": "No observed stress is flagged."},
-   {"when": "n_opp > 0", "text": "Opportunity: {opp_text}."},
-   {"when": "n_works > 0", "text": "Recorded intervention: {works_text}; its impact is assessed separately."}
+   {
+    "when": "status in ['r', 'n'] and krz_mean >= 30",
+    "text": "It usually still holds water in summer."
+   },
+   {
+    "when": "status in ['r', 'n'] and krz_mean < 30 and kr_mean >= 30",
+    "text": "It usually holds water into the rabi season and dries up before summer."
+   },
+   {
+    "when": "status in ['r', 'n'] and kr_mean < 30",
+    "text": "It holds water mainly during the monsoon."
+   },
+   {
+    "when": "status == 'r' and weeks_change >= 4",
+    "text": "It has held water longer in recent years: about {weeks_late} weeks a year in 2021-2024 against {weeks_early} in 2017-2020."
+   },
+   {
+    "when": "status == 'r' and weeks_change <= -4",
+    "text": "It has held water for less time in recent years: about {weeks_late} weeks a year in 2021-2024 against {weeks_early} in 2017-2020."
+   },
+   {
+    "when": "in_scope and n_roles > 0",
+    "text": "Its water is most likely used for {roles_text}."
+   },
+   {
+    "when": "in_scope and n_roles == 0 and role_top_label",
+    "text": "No use stands out; the strongest sign is {role_top_label}."
+   },
+   {
+    "when": "n_stress > 0 and n_severe > 0",
+    "text": "Likely stresses: {stress_text} ({n_severe} severe)."
+   },
+   {
+    "when": "n_stress > 0 and n_severe == 0",
+    "text": "Likely stresses: {stress_text}."
+   },
+   {
+    "when": "in_scope and status == 'r' and n_stress == 0",
+    "text": "No observed stress is flagged."
+   },
+   {
+    "when": "n_opp > 0",
+    "text": "Opportunity: {opp_text}."
+   },
+   {
+    "when": "n_works > 0",
+    "text": "Recorded intervention: {works_text}; its impact is assessed separately."
+   },
+   {
+    "when": "fp_lining == 'lined' and type in ['farm_pond', 'headwater_pond']",
+    "text": "Its water looks like a lined pond's: it held water in summer in {fp_summer_years}% of the years since it first filled, over {fp_summer_area}% of its area on average."
+   },
+   {
+    "when": "fp_lining == 'unlined' and type in ['farm_pond', 'headwater_pond']",
+    "text": "Its water looks like an unlined pond's: it is usually dry by summer ({fp_summer_area}% of its area holds summer water), so it mainly stores monsoon water and recharges groundwater."
+   },
+   {
+    "when": "fp_new and type in ['farm_pond', 'headwater_pond']",
+    "text": "It first held water in {fp_year_label}, so its effect on cropping around it is assessed as a new farm pond."
+   }
   ]
  },
  "unit": {
   "main": [
-   {"when": "n == 0", "text": "No waterbodies of 0.05 ha or more are mapped in {unit_label}."},
-   {"when": "n_scope == 0", "text": "{unit_label_cap} has {n} waterbodies, none of a type the atlas assesses: mostly {type1_label}."},
-   {"when": "type1_pct >= 50", "text": "{unit_label_cap} has {n} waterbodies covering {area_ha} ha, mostly {type1_label} ({type1_pct}%)."},
-   {"when": "true", "text": "{unit_label_cap} has {n} waterbodies covering {area_ha} ha: {types_text}."}
+   {
+    "when": "n == 0",
+    "text": "No waterbodies of 0.05 ha or more are mapped in {unit_label}."
+   },
+   {
+    "when": "n_scope == 0",
+    "text": "{unit_label_cap} has {n} waterbodies, none of a type the atlas assesses: mostly {type1_label}."
+   },
+   {
+    "when": "type1_pct >= 50",
+    "text": "{unit_label_cap} has {n} waterbodies covering {area_ha} ha, mostly {type1_label} ({type1_pct}%)."
+   },
+   {
+    "when": "true",
+    "text": "{unit_label_cap} has {n} waterbodies covering {area_ha} ha: {types_text}."
+   }
   ],
   "add": [
-   {"when": "n_scope > 0", "text": "Of the {n_scope} assessed, {pct_regular}% hold water regularly and {pct_rarely}% rarely; a typical one holds water about {weeks_median} weeks a year."},
-   {"when": "n_scope > 0 and pct_summer >= 25", "text": "{pct_summer}% usually still hold water in summer."},
-   {"when": "n_scope > 0 and pct_summer < 25", "text": "Few hold water into summer ({pct_summer}%)."},
-   {"when": "n_recent > 0", "text": "{n_recent} recent ponds first held water in 2022 or later."},
-   {"when": "role_label and role_pct >= 10", "text": "The most common likely use is {role_label} ({role_pct}% of assessed waterbodies)."},
-   {"when": "n_stress_rules > 1", "text": "The most common stresses are {stress_text}."},
-   {"when": "n_stress_rules == 1", "text": "The most common stress is {stress_text}."},
-   {"when": "n_scope > 0 and n_stress_rules == 0", "text": "No observed stress affects 10% or more of the waterbodies where it applies."},
-   {"when": "opp_label and opp_pct >= 10", "text": "Opportunity: {opp_label} ({opp_pct}%)."},
-   {"when": "n_works > 0", "text": "{n_works} have a recorded intervention."}
+   {
+    "when": "n_scope > 0",
+    "text": "Of the {n_scope} assessed, {pct_regular}% hold water regularly and {pct_rarely}% rarely; a typical one holds water about {weeks_median} weeks a year."
+   },
+   {
+    "when": "n_scope > 0 and pct_summer >= 25",
+    "text": "{pct_summer}% usually still hold water in summer."
+   },
+   {
+    "when": "n_scope > 0 and pct_summer < 25",
+    "text": "Few hold water into summer ({pct_summer}%)."
+   },
+   {
+    "when": "n_recent > 0",
+    "text": "{n_recent} recent ponds first held water in 2022 or later."
+   },
+   {
+    "when": "role_label and role_pct >= 10",
+    "text": "The most common likely use is {role_label} ({role_pct}% of assessed waterbodies)."
+   },
+   {
+    "when": "n_stress_rules > 1",
+    "text": "The most common stresses are {stress_text}."
+   },
+   {
+    "when": "n_stress_rules == 1",
+    "text": "The most common stress is {stress_text}."
+   },
+   {
+    "when": "n_scope > 0 and n_stress_rules == 0",
+    "text": "No observed stress affects 10% or more of the waterbodies where it applies."
+   },
+   {
+    "when": "opp_label and opp_pct >= 10",
+    "text": "Opportunity: {opp_label} ({opp_pct}%)."
+   },
+   {
+    "when": "n_works > 0",
+    "text": "{n_works} have a recorded intervention."
+   }
   ]
  }
 }

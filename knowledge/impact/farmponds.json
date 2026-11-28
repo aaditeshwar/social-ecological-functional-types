@@ -1,0 +1,177 @@
+{
+ "_about": "Settings of the new-farm-pond impact assessment (seft/impact/farmpond.py, command impact-farmpond): which waterbodies count as new ponds, the outcomes read in their zone of influence, the estimators, the lined/unlined rule, the per-pond verdicts, the averages and the effectiveness measure for older structures. Unlike desilting there is no registry: a pond's first wet year in the CoRE Stack water series is its construction year. The full method is described on the atlas's Impact assessment tab and in knowledge/impact/README.md; references are ids in knowledge/impact/references.json.",
+ "version": "0.1.0",
+ "intervention": {
+  "id": "new_farmpond",
+  "label": "New farm pond",
+  "types": [
+   "farm_pond",
+   "headwater_pond"
+  ],
+  "about": "A farm pond or headwater pond that first holds water in a year from 2019 and keeps holding water in most years since. Most are dug on private farmland (MGNREGA, state farm-pond schemes such as Magel Tyala Shettale, or by farmers) to store runoff for protective irrigation.",
+  "references": [
+   "kaur2024farmponds"
+  ]
+ },
+ "years": {
+  "series": [
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "first_appearance": 2019,
+  "last_appearance": 2023,
+  "last_main": 2022,
+  "about": "Hydrological years (2019 = 2019-20). A pond is new if its first wet year is between first_appearance and last_appearance; 2017 and 2018 are kept as pre years. Effects in years up to last_main are identified by ponds not yet built in the same district and year; later years (2023-24) have few such ponds left and are reported as early signs."
+ },
+ "appearance": {
+  "persist_share": 0.75,
+  "neighbour_wet_share": 0.5,
+  "min_neighbours": 3,
+  "same_type_min": 3,
+  "about": "New ponds must be wet in at least persist_share of the years from their first wet year. A pre year counts (qualifying pre year) only if at least neighbour_wet_share of the established waterbodies of the same home MWS (same type if there are same_type_min of them, else any type; at least min_neighbours) were wet that year and it was not a drought year: a dry pre year in a wet landscape means the pond was not there yet, not that it was dry. Ponds without a qualifying pre year are not assessed. A first wet year of 2019 may also be an older pond that was dry in the drought years 2017-18, so these are flagged."
+ },
+ "drought": {
+  "min_weeks": 4,
+  "about": "A drought year in the home MWS has 4 or more weeks of moderate or severe kharif drought (CoRE Stack kharif drought data; the Drought Manual's 3-4 week dry-spell trigger), as in the waterbody atlas."
+ },
+ "outcomes": [
+  {
+   "id": "ci",
+   "label": "Cropping intensity",
+   "unit": "points",
+   "expr": "(single + 2 double + 3 triple) / cropable_ever",
+   "footprint": true,
+   "headline": true,
+   "about": "Cropping intensity of the pond's zone of influence (ZoI, the cropland around it that CoRE Stack links to it), in percentage points: 100 is one crop a year on all cropland."
+  },
+  {
+   "id": "nonkharif",
+   "label": "Rabi and summer cropping",
+   "unit": "points",
+   "expr": "(double + triple + single_non_kharif) / cropable_ever",
+   "footprint": true,
+   "about": "Share of the ZoI's cropland under a crop outside the monsoon (rabi or summer), in percentage points: the season a stored-water pond should help."
+  },
+  {
+   "id": "multi",
+   "label": "Multi-cropped share",
+   "unit": "points",
+   "expr": "(double + triple) / cropped",
+   "footprint": false,
+   "about": "Double and triple cropped share of the cropped area, in percentage points."
+  },
+  {
+   "id": "cropped",
+   "label": "Cropped share",
+   "unit": "points",
+   "expr": "(single + double + triple) / cropable_ever",
+   "footprint": true,
+   "about": "Share of the ZoI's cropland cropped at least once in the year, in percentage points."
+  }
+ ],
+ "footprint": {
+  "max_share": 0.5,
+  "about": "A pond dug on cropland takes that land out of cultivation. After construction the ZoI outcomes measured over its cropable area are divided by (1 - pond area / ZoI area), capped at max_share, so the pond's own footprint is not counted as a loss of cropping."
+ },
+ "background": {
+  "max_remove": 0.8,
+  "about": "The comparison series is the home MWS's own cropping, computed without the ZoI cropland of every waterbody that appeared from 2019, so the effect of new ponds is not counted as background change. Overlapping zones can add up to more than the MWS's cropland, so at most max_remove of it is removed."
+ },
+ "estimators": [
+  {
+   "id": "imputation",
+   "label": "Imputation (headline)",
+   "headline": true,
+   "min_cell": 10,
+   "about": "Fitted on the years before each pond was built (and on ponds not yet built): pond baseline + year effect for the district + the MWS background outcome + drought weeks. The fitted model predicts each built pond's outcome had it not been built; the effect is observed minus predicted. A district-year with fewer than min_cell not-yet-built ponds falls back to the year effect over all districts, and then to the background alone (marked background support).",
+   "references": [
+    "borusyak2024",
+    "callaway2021"
+   ]
+  },
+  {
+   "id": "did_district",
+   "label": "Same-district DiD",
+   "min_n": 10,
+   "about": "Each cohort (ponds first wet in the same year) against ponds of the same district not yet built by that year, change from the mean of the pre years; with no covariates, with pond size, ZoI size, catchment and stream order, and adding the MWS background level, its change and drought weeks (doubly robust: a propensity model and an outcome model). Weighted by the number of ponds in each cohort and year.",
+   "references": [
+    "callaway2021",
+    "santanna2020"
+   ]
+  },
+  {
+   "id": "background",
+   "label": "Change against the MWS background",
+   "about": "The pond's ZoI minus its MWS background, after construction minus before. Uses no other ponds; reported as a check on the sign of each pond's effect."
+  },
+  {
+   "id": "placebo",
+   "label": "Placebo: the year before construction",
+   "about": "The imputation model refitted without each pond's last pre year, which is then predicted as if it were a post year. A real effect should not appear before the pond did."
+  }
+ ],
+ "lining": {
+  "lined_summer_years": 0.75,
+  "lined_summer_area": 40,
+  "unlined_summer_area": 10,
+  "drought_fill_ratio": 0.9,
+  "steady_cv": 0.25,
+  "min_supporting": 1,
+  "labels": {
+   "lined": "lined-like",
+   "unlined": "unlined-like",
+   "uncertain": "uncertain"
+  },
+  "about": "Many farm ponds, especially in Maharashtra, are lined with plastic sheet and are filled from wells as well as from runoff, so they store water for rabi and summer crops; unlined ponds lose water to seepage, recharge groundwater and mostly hold water in the monsoon. Lining is not observed, so the class is read from the water seen after the pond first holds water. Lined-like: water in summer (zaid) in at least lined_summer_years of those years, over at least lined_summer_area % of its area, and at least min_supporting of the supporting signs. Unlined-like: summer water on less than unlined_summer_area % of its area, with neither a drought-proof fill nor more water in rabi or summer than in kharif. Supporting signs: kharif fill in drought years at least drought_fill_ratio of that in normal years (filled by pumping, not only by rain), rabi or summer water above the kharif water, and a steady kharif fill (coefficient of variation below steady_cv). Everything else is uncertain. The class describes how the pond behaves, not how it was built; it is used only for the impact assessment and the waterbody's note, not as a type or role."
+ },
+ "verdict": {
+  "gain_pct": 90,
+  "loss_pct": 10,
+  "placebo_band": [
+   25,
+   75
+  ],
+  "min_post_years_full": 2,
+  "labels": {
+   "likely_gain": "Likely gain",
+   "early_gain": "Early sign of gain",
+   "likely_loss": "Likely loss",
+   "early_loss": "Early sign of loss",
+   "no_change": "No detectable change",
+   "inconclusive": "Inconclusive",
+   "not_assessable": "Not assessable"
+  },
+  "about": "A pond's effect (mean over its post years up to last_main) is placed among the means of as many placebo residuals of ponds before they were built (no-pond years). At or above percentile gain_pct: likely gain; at or below percentile loss_pct: likely loss; provided its own placebo residual lies within the placebo_band percentile band and is smaller than the effect, and the background check agrees in sign; otherwise inconclusive. In between: no detectable change. With fewer than min_post_years_full years, or only years after last_main, a gain or loss is an early sign."
+ },
+ "averages": {
+  "units": [
+   "district",
+   "tehsil",
+   "mws"
+  ],
+  "min_n": 10,
+  "bootstrap": 500,
+  "about": "Averages of the ponds' effects (years up to last_main) with a 95% bootstrap range over ponds, for each district, tehsil and micro-watershed, and by lined/unlined class. Units with fewer than min_n ponds are shown with a caution."
+ },
+ "heterogeneity": {
+  "min_ponds": 300,
+  "folds": 5,
+  "trees": 300,
+  "min_leaf": 60,
+  "about": "Which ponds gain most: a random forest is fitted to the ponds' effects on landscape and pond features (without the pond's own pre-construction ZoI cropping, which would only pick up regression to the mean), cross-fitted over folds, and tested with the best linear predictor (BLP), sorted-group averages (GATES) and the features of the top and bottom groups (CLAN).",
+  "references": [
+   "chernozhukov2025",
+   "wager2018"
+  ]
+ },
+ "effectiveness": {
+  "min_new_for_premium": 10,
+  "about": "Structures wet since 2017 cannot be compared before and after. For them the atlas reports the gap between cropping intensity in the ZoI and in the home MWS, minus the site premium: the same gap at sites in the same district where waterbodies of the same type were built later, measured before they were built. It is a cross-sectional measure that assumes older structures were sited like newer ones, not a causal estimate."
+ }
+}

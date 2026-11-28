@@ -1,6 +1,6 @@
 {
  "_about": "Settings of the waterbody-impact module: how an intervention's effect on a waterbody's seasonal water is estimated. Read by seft/impact and core_seft. See knowledge/impact/README.md.",
- "version": "0.1.0",
+ "version": "0.2.0",
  "intervention_types": [
   {
    "id": "desilting",
@@ -11,7 +11,13 @@
     "RR",
     "SR"
    ],
-   "headline": "W"
+   "headline": "W",
+   "references": [
+    "singh2026desilting",
+    "stuart2010",
+    "abadie2010",
+    "kaur2026validation"
+   ]
   }
  ],
  "year_convention": "Hydrological years start in June and are named by their first calendar year (2023 = 2023-24). Work is done before the monsoon, so an intervention in year Y has Y, Y+1, ... as post years and Y-1 and earlier as pre years.",

@@ -349,6 +349,42 @@ python -m seft.cli impact-validate
 * In the atlas, a desilted waterbody shows its result, chart and public note; districts, tehsils and MWS show the
   average and the list of works. `core_seft` answers `analyse("waterbody-impact", ...)` with the same code.
 
+### New farm ponds
+
+`impact-farmpond` (`seft/impact/farmpond.py`, settings in `knowledge/impact/farmponds.json`, references in
+`knowledge/impact/references.json`) assesses new farm ponds and headwater ponds without a registry: a pond that
+first holds water from 2019 and keeps holding water in most years since is taken as built in its first wet year,
+if one of its earlier years was a normal year in which most waterbodies of its micro-watershed held water (so it
+was not simply dry). The outcome is cropping in its zone of influence: cropping intensity (headline), rabi and
+summer cropping, multi-cropped and cropped shares, corrected after construction for the cropland the pond takes,
+against a background of its micro-watershed's cropping without the fields of other new ponds.
+
+```bash
+python -m seft.cli wb-fetch            # waterbody layers, cropping intensity and kharif drought of every tehsil
+python -m seft.cli wb-run --merge      # waterbody atlas bundles (MWS context for the heterogeneity tests)
+python -m seft.cli impact-farmpond     # -> out/impact/farmpond/{records,summary}.json, review.md; web/data/waterbody/fp*.json
+python -m seft.cli impact-validate
+```
+
+* **Headline: imputation** (Borusyak, Jaravel and Spiess 2024): pond baseline + district-year effect + MWS
+  background + drought weeks, fitted on pond-years before each pond was built; a built pond's effect is observed
+  minus predicted, averaged over its years up to 2022-23. Years from 2023-24 have few ponds left unbuilt, rest on
+  the background and are reported as early signs.
+* **Checks:** same-district DiD against ponds not yet built (simple, and doubly robust with pond and MWS
+  covariates; Callaway and Sant'Anna 2021, Sant'Anna and Zhao 2020); a placebo on the year before each pond
+  appeared; the change against the MWS background.
+* **Lined and unlined:** the class is read from the pond's water after it first fills (summer water in most years
+  and over much of its area, with a drought-proof or late-season fill, looks lined; little summer water looks
+  unlined). It is used only for the impact results and the waterbody's note, not as a type or role.
+* **Per pond:** a verdict (the effect placed among the same differences for ponds before they were built, with
+  the placebo and background checks), a chart and a public note (`fp_waterbody` in `knowledge/impact/notes.json`).
+  Averages by district, tehsil and MWS (`fp_unit`), also by class. Which ponds gain most: a cross-fitted forest
+  with BLP, GATES and CLAN (Chernozhukov et al.).
+* **Older structures** (wet since 2017, any type): the ZoI-minus-MWS cropping gap minus the same gap at sites where
+  structures of that type were built later, before they were built (`fp_old`): a cross-sectional measure.
+* `--data-root DIR` reads `raw/` and `geo/` from another folder; `SEFT_FP_CACHE=<file.pkl>` keeps the loaded panel
+  between runs. The atlas's Impact assessment tab describes both intervention types in detail.
+
 The pilot registry (a browser extract of the Pune and Amravati layers) was removed once the full registry
 could be built locally; the atlas files under web/data/waterbody/ keep its results until impact-run is rerun.
 

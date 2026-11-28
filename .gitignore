@@ -9,3 +9,5 @@ out/waterbody/web/
 out/priority/
 
 out/impact/web/
+out/impact/farmpond/web/
+out/impact/farmpond/records.json

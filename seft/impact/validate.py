@@ -6,20 +6,59 @@ from . import registry as REG
 
 ROLES = ('reference', 'test', 'coverage')
 
-def panel_errors(N, page=None):
-    """notes.json `panel`: every key the atlas page uses exists, and each text uses only its declared placeholders."""
+def panel_errors(N, page=None, key='panel', fn='impT'):
+    """notes.json `panel` (page function impT) and `fp_panel` (fpT): every key the atlas page uses exists, and each
+    text uses only its declared placeholders."""
     import re
-    P = N.get('panel'); errs = []
-    if not isinstance(P, dict): return ['notes.json: missing "panel" (fixed text of the impact panels)']
+    P = N.get(key); errs = []
+    if not isinstance(P, dict): return [f'notes.json: missing "{key}" (fixed text of the impact panels)']
     decl = {k: {x.strip() for x in v.split(',')} for k, v in P.get('_placeholders', {}).items()}
     for k, t in P.items():
         if k.startswith('_'): continue
         used = set(re.findall(r'\{(\w+)\}', t))
-        if used - decl.get(k, set()): errs.append(f'notes.json panel.{k}: placeholder(s) {sorted(used - decl.get(k, set()))} not listed in panel._placeholders')
+        if used - decl.get(k, set()): errs.append(f'notes.json {key}.{k}: placeholder(s) {sorted(used - decl.get(k, set()))} not listed in {key}._placeholders')
     page = page or ROOT / 'web' / 'index.html'
     if page.exists():
-        for k in sorted(set(re.findall(r'impT\("(\w+)"', page.read_text(encoding='utf-8'))) - set(P)):
-            errs.append(f'notes.json panel: key "{k}" is used by web/index.html but not defined')
+        text = page.read_text(encoding='utf-8')
+        used = set(re.findall(fn + r'\("(\w+)"', text))
+        if fn == 'fpT': used |= {'flag_' + f for f in ('appeared_2019', 'small')}      # built as fpT("flag_"+f)
+        for k in sorted(x for x in used - set(P) if not x.endswith('_')):
+            errs.append(f'notes.json {key}: key "{k}" is used by web/index.html but not defined')
+    return errs
+
+def farmpond_errors(N, warns):
+    """knowledge/impact/farmponds.json, references.json and the fp_* note rules."""
+    errs = []
+    fp = knowledge_dir() / 'impact' / 'farmponds.json'
+    if not fp.exists(): return ['knowledge/impact/farmponds.json is missing']
+    F = load_json(fp)
+    for k in ('intervention', 'years', 'appearance', 'drought', 'outcomes', 'footprint', 'background', 'estimators', 'lining', 'verdict', 'averages', 'heterogeneity', 'effectiveness'):
+        if k not in F: errs.append(f'farmponds.json: missing "{k}"')
+    Y = F.get('years', {})
+    if not (Y.get('series') and Y['series'][0] < Y.get('first_appearance', 0) <= Y.get('last_main', 0) <= Y.get('last_appearance', 0) <= Y['series'][-1]):
+        errs.append('farmponds.json years: need series[0] < first_appearance <= last_main <= last_appearance <= series[-1]')
+    if [o['id'] for o in F.get('outcomes', [])] != ['ci', 'nonkharif', 'multi', 'cropped']: errs.append('farmponds.json outcomes: expected ci, nonkharif, multi, cropped')
+    if {e['id'] for e in F.get('estimators', [])} != {'imputation', 'did_district', 'background', 'placebo'}: errs.append('farmponds.json estimators: expected imputation, did_district, background, placebo')
+    L = F.get('lining', {})
+    if not (0 <= L.get('unlined_summer_area', 0) < L.get('lined_summer_area', 0) <= 100): errs.append('farmponds.json lining: need unlined_summer_area < lined_summer_area')
+    V = F.get('verdict', {})
+    if not (0 < V.get('loss_pct', 0) < V.get('gain_pct', 0) < 100): errs.append('farmponds.json: verdict needs 0 < loss_pct < gain_pct < 100')
+    rp = knowledge_dir() / 'impact' / 'references.json'
+    refs = {r['id'] for r in load_json(rp)['references']} if rp.exists() else set()
+    if not rp.exists(): errs.append('knowledge/impact/references.json is missing')
+    S = load_json(knowledge_dir() / 'impact' / 'settings.json')
+    cited = list(F['intervention'].get('references', [])) + [x for e in F.get('estimators', []) for x in e.get('references', [])] + \
+            list(F.get('heterogeneity', {}).get('references', [])) + [x for t in S.get('intervention_types', []) for x in t.get('references', [])]
+    for c in cited:
+        if c not in refs: errs.append(f'impact reference "{c}" is cited but not in references.json')
+    for kind in ('fp_waterbody', 'fp_unit', 'fp_old'):
+        for part in ('main', 'add'):
+            for i, r in enumerate(N.get(kind, {}).get(part, [])):
+                try: compile_expr(r['when'])
+                except Exception as e: errs.append(f'notes.json {kind}.{part}[{i}]: {e}')
+        if not N.get(kind, {}).get('main') or N[kind]['main'][-1]['when'] != 'true':
+            warns.append(f'notes.json {kind}.main: the last rule should be `true` so every result gets a note')
+    errs += panel_errors(N, key='fp_panel', fn='fpT')
     return errs
 
 def main(log=print):
@@ -40,6 +79,7 @@ def main(log=print):
         if not N.get(kind, {}).get('main') or N[kind]['main'][-1]['when'] != 'true':
             warns.append(f'notes.json {kind}.main: the last rule should be `true` so every result gets a note')
     errs += panel_errors(N)
+    errs += farmpond_errors(N, warns)
     p = REG.IMPACT_CFG / 'locations.json'
     if p.exists():
         for d in load_json(p)['districts']:

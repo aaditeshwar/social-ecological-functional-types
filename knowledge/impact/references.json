@@ -1,0 +1,109 @@
+{
+ "_about": "References cited by the impact assessment (knowledge/impact/settings.json, farmponds.json and the atlas's Impact assessment tab). Each entry: id, short (how it is cited in text), citation, url (a public copy where one exists), doi where known, and what it is used for.",
+ "version": "0.1.0",
+ "references": [
+  {
+   "id": "singh2026desilting",
+   "citation": "Singh T, Gujar S, Kaur R, Seth A (2026). Use of satellite data for impact assessment of desilting interventions in waterbodies. Manuscript, IIT Delhi and Plaksha University.",
+   "url": null,
+   "public": false,
+   "used_for": "Desilting: matching each desilted waterbody with similar untreated waterbodies, rainfall-matched before and after years, and difference-in-differences on how long water lasts; heterogeneity by rainfall zone and size.",
+   "short": "Singh et al. 2026"
+  },
+  {
+   "id": "kaur2026validation",
+   "citation": "Kaur R (2026). Validating impact: field observations from waterbody rejuvenation in Madhya Pradesh. CoRE Stack blog.",
+   "url": "https://core-stack.org/validating-impact-field-observations-from-waterbody-rejuvenation-in-madhya-pradesh/",
+   "public": true,
+   "used_for": "Desilting: field checks of the satellite-based impact estimates in Chhatarpur district.",
+   "short": "Kaur 2026"
+  },
+  {
+   "id": "kaur2024farmponds",
+   "citation": "Kaur R, Bansal K, Garg D, Sardana R, Vishnubhatla S, Agrawal S, Kumari S, Singla P, Seth A (2024). Assessing the impact of farm ponds on agricultural productivity in Northern India. ACM SIGCAS/SIGCHI Conference on Computing and Sustainable Societies (COMPASS '24), New Delhi.",
+   "url": "https://www.cse.iitd.ac.in/~aseth/farm-ponds.pdf",
+   "doi": "10.1145/3674829.3675085",
+   "public": true,
+   "used_for": "Farm ponds: treated sites and matched control sites without ponds, difference-in-differences on vegetation around the pond for up to five years, effects in drought years and on drought sensitivity, by season.",
+   "short": "Kaur et al. 2024"
+  },
+  {
+   "id": "borusyak2024",
+   "citation": "Borusyak K, Jaravel X, Spiess J (2024). Revisiting event-study designs: robust and efficient estimation. Review of Economic Studies 91(6): 3253-3285.",
+   "url": "https://arxiv.org/abs/2108.12419",
+   "doi": "10.1093/restud/rdae007",
+   "public": true,
+   "used_for": "Farm ponds, headline: the imputation estimator for staggered adoption (fit unit and time effects on untreated observations, impute the untreated outcome of treated observations).",
+   "short": "Borusyak, Jaravel and Spiess 2024"
+  },
+  {
+   "id": "callaway2021",
+   "citation": "Callaway B, Sant'Anna PHC (2021). Difference-in-differences with multiple time periods. Journal of Econometrics 225(2): 200-230.",
+   "url": "https://arxiv.org/abs/1803.09015",
+   "doi": "10.1016/j.jeconom.2020.12.001",
+   "public": true,
+   "used_for": "Farm ponds: cohort-by-year effects with not-yet-treated controls, and why a single two-way fixed-effects regression is avoided when ponds are built in different years.",
+   "short": "Callaway and Sant'Anna 2021"
+  },
+  {
+   "id": "santanna2020",
+   "citation": "Sant'Anna PHC, Zhao J (2020). Doubly robust difference-in-differences estimators. Journal of Econometrics 219(1): 101-122.",
+   "url": "https://arxiv.org/abs/1812.01723",
+   "doi": "10.1016/j.jeconom.2020.06.003",
+   "public": true,
+   "used_for": "Farm ponds, robustness: doubly robust DiD (propensity score and outcome regression) within each district.",
+   "short": "Sant'Anna and Zhao 2020"
+  },
+  {
+   "id": "chernozhukov2025",
+   "citation": "Chernozhukov V, Demirer M, Duflo E, Fernández-Val I (2018, revised 2025). Generic machine learning inference on heterogeneous treatment effects in randomized experiments. NBER Working Paper 24678.",
+   "url": "https://arxiv.org/abs/1712.04802",
+   "public": true,
+   "used_for": "Farm ponds, heterogeneity: best linear predictor (BLP), sorted group average effects (GATES) and classification analysis (CLAN) on cross-fitted machine-learning predictions.",
+   "short": "Chernozhukov et al. 2018"
+  },
+  {
+   "id": "wager2018",
+   "citation": "Wager S, Athey S (2018). Estimation and inference of heterogeneous treatment effects using random forests. Journal of the American Statistical Association 113(523): 1228-1242.",
+   "url": "https://arxiv.org/abs/1510.04342",
+   "doi": "10.1080/01621459.2017.1319839",
+   "public": true,
+   "used_for": "Farm ponds, heterogeneity: forests for treatment-effect variation.",
+   "short": "Wager and Athey 2018"
+  },
+  {
+   "id": "abadie2010",
+   "citation": "Abadie A, Diamond A, Hainmueller J (2010). Synthetic control methods for comparative case studies: estimating the effect of California's tobacco control program. Journal of the American Statistical Association 105(490): 493-505.",
+   "url": "https://www.nber.org/papers/w12831",
+   "doi": "10.1198/jasa.2009.ap08746",
+   "public": true,
+   "used_for": "Desilting: the counterfactual model (a treated waterbody fitted on its controls over the pre years and projected over the post years), and placebo-based inference: placing an estimate among the same estimates for untreated units.",
+   "short": "Abadie, Diamond and Hainmueller 2010"
+  },
+  {
+   "id": "stuart2010",
+   "citation": "Stuart EA (2010). Matching methods for causal inference: a review and a look forward. Statistical Science 25(1): 1-21.",
+   "url": "https://arxiv.org/abs/1010.5586",
+   "doi": "10.1214/09-STS313",
+   "public": true,
+   "used_for": "Desilting: nearest-neighbour matching of controls on covariates (Mahalanobis distance) and balance.",
+   "short": "Stuart 2010"
+  },
+  {
+   "id": "drought_manual",
+   "citation": "Department of Agriculture & Farmers Welfare (2016, updated 2020). Manual for Drought Management. Government of India.",
+   "url": "https://agriwelfare.gov.in",
+   "public": true,
+   "used_for": "Drought years: the 3-4 week dry-spell trigger behind 4 or more weeks of moderate or severe kharif drought.",
+   "short": "Drought Manual 2016"
+  },
+  {
+   "id": "core_stack",
+   "citation": "CoRE Stack: Commoning for Resilience and Equity. Surface water body, zone-of-influence, cropping intensity and drought layers.",
+   "url": "https://core-stack.org",
+   "public": true,
+   "used_for": "All data: seasonal water extent of each waterbody per hydrological year, the zone of influence and its cropping, MWS cropping and kharif drought weeks.",
+   "short": "CoRE Stack"
+  }
+ ]
+}
