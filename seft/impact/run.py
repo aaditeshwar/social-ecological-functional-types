@@ -111,12 +111,11 @@ def note_env(rec, wb, S, labels, group=None, itype='desilting'):
             'group_placebo_text': 'gaining on' if (g.get('placebo_mean') or 0) > 0 else 'falling behind'}
 
 def unit_stats(recs, S, label, R=None, rng=None):
-    A = S['averages']; rng = rng or random.Random(7)
+    A = S['averages']; rng = rng or np.random.default_rng(7)
     xs = np.array([r['effects']['W']['did'] for r in recs], float)
     out = {'n': len(recs), 'unit_label': label}
     if len(xs):
-        xs_list = xs.tolist()
-        bs = [float(np.mean(rng.choices(xs_list, k=len(xs_list)))) for _ in range(A['bootstrap'])] if len(xs) > 1 else [float(xs[0])]
+        bs = [float(np.mean(rng.choice(xs, len(xs)))) for _ in range(A['bootstrap'])] if len(xs) > 1 else [float(xs[0])]
         out.update(mean=round(float(xs.mean()), 2), lo=round(float(np.percentile(bs, 2.5)), 2), hi=round(float(np.percentile(bs, 97.5)), 2),
                    n_gain=sum(r['verdict'] in GAINS for r in recs), n_loss=sum(r['verdict'] in LOSSES for r in recs),
                    reference_mean=round(float(np.nanmean([r['effects']['W'].get('reference_mean') or np.nan for r in recs])), 2),
@@ -127,7 +126,7 @@ def unit_stats(recs, S, label, R=None, rng=None):
     pl = [float(np.mean(list(r['effects']['W']['placebo'].values()))) for r in recs
           if (r['effects']['W'].get('placebo') or {}) and all(v is not None for v in r['effects']['W']['placebo'].values())]
     if len(pl) > 1:
-        pb = [float(np.mean(rng.choices(pl, k=len(pl)))) for _ in range(A['bootstrap'])]
+        pb = [float(np.mean(rng.choice(pl, len(pl)))) for _ in range(A['bootstrap'])]
         pm, plo, phi = float(np.mean(pl)), float(np.percentile(pb, 2.5)), float(np.percentile(pb, 97.5))
         out.update(placebo_mean=round(pm, 2), placebo_lo=round(plo, 2), placebo_hi=round(phi, 2),
                    placebo_concern=bool(abs(pm) >= A.get('placebo_concern_weeks', 1.0) or plo > 0 or phi < 0))
