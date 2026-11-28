@@ -36,7 +36,10 @@ Waterbody impact (config/impact/locations.json, registries in data/registries/):
     python -m seft.cli impact-farmpond [--data-root DIR]
                                        # new farm ponds (first wet 2019-2023) in every waterbody tehsil: effect on
                                        # cropping in their zone of influence, lined/unlined class, older structures
-                                       # -> out/impact/farmpond and web/data/waterbody (fp.json, fp_<district>.json)
+                                       # -> out/impact/farmpond and web/data/waterbody (fp.json, fp_<district>.json),
+                                       # and the prediction model core_seft/models/farmpond.json.gz
+    python -m seft.cli impact-model    # desilting prediction model from the published desilting bundles
+                                       # -> core_seft/models/desilting.json.gz (run after impact-run)
 
 Common options: --locations FILE (default config/locations.json). For run and wb-run: --answers FILE
 (community answers saved from the atlas), --merge (keep districts already in the atlas that this run does not
@@ -91,6 +94,12 @@ def cmd_impact_farmpond(a):
     from .util import set_data_root
     if a.data_root: set_data_root(a.data_root)
     fmain(web=not a.no_web)
+
+def cmd_impact_model(a):
+    from .impact.model import build_desilting_model, save
+    from . import __version__ as v
+    m = build_desilting_model(version=v)
+    if m: save(m, 'desilting', ROOT / 'out' / 'impact')
 
 def cmd_add(a):
     roles = _roles(a)
@@ -306,6 +315,7 @@ def main(argv=None):
     p.add_argument('--no-web', action='store_true', help='do not copy bundles to web/data/waterbody')
     p.add_argument('--finalize-only', action='store_true', help='rebuild verdicts, notes and averages from out/impact/records.json without re-estimating')
     sub.add_parser('impact-validate', help='check knowledge/impact, config/impact and the registries')
+    sub.add_parser('impact-model', help='desilting prediction model from the published impact bundles -> core_seft/models/desilting.json.gz')
     p = sub.add_parser('impact-farmpond', help='effect of new farm ponds on cropping around them -> out/impact/farmpond, web/data/waterbody')
     p.add_argument('--data-root', help='folder holding raw/ and geo/ (default: data/)')
     p.add_argument('--no-web', action='store_true', help='do not copy bundles to web/data/waterbody')
@@ -328,6 +338,7 @@ def main(argv=None):
     elif a.cmd == 'impact-link': cmd_impact_link(a)
     elif a.cmd == 'impact-run': cmd_impact_run(a)
     elif a.cmd == 'impact-farmpond': cmd_impact_farmpond(a)
+    elif a.cmd == 'impact-model': cmd_impact_model(a)
     elif a.cmd == 'impact-validate':
         from .impact.validate import main as iv; sys.exit(0 if iv() else 1)
     elif a.cmd == 'cc-build':

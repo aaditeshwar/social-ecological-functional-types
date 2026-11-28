@@ -2,9 +2,9 @@
 __version__ = "0.3.0"
 
 from .errors import CacheMiss, CoreSeftError, KnowledgeError, UnknownEntity
-from .session import Session, analyse, configure
+from .session import Session, analyse, configure, predict_impact, site_suitability
 __all__ = [
-    "Session", "analyse", "configure",
+    "Session", "analyse", "configure", "predict_impact", "site_suitability",
     "CacheMiss", "CoreSeftError", "KnowledgeError", "UnknownEntity",
     "__version__",
 ]

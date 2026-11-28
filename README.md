@@ -382,6 +382,11 @@ python -m seft.cli impact-validate
   with BLP, GATES and CLAN (Chernozhukov et al.).
 * **Older structures** (wet since 2017, any type): the ZoI-minus-MWS cropping gap minus the same gap at sites where
   structures of that type were built later, before they were built (`fp_old`): a cross-sectional measure.
+* **Other ponds and tanks:** small on-stream ponds, on-stream tanks, village ponds and canal-fed ponds are assessed
+  the same way as exploratory results (their benefit can lie downstream or in uses other than crops); river reaches
+  are not assessed. Every waterbody's panel says why when there is no result (`fp_none`).
+* **Prediction model:** the run also writes `core_seft/models/farmpond.json.gz` for `core_seft.predict_impact`;
+  `impact-model` writes the desilting model (see docs/core-seft.md).
 * `--data-root DIR` reads `raw/` and `geo/` from another folder; `SEFT_FP_CACHE=<file.pkl>` keeps the loaded panel
   between runs. The atlas's Impact assessment tab describes both intervention types in detail.
 

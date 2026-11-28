@@ -28,6 +28,18 @@ def configure(data_dir=None, api_key=None, knowledge_dir=None, log=print):
     return _DEFAULT
 
 
+def predict_impact(intervention, **kw):
+    if _DEFAULT is None:
+        configure()
+    return _DEFAULT.predict_impact(intervention, **kw)
+
+
+def site_suitability(values=None, **kw):
+    if _DEFAULT is None:
+        configure()
+    return _DEFAULT.site_suitability(values, **kw)
+
+
 def analyse(kind, *, state, district, tehsil=None, uid=None, answers=None, fetch=True, include=None, detail='summary',
             intervention=None):
     if _DEFAULT is None:
@@ -504,6 +516,54 @@ class Session:
 
 
     # ------------------------------------------------------------------ waterbody impact
+    def predict_impact(self, intervention, *, state, district, type=None, waterbody=None, mws=None, lat=None, lon=None,
+                       tehsil=None, area_ha=None, zoi_area_ha=None, catchment_ha=None, stream_order=None, lined=None,
+                       volume_m3=None, fetch=True, k=10):
+        """Predicted impact of a new pond or tank (intervention='new_pond') or of desilting (intervention='desilting').
+
+        new_pond: where (waterbody= an existing one, or mws=, or lat= and lon=), type= (farm_pond, headwater_pond,
+        small_onstream_pond, onstream_tank, village_pond, canal_fed; default farm_pond or the waterbody's type),
+        area_ha=, and if known zoi_area_ha=, catchment_ha=, stream_order=, lined= (farm ponds: True, False or None).
+        desilting: waterbody= and volume_m3=. Returns the predicted effect, the group of assessed structures it falls in
+        with their range, the most similar assessed structures and the model's notes (see core_seft/predict.py)."""
+        from .predict import Predictor
+        return Predictor(self).predict(intervention, state=state, district=district, type=type, waterbody=waterbody, mws=mws,
+                                       lat=lat, lon=lon, tehsil=tehsil, area_ha=area_ha, zoi_area_ha=zoi_area_ha,
+                                       catchment_ha=catchment_ha, stream_order=stream_order, lined=lined, volume_m3=volume_m3,
+                                       fetch=fetch, k=k)
+
+    def site_suitability(self, values=None, *, structures=None, state=None, district=None, waterbody=None, mws=None,
+                         lat=None, lon=None, tehsil=None, predict=True, area_ha=None, fetch=True):
+        """Which structures suit a site, from the suitability rules in knowledge/interventions.json.
+
+        values: {slope_pct, stream_order, catchment_ha, drainage_distance_m, land_use, soil_group}; with waterbody=
+        its stream order and catchment fill the missing ones. With a location (state, district and waterbody=, mws=
+        or lat=/lon=) and predict=True, structures the impact model covers (farm ponds, check dams, community and
+        percolation ponds) also get predict_impact for that site."""
+        from .predict import suitability, Predictor, STRUCTURE_TYPES
+        from seft.util import load_json
+        self._activate()
+        values = dict(values or {})
+        if waterbody is not None:
+            b, _ = Predictor(self)._wb(state, district, waterbody, tehsil, fetch)
+            values.setdefault('stream_order', b.get('stream_order')); values.setdefault('catchment_ha', b.get('catchment_ha'))
+        I = load_json(self.knowledge_dir / 'interventions.json')
+        res = suitability(I, values, structures)
+        if predict and state and district and (waterbody is not None or mws is not None or (lat is not None and lon is not None)):
+            for r in res:
+                t = STRUCTURE_TYPES.get(r['structure'])
+                if not t or r['verdict'] == 'not suitable': continue
+                try:
+                    r['impact'] = self.predict_impact('new_pond', state=state, district=district, type=t, mws=mws,
+                                                      waterbody=None, lat=lat, lon=lon, tehsil=tehsil, area_ha=area_ha,
+                                                      catchment_ha=values.get('catchment_ha'), stream_order=values.get('stream_order'),
+                                                      fetch=fetch, k=5) if (mws is not None or lat is not None) else \
+                                  self.predict_impact('new_pond', state=state, district=district, type=t, waterbody=waterbody,
+                                                      tehsil=tehsil, area_ha=area_ha, fetch=fetch, k=5)
+                except Exception as e:
+                    r['impact'] = {'error': str(e)}
+        return res
+
     def _registries(self):
         """Registries from <data_dir>/registries and the repository's data/registries (same id: data_dir wins)."""
         out = {}

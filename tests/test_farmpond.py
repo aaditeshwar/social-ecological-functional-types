@@ -55,3 +55,26 @@ class Notes(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class Models(unittest.TestCase):
+    def test_shipped_models(self):
+        from seft.impact.model import load, predict_forest, FP_FEATURES
+        m = load('farmpond')
+        self.assertEqual(m['features'], FP_FEATURES)
+        T = m['types']['farm_pond']; row = T['table'][0]
+        p = predict_forest(T['trees'], [row[5:]])[0]
+        self.assertTrue(-1 < p < 1); self.assertEqual(len(T['cuts']), 4); self.assertEqual(len(T['groups']), 5)
+        d = load('desilting'); self.assertEqual(len(d['coef']), len(d['features'])); self.assertGreater(d['n'], 30)
+
+class Suitability(unittest.TestCase):
+    def test_rules(self):
+        import json
+        from core_seft.predict import suitability, _num_match
+        from seft.util import knowledge_dir
+        self.assertTrue(_num_match(25, '< 2 or > 20%')); self.assertFalse(_num_match(4, '1 or > 4')); self.assertTrue(_num_match(30, '≤ 30 m (on a drainage line)'))
+        I = json.load(open(knowledge_dir() / 'interventions.json'))
+        r = {x['structure']: x for x in suitability(I, {'slope_pct': 2, 'stream_order': 3, 'catchment_ha': 3, 'drainage_distance_m': 100,
+                                                          'land_use': 'single kharif', 'soil_group': 'C'})}
+        self.assertEqual(r['farm_pond']['verdict'], 'suitable')
+        self.assertEqual(r['check_dam']['verdict'], 'not suitable')       # catchment 3 ha is too small for a check dam
+        self.assertEqual(suitability(I, {}, ['farm_pond'])[0]['verdict'], 'unknown')

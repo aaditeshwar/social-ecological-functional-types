@@ -18,6 +18,10 @@ the lined/unlined class in waterbody notes). The atlas's Impact assessment tab d
   background corrections, the estimators (imputation headline with `min_cell`, same-district DiD with `min_n`,
   background change, placebo), the lined/unlined thresholds, verdicts, averages, the heterogeneity forest and the
   effectiveness measure for older structures. Every `about` is shown on the Impact assessment tab.
+  Also: `intervention.types` (farm and headwater ponds, and as `exploratory_types` small on-stream ponds, on-stream
+  tanks, village ponds and canal-fed ponds), `not_assessed` (river reaches, with the reason shown), `lining.types`
+  (the lined/unlined split, farm ponds only), `effectiveness.min_group` (the percentile of an older structure among
+  its type in its district) and `heterogeneity.ship_trees` (trees of the prediction model shipped with core_seft).
 * `references.json` — the references cited (id, short, citation, url to a public copy where one exists, doi,
   used_for); `impact-validate` checks that every cited id exists.
 * `notes.json` — public notes. For a waterbody (`waterbody`) and for a unit (`unit`): the first `main` rule whose
@@ -28,7 +32,7 @@ the lined/unlined class in waterbody notes). The atlas's Impact assessment tab d
   page; each entry's placeholders are declared in `panel._placeholders`, and `impact-validate` checks that every
   key the page uses exists. Changing any of this text needs `impact-run --finalize-only` (or a full run) to reach
   the atlas. New farm ponds: `fp_waterbody` (one pond: verdict, class, rabi/summer cropping, drought years,
-  early years, the district's average), `fp_unit` (district, tehsil, MWS), `fp_old` (older structures) and
+  early years, the district's average), `fp_unit` (district, tehsil, MWS), `fp_old` (older structures, with its position in its district), `fp_none` (why a waterbody has no result) and
   `fp_panel` (fixed text, filled by `fpT` in the page); their placeholders are built in
   `seft/impact/farmpond.py` (`wb_env`, `unit_env`, `old_env`). They reach the atlas with `impact-farmpond`.
 

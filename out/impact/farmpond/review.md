@@ -72,13 +72,120 @@ Heterogeneity: BLP 1.05 (SE 0.177); GATES +2.4 (+0.5, +4.2) n=374; -0.5 (-2.3, +
 - catchment area: importance 0.054, lowest group 39.78, highest 34.7
 - zone of influence area: importance 0.048, lowest group 41.28, highest 32.03
 
+## small_onstream_pond
+
+2505 new since 2019; 1077 assessed in 35 districts; classes None.
+Placebo (year before): -0.7 (-2.7, +1.3) n=519 points. Model: background coefficient 0.742, drought weeks -0.0044; support {'district': 1704, 'background': 2154, 'pooled': 1537}.
+
+| Outcome | Class | Up to 2022 (points) | Normal years | Drought years | Later years (early) |
+| --- | --- | --- | --- | --- | --- |
+| ci | all | -2.0 (-3.3, -0.8) n=1005 | -1.3 | -3.3 | -2.5 (-3.7, -1.3) n=1077 |
+| nonkharif | all | -0.1 (-0.9, +0.6) n=1005 | +0.5 | -2.0 | +0.8 (+0.0, +1.5) n=1077 |
+| multi | all | +2.0 (+1.1, +2.9) n=1003 | +2.2 | +2.5 | +0.8 (-0.1, +1.6) n=1075 |
+| cropped | all | -3.5 (-4.1, -2.9) n=1005 | -3.4 | -3.9 | -3.1 (-3.8, -2.4) n=1077 |
+
+| Same-district DiD | Class | No covariates | Size | Size + MWS |
+| --- | --- | --- | --- | --- |
+| ci | all | +3.3 (+0.2, +6.8) | +2.6 (-0.4, +5.4) | +1.7 (-2.3, +5.2) |
+| nonkharif | all | +7.4 (+4.6, +10.5) | +8.2 (+5.9, +10.4) | +4.4 (+2.0, +7.0) |
+
+Heterogeneity: BLP 1.106 (SE 0.222); GATES -5.0 (-8.5, -2.1) n=201; -5.2 (-7.6, -2.5) n=201; -3.0 (-5.9, -0.3) n=201; -0.6 (-2.2, +1.3) n=201; +3.5 (+1.2, +5.8) n=201
+- MWS cropping intensity before the pond: importance 0.148, lowest group 127.54, highest 82.47
+- pond area: importance 0.146, lowest group 0.12, highest 0.52
+- zone of influence area: importance 0.115, lowest group 8.14, highest 55.15
+- pastoral share of MWS: importance 0.088, lowest group 2.69, highest 11.29
+- catchment area: importance 0.063, lowest group 1529.01, highest 1360.08
+- rainfed dryland share of MWS: importance 0.063, lowest group 24.79, highest 33.87
+- kharif drought weeks after it appeared: importance 0.055, lowest group 1.34, highest 0.98
+- first wet year: importance 0.051, lowest group 2020.32, highest 2019.34
+
+## onstream_tank
+
+838 new since 2019; 342 assessed in 32 districts; classes None.
+Placebo (year before): -2.9 (-7.9, +1.8) n=120 points. Model: background coefficient 0.511, drought weeks -0.01007; support {'pooled': 719, 'background': 1019, 'district': 118}.
+
+| Outcome | Class | Up to 2022 (points) | Normal years | Drought years | Later years (early) |
+| --- | --- | --- | --- | --- | --- |
+| ci | all | +9.8 (+7.8, +11.6) n=335 | +10.7 | +9.0 | +5.8 (+3.1, +7.9) n=342 |
+| nonkharif | all | +8.6 (+7.2, +10.1) n=335 | +9.4 | +4.9 | +8.6 (+7.1, +10.2) n=342 |
+| multi | all | +6.7 (+5.3, +8.2) n=335 | +7.9 | +1.1 | +5.6 (+4.3, +7.0) n=342 |
+| cropped | all | +1.3 (+0.2, +2.2) n=335 | +1.0 | +5.5 | -0.4 (-1.5, +0.8) n=342 |
+
+| Same-district DiD | Class | No covariates | Size | Size + MWS |
+| --- | --- | --- | --- | --- |
+| ci | all | +16.3 (+9.1, +23.0) | +15.9 (+9.8, +21.3) | +15.3 (+10.0, +20.1) |
+| nonkharif | all | +14.5 (+7.9, +21.7) | +14.1 (+6.5, +20.8) | +15.2 (+9.3, +21.6) |
+
+Heterogeneity: BLP 1.905 (SE 0.366); GATES -1.1 (-7.8, +4.7) n=67; +8.2 (+4.1, +12.3) n=67; +10.5 (+5.2, +14.8) n=67; +14.2 (+10.4, +17.6) n=67; +17.2 (+13.9, +20.3) n=67
+- groundwater irrigated share of MWS: importance 0.27, lowest group 2.96, highest 23.9
+- MWS cropping intensity before the pond: importance 0.226, lowest group 130.61, highest 88.47
+- rainfed dryland share of MWS: importance 0.201, lowest group 14.36, highest 42.8
+- peri urban share of MWS: importance 0.082, lowest group 1.54, highest 2.99
+- pastoral share of MWS: importance 0.044, lowest group 4.11, highest 6.55
+- catchment area: importance 0.039, lowest group 290.7, highest 639.36
+- tank irrigated share of MWS: importance 0.037, lowest group 1.46, highest 3.31
+- zone of influence area: importance 0.034, lowest group 109.73, highest 132.73
+
+## village_pond
+
+1575 new since 2019; 658 assessed in 34 districts; classes None.
+Placebo (year before): -0.7 (-3.1, +1.5) n=315 points. Model: background coefficient 0.497, drought weeks -0.00158; support {'district': 501, 'pooled': 1503, 'background': 1316}.
+
+| Outcome | Class | Up to 2022 (points) | Normal years | Drought years | Later years (early) |
+| --- | --- | --- | --- | --- | --- |
+| ci | all | +7.2 (+5.5, +8.8) n=627 | +7.9 | +4.5 | +4.1 (+2.4, +6.0) n=658 |
+| nonkharif | all | +4.0 (+3.0, +4.9) n=627 | +4.4 | +1.9 | +3.6 (+2.7, +4.5) n=658 |
+| multi | all | +1.8 (+1.0, +2.7) n=627 | +2.7 | -1.8 | +1.5 (+0.7, +2.5) n=658 |
+| cropped | all | +3.2 (+2.3, +4.2) n=627 | +3.3 | +4.7 | +1.2 (+0.0, +2.2) n=658 |
+
+| Same-district DiD | Class | No covariates | Size | Size + MWS |
+| --- | --- | --- | --- | --- |
+| ci | all | +13.8 (+8.1, +20.3) | +16.1 (+9.1, +22.2) | +15.5 (+7.5, +22.4) |
+| nonkharif | all | +8.8 (+4.7, +12.8) | +10.5 (+5.7, +14.8) | +9.5 (+5.4, +13.2) |
+
+Heterogeneity: BLP 0.811 (SE 0.251); GATES +2.4 (-0.8, +5.7) n=126; +6.3 (+2.5, +9.9) n=125; +10.4 (+6.7, +13.6) n=125; +8.1 (+4.4, +11.7) n=125; +8.9 (+6.0, +11.3) n=126
+- rainfed rice subhumid share of MWS: importance 0.206, lowest group 20.98, highest 0.13
+- rainfed dryland share of MWS: importance 0.133, lowest group 9.4, highest 42.62
+- tree crops share of MWS: importance 0.088, lowest group 1.86, highest 7.7
+- MWS cropping intensity before the pond: importance 0.078, lowest group 156.34, highest 104.29
+- tank irrigated share of MWS: importance 0.077, lowest group 0.48, highest 4.4
+- semi-arid rainfall: importance 0.075, lowest group 0.0, highest 98.41
+- pastoral share of MWS: importance 0.071, lowest group 1.02, highest 6.14
+- groundwater irrigated share of MWS: importance 0.06, lowest group 1.03, highest 14.81
+
+## canal_fed
+
+1512 new since 2019; 707 assessed in 29 districts; classes None.
+Placebo (year before): -4.3 (-6.5, -2.2) n=401 points. Model: background coefficient 0.843, drought weeks -0.00135; support {'district': 1090, 'background': 1414, 'pooled': 894}.
+
+| Outcome | Class | Up to 2022 (points) | Normal years | Drought years | Later years (early) |
+| --- | --- | --- | --- | --- | --- |
+| ci | all | -0.6 (-2.2, +1.0) n=634 | -0.5 | -0.3 | +0.2 (-1.3, +1.8) n=707 |
+| nonkharif | all | +0.1 (-0.9, +1.1) n=634 | +0.0 | -0.2 | +0.7 (-0.2, +1.6) n=707 |
+| multi | all | -0.2 (-1.2, +0.9) n=633 | +0.3 | +0.0 | -0.4 (-1.4, +0.5) n=706 |
+| cropped | all | -0.4 (-1.3, +0.4) n=634 | -0.6 | -0.5 | -0.2 (-1.2, +0.8) n=707 |
+
+| Same-district DiD | Class | No covariates | Size | Size + MWS |
+| --- | --- | --- | --- | --- |
+| ci | all | +2.1 (-2.5, +7.7) | +15.8 (+7.6, +23.8) | +3.9 (-0.9, +9.4) |
+| nonkharif | all | +1.2 (-2.8, +4.4) | +10.3 (+5.0, +16.7) | -4.5 (-8.8, -0.2) |
+
+Heterogeneity: BLP 1.064 (SE 0.239); GATES -6.1 (-9.1, -2.7) n=127; -3.2 (-6.3, +0.1) n=127; +1.5 (-1.9, +4.4) n=126; +1.9 (-0.9, +5.1) n=127; +3.2 (-0.5, +6.8) n=127
+- groundwater irrigated share of MWS: importance 0.241, lowest group 23.02, highest 1.15
+- canal irrigated share of MWS: importance 0.144, lowest group 28.17, highest 2.35
+- pastoral share of MWS: importance 0.1, lowest group 0.79, highest 6.67
+- peri urban share of MWS: importance 0.081, lowest group 3.25, highest 0.6
+- MWS cropping intensity before the pond: importance 0.072, lowest group 135.44, highest 109.52
+- catchment area: importance 0.069, lowest group 1.08, highest 1.53
+- rainfed dryland share of MWS: importance 0.069, lowest group 26.68, highest 30.4
+- tree crops share of MWS: importance 0.041, lowest group 10.13, highest 2.47
+
 ## Older structures (site-premium corrected)
 
 | Type | n | Gap | Premium | Corrected |
 | --- | --- | --- | --- | --- |
 | farm_pond | 12281 | -3.9 | -8.5 | +4.5 (+4.1, +5.0) n=12235 |
 | headwater_pond | 10889 | -6.0 | -8.6 | +2.4 (+2.0, +2.8) n=10490 |
-| river_reach | 5086 | -1.0 | -6.7 | +5.5 (+4.8, +6.2) n=4834 |
 | village_pond | 4984 | -4.6 | -13.4 | +9.4 (+8.6, +10.2) n=4284 |
 | onstream_tank | 4663 | +1.0 | -1.9 | +3.9 (+2.9, +4.8) n=2162 |
 | small_onstream_pond | 2926 | +1.3 | -3.1 | +4.3 (+3.4, +5.2) n=2746 |

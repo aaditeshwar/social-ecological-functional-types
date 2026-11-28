@@ -22,5 +22,6 @@ notebooks = ["jupyter", "ipykernel"]
 include = ["core_seft*", "seft*", "knowledge*", "config*"]
 
 [tool.setuptools.package-data]
+core_seft = ["models/*.json.gz"]
 knowledge = ["*.json", "waterbody/*.json", "impact/*.json"]
 config = ["*.json", "groundtruth/*.json", "waterbody/*.json", "impact/*.json"]

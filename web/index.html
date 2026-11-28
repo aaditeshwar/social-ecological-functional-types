@@ -1567,7 +1567,7 @@ async function wBundle(slug){
   const b=await loadWbData("w_"+slug); b.byId={}; b.byMws={}; b.slug=slug;
   b.waterbodies=await wDedupe(b.waterbodies,slug);
   await wImpIndex(); if(WIMP&&WIMP.districts.some(x=>x.slug===slug)){try{b.imp=(await loadWbData("imp_"+slug)).waterbodies;}catch(e){b.imp=null;}}
-  if(WFP&&WFP.districts.some(x=>x.slug===slug)){try{const f=await loadWbData("fp_"+slug); b.fp=f.waterbodies; b.fpLin=f.lining; b.fpOld=f.old; b.fpUnits=f.units;}catch(e){b.fp=null;}}
+  if(WFP&&WFP.districts.some(x=>x.slug===slug)){try{const f=await loadWbData("fp_"+slug); b.fp=f.waterbodies; b.fpLin=f.lining; b.fpOld=f.old; b.fpUnits=f.units; b.fpStatus=f.status||{};}catch(e){b.fp=null;}}
   b.waterbodies.forEach(w=>{b.byId[w.id]=w; (b.byMws[w.mws]=b.byMws[w.mws]||[]).push(w); w.rmap={}; (w.ru||[]).forEach(([i,s,v])=>w.rmap[i]=[s,v]);});
   b.maxPonds=Math.max(1,...Object.values(b.mws).map(m=>m.recent_ponds||0));
   WBB[slug]=b; return b;
@@ -1885,7 +1885,7 @@ function wPickers(){
   h+=distToggle("wall");
   if(!WIMP) h+=`<span class="note" style="align-self:flex-end;padding-bottom:6px">Intervention data not loaded${WIMP_TRIED?"":" yet"}${WIMP_ERR?": "+esc(WIMP_ERR):""}</span>`;
   if(WIMP) h+=`<label class="tog" for="wimpds"><input type="checkbox" id="wimpds" ${IMP_DS?"checked":""}> Desilted waterbodies</label>`;
-  if(WFP) h+=`<label class="tog" for="wimpfp"><input type="checkbox" id="wimpfp" ${IMP_FP?"checked":""}> New farm ponds</label>`;
+  if(WFP) h+=`<label class="tog" for="wimpfp"><input type="checkbox" id="wimpfp" ${IMP_FP?"checked":""}> New ponds and tanks</label>`;
   $("#wpickers").innerHTML=h; bindDistToggle("wall");
   const impTog=()=>{IMP_DS=!!($("#wimpds")&&$("#wimpds").checked); IMP_FP=!!($("#wimpfp")&&$("#wimpfp").checked); IMPONLY=IMP_DS||IMP_FP;
     try{localStorage.setItem("wb_imp_ds",IMP_DS?"1":"0"); localStorage.setItem("wb_imp_fp",IMP_FP?"1":"0"); localStorage.removeItem("wb_imp_only");}catch(x){} applyViews();
@@ -2130,7 +2130,7 @@ function fpNote(rec){
   const S=WFP.settings, e=rec.effects||{}, sg=fpSig(rec), tl=plainLabel((WTYPE[rec.type]||{label:rec.type}).label).toLowerCase(), last=S.years.last_main;
   const A=(((WFP.averages||{}).district||{})[W.district]||{})[rec.type]||{}, C=(A.by_class||{})[rec.cls]||{};
   const nk=e.nonkharif?(e.nonkharif.main!=null?e.nonkharif.main:e.nonkharif.early):null;
-  const env={verdict:rec.verdict,type_label:tl,year_label:fpYearsText([rec.E]),year:rec.E,effect_signed:fpPts(rec.tau),effect_abs:Math.abs((rec.tau||0)*100).toFixed(1),
+  const env={verdict:rec.verdict,wtype:rec.type,type_label:tl,year_label:fpYearsText([rec.E]),year:rec.E,effect_signed:fpPts(rec.tau),effect_abs:Math.abs((rec.tau||0)*100).toFixed(1),
     nk_signed:fpPts(nk),has_nk:nk!=null,post_text:fpYearsText((rec.main_years&&rec.main_years.length?rec.main_years:rec.post_years)||[]),n_years:rec.n||0,
     early_text:fpYearsText((rec.post_years||[]).filter(y=>y>last)),early_signed:fpPts(e.ci&&e.ci.early),has_early:!!(e.ci&&e.ci.early!=null&&(rec.main_years||[]).length),
     reason:rec.reason||"",cls:rec.cls||"",cls_label:fpCls(rec.cls),summer_area:Math.round(sg.summer_area||0).toFixed(0),summer_years:Math.round(100*(sg.summer_years||0)).toFixed(0),
@@ -2141,10 +2141,18 @@ function fpNote(rec){
   return noteRender(WFP.notes.fp_waterbody,env);
 }
 function fpOldNote(o,t){
-  if(!WFP||!WFP.notes||!o) return ""; const [g,p,c]=o; if(c==null) return "";
+  if(!WFP||!WFP.notes||!o) return ""; const [g,p,c,pct,ng]=o; if(g==null) return "";
   const tl=plainLabel((WTYPE[t]||{label:t}).label).toLowerCase();
-  return noteRender(WFP.notes.fp_old,{type_label:tl,type_label_plural:impPlural(tl),gap_abs:Math.abs((g||0)*100).toFixed(1),gap_dir:(g||0)>=0?"above":"below",
-    premium_abs:Math.abs((p||0)*100).toFixed(1),premium_dir:(p||0)<0?"below":"above",has_premium:p!=null,corrected_signed:fpPts(c),corrected:c});
+  return noteRender(WFP.notes.fp_old,{wtype:t,type_label:tl,type_label_plural:impPlural(tl),gap_abs:Math.abs((g||0)*100).toFixed(1),gap_dir:(g||0)>=0?"above":"below",
+    premium_abs:Math.abs((p||0)*100).toFixed(1),premium_dir:(p||0)<0?"below":"above",has_premium:p!=null,corrected_signed:fpPts(c),corrected:c??0,
+    pct:pct??-1,n_group:ng||0,district:W.district||""});
+}
+/* why a waterbody has no result (fp_<district>.json status: [code, years wet, first wet year]); notes.json fp_none */
+function fpNoneNote(w,b){
+  if(!WFP||!WFP.notes||!WFP.notes.fp_none) return "";
+  const st=(b.fpStatus||{})[String(w.id)], Y=WFP.settings.years.series, tl=plainLabel((WTYPE[w.t]||{label:w.t}).label).toLowerCase();
+  const code=st?st[0]:(WTYPE[w.t]&&WTYPE[w.t].in_scope===false?"scope":"other"), E=st?st[2]:null;
+  return noteRender(WFP.notes.fp_none,{code,wtype:w.t,type_label:tl,years_wet:st?st[1]:0,n_years:Y.length,n_since:E!=null?Y.length-Y.indexOf(E):Y.length,first_year_label:E!=null?fpYearsText([E]):""});
 }
 function fpChart(rec){
   const s=rec.series||{}, Z=s.zoi||[], M=s.mws||[], F=s.fit||[];
@@ -2170,7 +2178,7 @@ function fpRecord(w,b,rec){
     <tr><td>${fpT("row_placebo")}</td><td class="r num">${fpPts(rec.placebo)}</td><td></td></tr>
     <tr><td>${fpT("row_background")}</td><td class="r num">${fpPts(rec.background)}</td><td></td></tr></tbody></table></div>`;
   const fl=(rec.flags||[]).map(f=>fpT("flag_"+f));
-  return `<div style="margin:8px 0 14px"><h3>${fpT("record_title",{intervention_label:esc(S.intervention.label),year:impYears([rec.E])})}</h3>
+  return `<div style="margin:8px 0 14px"><h3>${fpT("record_title",{type_label:esc(plainLabel((WTYPE[rec.type]||{label:rec.type}).label).toLowerCase()),year:impYears([rec.E])})}</h3>
     <div class="chips">${fpChip(rec.verdict)}${rec.cls?`<span class="chip">${fpT("cls_chip",{label:esc(fpCls(rec.cls))})}</span>`:""}</div>
     <p class="pubnote">${rec.note?esc(rec.note):fpNote(rec)}</p>
     ${rec.verdict!=="not_assessable"?fpChart(rec):""}
@@ -2180,11 +2188,12 @@ function fpRecord(w,b,rec){
       ${fl.length?`<p class="note"><b>${fpT("cautions_label")}</b> ${fl.join("; ")}.</p>`:""}</details></div>`;
 }
 function fpBlockWb(w,b){
-  if(!WFP||!b.fp) return "";
-  const rec=b.fp[String(w.id)], old=b.fpOld&&b.fpOld[String(w.id)];
+  if(!WFP) return "";
+  const rec=b.fp&&b.fp[String(w.id)], old=b.fpOld&&b.fpOld[String(w.id)];
   if(rec) return `<div class="block" id="wfp"><div class="eyebrow">${fpT("waterbody_eyebrow")}</div>${fpRecord(w,b,rec)}<p class="note">${fpT("waterbody_footer")}</p></div>`;
   const on=old?fpOldNote(old,w.t):""; if(on) return `<div class="block" id="wfp"><div class="eyebrow">${fpT("old_eyebrow")}</div><p class="pubnote">${on}</p><p class="note">${fpT("old_footer")}</p></div>`;
-  return "";
+  if(b.imp&&b.imp[String(w.id)]) return "";           // a desilting result is shown above
+  return `<div class="block" id="wfp"><div class="eyebrow">${fpT("none_eyebrow")}</div><p class="pubnote">${fpNoneNote(w,b)}</p></div>`;
 }
 function fpAvgBlock(kind,key,ws,b){
   if(!WFP||!b.fp) return "";
@@ -2434,7 +2443,7 @@ function impMethod(){
   const regs=(WIMP&&WIMP.registries)||[], it=WIMP&&WIMP.settings.intervention_types[0], fs=WFP&&WFP.settings;
   if(!WIMP&&!WFP) return `<div class="block"><h3>Impact of interventions</h3><p>No impact results are loaded. Run <code>python -m seft.cli impact-run</code> (desilting, from a registry) and <code>impact-farmpond</code> (new farm ponds).</p></div>`;
   return `<div class="block"><h3>Impact of interventions</h3>${wDrawsOn("Impact of interventions")}
-   <p>Two intervention types are assessed. ${it?`<b>${esc(it.label)}</b>: works listed in a registry (${regs.map(r=>`${esc(r.name)}, ${r.n} records, ${r.linked} linked`).join("; ")}); the outcome is the weeks of water a year, compared with similar untreated waterbodies within ${WIMP.settings.matching.radius_km} km (difference-in-differences, four estimators) and placed among untreated waterbodies run through the same steps.`:""} ${fs?`<b>${esc(fs.intervention.label)}</b>: farm and headwater ponds that first hold water from ${fs.years.first_appearance}, found from the water series; the outcome is cropping in the zone of influence, compared with a prediction from ponds of the district not yet built and the pond's earlier years (imputation), with a lined/unlined class read from the pond's water. Older structures get a site-premium corrected effectiveness measure.`:""}</p>
+   <p>Two intervention types are assessed. ${it?`<b>${esc(it.label)}</b>: works listed in a registry (${regs.map(r=>`${esc(r.name)}, ${r.n} records, ${r.linked} linked`).join("; ")}); the outcome is the weeks of water a year, compared with similar untreated waterbodies within ${WIMP.settings.matching.radius_km} km (difference-in-differences, four estimators) and placed among untreated waterbodies run through the same steps.`:""} ${fs?`<b>${esc(fs.intervention.label)}</b>: farm ponds, headwater ponds and (exploratory) other ponds and tanks that first hold water from ${fs.years.first_appearance}, found from the water series; the outcome is cropping in the zone of influence, compared with a prediction from ponds of the district not yet built and the pond's earlier years (imputation), with a lined/unlined class read from the pond's water. Older structures get a site-premium corrected effectiveness measure.`:""}</p>
    <p>The methods in detail, with results, checks and references, are on the <a href="#" id="wgoimpact">Impact assessment</a> tab. Public notes are written by the rules in <span class="mono">knowledge/impact/notes.json</span>.</p></div>`;
 }
 /* ---------- Impact assessment tab: the intervention types and their methods in detail ---------- */
@@ -2497,10 +2506,10 @@ function iaFarmponds(){
   const effTbl=(Sm.effectiveness||[]).filter(e=>e.n>=30).map(e=>`<tr><td>${typeL(e.type)}</td><td class="r num">${e.n.toLocaleString("en-IN")}</td><td class="r num">${iaP(e.gap)}</td><td class="r num">${iaP(e.premium)}</td><td class="r num">${iaB(e.corrected)}</td><td class="r num">${e.n_districts}</td></tr>`).join("");
   const byD=t=>{const x=(T[t]||{}).by_district||{}; const r=Object.entries(x).filter(([,b])=>b.n>=30).sort((a,c)=>c[1].mean-a[1].mean); return r.length?`<p class="note"><b>${typeL(t)} by district</b> (30 or more ponds; points, up to ${impYears([Y.last_main])}): ${r.map(([d,b])=>`${esc(d)} ${iaP(b.mean)}`).join(" · ")}.</p>`:"";};
   const types=S.intervention.types;
-  return `<div class="block" id="ia-farmponds"><h3>New farm ponds</h3>
+  return `<div class="block" id="ia-farmponds"><h3>${esc(S.intervention.label)}</h3>
    <p>${esc(S.intervention.about)} A pond's purpose is to give the fields around it water in dry spells and for a second crop, so the outcome is cropping in its zone of influence, not the water it holds. The earlier study of MGNREGA farm ponds (${iaCite(["kaur2024farmponds"])}) compared ponds with matched sites without ponds in a difference-in-differences design and found gains in the monsoon season, also in drought years, and smaller gains in rabi and summer. Here every new pond in the atlas districts is assessed, using the year it first held water as its construction year.</p>
    <h4>Finding new ponds</h4>
-   <p>${iaSub(A.about,A)} Assessed types: ${types.map(typeL).join(" and ")}. Other new waterbodies (on-stream ponds, village ponds, river reaches) are not assessed this way, because their water also depends on works and flows upstream; older structures of every type get the effectiveness measure below.</p>
+   <p>${iaSub(A.about,A)} Assessed types: ${types.map(typeL).join(", ")}. ${(S.intervention.exploratory_types||[]).length?`Results for ${(S.intervention.exploratory_types||[]).map(typeL).join(", ")} are exploratory: much of their benefit can lie downstream or in uses other than crops, and their notes say so.`:""} ${Object.entries(S.not_assessed||{}).map(([t,why])=>`${typeL(t)}s are not assessed: ${esc(why)}`).join(" ")} Older structures get the effectiveness measure below.</p>
    <div class="tbl"><table><thead><tr><th>Type</th><th class="r">New since ${Y.first_appearance}</th><th class="r">Assessed</th><th class="r">Districts</th><th class="r">Lined / uncertain / unlined (farm ponds)</th><th class="r">Placebo (points)</th></tr></thead><tbody>${head}</tbody></table></div>
    <h4>Zone of influence and outcomes</h4>
    <p>CoRE Stack links each waterbody to a zone of influence (ZoI): the cropland around it that it can serve. The yearly single, double and triple cropped areas of that land give the outcomes, all in percentage points:</p>
@@ -2541,6 +2550,9 @@ function iaFarmponds(){
    <h4>Older structures</h4>
    <p>${iaSub(S.effectiveness.about,S.effectiveness)}</p>
    <div class="tbl"><table><thead><tr><th>Type (wet since ${Y.series[0]})</th><th class="r">n</th><th class="r">ZoI − MWS</th><th class="r">Site premium</th><th class="r">Corrected (95% range)</th><th class="r">Districts</th></tr></thead><tbody>${effTbl}</tbody></table></div>
+   <p><b>Issues with this measure.</b> It compares places, not years: it assumes older structures were sited like the new ones that give the premium, which is weakest for village ponds and old tanks, sited generations ago. A single structure's gap carries year-to-year noise of many points and is shown without a range, and the zones of clustered tanks overlap. So each structure's panel also gives its position among structures of its type in its district, which does not depend on the premium.</p>
+   <h4>Waterbodies without a result</h4>
+   <p>Every waterbody's panel has an impact section. Where there is neither a new-structure result nor an older-structure measure, it says why: the type is outside the atlas's scope; it is a river reach; it never held water; it held water in too few years to be dated as new or compared as established; it first held water in 2018-19 (too late to count as existing in 2017, too early to be dated as new); or it has no zone of influence with cropping data. The texts are the fp_none rules in notes.json.</p>
    <p class="note">Cropping intensity, percentage points. The corrected value is given only where at least ${S.effectiveness.min_new_for_premium} new structures of the type were built later in the district.</p>
    <h4>What it does not show</h4>
    <p>The construction year is read from the water, so a pond that was dry for years before it first shows water is dated late, and one dug but never filled is missed. The ZoI is drawn around the pond, so its cropping also reflects other changes on the same fields, such as a new well. The estimates are averages over many ponds: a single pond's verdict carries the year-to-year noise of a small area (${types.filter(t=>T[t]&&T[t].placebo_sd!=null).map(t=>`for ${typeL(t).toLowerCase()}s a year without the pond differs from its prediction by about ${Math.round(T[t].placebo_sd*100)} points`).join(", ")||"a year without the pond differs from its prediction by many points"}), so roughly one pond in ten shows a gain or a loss by chance. Whether a pond is lined is inferred, not observed.</p>
@@ -2552,11 +2564,11 @@ function renderWbImpact(m){
   if(WIMP){const it=WIMP.settings.intervention_types[0]||{}, a=(WIMP.averages||{}).state||{}, n=Object.values(a).reduce((s,x)=>s+x.n,0);
     types.push(`<tr><td><a href="#ia-desilting">${esc(it.label||"Desilting")}</a></td><td>A work listed in an intervention registry, matched to its waterbody</td><td>Weeks of water a year in the waterbody</td><td>Similar untreated waterbodies within ${WIMP.settings.matching.radius_km} km</td><td class="r num">${n.toLocaleString("en-IN")}</td></tr>`);}
   if(WFP){const S=WFP.settings, T=(WFP.summary||{}).types||{}, n=Object.values(T).reduce((s,x)=>s+x.n_assessed,0);
-    types.push(`<tr><td><a href="#ia-farmponds">${esc(S.intervention.label)}</a></td><td>A farm or headwater pond first holding water in ${S.years.first_appearance}-${String(S.years.last_appearance).slice(2)} (no registry)</td><td>Cropping in its zone of influence</td><td>Ponds of the same district not yet built, and the pond's own earlier years</td><td class="r num">${n.toLocaleString("en-IN")}</td></tr>`);}
+    types.push(`<tr><td><a href="#ia-farmponds">${esc(S.intervention.label)}</a></td><td>A pond or tank of an assessed type first holding water in ${S.years.first_appearance}-${String(S.years.last_appearance).slice(2)} (no registry)</td><td>Cropping in its zone of influence</td><td>Ponds of the same district not yet built, and the pond's own earlier years</td><td class="r num">${n.toLocaleString("en-IN")}</td></tr>`);}
   m.innerHTML=`<div class="doc"><h2>Impact assessment</h2>
    <div class="block"><p>The atlas estimates what interventions on waterbodies changed, from the same satellite series that describe the waterbodies. Each intervention type has its own question and design: desilting should make a waterbody hold water longer, so its outcome is the water held; a new farm pond should help the fields around it, so its outcome is their cropping. In both, a result is read against what the same steps give where nothing was done, so chance changes are not taken for effects. The settings, notes and references are editable files in <span class="mono">knowledge/impact/</span> (Methodology tab, Knowledge files).</p>
     <div class="tbl"><table><thead><tr><th>Intervention</th><th>What counts as one</th><th>Outcome</th><th>Compared with</th><th class="r">Assessed</th></tr></thead><tbody>${types.join("")}</tbody></table></div>
-    <p class="note">Sections: <a href="#ia-desilting">Desilting</a> · <a href="#ia-farmponds">New farm ponds</a> · <a href="#ia-refs">References</a></p></div>
+    <p class="note">Sections: <a href="#ia-desilting">Desilting</a> · <a href="#ia-farmponds">${esc(WFP?WFP.settings.intervention.label:"New ponds and tanks")}</a> · <a href="#ia-refs">References</a></p></div>
    ${iaDesilting()}${iaFarmponds()}
    <div class="block" id="ia-refs"><h3>References</h3><ul>${R.map(r=>`<li id="ref-${esc(r.id)}">${esc(r.citation)}${r.doi?` doi:<a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener">${esc(r.doi)}</a>`:""}${r.url?` <a href="${esc(r.url)}" target="_blank" rel="noopener">${r.doi?"public copy":"link"}</a>`:r.public===false?' <span class="muted">(not yet public)</span>':""}<br><span class="note">${esc(r.used_for)}</span></li>`).join("")}</ul></div></div>`;
   m.querySelectorAll('a[href^="#ia-"]').forEach(a=>a.onclick=e=>{e.preventDefault(); const t=m.querySelector(a.getAttribute("href")); if(t) t.scrollIntoView({behavior:"smooth",block:"start"});});

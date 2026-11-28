@@ -1,6 +1,6 @@
 {
- "_about": "Rules that write the public note for an intervention's impact, and the fixed text of the impact panels. For each note kind (`waterbody`, `unit` for desilting; `fp_waterbody`, `fp_unit`, `fp_old` for new farm ponds) the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files. `panel` and `fp_panel` hold the labels, headings and explanations around the notes in the atlas panels; its placeholders are listed in `panel._placeholders`.",
- "version": "0.4.0",
+ "_about": "Rules that write the public note for an intervention's impact, and the fixed text of the impact panels. For each note kind (`waterbody`, `unit` for desilting; `fp_waterbody`, `fp_unit`, `fp_old`, `fp_none` for new ponds and tanks, older structures and waterbodies that cannot be assessed) the first rule whose `when` holds gives the main sentence; every `add` rule whose `when` holds appends its sentence. Placeholders in braces are filled from the record (seft/impact/notes.py lists them). Expressions use the same syntax as the other knowledge files. `panel` and `fp_panel` hold the labels, headings and explanations around the notes in the atlas panels; its placeholders are listed in `panel._placeholders`.",
+ "version": "0.5.0",
  "waterbody": {
   "main": [
    {
@@ -192,6 +192,18 @@
     "text": "In {early_text}, when only its micro-watershed is left as a comparison, the difference was {early_signed} points (an early sign)."
    },
    {
+    "when": "wtype in ['small_onstream_pond', 'onstream_tank'] and verdict != 'not_assessable'",
+    "text": "On a stream, much of its benefit may lie downstream (recharge and fields below it), which the fields around it do not show, so this is an exploratory result."
+   },
+   {
+    "when": "wtype == 'village_pond' and verdict != 'not_assessable'",
+    "text": "A village pond serves households, livestock and fish as much as crops, so the cropping around it shows only part of its use; this is an exploratory result."
+   },
+   {
+    "when": "wtype == 'canal_fed' and verdict != 'not_assessable'",
+    "text": "It fills with canal releases, so its water and the cropping around it follow the canal as much as the pond; this is an exploratory result."
+   },
+   {
     "when": "appeared_2019",
     "text": "Caution: it first held water in 2019-20, after the dry years 2017-18, so it may be an older pond that was dry rather than a new one."
    },
@@ -262,12 +274,17 @@
     "text": "Since 2017, cropping intensity in this {type_label}'s zone of influence has been {gap_abs} points {gap_dir} that of its micro-watershed."
    }
   ],
-  "add": []
+  "add": [
+   {
+    "when": "pct >= 0 and n_group >= 10",
+    "text": "Among the {n_group} {type_label_plural} wet since 2017 in {district} district, its zone of influence does better against its micro-watershed than {pct}% of them."
+   }
+  ]
  },
  "fp_panel": {
   "_about": "Fixed text of the new-farm-pond panels and of the Impact assessment tab's farm-pond tables (web/index.html, fpT). Text is shown as written; placeholders in braces are filled by the page.",
   "_placeholders": {
-   "record_title": "intervention_label, year",
+   "record_title": "type_label, year",
    "cls_chip": "label",
    "lining_detail": "summer_years, summer_area, rabi, kharif, fill_ratio",
    "method_note": "district",
@@ -277,8 +294,8 @@
    "chart_built": "year",
    "unit_summary_plain": "n, lo, hi"
   },
-  "waterbody_eyebrow": "Impact of a new farm pond",
-  "record_title": "{intervention_label}, first wet in {year}",
+  "waterbody_eyebrow": "Impact of a new pond or tank",
+  "record_title": "New {type_label}, first wet in {year}",
   "cls_chip": "water looks {label}",
   "how_summary": "How this was estimated",
   "col_outcome": "Outcome (points)",
@@ -300,7 +317,7 @@
   "chart_built": "first wet {year}",
   "chart_axis": "Cropping intensity, %",
   "waterbody_footer": "New ponds are found from the water series: there is no registry. The effect is observed cropping minus the prediction had the pond not been built, and it is placed among the same differences for ponds in the years before they were built, so that chance changes are not read as effects (Impact assessment tab).",
-  "unit_eyebrow": "Impact of new farm ponds",
+  "unit_eyebrow": "Impact of new ponds and tanks",
   "unit_eyebrow_type": "{label}",
   "unit_summary": "Average over {n} assessed ponds (95% range {lo} to {hi} points of cropping intensity). By how their water looks: lined {lined}, uncertain {uncertain}, unlined {unlined} points.",
   "col_pond": "Pond",
@@ -311,6 +328,40 @@
   "more_rows": "The largest and smallest {n} of {total} are listed.",
   "old_eyebrow": "Effectiveness of an older structure",
   "old_footer": "A comparison of places, not of years before and after: see the Impact assessment tab.",
-  "unit_summary_plain": "Average over {n} assessed ponds (95% range {lo} to {hi} points of cropping intensity)."
+  "unit_summary_plain": "Average over {n} assessed ponds (95% range {lo} to {hi} points of cropping intensity).",
+  "none_eyebrow": "Impact assessment"
+ },
+ "fp_none": {
+  "main": [
+   {
+    "when": "code == 'scope'",
+    "text": "Waterbodies of this type ({type_label}) are outside the atlas's scope, so their impact is not assessed."
+   },
+   {
+    "when": "code == 'river_reach'",
+    "text": "The impact of a river reach cannot be assessed: its water follows the river's flow, so the first year it shows water is not a construction year, and the fields beside it are not served by it the way a pond's are."
+   },
+   {
+    "when": "code == 'dry'",
+    "text": "It held no water in any of the {n_years} years, so there is nothing to assess."
+   },
+   {
+    "when": "code == 'intermittent'",
+    "text": "It held water in only {years_wet} of the {n_since} years since it first did ({first_year_label}), so it can be neither dated as a new structure nor compared as one that has held water since 2017; its impact is not assessed."
+   },
+   {
+    "when": "code == 'nozoi'",
+    "text": "It has no zone of influence with cropping data, so its effect on cropping cannot be assessed."
+   },
+   {
+    "when": "code == 'between'",
+    "text": "It first held water in {first_year_label}: too late to be compared as a structure that held water in 2017, and too early to be dated as new (from 2019-20), so its impact is not assessed."
+   },
+   {
+    "when": "true",
+    "text": "Its impact cannot be assessed with the data available."
+   }
+  ],
+  "add": []
  }
 }

@@ -1341,6 +1341,1974 @@
      "hi": 0.176
     }
    }
+  },
+  "small_onstream_pond": {
+   "n_candidates": 2505,
+   "n_assessed": 1077,
+   "n_districts": 35,
+   "classes": null,
+   "gamma": 0.742,
+   "delta": -0.0044,
+   "support": {
+    "district": 1704,
+    "background": 2154,
+    "pooled": 1537
+   },
+   "placebo": {
+    "n": 519,
+    "mean": -0.0065,
+    "lo": -0.0266,
+    "hi": 0.0131
+   },
+   "placebo_sd": 0.2276,
+   "outcomes": {
+    "ci": {
+     "all": {
+      "main": {
+       "n": 1005,
+       "mean": -0.0204,
+       "lo": -0.0326,
+       "hi": -0.0079
+      },
+      "early": {
+       "n": 1077,
+       "mean": -0.0252,
+       "lo": -0.0366,
+       "hi": -0.0134
+      },
+      "normal": -0.0134,
+      "drought": -0.0329,
+      "n_drought_cells": 232
+     }
+    },
+    "nonkharif": {
+     "all": {
+      "main": {
+       "n": 1005,
+       "mean": -0.0014,
+       "lo": -0.0086,
+       "hi": 0.0064
+      },
+      "early": {
+       "n": 1077,
+       "mean": 0.0075,
+       "lo": 0.0003,
+       "hi": 0.0149
+      },
+      "normal": 0.0054,
+      "drought": -0.0198,
+      "n_drought_cells": 232
+     }
+    },
+    "multi": {
+     "all": {
+      "main": {
+       "n": 1003,
+       "mean": 0.0199,
+       "lo": 0.0115,
+       "hi": 0.0289
+      },
+      "early": {
+       "n": 1075,
+       "mean": 0.0077,
+       "lo": -0.001,
+       "hi": 0.0158
+      },
+      "normal": 0.0224,
+      "drought": 0.0249,
+      "n_drought_cells": 232
+     }
+    },
+    "cropped": {
+     "all": {
+      "main": {
+       "n": 1005,
+       "mean": -0.0354,
+       "lo": -0.0408,
+       "hi": -0.0294
+      },
+      "early": {
+       "n": 1077,
+       "mean": -0.0311,
+       "lo": -0.0383,
+       "hi": -0.0244
+      },
+      "normal": -0.0341,
+      "drought": -0.0388,
+      "n_drought_cells": 232
+     }
+    }
+   },
+   "did": {
+    "ci": {
+     "all": {
+      "none": {
+       "mean": 0.0333,
+       "lo": 0.0025,
+       "hi": 0.0679,
+       "n_cells": 33
+      },
+      "size": {
+       "mean": 0.0265,
+       "lo": -0.0038,
+       "hi": 0.0537,
+       "n_cells": 33
+      },
+      "mws": {
+       "mean": 0.0172,
+       "lo": -0.0232,
+       "hi": 0.0519,
+       "n_cells": 33
+      }
+     }
+    },
+    "nonkharif": {
+     "all": {
+      "none": {
+       "mean": 0.0736,
+       "lo": 0.0461,
+       "hi": 0.1046,
+       "n_cells": 33
+      },
+      "size": {
+       "mean": 0.0816,
+       "lo": 0.0591,
+       "hi": 0.1041,
+       "n_cells": 33
+      },
+      "mws": {
+       "mean": 0.0443,
+       "lo": 0.0197,
+       "hi": 0.0699,
+       "n_cells": 33
+      }
+     }
+    }
+   },
+   "by_appearance": {
+    "2019": {
+     "mean": -0.0125,
+     "n_cells": 3348
+    },
+    "2020": {
+     "mean": -0.0357,
+     "n_cells": 1010
+    },
+    "2021": {
+     "mean": -0.0392,
+     "n_cells": 632
+    },
+    "2022": {
+     "mean": -0.0026,
+     "n_cells": 261
+    },
+    "2023": {
+     "mean": 0.0084,
+     "n_cells": 144
+    }
+   },
+   "event": {
+    "0": {
+     "mean": -0.0018,
+     "n_cells": 1077
+    },
+    "1": {
+     "mean": -0.0152,
+     "n_cells": 1077
+    },
+    "2": {
+     "mean": -0.0158,
+     "n_cells": 1005
+    },
+    "3": {
+     "mean": -0.0261,
+     "n_cells": 918
+    },
+    "4": {
+     "mean": -0.0361,
+     "n_cells": 760
+    },
+    "5": {
+     "mean": -0.0296,
+     "n_cells": 558
+    }
+   },
+   "heterogeneity": {
+    "n": 1005,
+    "blp": 1.106,
+    "blp_se": 0.222,
+    "gates": [
+     {
+      "n": 201,
+      "mean": -0.0495,
+      "lo": -0.085,
+      "hi": -0.0208
+     },
+     {
+      "n": 201,
+      "mean": -0.0517,
+      "lo": -0.0763,
+      "hi": -0.0247
+     },
+     {
+      "n": 201,
+      "mean": -0.0302,
+      "lo": -0.0589,
+      "hi": -0.0029
+     },
+     {
+      "n": 201,
+      "mean": -0.0058,
+      "lo": -0.0224,
+      "hi": 0.0132
+     },
+     {
+      "n": 201,
+      "mean": 0.0352,
+      "lo": 0.012,
+      "hi": 0.0578
+     }
+    ],
+    "clan": [
+     {
+      "feature": "MWS cropping intensity before the pond",
+      "unit": "%",
+      "importance": 0.148,
+      "low": 127.54,
+      "high": 82.47,
+      "stat": "mean"
+     },
+     {
+      "feature": "pond area",
+      "unit": "ha",
+      "importance": 0.146,
+      "low": 0.12,
+      "high": 0.52,
+      "stat": "median"
+     },
+     {
+      "feature": "zone of influence area",
+      "unit": "ha",
+      "importance": 0.115,
+      "low": 8.14,
+      "high": 55.15,
+      "stat": "median"
+     },
+     {
+      "feature": "pastoral share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.088,
+      "low": 2.69,
+      "high": 11.29,
+      "stat": "mean"
+     },
+     {
+      "feature": "catchment area",
+      "unit": "ha",
+      "importance": 0.063,
+      "low": 1529.01,
+      "high": 1360.08,
+      "stat": "median"
+     },
+     {
+      "feature": "rainfed dryland share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.063,
+      "low": 24.79,
+      "high": 33.87,
+      "stat": "mean"
+     },
+     {
+      "feature": "kharif drought weeks after it appeared",
+      "unit": "weeks a year",
+      "importance": 0.055,
+      "low": 1.34,
+      "high": 0.98,
+      "stat": "mean"
+     },
+     {
+      "feature": "first wet year",
+      "unit": "",
+      "importance": 0.051,
+      "low": 2020.32,
+      "high": 2019.34,
+      "stat": "mean"
+     }
+    ]
+   },
+   "by_district": {
+    "Ahamadnagar": {
+     "n": 47,
+     "mean": 0.0074,
+     "lo": -0.028,
+     "hi": 0.0471
+    },
+    "Amaravati": {
+     "n": 68,
+     "mean": 0.0053,
+     "lo": -0.0256,
+     "hi": 0.0387
+    },
+    "Ananthapur": {
+     "n": 17,
+     "mean": 0.0914,
+     "lo": -0.015,
+     "hi": 0.2078
+    },
+    "Aurangabad": {
+     "n": 44,
+     "mean": 0.036,
+     "lo": -0.01,
+     "hi": 0.081
+    },
+    "Ballia": {
+     "n": 14,
+     "mean": 0.007,
+     "lo": -0.0667,
+     "hi": 0.084
+    },
+    "Baran": {
+     "n": 1,
+     "mean": -0.0271,
+     "lo": -0.0271,
+     "hi": -0.0271
+    },
+    "Bid": {
+     "n": 25,
+     "mean": -0.0125,
+     "lo": -0.0655,
+     "hi": 0.0347
+    },
+    "Bolangir (Balangir)": {
+     "n": 29,
+     "mean": -0.0024,
+     "lo": -0.0492,
+     "hi": 0.0407
+    },
+    "Chandrapur": {
+     "n": 3,
+     "mean": -0.1183,
+     "lo": -0.3049,
+     "hi": -0.0154
+    },
+    "Chhatarpur": {
+     "n": 19,
+     "mean": -0.0742,
+     "lo": -0.1582,
+     "hi": 0.011
+    },
+    "Chitrakoot": {
+     "n": 17,
+     "mean": -0.0539,
+     "lo": -0.1205,
+     "hi": 0.0085
+    },
+    "Chittoor": {
+     "n": 26,
+     "mean": -0.0828,
+     "lo": -0.1686,
+     "hi": 0.0184
+    },
+    "Godda": {
+     "n": 12,
+     "mean": -0.1405,
+     "lo": -0.3286,
+     "hi": -0.0049
+    },
+    "Gondia": {
+     "n": 2,
+     "mean": -0.0517,
+     "lo": -0.1356,
+     "hi": 0.0322
+    },
+    "Hazaribagh": {
+     "n": 16,
+     "mean": -0.0989,
+     "lo": -0.2114,
+     "hi": -0.0075
+    },
+    "Hingoli": {
+     "n": 8,
+     "mean": -0.1464,
+     "lo": -0.266,
+     "hi": -0.0541
+    },
+    "Jalgaon": {
+     "n": 18,
+     "mean": 0.0162,
+     "lo": -0.0679,
+     "hi": 0.0968
+    },
+    "Jalna": {
+     "n": 65,
+     "mean": -0.0525,
+     "lo": -0.1078,
+     "hi": -0.0071
+    },
+    "Koraput": {
+     "n": 13,
+     "mean": -0.0193,
+     "lo": -0.099,
+     "hi": 0.0603
+    },
+    "Nanded": {
+     "n": 6,
+     "mean": -0.1522,
+     "lo": -0.3694,
+     "hi": 0.0438
+    },
+    "Nandurbar": {
+     "n": 5,
+     "mean": 0.0922,
+     "lo": 0.011,
+     "hi": 0.1559
+    },
+    "Nashik": {
+     "n": 289,
+     "mean": 0.0056,
+     "lo": -0.0143,
+     "hi": 0.0231
+    },
+    "Palghar": {
+     "n": 8,
+     "mean": 0.0313,
+     "lo": -0.0489,
+     "hi": 0.109
+    },
+    "Parbhani": {
+     "n": 8,
+     "mean": -0.1098,
+     "lo": -0.2514,
+     "hi": 0.0129
+    },
+    "Pune": {
+     "n": 45,
+     "mean": -0.0106,
+     "lo": -0.0495,
+     "hi": 0.0318
+    },
+    "Sangli": {
+     "n": 33,
+     "mean": -0.0678,
+     "lo": -0.1187,
+     "hi": -0.0245
+    },
+    "Satara": {
+     "n": 3,
+     "mean": -0.0071,
+     "lo": -0.0709,
+     "hi": 0.077
+    },
+    "Sirohi": {
+     "n": 12,
+     "mean": -0.0426,
+     "lo": -0.123,
+     "hi": 0.0255
+    },
+    "Solapur": {
+     "n": 58,
+     "mean": -0.0617,
+     "lo": -0.1104,
+     "hi": -0.0091
+    },
+    "Srikakulam": {
+     "n": 25,
+     "mean": -0.189,
+     "lo": -0.3599,
+     "hi": -0.0392
+    },
+    "Thane": {
+     "n": 8,
+     "mean": 0.0484,
+     "lo": -0.0668,
+     "hi": 0.1588
+    },
+    "Udaipur": {
+     "n": 15,
+     "mean": 0.0017,
+     "lo": -0.1179,
+     "hi": 0.1032
+    },
+    "Usmanabad": {
+     "n": 37,
+     "mean": -0.0429,
+     "lo": -0.0781,
+     "hi": -0.0065
+    },
+    "Washim": {
+     "n": 7,
+     "mean": 0.1388,
+     "lo": -0.014,
+     "hi": 0.293
+    },
+    "Yavatmal": {
+     "n": 2,
+     "mean": -0.049,
+     "lo": -0.0636,
+     "hi": -0.0343
+    }
+   }
+  },
+  "onstream_tank": {
+   "n_candidates": 838,
+   "n_assessed": 342,
+   "n_districts": 32,
+   "classes": null,
+   "gamma": 0.511,
+   "delta": -0.01007,
+   "support": {
+    "pooled": 719,
+    "background": 1019,
+    "district": 118
+   },
+   "placebo": {
+    "n": 120,
+    "mean": -0.0291,
+    "lo": -0.0793,
+    "hi": 0.0175
+   },
+   "placebo_sd": 0.2605,
+   "outcomes": {
+    "ci": {
+     "all": {
+      "main": {
+       "n": 335,
+       "mean": 0.0979,
+       "lo": 0.0776,
+       "hi": 0.1162
+      },
+      "early": {
+       "n": 342,
+       "mean": 0.0576,
+       "lo": 0.0308,
+       "hi": 0.0787
+      },
+      "normal": 0.1068,
+      "drought": 0.0899,
+      "n_drought_cells": 86
+     }
+    },
+    "nonkharif": {
+     "all": {
+      "main": {
+       "n": 335,
+       "mean": 0.0864,
+       "lo": 0.072,
+       "hi": 0.1009
+      },
+      "early": {
+       "n": 342,
+       "mean": 0.0863,
+       "lo": 0.0715,
+       "hi": 0.1017
+      },
+      "normal": 0.0941,
+      "drought": 0.0491,
+      "n_drought_cells": 86
+     }
+    },
+    "multi": {
+     "all": {
+      "main": {
+       "n": 335,
+       "mean": 0.0666,
+       "lo": 0.0532,
+       "hi": 0.0815
+      },
+      "early": {
+       "n": 342,
+       "mean": 0.0562,
+       "lo": 0.0434,
+       "hi": 0.0695
+      },
+      "normal": 0.0788,
+      "drought": 0.0109,
+      "n_drought_cells": 86
+     }
+    },
+    "cropped": {
+     "all": {
+      "main": {
+       "n": 335,
+       "mean": 0.013,
+       "lo": 0.0021,
+       "hi": 0.0219
+      },
+      "early": {
+       "n": 342,
+       "mean": -0.0039,
+       "lo": -0.015,
+       "hi": 0.0078
+      },
+      "normal": 0.01,
+      "drought": 0.0554,
+      "n_drought_cells": 86
+     }
+    }
+   },
+   "did": {
+    "ci": {
+     "all": {
+      "none": {
+       "mean": 0.1629,
+       "lo": 0.0907,
+       "hi": 0.2297,
+       "n_cells": 1
+      },
+      "size": {
+       "mean": 0.1589,
+       "lo": 0.0978,
+       "hi": 0.2129,
+       "n_cells": 1
+      },
+      "mws": {
+       "mean": 0.1526,
+       "lo": 0.0999,
+       "hi": 0.2011,
+       "n_cells": 1
+      }
+     }
+    },
+    "nonkharif": {
+     "all": {
+      "none": {
+       "mean": 0.1451,
+       "lo": 0.0789,
+       "hi": 0.2166,
+       "n_cells": 1
+      },
+      "size": {
+       "mean": 0.1409,
+       "lo": 0.0651,
+       "hi": 0.2084,
+       "n_cells": 1
+      },
+      "mws": {
+       "mean": 0.1524,
+       "lo": 0.0934,
+       "hi": 0.2159,
+       "n_cells": 1
+      }
+     }
+    }
+   },
+   "by_appearance": {
+    "2019": {
+     "mean": 0.0943,
+     "n_cells": 1332
+    },
+    "2020": {
+     "mean": 0.1101,
+     "n_cells": 360
+    },
+    "2021": {
+     "mean": 0.0359,
+     "n_cells": 108
+    },
+    "2022": {
+     "mean": 0.0193,
+     "n_cells": 42
+    },
+    "2023": {
+     "mean": -0.488,
+     "n_cells": 14
+    }
+   },
+   "event": {
+    "0": {
+     "mean": 0.0806,
+     "n_cells": 342
+    },
+    "1": {
+     "mean": 0.0736,
+     "n_cells": 342
+    },
+    "2": {
+     "mean": 0.1321,
+     "n_cells": 335
+    },
+    "3": {
+     "mean": 0.0933,
+     "n_cells": 321
+    },
+    "4": {
+     "mean": 0.0654,
+     "n_cells": 294
+    },
+    "5": {
+     "mean": 0.0761,
+     "n_cells": 222
+    }
+   },
+   "heterogeneity": {
+    "n": 335,
+    "blp": 1.905,
+    "blp_se": 0.366,
+    "gates": [
+     {
+      "n": 67,
+      "mean": -0.0113,
+      "lo": -0.0778,
+      "hi": 0.0474
+     },
+     {
+      "n": 67,
+      "mean": 0.0817,
+      "lo": 0.0413,
+      "hi": 0.123
+     },
+     {
+      "n": 67,
+      "mean": 0.1051,
+      "lo": 0.0523,
+      "hi": 0.1482
+     },
+     {
+      "n": 67,
+      "mean": 0.1417,
+      "lo": 0.1038,
+      "hi": 0.1761
+     },
+     {
+      "n": 67,
+      "mean": 0.1725,
+      "lo": 0.1387,
+      "hi": 0.2035
+     }
+    ],
+    "clan": [
+     {
+      "feature": "groundwater irrigated share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.27,
+      "low": 2.96,
+      "high": 23.9,
+      "stat": "mean"
+     },
+     {
+      "feature": "MWS cropping intensity before the pond",
+      "unit": "%",
+      "importance": 0.226,
+      "low": 130.61,
+      "high": 88.47,
+      "stat": "mean"
+     },
+     {
+      "feature": "rainfed dryland share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.201,
+      "low": 14.36,
+      "high": 42.8,
+      "stat": "mean"
+     },
+     {
+      "feature": "peri urban share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.082,
+      "low": 1.54,
+      "high": 2.99,
+      "stat": "mean"
+     },
+     {
+      "feature": "pastoral share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.044,
+      "low": 4.11,
+      "high": 6.55,
+      "stat": "mean"
+     },
+     {
+      "feature": "catchment area",
+      "unit": "ha",
+      "importance": 0.039,
+      "low": 290.7,
+      "high": 639.36,
+      "stat": "median"
+     },
+     {
+      "feature": "tank irrigated share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.037,
+      "low": 1.46,
+      "high": 3.31,
+      "stat": "mean"
+     },
+     {
+      "feature": "zone of influence area",
+      "unit": "ha",
+      "importance": 0.034,
+      "low": 109.73,
+      "high": 132.73,
+      "stat": "median"
+     }
+    ]
+   },
+   "by_district": {
+    "Ahamadnagar": {
+     "n": 8,
+     "mean": 0.1102,
+     "lo": 0.0177,
+     "hi": 0.2026
+    },
+    "Amaravati": {
+     "n": 14,
+     "mean": 0.0298,
+     "lo": -0.0192,
+     "hi": 0.0697
+    },
+    "Ananthapur": {
+     "n": 11,
+     "mean": 0.1472,
+     "lo": -0.0277,
+     "hi": 0.2991
+    },
+    "Aurangabad": {
+     "n": 13,
+     "mean": 0.1692,
+     "lo": 0.0967,
+     "hi": 0.243
+    },
+    "Ballia": {
+     "n": 16,
+     "mean": 0.1076,
+     "lo": -0.0049,
+     "hi": 0.2168
+    },
+    "Bid": {
+     "n": 11,
+     "mean": 0.1306,
+     "lo": 0.0584,
+     "hi": 0.2
+    },
+    "Bolangir (Balangir)": {
+     "n": 4,
+     "mean": 0.1045,
+     "lo": 0.0579,
+     "hi": 0.1798
+    },
+    "Chhatarpur": {
+     "n": 7,
+     "mean": 0.1639,
+     "lo": 0.0564,
+     "hi": 0.2728
+    },
+    "Chitrakoot": {
+     "n": 2,
+     "mean": -0.006,
+     "lo": -0.0155,
+     "hi": 0.0036
+    },
+    "Chittoor": {
+     "n": 29,
+     "mean": 0.0555,
+     "lo": -0.0151,
+     "hi": 0.1243
+    },
+    "Godda": {
+     "n": 5,
+     "mean": -0.4889,
+     "lo": -0.7978,
+     "hi": -0.1416
+    },
+    "Gondia": {
+     "n": 1,
+     "mean": -0.0922,
+     "lo": -0.0922,
+     "hi": -0.0922
+    },
+    "Hazaribagh": {
+     "n": 2,
+     "mean": -0.2866,
+     "lo": -0.3902,
+     "hi": -0.183
+    },
+    "Hingoli": {
+     "n": 2,
+     "mean": 0.129,
+     "lo": 0.053,
+     "hi": 0.2051
+    },
+    "Jalgaon": {
+     "n": 12,
+     "mean": 0.1226,
+     "lo": 0.0399,
+     "hi": 0.2066
+    },
+    "Jalna": {
+     "n": 10,
+     "mean": 0.1775,
+     "lo": 0.0775,
+     "hi": 0.267
+    },
+    "Koraput": {
+     "n": 3,
+     "mean": 0.0287,
+     "lo": -0.052,
+     "hi": 0.0939
+    },
+    "Nanded": {
+     "n": 3,
+     "mean": 0.1093,
+     "lo": 0.073,
+     "hi": 0.1422
+    },
+    "Nandurbar": {
+     "n": 2,
+     "mean": 0.0344,
+     "lo": -0.0206,
+     "hi": 0.0893
+    },
+    "Nashik": {
+     "n": 135,
+     "mean": 0.1461,
+     "lo": 0.1239,
+     "hi": 0.1699
+    },
+    "Palghar": {
+     "n": 1,
+     "mean": 0.1362,
+     "lo": 0.1362,
+     "hi": 0.1362
+    },
+    "Parbhani": {
+     "n": 1,
+     "mean": -0.0499,
+     "lo": -0.0499,
+     "hi": -0.0499
+    },
+    "Pune": {
+     "n": 4,
+     "mean": 0.1314,
+     "lo": 0.055,
+     "hi": 0.2584
+    },
+    "Sangli": {
+     "n": 6,
+     "mean": 0.0846,
+     "lo": 0.0431,
+     "hi": 0.1163
+    },
+    "Sirohi": {
+     "n": 2,
+     "mean": -0.0069,
+     "lo": -0.0317,
+     "hi": 0.0178
+    },
+    "Solapur": {
+     "n": 6,
+     "mean": 0.1109,
+     "lo": 0.0461,
+     "hi": 0.1792
+    },
+    "Srikakulam": {
+     "n": 12,
+     "mean": -0.103,
+     "lo": -0.2555,
+     "hi": 0.0474
+    },
+    "Thane": {
+     "n": 1,
+     "mean": 0.0442,
+     "lo": 0.0442,
+     "hi": 0.0442
+    },
+    "Udaipur": {
+     "n": 1,
+     "mean": -0.0407,
+     "lo": -0.0407,
+     "hi": -0.0407
+    },
+    "Usmanabad": {
+     "n": 8,
+     "mean": 0.0433,
+     "lo": -0.0451,
+     "hi": 0.1112
+    },
+    "Washim": {
+     "n": 2,
+     "mean": 0.0927,
+     "lo": 0.0765,
+     "hi": 0.1089
+    },
+    "Yavatmal": {
+     "n": 1,
+     "mean": -0.2925,
+     "lo": -0.2925,
+     "hi": -0.2925
+    }
+   }
+  },
+  "village_pond": {
+   "n_candidates": 1575,
+   "n_assessed": 658,
+   "n_districts": 34,
+   "classes": null,
+   "gamma": 0.497,
+   "delta": -0.00158,
+   "support": {
+    "district": 501,
+    "pooled": 1503,
+    "background": 1316
+   },
+   "placebo": {
+    "n": 315,
+    "mean": -0.0071,
+    "lo": -0.031,
+    "hi": 0.0147
+   },
+   "placebo_sd": 0.2173,
+   "outcomes": {
+    "ci": {
+     "all": {
+      "main": {
+       "n": 627,
+       "mean": 0.0722,
+       "lo": 0.0551,
+       "hi": 0.0876
+      },
+      "early": {
+       "n": 658,
+       "mean": 0.0411,
+       "lo": 0.0239,
+       "hi": 0.0599
+      },
+      "normal": 0.0788,
+      "drought": 0.0452,
+      "n_drought_cells": 176
+     }
+    },
+    "nonkharif": {
+     "all": {
+      "main": {
+       "n": 627,
+       "mean": 0.0402,
+       "lo": 0.0303,
+       "hi": 0.0489
+      },
+      "early": {
+       "n": 658,
+       "mean": 0.036,
+       "lo": 0.0267,
+       "hi": 0.0455
+      },
+      "normal": 0.0437,
+      "drought": 0.0193,
+      "n_drought_cells": 176
+     }
+    },
+    "multi": {
+     "all": {
+      "main": {
+       "n": 627,
+       "mean": 0.0182,
+       "lo": 0.0097,
+       "hi": 0.0268
+      },
+      "early": {
+       "n": 658,
+       "mean": 0.0154,
+       "lo": 0.0068,
+       "hi": 0.0253
+      },
+      "normal": 0.0268,
+      "drought": -0.0182,
+      "n_drought_cells": 175
+     }
+    },
+    "cropped": {
+     "all": {
+      "main": {
+       "n": 627,
+       "mean": 0.0324,
+       "lo": 0.0231,
+       "hi": 0.0418
+      },
+      "early": {
+       "n": 658,
+       "mean": 0.0116,
+       "lo": 0.0003,
+       "hi": 0.0217
+      },
+      "normal": 0.033,
+      "drought": 0.0466,
+      "n_drought_cells": 176
+     }
+    }
+   },
+   "did": {
+    "ci": {
+     "all": {
+      "none": {
+       "mean": 0.1383,
+       "lo": 0.0809,
+       "hi": 0.2026,
+       "n_cells": 24
+      },
+      "size": {
+       "mean": 0.1609,
+       "lo": 0.0908,
+       "hi": 0.2216,
+       "n_cells": 24
+      },
+      "mws": {
+       "mean": 0.1554,
+       "lo": 0.0751,
+       "hi": 0.224,
+       "n_cells": 24
+      }
+     }
+    },
+    "nonkharif": {
+     "all": {
+      "none": {
+       "mean": 0.0884,
+       "lo": 0.0468,
+       "hi": 0.1282,
+       "n_cells": 24
+      },
+      "size": {
+       "mean": 0.1048,
+       "lo": 0.0567,
+       "hi": 0.1478,
+       "n_cells": 24
+      },
+      "mws": {
+       "mean": 0.0946,
+       "lo": 0.0542,
+       "hi": 0.1325,
+       "n_cells": 24
+      }
+     }
+    }
+   },
+   "by_appearance": {
+    "2019": {
+     "mean": 0.0763,
+     "n_cells": 2058
+    },
+    "2020": {
+     "mean": 0.0611,
+     "n_cells": 620
+    },
+    "2021": {
+     "mean": 0.0544,
+     "n_cells": 400
+    },
+    "2022": {
+     "mean": -0.0279,
+     "n_cells": 180
+    },
+    "2023": {
+     "mean": -0.0891,
+     "n_cells": 62
+    }
+   },
+   "event": {
+    "0": {
+     "mean": 0.024,
+     "n_cells": 658
+    },
+    "1": {
+     "mean": 0.0392,
+     "n_cells": 658
+    },
+    "2": {
+     "mean": 0.0723,
+     "n_cells": 627
+    },
+    "3": {
+     "mean": 0.1125,
+     "n_cells": 567
+    },
+    "4": {
+     "mean": 0.0678,
+     "n_cells": 467
+    },
+    "5": {
+     "mean": 0.0691,
+     "n_cells": 343
+    }
+   },
+   "heterogeneity": {
+    "n": 627,
+    "blp": 0.811,
+    "blp_se": 0.251,
+    "gates": [
+     {
+      "n": 126,
+      "mean": 0.0243,
+      "lo": -0.008,
+      "hi": 0.0572
+     },
+     {
+      "n": 125,
+      "mean": 0.0628,
+      "lo": 0.0254,
+      "hi": 0.0988
+     },
+     {
+      "n": 125,
+      "mean": 0.1044,
+      "lo": 0.0667,
+      "hi": 0.136
+     },
+     {
+      "n": 125,
+      "mean": 0.0811,
+      "lo": 0.0441,
+      "hi": 0.1174
+     },
+     {
+      "n": 126,
+      "mean": 0.0886,
+      "lo": 0.0603,
+      "hi": 0.1133
+     }
+    ],
+    "clan": [
+     {
+      "feature": "rainfed rice subhumid share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.206,
+      "low": 20.98,
+      "high": 0.13,
+      "stat": "mean"
+     },
+     {
+      "feature": "rainfed dryland share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.133,
+      "low": 9.4,
+      "high": 42.62,
+      "stat": "mean"
+     },
+     {
+      "feature": "tree crops share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.088,
+      "low": 1.86,
+      "high": 7.7,
+      "stat": "mean"
+     },
+     {
+      "feature": "MWS cropping intensity before the pond",
+      "unit": "%",
+      "importance": 0.078,
+      "low": 156.34,
+      "high": 104.29,
+      "stat": "mean"
+     },
+     {
+      "feature": "tank irrigated share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.077,
+      "low": 0.48,
+      "high": 4.4,
+      "stat": "mean"
+     },
+     {
+      "feature": "semi-arid rainfall",
+      "unit": "% of ponds",
+      "importance": 0.075,
+      "low": 0.0,
+      "high": 98.41,
+      "stat": "mean"
+     },
+     {
+      "feature": "pastoral share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.071,
+      "low": 1.02,
+      "high": 6.14,
+      "stat": "mean"
+     },
+     {
+      "feature": "groundwater irrigated share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.06,
+      "low": 1.03,
+      "high": 14.81,
+      "stat": "mean"
+     }
+    ]
+   },
+   "by_district": {
+    "Ahamadnagar": {
+     "n": 13,
+     "mean": 0.1059,
+     "lo": 0.0553,
+     "hi": 0.164
+    },
+    "Amaravati": {
+     "n": 25,
+     "mean": 0.0582,
+     "lo": 0.006,
+     "hi": 0.1126
+    },
+    "Ananthapur": {
+     "n": 3,
+     "mean": 0.0797,
+     "lo": -0.0286,
+     "hi": 0.1554
+    },
+    "Aurangabad": {
+     "n": 22,
+     "mean": 0.0906,
+     "lo": 0.0472,
+     "hi": 0.1289
+    },
+    "Ballia": {
+     "n": 52,
+     "mean": 0.0526,
+     "lo": 0.0129,
+     "hi": 0.0962
+    },
+    "Baran": {
+     "n": 1,
+     "mean": -0.1019,
+     "lo": -0.1019,
+     "hi": -0.1019
+    },
+    "Bid": {
+     "n": 13,
+     "mean": 0.0653,
+     "lo": -0.0291,
+     "hi": 0.16
+    },
+    "Bolangir (Balangir)": {
+     "n": 70,
+     "mean": 0.0768,
+     "lo": 0.0465,
+     "hi": 0.1074
+    },
+    "Chandrapur": {
+     "n": 8,
+     "mean": 0.0043,
+     "lo": -0.0983,
+     "hi": 0.0806
+    },
+    "Chhatarpur": {
+     "n": 41,
+     "mean": 0.1693,
+     "lo": 0.0808,
+     "hi": 0.2526
+    },
+    "Chitrakoot": {
+     "n": 25,
+     "mean": 0.0068,
+     "lo": -0.0292,
+     "hi": 0.0406
+    },
+    "Chittoor": {
+     "n": 9,
+     "mean": 0.0484,
+     "lo": -0.1437,
+     "hi": 0.1909
+    },
+    "Godda": {
+     "n": 36,
+     "mean": -0.0103,
+     "lo": -0.0974,
+     "hi": 0.0532
+    },
+    "Gondia": {
+     "n": 12,
+     "mean": 0.0899,
+     "lo": -0.0043,
+     "hi": 0.2052
+    },
+    "Hazaribagh": {
+     "n": 9,
+     "mean": 0.0494,
+     "lo": -0.0594,
+     "hi": 0.1665
+    },
+    "Hingoli": {
+     "n": 7,
+     "mean": 0.1811,
+     "lo": 0.0511,
+     "hi": 0.3165
+    },
+    "Jalgaon": {
+     "n": 11,
+     "mean": -0.0074,
+     "lo": -0.1325,
+     "hi": 0.1191
+    },
+    "Jalna": {
+     "n": 27,
+     "mean": 0.0571,
+     "lo": 0.015,
+     "hi": 0.1055
+    },
+    "Koraput": {
+     "n": 9,
+     "mean": 0.0225,
+     "lo": -0.0407,
+     "hi": 0.0817
+    },
+    "Nanded": {
+     "n": 6,
+     "mean": 0.2845,
+     "lo": 0.1277,
+     "hi": 0.4548
+    },
+    "Nandurbar": {
+     "n": 1,
+     "mean": -0.031,
+     "lo": -0.031,
+     "hi": -0.031
+    },
+    "Nashik": {
+     "n": 52,
+     "mean": 0.1586,
+     "lo": 0.111,
+     "hi": 0.2039
+    },
+    "Parbhani": {
+     "n": 5,
+     "mean": -0.0085,
+     "lo": -0.1643,
+     "hi": 0.1511
+    },
+    "Pune": {
+     "n": 29,
+     "mean": 0.1473,
+     "lo": 0.0554,
+     "hi": 0.2526
+    },
+    "Sangli": {
+     "n": 9,
+     "mean": 0.1158,
+     "lo": -0.0098,
+     "hi": 0.2924
+    },
+    "Satara": {
+     "n": 1,
+     "mean": 0.0814,
+     "lo": 0.0814,
+     "hi": 0.0814
+    },
+    "Sirohi": {
+     "n": 5,
+     "mean": -0.0488,
+     "lo": -0.2142,
+     "hi": 0.1095
+    },
+    "Solapur": {
+     "n": 39,
+     "mean": 0.0863,
+     "lo": 0.0501,
+     "hi": 0.1212
+    },
+    "Srikakulam": {
+     "n": 45,
+     "mean": -0.0478,
+     "lo": -0.1203,
+     "hi": 0.0251
+    },
+    "Thane": {
+     "n": 5,
+     "mean": 0.048,
+     "lo": -0.0027,
+     "hi": 0.1105
+    },
+    "Udaipur": {
+     "n": 1,
+     "mean": 0.2169,
+     "lo": 0.2169,
+     "hi": 0.2169
+    },
+    "Usmanabad": {
+     "n": 23,
+     "mean": 0.1397,
+     "lo": 0.097,
+     "hi": 0.1895
+    },
+    "Washim": {
+     "n": 9,
+     "mean": -0.0863,
+     "lo": -0.2431,
+     "hi": 0.0371
+    },
+    "Yavatmal": {
+     "n": 4,
+     "mean": 0.1358,
+     "lo": 0.0903,
+     "hi": 0.1756
+    }
+   }
+  },
+  "canal_fed": {
+   "n_candidates": 1512,
+   "n_assessed": 707,
+   "n_districts": 29,
+   "classes": null,
+   "gamma": 0.843,
+   "delta": -0.00135,
+   "support": {
+    "district": 1090,
+    "background": 1414,
+    "pooled": 894
+   },
+   "placebo": {
+    "n": 401,
+    "mean": -0.0434,
+    "lo": -0.0654,
+    "hi": -0.0217
+   },
+   "placebo_sd": 0.2216,
+   "outcomes": {
+    "ci": {
+     "all": {
+      "main": {
+       "n": 634,
+       "mean": -0.0057,
+       "lo": -0.0216,
+       "hi": 0.0096
+      },
+      "early": {
+       "n": 707,
+       "mean": 0.0023,
+       "lo": -0.013,
+       "hi": 0.0181
+      },
+      "normal": -0.0052,
+      "drought": -0.0033,
+      "n_drought_cells": 234
+     }
+    },
+    "nonkharif": {
+     "all": {
+      "main": {
+       "n": 634,
+       "mean": 0.0011,
+       "lo": -0.0086,
+       "hi": 0.0115
+      },
+      "early": {
+       "n": 707,
+       "mean": 0.0071,
+       "lo": -0.0024,
+       "hi": 0.0162
+      },
+      "normal": 0.0001,
+      "drought": -0.0022,
+      "n_drought_cells": 234
+     }
+    },
+    "multi": {
+     "all": {
+      "main": {
+       "n": 633,
+       "mean": -0.0016,
+       "lo": -0.0123,
+       "hi": 0.0094
+      },
+      "early": {
+       "n": 706,
+       "mean": -0.0045,
+       "lo": -0.0135,
+       "hi": 0.0047
+      },
+      "normal": 0.0026,
+      "drought": 0.0,
+      "n_drought_cells": 234
+     }
+    },
+    "cropped": {
+     "all": {
+      "main": {
+       "n": 634,
+       "mean": -0.0039,
+       "lo": -0.0128,
+       "hi": 0.0044
+      },
+      "early": {
+       "n": 707,
+       "mean": -0.0025,
+       "lo": -0.012,
+       "hi": 0.0076
+      },
+      "normal": -0.0059,
+      "drought": -0.0047,
+      "n_drought_cells": 234
+     }
+    }
+   },
+   "did": {
+    "ci": {
+     "all": {
+      "none": {
+       "mean": 0.0209,
+       "lo": -0.0255,
+       "hi": 0.0771,
+       "n_cells": 39
+      },
+      "size": {
+       "mean": 0.158,
+       "lo": 0.0765,
+       "hi": 0.2382,
+       "n_cells": 39
+      },
+      "mws": {
+       "mean": 0.0394,
+       "lo": -0.0092,
+       "hi": 0.0943,
+       "n_cells": 39
+      }
+     }
+    },
+    "nonkharif": {
+     "all": {
+      "none": {
+       "mean": 0.0124,
+       "lo": -0.0281,
+       "hi": 0.0436,
+       "n_cells": 39
+      },
+      "size": {
+       "mean": 0.1029,
+       "lo": 0.0499,
+       "hi": 0.1669,
+       "n_cells": 39
+      },
+      "mws": {
+       "mean": -0.045,
+       "lo": -0.0884,
+       "hi": -0.0023,
+       "n_cells": 39
+      }
+     }
+    }
+   },
+   "by_appearance": {
+    "2019": {
+     "mean": -0.0073,
+     "n_cells": 1836
+    },
+    "2020": {
+     "mean": 0.0129,
+     "n_cells": 785
+    },
+    "2021": {
+     "mean": -0.0246,
+     "n_cells": 472
+    },
+    "2022": {
+     "mean": 0.0401,
+     "n_cells": 159
+    },
+    "2023": {
+     "mean": 0.013,
+     "n_cells": 146
+    }
+   },
+   "event": {
+    "0": {
+     "mean": -0.0006,
+     "n_cells": 707
+    },
+    "1": {
+     "mean": 0.0045,
+     "n_cells": 707
+    },
+    "2": {
+     "mean": -0.0115,
+     "n_cells": 634
+    },
+    "3": {
+     "mean": 0.0044,
+     "n_cells": 581
+    },
+    "4": {
+     "mean": 0.0029,
+     "n_cells": 463
+    },
+    "5": {
+     "mean": -0.0195,
+     "n_cells": 306
+    }
+   },
+   "heterogeneity": {
+    "n": 634,
+    "blp": 1.064,
+    "blp_se": 0.239,
+    "gates": [
+     {
+      "n": 127,
+      "mean": -0.0614,
+      "lo": -0.091,
+      "hi": -0.027
+     },
+     {
+      "n": 127,
+      "mean": -0.0324,
+      "lo": -0.0629,
+      "hi": 0.0013
+     },
+     {
+      "n": 126,
+      "mean": 0.0147,
+      "lo": -0.0192,
+      "hi": 0.0443
+     },
+     {
+      "n": 127,
+      "mean": 0.0192,
+      "lo": -0.0095,
+      "hi": 0.0508
+     },
+     {
+      "n": 127,
+      "mean": 0.0318,
+      "lo": -0.005,
+      "hi": 0.0677
+     }
+    ],
+    "clan": [
+     {
+      "feature": "groundwater irrigated share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.241,
+      "low": 23.02,
+      "high": 1.15,
+      "stat": "mean"
+     },
+     {
+      "feature": "canal irrigated share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.144,
+      "low": 28.17,
+      "high": 2.35,
+      "stat": "mean"
+     },
+     {
+      "feature": "pastoral share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.1,
+      "low": 0.79,
+      "high": 6.67,
+      "stat": "mean"
+     },
+     {
+      "feature": "peri urban share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.081,
+      "low": 3.25,
+      "high": 0.6,
+      "stat": "mean"
+     },
+     {
+      "feature": "MWS cropping intensity before the pond",
+      "unit": "%",
+      "importance": 0.072,
+      "low": 135.44,
+      "high": 109.52,
+      "stat": "mean"
+     },
+     {
+      "feature": "catchment area",
+      "unit": "ha",
+      "importance": 0.069,
+      "low": 1.08,
+      "high": 1.53,
+      "stat": "median"
+     },
+     {
+      "feature": "rainfed dryland share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.069,
+      "low": 26.68,
+      "high": 30.4,
+      "stat": "mean"
+     },
+     {
+      "feature": "tree crops share of MWS",
+      "unit": "% of MWS area",
+      "importance": 0.041,
+      "low": 10.13,
+      "high": 2.47,
+      "stat": "mean"
+     }
+    ]
+   },
+   "by_district": {
+    "Ahamadnagar": {
+     "n": 2,
+     "mean": 0.1303,
+     "lo": 0.0775,
+     "hi": 0.183
+    },
+    "Amaravati": {
+     "n": 7,
+     "mean": 0.0364,
+     "lo": -0.0549,
+     "hi": 0.1463
+    },
+    "Ananthapur": {
+     "n": 6,
+     "mean": -0.1079,
+     "lo": -0.3035,
+     "hi": 0.098
+    },
+    "Aurangabad": {
+     "n": 20,
+     "mean": -0.0632,
+     "lo": -0.2252,
+     "hi": 0.0563
+    },
+    "Ballia": {
+     "n": 8,
+     "mean": 0.0048,
+     "lo": -0.0258,
+     "hi": 0.0291
+    },
+    "Bid": {
+     "n": 6,
+     "mean": -0.0168,
+     "lo": -0.1164,
+     "hi": 0.1146
+    },
+    "Bolangir (Balangir)": {
+     "n": 24,
+     "mean": -0.0207,
+     "lo": -0.0813,
+     "hi": 0.0537
+    },
+    "Chhatarpur": {
+     "n": 2,
+     "mean": -0.0089,
+     "lo": -0.0361,
+     "hi": 0.0183
+    },
+    "Chitrakoot": {
+     "n": 4,
+     "mean": -0.008,
+     "lo": -0.0655,
+     "hi": 0.0471
+    },
+    "Chittoor": {
+     "n": 16,
+     "mean": -0.016,
+     "lo": -0.1273,
+     "hi": 0.1005
+    },
+    "Godda": {
+     "n": 57,
+     "mean": -0.0611,
+     "lo": -0.1164,
+     "hi": -0.0147
+    },
+    "Gondia": {
+     "n": 4,
+     "mean": -0.0119,
+     "lo": -0.0917,
+     "hi": 0.121
+    },
+    "Hazaribagh": {
+     "n": 3,
+     "mean": -0.0144,
+     "lo": -0.0633,
+     "hi": 0.0524
+    },
+    "Hingoli": {
+     "n": 6,
+     "mean": -0.041,
+     "lo": -0.191,
+     "hi": 0.0924
+    },
+    "Jalgaon": {
+     "n": 12,
+     "mean": 0.0591,
+     "lo": -0.019,
+     "hi": 0.136
+    },
+    "Jalna": {
+     "n": 7,
+     "mean": 0.0342,
+     "lo": -0.0251,
+     "hi": 0.1052
+    },
+    "Koraput": {
+     "n": 6,
+     "mean": -0.0537,
+     "lo": -0.1213,
+     "hi": 0.0291
+    },
+    "Nanded": {
+     "n": 11,
+     "mean": -0.0062,
+     "lo": -0.115,
+     "hi": 0.0973
+    },
+    "Nandurbar": {
+     "n": 1,
+     "mean": 0.3278,
+     "lo": 0.3278,
+     "hi": 0.3278
+    },
+    "Nashik": {
+     "n": 136,
+     "mean": -0.0737,
+     "lo": -0.1075,
+     "hi": -0.0461
+    },
+    "Parbhani": {
+     "n": 4,
+     "mean": -0.1,
+     "lo": -0.2281,
+     "hi": -0.019
+    },
+    "Pune": {
+     "n": 95,
+     "mean": 0.0637,
+     "lo": 0.0252,
+     "hi": 0.1057
+    },
+    "Sangli": {
+     "n": 35,
+     "mean": 0.0064,
+     "lo": -0.0775,
+     "hi": 0.0778
+    },
+    "Satara": {
+     "n": 9,
+     "mean": 0.062,
+     "lo": 0.0262,
+     "hi": 0.0947
+    },
+    "Sirohi": {
+     "n": 1,
+     "mean": 0.1835,
+     "lo": 0.1835,
+     "hi": 0.1835
+    },
+    "Solapur": {
+     "n": 95,
+     "mean": -0.0009,
+     "lo": -0.0386,
+     "hi": 0.0345
+    },
+    "Srikakulam": {
+     "n": 35,
+     "mean": 0.0954,
+     "lo": 0.0407,
+     "hi": 0.1547
+    },
+    "Usmanabad": {
+     "n": 19,
+     "mean": 0.0706,
+     "lo": 0.0078,
+     "hi": 0.1325
+    },
+    "Yavatmal": {
+     "n": 3,
+     "mean": 0.1369,
+     "lo": 0.0681,
+     "hi": 0.2434
+    }
+   }
   }
  },
  "effectiveness": [
@@ -1369,19 +3337,6 @@
     "hi": 0.0284
    },
    "n_districts": 28
-  },
-  {
-   "type": "river_reach",
-   "n": 5086,
-   "gap": -0.0104,
-   "premium": -0.0669,
-   "corrected": {
-    "n": 4834,
-    "mean": 0.0554,
-    "lo": 0.0481,
-    "hi": 0.0616
-   },
-   "n_districts": 26
   },
   {
    "type": "village_pond",

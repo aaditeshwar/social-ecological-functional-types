@@ -101,6 +101,62 @@ The notes come from the rules in `knowledge/notes.json` (MWS, tehsil, district) 
 
 `r.to_dict()` is JSON-safe. `detail="full"` adds not-applicable rules and every indicator.
 
+## Predict impact and site suitability
+
+```python
+import core_seft as cs
+
+# a proposed farm pond in a micro-watershed (or lat=/lon=, or waterbody= for an existing one)
+p = cs.predict_impact("new_pond", state="Maharashtra", district="Pune", mws="25_14510",
+                      type="farm_pond", area_ha=0.3, lined=True)
+p["predicted"]            # cropping intensity around the pond, percentage points
+p["group"], p["similar"]  # the fifth of assessed ponds it falls in (mean, 95% range, p10-p90) and the most similar ponds
+
+# desilting an existing waterbody
+d = cs.predict_impact("desilting", state="Maharashtra", district="Pune", waterbody=7809068, volume_m3=5000)
+d["predicted"], d["range95_single"]   # weeks of water a year
+
+# which structures suit a site, with predicted impact where the model covers the structure
+s = cs.site_suitability({"slope_pct": 3, "stream_order": 2, "catchment_ha": 4, "drainage_distance_m": 100,
+                         "land_use": "single kharif", "soil_group": "C"},
+                        state="Maharashtra", district="Pune", mws="25_14510", area_ha=0.3)
+[(x["structure"], x["verdict"]) for x in s]
+```
+
+* **`predict_impact("new_pond", ...)`**: types `farm_pond`, `headwater_pond`, `small_onstream_pond`, `onstream_tank`,
+  `village_pond`, `canal_fed` (the last four exploratory). Inputs: where (`waterbody=`, `mws=` or `lat=`/`lon=`,
+  with `tehsil=` to fetch only that tehsil), `area_ha=`, and if known `zoi_area_ha=`, `catchment_ha=`, `stream_order=`,
+  `lined=` (farm ponds). The micro-watershed's cropping intensity, kharif drought, context and farming-system shares
+  are looked up. Unknown sizes are set to the median of assessed structures and listed in `notes`. The model is a
+  random forest per type fitted to the effects the atlas measured (imputation estimates, years up to 2022-23); the
+  result gives the predicted effect, the fifth of assessed structures it falls in with their observed range, and
+  the most similar assessed structures (same district first). A single structure varies by about 20 points from
+  year to year, so read the ranges rather than the point value.
+* **`predict_impact("desilting", ...)`**: `waterbody=` and `volume_m3=`. A linear model of the headline effect on
+  weeks of water (size, depth of silt removed, catchment, stream order, rainfall zone, type) on the assessable
+  works; it explains little of the variation (R² is reported), so the prediction stays close to the average and
+  `range95_single` is wide.
+* **`site_suitability(values, ...)`**: runs `slope_pct`, `stream_order`, `catchment_ha`, `drainage_distance_m`,
+  `land_use` (single kharif, single non-kharif, double, triple, croplands, barren, shrub/scrub, trees/forest,
+  built-up, water) and `soil_group` (A-D) against the site rules of the 19 structures in
+  `knowledge/interventions.json`. Each structure gets suitable / suitable on the values given / partly suitable /
+  not suitable / unknown, the missing inputs and each rule with its basis and sources. With `waterbody=` its stream
+  order and catchment fill missing values. Point layers (slope, drainage distance, soil) are not fetched yet: pass
+  them in.
+
+**Models.** `core_seft/models/farmpond.json.gz` (about 0.4 MB: 100 trees per type as plain arrays, the cut points
+and observed effects of each fifth, and the table of assessed structures) and `core_seft/models/desilting.json.gz`
+(about 10 kB). Predicting needs numpy only. Rebuild them with the impact commands (they also write copies to
+`out/impact/`):
+
+```bash
+python -m seft.cli impact-farmpond   # new ponds and tanks: estimates, atlas bundles and farmpond.json.gz
+python -m seft.cli impact-run        # desilting estimates and bundles (from the registries)
+python -m seft.cli impact-model      # desilting.json.gz from the published desilting bundles
+```
+
+The forest settings (trees, leaf size, folds) are `heterogeneity` in `knowledge/impact/farmponds.json`.
+
 ## Knowledge packs
 
 Tehsils fetched on demand are listed in `data_dir/index.json` under their district with the role `coverage`: they are scored with the published pools in the knowledge pack (`pools.json`, whose `provenance` names the districts the pools were computed over) and never change them. The atlas's own location roles (`pools`, `groundtruth`, `coverage`) are described in the README (Location roles).

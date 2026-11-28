@@ -190,7 +190,7 @@ def make_units(B, MWS, S, log=print):
                   'zoi_area': (z or {}).get('zoi_area'), 'so': b.get('stream_order'), 'catch': b.get('catchment_ha'),
                   'cropable': (z or {}).get('total_cropable_area_ever_hydroyear_2017_2024'), 'zraw': z,
                   'k': b.get('k'), 'kr': b.get('kr'), 'krz': b.get('krz'),
-                  'dweeks': np.array([float(dwk.get(y, np.nan)) for y in Y])})
+                  'dweeks': np.array([float(dwk.get(y, np.nan)) for y in Y]), 'mwsb': _mwsb(m, MWS, Y)})
     # background: the home MWS's cropping without the ZoI cropland of waterbodies that appeared from first_appearance
     sub = collections.defaultdict(lambda: {**{k: np.zeros(NY) for k in CROP_KEYS}, 'cropable': 0.0})
     for u in U:
@@ -228,6 +228,13 @@ def _cropable(M, src, NY):
     w = src['single_cropped_area'] + 2 * src['doubly_cropped_area'] + 3 * src['triply_cropped_area']
     ok = (ci > 0) & np.isfinite(ci) & (w > 0)
     return float(np.median(w[ok] / ci[ok])) if ok.any() else (M.get('area') or 0)
+
+_MWSB = {}
+def _mwsb(m, MWS, Y):
+    if m not in _MWSB:
+        from .model import mws_baseline
+        _MWSB[m] = mws_baseline(MWS.get(m) or {}, Y)
+    return _MWSB[m]
 
 # ------------------------------------------------------------------ 4. estimators
 def fit_imputation(units, oc, NY, hold=False, iters=300):
@@ -412,8 +419,15 @@ def effectiveness(U, S, in_scope, log=print):
         if not np.isfinite(g): continue
         s = summ[u['type']]; s['n'] += 1; s['gap'].append(g)
         p = premium.get((u['district'], u['type']))
-        per[u['id']] = {'type': u['type'], 'gap': _r(g, 4), 'premium': _r(p, 4), 'corrected': _r(g - p, 4) if p is not None else None}
+        per[u['id']] = {'type': u['type'], 'district': u['district'], 'gap': _r(g, 4), 'premium': _r(p, 4), 'corrected': _r(g - p, 4) if p is not None else None}
         if p is not None: s['corr'].append(g - p); s['prem'].append(p); s['districts'].add(u['district'])
+    # position of each structure's gap among structures of its type in its district (the premium is the same for all
+    # of them, so this is also its position on the corrected value)
+    grp = collections.defaultdict(list)
+    for wid, o in per.items(): grp[(o['district'], o['type'])].append(o['gap'])
+    for wid, o in per.items():
+        g = np.array(grp[(o['district'], o['type'])]); o['n_group'] = int(len(g))
+        o['pct'] = int(round(100 * float((g < o['gap']).mean()))) if len(g) >= S['effectiveness'].get('min_group', 10) else None
     out = []
     for t, s in sorted(summ.items(), key=lambda kv: -kv[1]['n']):
         out.append({'type': t, 'n': s['n'], 'gap': _r(np.mean(s['gap']), 4), 'premium': _r(np.mean(s['prem']), 4) if s['prem'] else None,
@@ -436,7 +450,7 @@ def pts(x, n=1):
 def wb_env(rec, S, labels, group=None):
     L = S['lining']['labels']; e = rec['effects']; sig = rec.get('sig') or {}; g = group or {}
     tl = _pl(labels.get(rec['type'], rec['type'])).lower()
-    return {'verdict': rec['verdict'], 'type_label': tl, 'year_label': years_text([rec['E']]), 'year': rec['E'],
+    return {'verdict': rec['verdict'], 'wtype': rec['type'], 'type_label': tl, 'year_label': years_text([rec['E']]), 'year': rec['E'],
             'effect_signed': pts(rec.get('tau')), 'effect_abs': f"{abs((rec.get('tau') or 0) * 100):.1f}",
             'nk_signed': pts(e['nonkharif']['main'] if e['nonkharif']['main'] is not None else e['nonkharif']['early']),
             'has_nk': (e['nonkharif']['main'] if e['nonkharif']['main'] is not None else e['nonkharif']['early']) is not None,
@@ -466,7 +480,8 @@ def old_env(o, wtype, labels):
     tl = _pl(labels.get(wtype, wtype)).lower(); g = o.get('gap'); p = o.get('premium'); c = o.get('corrected')
     return {'type_label': tl, 'type_label_plural': plural(tl), 'gap_abs': f"{abs((g or 0) * 100):.1f}", 'gap_dir': 'above' if (g or 0) >= 0 else 'below',
             'premium_abs': f"{abs((p or 0) * 100):.1f}", 'premium_dir': 'below' if (p or 0) < 0 else 'above', 'has_premium': p is not None,
-            'corrected_signed': pts(c), 'corrected': c if c is not None else 0}
+            'corrected_signed': pts(c), 'corrected': c if c is not None else 0, 'wtype': wtype,
+            'pct': o.get('pct') if o.get('pct') is not None else -1, 'n_group': o.get('n_group') or 0, 'district': o.get('district', '')}
 
 def unit_stats(ks, recs, units, S, label, rng, classes=CLS):
     sel = [k for k in ks if recs[k]['verdict'] != 'not_assessable']
@@ -522,7 +537,8 @@ def run_panel(B, MWS, S=None, out=None, web=True, log=print, seed=7):
         if u['type'] in S['lining'].get('types', I['types']) and u['persist'] >= A['persist_share']:
             s = lining(u['k'], u['kr'], u['krz'], {y: v for y, v in zip(Y, u['dweeks']) if np.isfinite(v)}, u['E'], Y, L)
             if s: u['sig'] = {k: (_r(v, 3) if isinstance(v, float) else v) for k, v in s.items()}; u['cls'] = s['cls']; lin[u['id']] = u
-    records, summary, by_unit = {}, {'types': {}}, {}
+    records, summary, by_unit, model_rows = {}, {'types': {}}, {}, {}
+    from .model import fp_features, build_farmpond_model, save as save_model
     for typ in I['types']:
         cand = [u for u in U if u['type'] == typ and first <= u['E'] <= max(lastA, Y[-1]) and u['persist'] >= A['persist_share']]
         units = [u for u in cand if u['E'] <= lastA and u['valid_pre'] and u['ok']]
@@ -566,6 +582,13 @@ def run_panel(B, MWS, S=None, out=None, web=True, log=print, seed=7):
         for x in OUT_['ci']: ev[x[1] - units[x[0]]['Ei']].append(x[2])
         T['event'] = {e: {'mean': _r(np.mean(v), 4), 'n_cells': len(v)} for e, v in sorted(ev.items())}
         T['heterogeneity'] = heterogeneity(units, recs, S['heterogeneity'], ctx)
+        model_rows[typ] = []
+        for k, r in recs.items():
+            e = r['effects']['ci']['main'] if r.get('effects') else None
+            if e is None: continue
+            u = units[k]; c = ctx.get(u['mws'], {})
+            model_rows[typ].append((u, e, fp_features(u['area'], u.get('zoi_area'), u.get('so'), u.get('catch'), u['mwsb'][0], u['mwsb'][1], u['cls'], c,
+                                                      {a: c.get('share_' + a) for a in ARCH})))
         bd = collections.defaultdict(list)
         for k, r in recs.items():
             if r['effects']['ci']['main'] is not None: bd[units[k]['district']].append(r['effects']['ci']['main'])
@@ -599,14 +622,49 @@ def run_panel(B, MWS, S=None, out=None, web=True, log=print, seed=7):
                    'cls': u.get('cls'), 'sig': u.get('sig'), 'verdict': 'not_assessable', 'reason': reason, 'effects': None, 'flags': []}
             rec['note'] = render('fp_waterbody', {**wb_env({**rec, 'effects': {o: {'main': None, 'early': None} for o in OUTS}}, S, labels), 'reason': reason}, R)
             records[str(u['id'])] = rec
-    per_old, eff, premium = effectiveness(U, S, in_scope, log)
+    model = build_farmpond_model(model_rows, S['heterogeneity'], S.get('version', ''), Y, log)
+    save_model(model, 'farmpond', Path(out or OUT), log)
+    na = S.get('not_assessed', {})
+    per_old, eff, premium = effectiveness(U, S, in_scope - set(na), log)
+    status = statuses(B, U, records, per_old, S, in_scope, na)
     for wid, o in per_old.items():
-        o['note'] = render('fp_old', old_env(o, o['type'], labels), R) if o.get('corrected') is not None else ''
+        o['note'] = render('fp_old', old_env(o, o['type'], labels), R)
     summary['effectiveness'] = eff; summary['premium'] = premium
-    write(records, by_unit, summary, per_old, lin, U, S, out, web, log)
+    write(records, by_unit, summary, per_old, lin, U, S, out, web, log, status)
     return records, summary
 
+def statuses(B, U, records, per_old, S, in_scope, not_assessed):
+    """Why a waterbody has no new-structure result and no older-structure measure: a code and the years it held
+    water, for the note the page writes (fp_none in notes.json). {wb_id: [code, years_wet, first_wet_year]}."""
+    Y = S['years']['series']; ud = {u['id']: u for u in U}; out = {}
+    for b in B:
+        wid = b['wb_id']
+        if str(wid) in records or wid in per_old: continue
+        u = ud.get(wid); t = b['type']
+        yw = int(round(u['persist'] * (len(Y) - Y.index(u['E'])))) if u else 0
+        E = u['E'] if u else None
+        if t not in in_scope: c = 'scope'
+        elif t in not_assessed: c = t
+        elif not u: c = 'dry'
+        elif u['persist'] < S['appearance']['persist_share']: c = 'intermittent'
+        elif not u['ok']: c = 'nozoi'
+        elif u['E'] == Y[0]: c = 'nopremium'
+        elif u['E'] < S['years']['first_appearance']: c = 'between'
+        else: c = 'other'
+        out[str(wid)] = [c, yw, E, b['district']]
+    return out
+
 SIG = ('summer_area', 'summer_years', 'rabi_area', 'kharif_area', 'fill_ratio')
+
+def atlas_districts(districts):
+    """{wb_id: district} from the waterbody atlas bundles (w_<district>.json)."""
+    out = {}
+    for d in districts:
+        for p in (ROOT / 'out' / 'waterbody' / 'web' / f'w_{slug(d)}.json', WEB / f'w_{slug(d)}.json'):
+            if p.exists():
+                for w in json.loads(p.read_text(encoding='utf-8-sig')).get('waterbodies', []): out[str(w['id'])] = d
+                break
+    return out
 
 def bundle_record(r):
     """A pond's record as shipped to the atlas (fp_<district>.json): without the note, which the page writes from
@@ -618,14 +676,22 @@ def bundle_record(r):
     return o
 
 def bundle_old(o):
-    """An older structure's effectiveness as shipped: [gap, premium, corrected] (the page writes the note)."""
-    return [o.get('gap'), o.get('premium'), o.get('corrected')]
+    """An older structure's effectiveness as shipped: [gap, premium, corrected, percentile in its district and type,
+    structures in that group] (the page writes the note)."""
+    return [o.get('gap'), o.get('premium'), o.get('corrected'), o.get('pct'), o.get('n_group')]
 
-def write(records, by_unit, summary, per_old, lin, U, S, out=None, web=True, log=print):
+def write(records, by_unit, summary, per_old, lin, U, S, out=None, web=True, log=print, status=None):
     from .run import _finite
     out = Path(out or OUT); (out / 'web').mkdir(parents=True, exist_ok=True)
-    dist_of = {u['id']: u['district'] for u in U}
-    by = collections.defaultdict(lambda: {'waterbodies': {}, 'lining': {}, 'old': {}, 'units': {'tehsil': {}, 'mws': {}}})
+    # a waterbody's district is the one whose atlas bundle lists it (a waterbody near a district border can be
+    # assigned differently here), so the page finds its result in the bundle it loads
+    atlas = atlas_districts(sorted({u['district'] for u in U}))
+    dist_of = {u['id']: atlas.get(str(u['id']), u['district']) for u in U}
+    for r in records.values(): r['district'] = atlas.get(str(r['id']), r['district'])
+    for wid, v in (status or {}).items(): v[3] = atlas.get(wid, v[3])
+    for wid, u in lin.items(): u['district'] = dist_of.get(wid, u['district'])
+    by = collections.defaultdict(lambda: {'waterbodies': {}, 'lining': {}, 'old': {}, 'status': {}, 'units': {'tehsil': {}, 'mws': {}}})
+    for wid, v in (status or {}).items(): by[v[3]]['status'][wid] = v[:3]
     for wid, r in records.items(): by[r['district']]['waterbodies'][wid] = bundle_record(r)
     for wid, u in lin.items():
         s = u['sig']; by[u['district']]['lining'][str(wid)] = [{'lined': 'L', 'unlined': 'U', 'uncertain': '?'}[s['cls']], _r(s['summer_area'], 0), _r(100 * s['summer_years'], 0),
@@ -642,7 +708,7 @@ def write(records, by_unit, summary, per_old, lin, U, S, out=None, web=True, log
     idx = {'settings': Sx, 'references': refs['references'], 'summary': summary,
            'districts': [{'district': d, 'slug': slug(d), 'n_records': len(v['waterbodies']), 'n_lining': len(v['lining']), 'n_old': len(v['old'])} for d, v in sorted(by.items())],
            'averages': {'district': by_unit.get('district', {})}, 'panel': note_rules().get('fp_panel', {}),
-           'notes': {k: note_rules()[k] for k in ('fp_waterbody', 'fp_old')}}
+           'notes': {k: note_rules()[k] for k in ('fp_waterbody', 'fp_old', 'fp_none')}}
     (out / 'records.json').write_text(json.dumps(_finite(records), indent=1, ensure_ascii=False), encoding='utf-8')
     (out / 'summary.json').write_text(json.dumps(_finite(summary), indent=1, ensure_ascii=False), encoding='utf-8')
     (out / 'review.md').write_text(review(summary, S), encoding='utf-8')

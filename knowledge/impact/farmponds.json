@@ -1,16 +1,26 @@
 {
- "_about": "Settings of the new-farm-pond impact assessment (seft/impact/farmpond.py, command impact-farmpond): which waterbodies count as new ponds, the outcomes read in their zone of influence, the estimators, the lined/unlined rule, the per-pond verdicts, the averages and the effectiveness measure for older structures. Unlike desilting there is no registry: a pond's first wet year in the CoRE Stack water series is its construction year. The full method is described on the atlas's Impact assessment tab and in knowledge/impact/README.md; references are ids in knowledge/impact/references.json.",
- "version": "0.2.0",
+ "_about": "Settings of the impact assessment of new ponds and tanks (farm ponds first) (seft/impact/farmpond.py, command impact-farmpond): which waterbodies count as new ponds, the outcomes read in their zone of influence, the estimators, the lined/unlined rule, the per-pond verdicts, the averages and the effectiveness measure for older structures. Unlike desilting there is no registry: a pond's first wet year in the CoRE Stack water series is its construction year. The full method is described on the atlas's Impact assessment tab and in knowledge/impact/README.md; references are ids in knowledge/impact/references.json.",
+ "version": "0.3.0",
  "intervention": {
   "id": "new_farmpond",
-  "label": "New farm pond",
+  "label": "New ponds and tanks",
   "types": [
    "farm_pond",
-   "headwater_pond"
+   "headwater_pond",
+   "small_onstream_pond",
+   "onstream_tank",
+   "village_pond",
+   "canal_fed"
   ],
-  "about": "A farm pond or headwater pond that first holds water in a year from 2019 and keeps holding water in most years since. Most are dug on private farmland (MGNREGA, state farm-pond schemes such as Magel Tyala Shettale, or by farmers) to store runoff for protective irrigation.",
+  "about": "A pond or tank of an assessed type that first holds water in a year from 2019 and keeps holding water in most years since. Farm ponds are mostly dug on private farmland (MGNREGA, state farm-pond schemes such as Magel Tyala Shettale, or by farmers) to store runoff for protective irrigation; headwater ponds and check dams sit on first-order drainage lines. Small on-stream ponds, on-stream tanks, village ponds and canal-fed ponds are assessed the same way but as exploratory results: much of their benefit can lie downstream (recharge, irrigation of a command area) or in uses other than crops (households, livestock, fish), which the cropping around the structure does not capture, and canal-fed ponds fill with canal releases.",
   "references": [
    "kaur2024farmponds"
+  ],
+  "exploratory_types": [
+   "small_onstream_pond",
+   "onstream_tank",
+   "village_pond",
+   "canal_fed"
   ]
  },
  "years": {
@@ -167,14 +177,19 @@
   "folds": 5,
   "trees": 300,
   "min_leaf": 60,
-  "about": "Which ponds gain most: a random forest is fitted to the ponds' effects on landscape and pond features (without the pond's own pre-construction ZoI cropping, which would only pick up regression to the mean), cross-fitted over folds, and tested with the best linear predictor (BLP), sorted-group averages (GATES) and the features of the top and bottom groups (CLAN).",
+  "about": "Which ponds gain most: a random forest is fitted to the ponds' effects on landscape and pond features (without the pond's own pre-construction ZoI cropping, which would only pick up regression to the mean), cross-fitted over folds, and tested with the best linear predictor (BLP), sorted-group averages (GATES) and the features of the top and bottom groups (CLAN). A forest of ship_trees trees refitted on all assessed structures of each type, on features that can be known for a proposed site, is shipped with core_seft (core_seft/models/farmpond.json.gz) for predict_impact.",
   "references": [
    "chernozhukov2025",
    "wager2018"
-  ]
+  ],
+  "ship_trees": 100
  },
  "effectiveness": {
   "min_new_for_premium": 10,
-  "about": "Structures wet since 2017 cannot be compared before and after. For them the atlas reports the gap between cropping intensity in the ZoI and in the home MWS, minus the site premium: the same gap at sites in the same district where waterbodies of the same type were built later, measured before they were built. It is a cross-sectional measure that assumes older structures were sited like newer ones, not a causal estimate."
+  "about": "Structures wet since 2017 cannot be compared before and after. For them the atlas reports the gap between cropping intensity in the ZoI and in the home MWS, minus the site premium: the same gap at sites in the same district where waterbodies of the same type were built later, measured before they were built. It is a cross-sectional measure that assumes older structures were sited like newer ones, not a causal estimate. Each structure is also placed among the structures of its type wet since 2017 in its district (its percentile, given when there are at least min_group of them). River reaches are not measured.",
+  "min_group": 10
+ },
+ "not_assessed": {
+  "river_reach": "Water in a river reach follows the river's flow, so the first year it shows water is not a construction year, and the fields beside it are not served by it the way a pond's are."
  }
 }

@@ -51,7 +51,10 @@ def farmpond_errors(N, warns):
             list(F.get('heterogeneity', {}).get('references', [])) + [x for t in S.get('intervention_types', []) for x in t.get('references', [])]
     for c in cited:
         if c not in refs: errs.append(f'impact reference "{c}" is cited but not in references.json')
-    for kind in ('fp_waterbody', 'fp_unit', 'fp_old'):
+    T = {t['id'] for t in load_json(knowledge_dir() / 'waterbody' / 'types.json')['types']}
+    for t in list(F.get('intervention', {}).get('types', [])) + list(F.get('not_assessed', {})) + list(F.get('lining', {}).get('types', [])):
+        if t not in T: errs.append(f'farmponds.json: type "{t}" is not in knowledge/waterbody/types.json')
+    for kind in ('fp_waterbody', 'fp_unit', 'fp_old', 'fp_none'):
         for part in ('main', 'add'):
             for i, r in enumerate(N.get(kind, {}).get(part, [])):
                 try: compile_expr(r['when'])
