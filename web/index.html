@@ -284,11 +284,14 @@ function decode(s){
 }
 function curDistrict(){return IDX.districts.find(d=>d.district===S.district)}
 // District views: by default only districts with more than MIN_TEHSILS populated tehsils are listed; the full lists stay in ._all.
-const MIN_TEHSILS=5; let ALLD=false, IMPONLY=false;
-try{ALLD=localStorage.getItem("all_districts")==="1"; IMPONLY=localStorage.getItem("wb_imp_only")==="1";}catch(e){}
+// Intervention filters of the waterbody atlas: desilting works (registry) and new farm ponds; either or both.
+const MIN_TEHSILS=5; let ALLD=false, IMP_DS=false, IMP_FP=false, IMPONLY=false;
+try{ALLD=localStorage.getItem("all_districts")==="1"; const old=localStorage.getItem("wb_imp_only")==="1";
+  IMP_DS=(localStorage.getItem("wb_imp_ds")??(old?"1":"0"))==="1"; IMP_FP=localStorage.getItem("wb_imp_fp")==="1";}catch(e){}
+IMPONLY=IMP_DS||IMP_FP;
 const bigDistrict=d=>ALLD||(d.tehsils||[]).length>MIN_TEHSILS;
-function impDistricts(){if(!WIMP&&!WFP) return null; const s=new Set((WIMP?WIMP.districts:[]).filter(x=>x.n_waterbodies>0).map(x=>x.slug));
-  if(WFP) WFP.districts.filter(x=>x.n_records>0).forEach(x=>s.add(x.slug)); return s;}
+function impDistricts(){if(!WIMP&&!WFP) return null; const s=new Set(IMP_DS&&WIMP?WIMP.districts.filter(x=>x.n_waterbodies>0).map(x=>x.slug):[]);
+  if(IMP_FP&&WFP) WFP.districts.filter(x=>x.n_records>0).forEach(x=>s.add(x.slug)); return s;}
 function applyViews(){
   if(IDX){IDX._all=IDX._all||IDX.districts; IDX.districts=IDX._all.filter(bigDistrict);}
   if(WIDX){WIDX._all=WIDX._all||WIDX.districts; const im=IMPONLY?impDistricts():null; WIDX.districts=WIDX._all.filter(d=>bigDistrict(d)&&(!im||im.has(d.slug)));}
@@ -1571,7 +1574,7 @@ async function wBundle(slug){
 }
 const wsBundleOk=d=>IDX&&IDX.districts.some(x=>x.slug===d.slug);
 function wScope(t){return WTYPE[t]&&WTYPE[t].in_scope}
-const wHasWork=(b,w)=>!!(b&&((b.imp&&b.imp[String(w.id)])||(b.fp&&b.fp[String(w.id)])));
+const wHasWork=(b,w)=>!!(b&&((IMP_DS&&b.imp&&b.imp[String(w.id)])||(IMP_FP&&b.fp&&b.fp[String(w.id)])));
 function wImpW(w){if(!IMPONLY||!w) return true; const b=W.district&&WBB[wDist().slug]; return wHasWork(b,w);}
 function wShown(w){return (W.show==="all"||w.st===W.show)&&wImpW(w)}
 function wInView(w){return (!W.tehsil||w.teh===W.tehsil)&&wShown(w)}
@@ -1881,13 +1884,16 @@ function wPickers(){
   if(W.district) h+=`<label for="wps">Show<select id="wps">${[["all","All waterbodies"],["r","Holds water regularly"],["x","Rarely holds water"],["n","New (since 2022)"]].map(([v,l])=>`<option value="${v}" ${W.show===v?"selected":""}>${l}</option>`).join("")}</select></label>`;
   h+=distToggle("wall");
   if(!WIMP) h+=`<span class="note" style="align-self:flex-end;padding-bottom:6px">Intervention data not loaded${WIMP_TRIED?"":" yet"}${WIMP_ERR?": "+esc(WIMP_ERR):""}</span>`;
-  if(WIMP||WFP) h+=`<label class="tog" for="wimp"><input type="checkbox" id="wimp" ${IMPONLY?"checked":""}> Only waterbodies with interventions</label>`;
+  if(WIMP) h+=`<label class="tog" for="wimpds"><input type="checkbox" id="wimpds" ${IMP_DS?"checked":""}> Desilted waterbodies</label>`;
+  if(WFP) h+=`<label class="tog" for="wimpfp"><input type="checkbox" id="wimpfp" ${IMP_FP?"checked":""}> New farm ponds</label>`;
   $("#wpickers").innerHTML=h; bindDistToggle("wall");
-  if($("#wimp")) $("#wimp").onchange=e=>{IMPONLY=e.target.checked; try{localStorage.setItem("wb_imp_only",IMPONLY?"1":"0")}catch(x){} applyViews();
+  const impTog=()=>{IMP_DS=!!($("#wimpds")&&$("#wimpds").checked); IMP_FP=!!($("#wimpfp")&&$("#wimpfp").checked); IMPONLY=IMP_DS||IMP_FP;
+    try{localStorage.setItem("wb_imp_ds",IMP_DS?"1":"0"); localStorage.setItem("wb_imp_fp",IMP_FP?"1":"0"); localStorage.removeItem("wb_imp_only");}catch(x){} applyViews();
     if(W.district&&!WIDX.districts.some(d=>d.district===W.district)){W.district=W.tehsil=W.wb=W.mws=null;}
     if(W.tehsil&&!wTehsils().includes(W.tehsil)) W.tehsil=null;
     if(W.wb&&W.district&&!wImpW(WBB[wDist().slug].byId[W.wb])) W.wb=null;
     render();};
+  ["#wimpds","#wimpfp"].forEach(id=>{if($(id)) $(id).onchange=impTog;});
   $("#wpd").onchange=e=>e.target.value?wGo("district",e.target.value):wGo("india");
   if($("#wpt")) $("#wpt").onchange=e=>wGo("tehsil",e.target.value);
   if($("#wps")) $("#wps").onchange=e=>{W.show=e.target.value; wPane(); WBMAP.draw();};
